@@ -16,7 +16,10 @@
 		myInstances[n] = new Klass({
 			clickHandler: function(e) {
 				var model = this.model,
-					node = this.htmlNode();
+					node = this.getHTMLNode();
+
+				this.setValue('index', this.model.index + 1);
+				this.setValue('foo', this.model.index + 1);
 
 				model.click = model.click ? ++model.click : 1;
 				console.log(
@@ -29,7 +32,7 @@
 				console.log(this.uuid + ' is ready');
 			},
 			// dummyHandler: '#',
-			// appendContainer: n ? myInstances[n - 1].htmlNode() : document.body,
+			// parent: n ? myInstances[n - 1].htmlNode() : document.body,
 			template: '<div class="instance-div">{index}</div>'
 		});
 	}

@@ -10,7 +10,7 @@
 
 		Klass = function(options) {
 			var initialOptions = { // this.options = {
-					appendContainer: document.body
+					parent: document.body
 				};
 
 			initialize(this, options, this.options || initialOptions);
@@ -32,6 +32,7 @@
 				handlers: {}
 			};
 			instance.options = initialOptions;
+			instance.links = {};
 
 			focusInstance(This);
 
@@ -44,6 +45,7 @@
 				}
 			}
 			instance.htmlNode = createView(This);
+			(instance.options.parent || document.body).appendChild(instance.htmlNode);
 
 			++_idx;
 			// This.fireEvent('ready');
@@ -55,19 +57,24 @@
 		},
 		// the tempaling engine must be the key: cashing, partly caching, etc...
 		createView = function(This) { // this is just for demo purposes
-			var options = _instances[This.uuid].options,
-				html = options.template, // if url, cashe and make promise...
+			var html = _instances[This.uuid].options.template, // if url, cashe and make promise...
 				node;
 
 			html = html.replace(/{(.*?)}/g, function($1, $2) {
-				// register $2 as to be listened...???
-				return This.model[$2] !== undefined ? This.model[$2] : '';
+				// register $2 as to be listened to...???
+				if (This.model[$2] !== undefined) {
+					_setLink($2, This);
+					return This.model[$2];
+				} else {
+					return '';
+				}
+				// then parent scope
 			});
 			_htmlContainer.innerHTML = html;
 			node = _htmlContainer.firstChild;
 			node.refID = This.uuid;
 
-			return (options.appendContainer || document.body).appendChild(node);
+			return node;
 		},
 		installEventHandler = function(This, type, handler, off) {
 			if (!installEventHandler[type] || off) {
@@ -116,9 +123,15 @@
 		document.body.dispatchEvent(event);
 	};
 
-	Klass.prototype.htmlNode = function() {
+	Klass.prototype.getHTMLNode = function() {
 		return _instances[this.uuid].htmlNode;
 	};
+
+	Klass.prototype.setValue = function (key, value) {
+		if (this.model[key] !== value) {
+			_updateLink(key, value, _instances[this.uuid]);
+		}
+	}
 
 
 	Klass.consoleLogInstances = function() {
@@ -128,6 +141,31 @@
 	window.Klass = Klass;
 
 	/* -------------------------------- */
+
+	function _setLink(key, This) {
+		var instance = _instances[This.uuid];
+
+		if (!instance.links[key]) {
+			instance.links[key] = This.model[key];
+		}
+	}
+
+	function _updateLink(key, value, instance) { // ego update,... check for others...
+		// save to server if necessary... then change instance.links[key]
+		if (instance.reference.model[key] !== undefined) { // check if boud at all
+			instance.reference.model[key] = value;
+
+			var newNode = createView(instance.reference);
+			
+			instance.htmlNode.parentNode.replaceChild( // replaceNode is not good here... only data update
+				newNode,
+				instance.htmlNode
+			);
+			instance.htmlNode = newNode;
+		} else {
+			instance.reference.model[key] = value;
+		}
+	}
 
 	function _checkType(elm, type) {
 		if (typeof elm !== type) {
