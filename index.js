@@ -1,7 +1,7 @@
 ;(function(window, undefined){
 	'use strict';
 
-	var _instance,
+	var _instance, // rename
 		_instances = {},
 
 		_htmlContainer = document.createElement('div'),
@@ -60,11 +60,12 @@
 			var html = _instances[This.uuid].options.template, // if url, cashe and make promise...
 				node;
 
-			html = html.replace(/{(.*?)}/g, function($1, $2) {
+			html = html.replace(/(.*?){(.*?)}(.*?)/g, function($1, $2, $3, $4, $5, $6) {
 				// register $2 as to be listened to...???
-				if (This.model[$2] !== undefined) {
-					_setLink($2, This);
-					return This.model[$2];
+				if (This.model[$3] !== undefined) {
+					// determine id HTML, data, attribute, etc...
+					_setLink($3, This);
+					return $2 + This.model[$3] + $4;
 				} else {
 					return '';
 				}
@@ -152,18 +153,11 @@
 
 	function _updateLink(key, value, instance) { // ego update,... check for others...
 		// save to server if necessary... then change instance.links[key]
-		if (instance.reference.model[key] !== undefined) { // check if boud at all
-			instance.reference.model[key] = value;
-
+		instance.reference.model[key] = value;
+		if (instance.links[key] !== undefined) { // check if boud at all
 			var newNode = createView(instance.reference);
-			
-			instance.htmlNode.parentNode.replaceChild( // replaceNode is not good here... only data update
-				newNode,
-				instance.htmlNode
-			);
+			instance.options.parent.replaceChild(newNode, instance.htmlNode); // replaceNode is not good here
 			instance.htmlNode = newNode;
-		} else {
-			instance.reference.model[key] = value;
 		}
 	}
 
