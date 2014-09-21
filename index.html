@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<link rel="stylesheet" type="text/css" href="index.css">
+	<title>'Clean' instanciating in javaScript</title>
+</head>
+
+<body>
+</body>
+<script type="text/javascript" src="index.js"></script>
+<script type="text/javascript">
+	var myInstances = [];
+	
+	for (var n = 0, m = 10; n < m; n++) {
+		myInstances[n] = new Klass({
+			clickHandler: function(e) {
+				var model = this.model,
+					node = this.htmlNode();
+
+				model.click = model.click ? ++model.click : 1;
+				console.log(
+					'It\'s me, Instance No.' + model.index + ': ',
+					this,
+					node,
+					node === e.target);
+			},
+			readyHandler: function(e) {
+				console.log(this.uuid + ' is ready');
+			},
+			// dummyHandler: '#',
+			// appendContainer: n ? myInstances[n - 1].htmlNode() : document.body,
+			template: '<div class="instance-div">{index}</div>'
+		});
+	}
+
+	// function lass(e) {
+	// 	console.log(lass.name)
+	// }
+
+	myInstances[2].addEventListener('foo', function(e) {
+		this.model.foo = this.model.foo ? ++this.model.foo : 1;
+		console.log(e.type);
+	});
+	// myInstances[2].addEventListener('click', function(e) {
+	// 	this.model.click = this.model.click ? ++this.model.click : 1;
+	// 	console.log(this)
+	// });
+	// myInstances[2].addEventListener('click', lass);
+	// myInstances[2].removeEventListener('click', lass);
+	// myInstances[2].removeEventListener('click', function(e) {
+	// 	this.model.click = this.model.click ? ++this.model.click : 1;
+	// 	console.log(this)
+	// });
+	// myInstances[2].removeEventListener('click', function(e) {
+	// 	this.model.click = this.model.click ? ++this.model.click : 1;
+	// 	console.log(this)
+	// });
+	myInstances[2].addEventListener('mouseover', function(e) {
+		this.model.mouseover = this.model.mouseover ? ++this.model.mouseover : 1;
+		this.fireEvent('foo');
+		console.log(this)
+	});
+</script>
+</html>
