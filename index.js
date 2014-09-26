@@ -44,10 +44,11 @@
 					instance.options[key] = options[key];
 				}
 			}
+
 			instance.htmlNode = createView(This);
-			(instance.options.parent || document.body).appendChild(instance.htmlNode);
 
 			++_idx;
+			// this might take a while as template might be fetched...
 			// This.fireEvent('ready');
 		},
 		focusInstance = function(This) {
@@ -74,6 +75,7 @@
 			_htmlContainer.innerHTML = html;
 			node = _htmlContainer.firstChild;
 			node.refID = This.uuid;
+			_instances[This.uuid].options.parent.appendChild(node);
 
 			return node;
 		},

@@ -18,8 +18,8 @@
 				var model = this.model,
 					node = this.getHTMLNode();
 
-				this.setValue('index', this.model.index + 1);
-				this.setValue('foo', this.model.index + 1);
+				this.setValue('index', model.index + 1); // this changes this.getHTMLNode()
+				this.setValue('foo', (model.foo || 0) + 1);
 
 				model.click = model.click ? ++model.click : 1;
 				console.log(
