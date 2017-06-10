@@ -1,11 +1,23 @@
 # CircularJS
 
 CircularJS is a tiny MVC like framework. It's goal is to help building web-apps in a model-oriented easy way by building fast and convenient 2-way data binding.
-CircularJS provides you with:
 
-* VOM (Virtual Object Model),
+## CircularJS provides you with:
+
+* VOM, a Virtual Object Model controller that automatically reacts on changes of properties,
 * Schnauzer, a tiny and fast Mustache/Handlebars like template rendering engine (can be replaced),
-* a event-listener controller,
+* an event-listener controller for all UI actions an any other events,
 * DOMinator, a controller that automatically syncs the VOM model with the real DOM.
 
-CircularJS combines all those tools to easily abstract app modules 
+CircularJS combines all those tools to easily abstract app modules and build high performance SPAs.
+CircularJS is very small (~5.5kBytes gZip) and fast and therefore the best joice for mobile apps.
+
+## APIs
+
+This documentation will be continued soon. For now you can see some demos (also delivered by this repository) to explore how CircularJS works.
+
+* [Simple button demo](http://dematte.at/circularjs/)
+* [TODO list demo](http://dematte.at/circularjs/todo/)
+* [Nested tree demo](http://dematte.at/tree/)
+
+See you soon ;o)
