@@ -38,7 +38,7 @@
 
 			var demo = window.demo = new Circular();
 
-			var paragraphs = demo.component('app', {
+			var buttons = demo.component('app', {
 				model: [{
 					clicks: 0,
 					maxClicks: 10
@@ -50,7 +50,8 @@
 					maxClicks: 1
 				}],
 				enhanceMap: ['clicks'],
-				setterCallback: function(property, item, value, oldValue, type) {
+				setterCallback: function(property, item, value, oldValue) {
+					// console.log(property, item, value, oldValue);
 					if (property === 'clicks') {
 						if (value <= item.maxClicks || !item.maxClicks) {
 							item.views.clickCounter.textContent = value;
@@ -77,8 +78,10 @@
 				}];
 
 			for (var n = 0, l = more.length; n < l; n++) {
-				paragraphs.prependChild(more[n]);
+				buttons.prependChild(more[n]);
 			}
+
+			console.log(demo);
 		})(this);
 	</script>
 </html>

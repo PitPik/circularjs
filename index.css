@@ -4,7 +4,7 @@ body{
 }
 
 .item {
-	/*float: left;*/
+	float: left;
 	/*width: 50px;*/
 	/*display: inline-block;*/
 	height: 50px;

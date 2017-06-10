@@ -72,7 +72,7 @@ window.onload = function() {
 		},
 
 		ui = todo.component('app', {
-			model: [{prevValue: getFilter(location.hash)}],
+			model: [{filter: getFilter(location.hash)}],
 			eventListeners: {
 				addItem: function (e, element, item) {
 					var text = element.value.replace(/(?:^\s+|\s+$)/, '');
@@ -103,15 +103,15 @@ window.onload = function() {
 				filter: function (e, element, item) {
 					var value = getFilter(e.target.hash);
 
-					renderFilters(item.views, value, item.prevValue);
-					item.prevValue = value;
+					renderFilters(item.views, value, item.filter);
+					item.filter = value;
 				}
 			}
 		});
 
 	// --- INIT app
 	listCallbacks.nodeChange(); // triggers rendering...
-	renderFilters(ui.model[0].views, ui.model[0].prevValue);
+	renderFilters(ui.model[0].views, ui.model[0].filter);
 
 	// --- VIEW functions: don't know about models etc...
 	// following functions only use parameters, no other circular stuff
@@ -146,11 +146,11 @@ window.onload = function() {
 		elm.checked = value;
 	}
 
-	function renderFilters(views, value, prevValue) { // TODO
-		prevValue && views[prevValue].classList.remove('selected');
+	function renderFilters(views, value, filter) { // TODO
+		filter && views[filter].classList.remove('selected');
 		views[value].classList.add('selected');
 
-		views.app.classList.remove(prevValue);
+		views.app.classList.remove(filter);
 		views.app.classList.add(value);
 	}
 
