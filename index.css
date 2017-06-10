@@ -17,6 +17,9 @@ body{
 	padding: 0 6px;
 	/*cursor: pointer;*/
 }
+.circularjs {
+	 margin: 40px 10px 50px;  /* only for demo on this page */
+}
 
 /* -------------------- LOGO ------------------- */
 
@@ -28,9 +31,6 @@ body{
 	font-size: 55px;
 	line-height: 97px;
 	text-transform: uppercase;
-}
-.circularjs {
-	/* margin: 100px 10px 50px; */ /* only for demo on this page */
 }
 
 .circularjs-logo {
