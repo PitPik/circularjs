@@ -18,6 +18,6 @@ This documentation will be continued soon. For now you can see some demos (also 
 
 * [Simple button demo](http://dematte.at/circularjs/)
 * [TODO list demo](http://dematte.at/circularjs/todo/)
-* [Nested tree demo](http://dematte.at/tree/)
+* [Nested tree demo](http://dematte.at/circularjs/tree/)
 
 See you soon ;o)
