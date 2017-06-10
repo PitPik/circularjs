@@ -4,6 +4,8 @@
 		<meta charset="utf-8">
 		<title>Circular.js • Demo</title>
 
+		<link rel="stylesheet" type="text/css" href="index.css">
+
 		<script type="text/javascript" src="toolbox.js"></script>
 		<script type="text/javascript" src="VOM.js"></script>
 		<script type="text/javascript" src="DOMinator.js"></script>
@@ -14,12 +16,20 @@
  		<!-- <script type="text/javascript" src="circular.min.js"></script> -->
 	</head>
 	<body>
+		<div style="width:100%;margin:20px 0;text-align:center;">
+			<div class="circularjs">
+				<div class="circularjs-logo"></div>
+				<div class="circularjs-text">ircul<span class="span">a</span>r<em class="em">JS</em></div>
+				<div class="circularjs-creator">by <em class="em">WeekendProductions<sup class="sup">©</sup></em></div>
+			</div>
+		</div>
+
 		<section cr-component="app" cr-view="app" cr-container>
 			<script type="text/template" cr-template-for="app">
-				<p cr-event="click: clicker; mousedown: preventSelect">
+				<div class="item" cr-event="click: clicker; mousedown: preventSelect">
 					Clicks{{#maxClicks}} (max {{maxClicks}}){{/maxClicks}}:
 					<span cr-view="clickCounter">{{clicks}}</span> so far
-				</p>
+				</div>
 			</script>
 		</section>
 	</body>
