@@ -1,0 +1,10 @@
+.todo-list {
+	position: relative;
+	overflow: hidden;
+}
+.todoapp.completed .todo-list-item:not(.completed),
+.todoapp.active .todo-list-item.completed {
+	/*display: none;*/
+	position: absolute;
+	left: -100%;
+}
