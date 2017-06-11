@@ -1,5 +1,5 @@
 // Full spec-compliant TodoMVC with localStorage persistence
-// and hash-based routing in ~140 effective lines of JavaScript.
+// and hash-based routing in ~145 effective lines of JavaScript.
 window.onload = function() {
 	'use strict';
 

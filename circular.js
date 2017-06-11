@@ -3,19 +3,19 @@
 		module.exports = factory(root,
 			require('toolbox'),
 			require('controller'),
-			require('template'),
+			require('schnauzer'), // TODO: !!!!!!!!
 			require('VOM'),
 			require('DOMinator'));
 	} else if (typeof define === 'function' && define.amd) {
-		define('circular', ['toolbox', 'controller', 'template', 'VOM', 'DOMinator'],
-			function (Toolbox, Controller, Template, VOM, DOMinator) {
-				return factory(root, Toolbox, Controller, Template, VOM, DOMinator);
+		define('circular', ['toolbox', 'controller', 'schnauzer', 'VOM', 'DOMinator'],
+			function (Toolbox, Controller, Schnauzer, VOM, DOMinator) {
+				return factory(root, Toolbox, Controller, Schnauzer, VOM, DOMinator);
 			});
 	} else {
-		root.Circular = factory(root, root.Toolbox, root.Controller, root.Template,
+		root.Circular = factory(root, root.Toolbox, root.Controller, root.Schnauzer,
 			root.VOM, root.DOMinator);
 	}
-}(this, function(window, Toolbox, Controller, Template, VOM, DOMinator) {
+}(this, function(window, Toolbox, Controller, Schnauzer, VOM, DOMinator) {
 	'use strict';
 
 	var Circular = function(options) {
@@ -26,7 +26,7 @@
 				templatesAttr: 'cr-template',
 				eventAttribute: 'cr-event',
 				viewAttr: 'cr-view', // TODO...
-				elements: 'elements',
+				elements: 'elements', // TODO: check usage
 				events: 'events',
 				views: 'views'
 			};
@@ -53,6 +53,7 @@
 			_inst = {}, // current instance
 			proto = {},
 			options = this.options,
+			elements = options.elements,
 			componentAttr = options.componentAttr,
 			componentElement = $(document, '[' + componentAttr + '="' + name + '"]'),
 			nestingData = checkRestoreNesting(componentElement, componentAttr),
@@ -82,10 +83,10 @@
 			preRecursionCallback: function(item, type, sibling) {
 				var html = _inst.template &&_inst.template.partials.self &&
 						_inst.template.render(item),
-					container = item.parentNode.elements &&
-						item.parentNode.elements.container,
-					siblingElement = sibling && sibling.elements &&
-						sibling.elements.element,
+					container = item.parentNode[elements] &&
+						item.parentNode[elements].container,
+					siblingElement = sibling && sibling[elements] &&
+						sibling[elements].element,
 					parentContainer = html && siblingElement || component.container,
 					element = parentContainer && _inst.dominator.render(html,
 						parentContainer, type, container, siblingElement) ||
@@ -93,7 +94,7 @@
 
 				this.isNew = true; // ???????
 				// collect elements
-				this.reinforceProperty(item, options.elements, {
+				this.reinforceProperty(item, elements, {
 					element: element,
 					container: parameters.mountSelector &&
 						$(element, parameters.mountSelector)
@@ -101,12 +102,12 @@
 				// collect events
 				this.reinforceProperty(item, options.events, {});
 				_inst.controller && _inst.controller.getEventListeners( // TODO
-					this, item[options.elements].element ||
+					this, item[elements].element ||
 					component.element, item[options.events], component);
 				// collect view elements
 				this.reinforceProperty(item, options.views, {});
 				getViews(options, item[options.views],
-					item[options.elements].element || component.element);
+					item[elements].element || component.element);
 
 				this.options.vom && this.options.vom.preRecursionCallback &&
 					this.options.vom.preRecursionCallback(item);
@@ -117,12 +118,12 @@
 			setterCallback: function(property, item, value, oldValue, sibling) {
 				// console.log(property, item, value, oldValue);
 				if (property === 'removeChild') {
-					var element = item.elements.element.parentElement
-							.removeChild(item.elements.element);
+					var element = item[elements].element.parentElement
+							.removeChild(item[elements].element);
 				} else if (!this.isNew && _inst.vom[property]) { // ???????
-					_inst.dominator.render(item.elements.element,
-						item.parentNode.elements.element, property,
-							null, sibling.elements.element)
+					_inst.dominator.render(item[elements].element,
+						item.parentNode[elements].element, property,
+							null, sibling[elements].element)
 				}
 				parameters.setterCallback && parameters.setterCallback
 					.call(this, property, item, value, oldValue);
