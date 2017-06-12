@@ -107,6 +107,15 @@
 			this.options.setterCallback.call(this, 'removeChild', item); // order of arguments
 			return item;
 		},
+		sort: function(callback, model, children) {
+			model = (model || this.model).sort(callback);
+			for (var n = 0, l = model.length; n < l; n++) {
+				this.options.setterCallback.call(this, 'sort', model[n]);
+				if (children && model[n][this.options.childNodes]) {
+					this.sort(callback, model[n][this.options.childNodes], children);
+				}
+			}
+		},
 		reinforceProperty: reinforceProperty,
 		addProperty: function(property, item, path, readonly) {
 			var cache = {};

@@ -116,14 +116,15 @@
 			 // TODO: get options via...
 			enhanceMap: this.options.enhanceMap || parameters.enhanceMap || [],
 			setterCallback: function(property, item, value, oldValue, sibling) {
-				// console.log(property, item, value, oldValue);
 				if (property === 'removeChild') {
 					var element = item[elements].element.parentElement
 							.removeChild(item[elements].element);
-				} else if (!this.isNew && _inst.vom[property]) { // ???????
+				} else if (!this.isNew && _inst.vom[property]) { // has method
 					_inst.dominator.render(item[elements].element,
-						item.parentNode[elements].element, property,
-							null, sibling[elements].element)
+						item.parentNode[elements] ? 
+							item.parentNode[elements].element :
+							component.container, property,
+						null, sibling ? sibling[elements].element : null)
 				}
 				parameters.setterCallback && parameters.setterCallback
 					.call(this, property, item, value, oldValue);

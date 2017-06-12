@@ -51,9 +51,9 @@
 			if (container && firstLap) { // direct
 				element = container.appendChild(elm);
 			} else { // fragment
-				element = isHTML ? this.fragment.appendChild(elm) : elm;
+				element = this.fragment.appendChild(elm);
 
-				!firstLap && lazy(this, function() {
+				!firstLap && lazy(this, function() { // TODO: check if sort->childNodes works
 					firstLap = false;
 					if (type === 'prependChild' && parentContainer.children.length) {
 						parentContainer.insertBefore(self.fragment,
