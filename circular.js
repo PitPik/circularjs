@@ -65,7 +65,7 @@
 				container: data.container
 			};
 
-		instanceList[this.id] = instanceList[this.id] || {};
+		instanceList[this.id] = instanceList[this.id] || {};
 		_inst = instanceList[this.id][name] = {};
 
 		_inst.dominator = new DOMinator({});
@@ -119,9 +119,12 @@
 				if (property === 'removeChild') {
 					var element = item[elements].element.parentElement
 							.removeChild(item[elements].element);
+				} else if (property === 'sort') {
+					item[elements].element.parentElement
+						.appendChild(item[elements].element);
 				} else if (!this.isNew && _inst.vom[property]) { // has method
 					_inst.dominator.render(item[elements].element,
-						item.parentNode[elements] ? 
+						item.parentNode[elements] ?
 							item.parentNode[elements].element :
 							component.container, property,
 						null, sibling ? sibling[elements].element : null)
