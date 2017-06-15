@@ -12,6 +12,8 @@ CircularJS is a tiny MVC like framework (~5.5kBytes). It's goal is to help build
 CircularJS combines all those components to easily abstract app modules and build high performance SPAs.
 CircularJS is very small (~5.5kBytes gZip) and fast and therefore the best joice for mobile apps.
 
+The intention to build CircularJS was to create something small and fast that is easy to learn and feels closer to javaScript rather than having to learn a new language or complicated aptterns. Using CircularJS is quite easy and ...
+
 ## APIs
 
 This documentation will be continued soon. For now you can see some demos (also delivered by this repository) to explore how CircularJS works.
