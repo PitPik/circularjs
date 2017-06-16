@@ -5,14 +5,31 @@ window.onload = function() {
 
 	var STORAGE_KEY = 'todos-circularjs-0.1',
 		todoStorage = {
-			fetch: function () {
+			fetch: function() {
 				return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
 			},
-			save: function (todos) {
+			save: function(todos) {
 				lazy(function() {
 					localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
 				}, todoStorage);
 			}
+		},
+		sortDesc = function(a, b, asc, attr) {
+			var txtA = a[attr || 'text'].toUpperCase();
+			var txtB = b[attr || 'text'].toUpperCase();
+
+			return asc ?
+				txtA < txtB ? 1 : txtA > txtB ? -1 : 0:
+				txtA < txtB ? -1 : txtA > txtB ? 1 : 0;
+		},
+		sortAsc = function(a, b) {
+			return sortDesc(a, b, true);
+		},
+		sortIdDesc = function(a, b) {
+			return sortDesc(a, b, false, 'id');
+		},
+		sortIdAsc = function(a, b) {
+			return sortDesc(a, b, true, 'id');
 		},
 		todo = window.todo = new Circular(),
 
@@ -26,38 +43,38 @@ window.onload = function() {
 				todoStorage.save(this.model); // persist
 			},
 			eventListeners: {
-				toggle: function (e, element, item) {
+				toggle: function(e, element, item) {
 					item.done = element.checked;
 				},
-				delete: function (e, element, item) {
+				delete: function(e, element, item) {
 					this.removeChild(item);
 				},
-				save: function (e, element, item) {
+				save: function(e, element, item) {
 					item.text = element.value;
 				},
-				edit: function (e, element, item) {
+				edit: function(e, element, item) {
 					makeItemEditable(item.views.text, item.text);
 				},
-				blurItem: function (e, element, item) {
+				blurItem: function(e, element, item) {
 					blurItem(element, item.views.label, item.text);
 				},
-				escape: function (e, element, item) {
+				escape: function(e, element, item) {
 					escapeItem(e, element, item.views.label, item.text);
 				}
 			}
 		}),
 		listCallbacks = {
-			text: function (item, views, value) {
+			text: function(item, views, value) {
 				blurItem(views.text, views.label, value);
 			},
-			done: function (item, views, value) {
+			done: function(item, views, value) {
 				markItem(item.elements.element, views.toggle, value);
 				listCallbacks.nodeChange();
 			},
-			removeChild: function (item) {
+			removeChild: function(item) {
 				listCallbacks.nodeChange();
 			},
-			nodeChange: function () {
+			nodeChange: function() {
 				lazy(function() {
 					var getItems = list.getElementsByProperty,
 						all = getItems().length,
@@ -74,7 +91,7 @@ window.onload = function() {
 		ui = todo.component('app', {
 			model: [{filter: getFilter(location.hash)}],
 			eventListeners: {
-				addItem: function (e, element, item) {
+				addItem: function(e, element, item) {
 					var text = element.value.replace(/(?:^\s+|\s+$)/, '');
 
 					if ((e.which === 13 || e.keyCode === 13) && text) {
@@ -85,14 +102,25 @@ window.onload = function() {
 						element.value = '';
 					}
 				},
-				deleteDone: function (e, element, item) {
+				sort: function(e, element, item) { // extra feature
+					if (e.keyCode === 40 && e.altKey) {
+						list.sort(sortDesc);
+					} else if (e.keyCode === 38 && e.altKey) {
+						list.sort(sortAsc);
+					} else if (e.keyCode === 40) {
+						list.sort(sortIdDesc);
+					} else if (e.keyCode === 38) {
+						list.sort(sortIdAsc);
+					}
+				},
+				deleteDone: function(e, element, item) {
 					var items = list.getElementsByProperty('done', true);
 
 					for (var n = items.length; n--; ) {
 						list.removeChild(items[n]);
 					}
 				},
-				toggleAll: function (e, element, item) {
+				toggleAll: function(e, element, item) {
 					var checked = e.target.checked,
 						items = list.getElementsByProperty('done', !checked);
 
@@ -100,7 +128,7 @@ window.onload = function() {
 						items[n].done = checked;
 					}
 				},
-				filter: function (e, element, item) {
+				filter: function(e, element, item) {
 					var value = getFilter(e.target.hash);
 
 					renderFilters(item.views, value, item.filter);
