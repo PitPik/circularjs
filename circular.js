@@ -80,16 +80,18 @@
 			}) : null;
 		component.templates = data.templates;
 		_inst.vom = new VOM(component.model, {
-			preRecursionCallback: function(item, type, sibling) {
+			preRecursionCallback: function(item, type, siblingOrParent) {
 				var html = _inst.template &&_inst.template.partials.self &&
 						_inst.template.render(item),
+					operator = type || 'appendChild',
+					replaceElement = type === 'replaceChild' && siblingOrParent[elements].element,
 					container = item.parentNode[elements] &&
 						item.parentNode[elements].container,
-					siblingElement = sibling && sibling[elements] &&
-						sibling[elements].element,
-					parentContainer = html && siblingElement || component.container,
-					element = parentContainer && _inst.dominator.render(html,
-						parentContainer, type, container, siblingElement) ||
+					parentNode = html && siblingElement || container || component.container,
+					siblingElement = parentNode ? replaceElement || undefined : siblingOrParent &&
+						siblingOrParent[elements].element,
+					element = html && _inst.dominator
+						.render(html, operator, parentNode, siblingElement) ||
 							component.element;
 
 				this.isNew = true; // ???????
@@ -116,18 +118,16 @@
 			 // TODO: get options via...
 			enhanceMap: this.options.enhanceMap || parameters.enhanceMap || [],
 			setterCallback: function(property, item, value, oldValue, sibling) {
+				var element = item[elements].element,
+					parentElement = item.parentNode[elements] ?
+						item.parentNode[elements].element : component.container;
+
 				if (property === 'removeChild') {
-					var element = item[elements].element.parentElement
-							.removeChild(item[elements].element);
+					_inst.dominator.render(element, property, element.parentElement);
 				} else if (property === 'sort') {
-					item[elements].element.parentElement
-						.appendChild(item[elements].element);
+					_inst.dominator.render(element, 'appendChild', parentElement);
 				} else if (!this.isNew && _inst.vom[property]) { // has method
-					_inst.dominator.render(item[elements].element,
-						item.parentNode[elements] ?
-							item.parentNode[elements].element :
-							component.container, property,
-						null, sibling ? sibling[elements].element : null)
+					_inst.dominator.render(element, property, parentElement);
 				}
 				parameters.setterCallback && parameters.setterCallback
 					.call(this, property, item, value, oldValue);
@@ -140,7 +140,10 @@
 
 		checkRestoreNesting(null, null, nestingData);
 
-		proto = transferMethods(VOM, _inst.vom, component, this, proto);
+		proto = transferMethods(Schnauzer, _inst.template, component, this, proto);
+		proto = transferMethods(VOM, _inst.vom, component, this, {
+			render: proto.render
+		});
 		component.__proto__ = proto;
 
 		return component;
