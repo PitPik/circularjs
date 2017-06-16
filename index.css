@@ -3,7 +3,7 @@ body{
 	color: #333;
 }
 
-.item {
+.item, .items {
 	float: left;
 	/*width: 50px;*/
 	/*display: inline-block;*/
@@ -17,8 +17,12 @@ body{
 	padding: 0 6px;
 	/*cursor: pointer;*/
 }
+.items {
+	float: none;
+	display: inline-block;
+}
 .circularjs {
-	 margin: 40px 10px 50px;  /* only for demo on this page */
+	margin: 40px 10px 50px; /* only for demo on this page */
 }
 
 /* -------------------- LOGO ------------------- */
