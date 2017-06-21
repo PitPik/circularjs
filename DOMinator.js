@@ -37,9 +37,10 @@
 
 
 	DOMinator.prototype = {
-		render: function(html, operator, parentNode, siblingElement) {
-			var isHTML = typeof html === 'string';
-			var element = {};
+		render: function(html, operator, parentNode, sibling) {
+			var isHTML = typeof html === 'string',
+				isPrepend = operator === 'prependChild',
+				element = {};
 
 			if (isHTML) {
 				this.helper.innerHTML = html;
@@ -48,29 +49,28 @@
 				element = html;
 			}
 
-			if (operator === 'prependChild' || operator === 'insertAfter') {
-				siblingElement = siblingElement && siblingElement.nextSibling ||
-					operator === 'prependChild' && parentNode.children[0];
-				operator = siblingElement ? 'insertBefore' : 'appendChild';
-			}
+			window.requestAnimationFrame(function() {
+				if (isPrepend || operator === 'insertAfter') {
+					sibling = sibling && sibling.nextSibling ||
+						isPrepend && parentNode.children[0];
+					operator = sibling ? 'insertBefore' : 'appendChild';
+				}
 
-			if (operator === 'replaceChild') {
-				parentNode[operator](element, siblingElement);
-				return element;
-			}
+				parentNode[operator](element, sibling);
+			});
 
-			return parentNode[operator](element, siblingElement);;
+			return element;
 		},
-		appendImmediately: function(obj) {
-			obj = obj || this;
-			if (!obj._func) {
-				return;
-			}
-			clearTimeout(obj._timer);
-			obj._func();
-			delete obj._func;
-			delete obj._timer;
-		}
+		// appendImmediately: function(obj) {
+		// 	obj = obj || this;
+		// 	if (!obj._func) {
+		// 		return;
+		// 	}
+		// 	clearTimeout(obj._timer);
+		// 	obj._func();
+		// 	delete obj._func;
+		// 	delete obj._timer;
+		// }
 	};
 
 	return DOMinator;

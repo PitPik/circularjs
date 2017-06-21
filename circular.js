@@ -73,12 +73,19 @@
 			appElement: data.element,
 			eventListeners: parameters.eventListeners
 		});
+
 		_inst.template = data.template ? new (options.Template || Schnauzer)(
-			parameters.template || data.template, {
-				doEscape: false,
-				helpers: this.options.helpers || {} // TODO
-			}) : null;
+			parameters.template || data.template,
+			parameters.templateOptions || options.templateOptions || {}) : null;
+
 		component.templates = data.templates;
+		if (parameters.templates) {
+			for (var template in parameters.templates) {
+				component.templates[template] = new (options.Template || Schnauzer)(
+					parameters.templates[template].template,
+					parameters.templates[template].options);
+			}
+		}
 		_inst.vom = new VOM(component.model, {
 			preRecursionCallback: function(item, type, siblingOrParent) {
 				var html = _inst.template &&_inst.template.partials.self &&
@@ -133,9 +140,9 @@
 					.call(this, property, item, value, oldValue);
 				delete this.isNew; // ???????
 			},
-			moveCallback: function(item, type, sibling) {
-				type !== 'appendChild' && _inst.dominator.appendImmediately();
-			}
+			// moveCallback: function(item, type, sibling) {
+			// 	type !== 'appendChild' && _inst.dominator.appendImmediately();
+			// }
 		});
 
 		checkRestoreNesting(null, null, nestingData);
