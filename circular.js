@@ -75,17 +75,19 @@
 		});
 
 		_inst.template = data.template ? new (options.Template || Schnauzer)(
-			parameters.template || data.template,
-			parameters.templateOptions || options.templateOptions || {}) : null;
+			parameters.template || data.template, {
+				doEscape: false,
+				helpers: this.options.helpers || {} // TODO
+			}) : null;
 
 		component.templates = data.templates;
-		if (parameters.templates) {
-			for (var template in parameters.templates) {
-				component.templates[template] = new (options.Template || Schnauzer)(
-					parameters.templates[template].template,
-					parameters.templates[template].options);
-			}
-		}
+		// if (parameters.templates) {
+		// 	for (var template in parameters.templates) {
+		// 		component.templates[template] = new (options.Template || Schnauzer)(
+		// 			parameters.templates[template].template,
+		// 			parameters.templates[template].options);
+		// 	}
+		// }
 		_inst.vom = new VOM(component.model, {
 			preRecursionCallback: function(item, type, siblingOrParent) {
 				var html = _inst.template &&_inst.template.partials.self &&
