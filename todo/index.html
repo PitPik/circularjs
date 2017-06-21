@@ -19,7 +19,7 @@
 		<section class="todoapp" cr-component="app" cr-view="app">
 			<header class="header">
 				<h1>todos</h1>
-				<input class="new-todo" cr-event="keypress: addItem" placeholder="What needs to be done?" autofocus>
+				<input class="new-todo" cr-event="keypress: addItem; keydown: sort" placeholder="What needs to be done?" autofocus>
 			</header>
 			<section class="main" cr-view="main">
 				<input cr-view="toggle" cr-event="click: toggleAll" class="toggle-all" id="toggle-all" type="checkbox">
