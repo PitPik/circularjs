@@ -4,18 +4,17 @@
 			require('toolbox'),
 			require('controller'),
 			require('schnauzer'), // TODO: !!!!!!!!
-			require('VOM'),
-			require('DOMinator'));
+			require('VOM'));
 	} else if (typeof define === 'function' && define.amd) {
-		define('circular', ['toolbox', 'controller', 'schnauzer', 'VOM', 'DOMinator'],
-			function (Toolbox, Controller, Schnauzer, VOM, DOMinator) {
-				return factory(root, Toolbox, Controller, Schnauzer, VOM, DOMinator);
+		define('circular', ['toolbox', 'controller', 'schnauzer', 'VOM'],
+			function (Toolbox, Controller, Schnauzer, VOM) {
+				return factory(root, Toolbox, Controller, Schnauzer, VOM);
 			});
 	} else {
-		root.Circular = factory(root, root.Toolbox, root.Controller, root.Schnauzer,
-			root.VOM, root.DOMinator);
+		root.Circular = factory(root, root.Toolbox, root.Controller,
+			root.Schnauzer, root.VOM);
 	}
-}(this, function(window, Toolbox, Controller, Schnauzer, VOM, DOMinator) {
+}(this, function(window, Toolbox, Controller, Schnauzer, VOM) {
 	'use strict';
 
 	var Circular = function(options) {
@@ -68,7 +67,8 @@
 		instanceList[this.id] = instanceList[this.id] || {};
 		_inst = instanceList[this.id][name] = {};
 
-		_inst.dominator = new DOMinator({});
+		// _inst.dominator = new DOMinator({});
+		_inst.helper = document.createElement('div');
 		_inst.controller = parameters.eventListeners && new Controller({
 			appElement: data.element,
 			eventListeners: parameters.eventListeners
@@ -99,9 +99,9 @@
 					parentNode = html && siblingElement || container || component.container,
 					siblingElement = parentNode ? replaceElement || undefined : siblingOrParent &&
 						siblingOrParent[elements].element,
-					element = html && _inst.dominator
-						.render(html, operator, parentNode, siblingElement) ||
-							component.element;
+					element = html &&
+						render(_inst.helper, html, operator, parentNode, siblingElement) ||
+						component.element;
 
 				this.isNew = true; // ???????
 				// collect elements
@@ -132,11 +132,11 @@
 						item.parentNode[elements].element : component.container;
 
 				if (property === 'removeChild') {
-					_inst.dominator.render(element, property, element.parentElement);
+					render(_inst.helper, element, property, element.parentElement);
 				} else if (property === 'sort') {
-					_inst.dominator.render(element, 'appendChild', parentElement);
+					render(_inst.helper, element, 'appendChild', parentElement);
 				} else if (!this.isNew && _inst.vom[property]) { // has method
-					_inst.dominator.render(element, property, parentElement);
+					render(_inst.helper, element, property, parentElement);
 				}
 				parameters.setterCallback && parameters.setterCallback
 					.call(this, property, item, value, oldValue);
@@ -170,6 +170,31 @@
 	}
 
 	return Circular;
+
+	function render(helper, html, operator, parentNode, sibling) {
+		var isHTML = typeof html === 'string',
+			isPrepend = operator === 'prependChild',
+			element = {};
+
+		if (isHTML) {
+			helper.innerHTML = html;
+			element = helper.children[0];
+		} else {
+			element = html;
+		}
+
+		window.requestAnimationFrame(function() {
+			if (isPrepend || operator === 'insertAfter') {
+				sibling = sibling && sibling.nextSibling ||
+					isPrepend && parentNode.children[0];
+				operator = sibling ? 'insertBefore' : 'appendChild';
+			}
+
+			parentNode[operator](element, sibling);
+		});
+
+		return element;
+	}
 
 	function getViews(options, views, element) {
 		var elements = $$(element, '[' + options.viewAttr + ']'),
@@ -245,3 +270,4 @@
 		}
 	}
 }));
+
