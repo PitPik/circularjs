@@ -6,8 +6,7 @@ CircularJS is a tiny MVC like framework (~5.5kBytes). It's goal is to help build
 
 * VOM, a Virtual Object Model controller that automatically reacts on changes of properties on the model,
 * Schnauzer, a tiny and fast Mustache/Handlebars like template rendering engine (can be replaced),
-* an event-listener controller for all UI actions an any other events that installs automatically,
-* DOMinator, a controller that automatically syncs the VOM model with the real DOM.
+* an event-listener controller for all UI actions an any other events that installs automatically.
 
 CircularJS combines all those components to easily abstract app modules and build high performance SPAs.
 CircularJS is very small (~5.5kBytes gZip) and fast and therefore the best joice for mobile apps.
