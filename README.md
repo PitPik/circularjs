@@ -14,6 +14,11 @@ CircularJS is very small (~5.5kBytes gZip) and fast and therefore the best joice
 
 The intention to build CircularJS was to create something small and fast that is easy to learn and feels closer to javaScript rather than having to learn a new language or complicated patterns. Using CircularJS is quite easy and straight forward. It helps you to avoid bad practice patterns usually caused by wrongly set up event listeners, continuous element search in the DOM (also without caching) and using global variables to store information for other components...
 
+## Coming up soon
+
+* cr-class: automatic class name update due to model change
+* cr-event change: automatic model update on input change
+
 ## APIs
 
 This documentation will be continued soon. For now you can see some demos (also delivered by this repository) to explore how CircularJS works.
