@@ -69,7 +69,31 @@
 					Toolbox.addEvent.events.splice(n, 1);
 				}
 			}
+		},
+		storageHelper: {
+			fetch: function (key) {
+				return JSON.parse(localStorage.getItem(key) || '[]');
+			},
+			save: function (todos, key) {
+				Toolbox.lazy(function() {
+					localStorage.setItem(key, JSON.stringify(todos));
+				}, storageHelper);
+			}
+		},
+		lazy: function(fn, obj) {
+			clearTimeout(obj.timer);
+			obj.timer = setTimeout(fn, 0);
+		},
+
+		itemsSorter: function(a, b, type, asc) {
+			var textA = a[type].toUpperCase();
+			var textB = b[type].toUpperCase();
+
+			return asc ?
+				textA < textB ? 1 : textA > textB ? -1 : 0 :
+				textA < textB ? -1 : textA > textB ? 1 : 0;
 		}
+
 	}
 
 	return Toolbox;
