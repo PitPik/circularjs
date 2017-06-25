@@ -16,8 +16,9 @@ The intention to build CircularJS was to create something small and fast that is
 
 ## Coming up soon
 
-* cr-class: automatic class name update due to model change
+* auto-model-creation from server-side-rendered view
 * cr-event change: automatic model update on input change
+* cr-class: automatic class name update due to model change
 
 ## APIs
 
