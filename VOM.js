@@ -107,10 +107,10 @@
 			this.options.setterCallback.call(this, 'removeChild', item); // order of arguments
 			return item;
 		},
-		sort: function(callback, model, children) {
+		sortChildren: function(callback, model, children) {
 			model = (model || this.model).sort(callback);
 			for (var n = 0, l = model.length; n < l; n++) {
-				this.options.setterCallback.call(this, 'sort', model[n]);
+				this.options.setterCallback.call(this, 'sortChildren', model[n]);
 				if (children && model[n][this.options.childNodes]) {
 					this.sort(callback, model[n][this.options.childNodes], children);
 				}
@@ -119,8 +119,11 @@
 		reinforceProperty: reinforceProperty,
 		addProperty: function(property, item, path, readonly) {
 			var cache = {};
-			cache[path || property] = item[property];
+			cache[path || property] = (item[0] || item)[property];
 			defineProperty(property, item, cache, this, strIndex, !readonly, path);
+		},
+		getProperty: function(property, item) {
+			return crawlObject(item, property.split('.'));
 		},
 		getCleanModel: function() { // maybe not...
 			return JSON.parse(JSON.stringify(this.model));
@@ -252,7 +255,7 @@
 					__model = !path ? _model : crawlObject(_model[_item], pathArray, 1);
 					_path = longItem.replace('*', _item);
 					__item = pathArray[pathArray.length - 1] || _item;
-					_this.addProperty(__item, __model, _path);
+					_this.addProperty(__item, [__model, model], _path);
 				}
 				continue;
 			}
@@ -279,10 +282,10 @@
 	}
 
 	function defineProperty(property, object, cache, _this, strIndex, enumerable, longItem) {
-		return Object.defineProperty(object, property, {
+		return Object.defineProperty((object[0] || object), property, {
 			get: function() {
 				return property === strIndex ?
-					indexOf(_this, object) : cache[longItem || property];
+					indexOf(_this, (object[0] || object)) : cache[longItem || property];
 			},
 			set: function(value) {
 				var  oldValue = cache[longItem || property];
@@ -298,7 +301,7 @@
 
 		if (property === _this.options.idProperty || property === strIndex ||
 			_this.options.setterCallback.call(_this, _this.type ||
-					property, object, value, oldValue, _this.sibling)) {
+					property, (object[1] || object), value, oldValue, _this.sibling)) {
 				cache[property] = oldValue; // return value if not allowed
 				error('ERROR: Cannot set property \'' + property + '\' to \'' +
 					value + '\'', _this.options);

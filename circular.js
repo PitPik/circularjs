@@ -123,24 +123,26 @@
 				this.options.vom && this.options.vom.preRecursionCallback &&
 					this.options.vom.preRecursionCallback(item);
 			},
-			enrichModelCallback: this.options.enrichModelCallback || function() {},
+			enrichModelCallback: this.options.enrichModelCallback ||
+				parameters.enrichModelCallback || function() {},
 			 // TODO: get options via...
 			enhanceMap: this.options.enhanceMap || parameters.enhanceMap || [],
 			setterCallback: function(property, item, value, oldValue, sibling) {
-				var element = item[elements].element,
-					parentElement = item.parentNode[elements] ?
+				// if (options.skipOnSame && value === oldValue) return;
+				var element = item[elements] && item[elements].element,
+					parentElement = item.parentNode && item.parentNode[elements] ?
 						item.parentNode[elements].element : component.container;
 
 				if (property === 'removeChild') {
 					render(_inst.helper, element, property, element.parentElement);
-				} else if (property === 'sort') {
+				} else if (property === 'sortChildren') {
 					render(_inst.helper, element, 'appendChild', parentElement);
 				} else if (!this.isNew && _inst.vom[property]) { // has method
 					render(_inst.helper, element, property, parentElement);
 				}
+				delete this.isNew; // ???????
 				parameters.setterCallback && parameters.setterCallback
 					.call(this, property, item, value, oldValue);
-				delete this.isNew; // ???????
 			},
 			// moveCallback: function(item, type, sibling) {
 			// 	type !== 'appendChild' && _inst.dominator.appendImmediately();
@@ -270,4 +272,3 @@
 		}
 	}
 }));
-

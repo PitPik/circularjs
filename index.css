@@ -1,5 +1,5 @@
 body{
-	font: normal normal normal .80em/1.6em "Trebuchet MS", Arial, Helvetica, sans-serif;
+	font: normal normal normal .80em/1.6em "Trebuchet MS", Arial, Helvetica, sans-serif, Arial, Helvetica, sans-serif;
 	color: #333;
 }
 
@@ -22,7 +22,7 @@ body{
 	display: inline-block;
 }
 .circularjs {
-	margin: 40px 10px 50px; /* only for demo on this page */
+	 margin: 40px 10px 50px;  /* only for demo on this page */
 }
 
 /* -------------------- LOGO ------------------- */

@@ -6,14 +6,13 @@
 
 		<link rel="stylesheet" type="text/css" href="index.css">
 
-		<script type="text/javascript" src="toolbox.js"></script>
+		<!-- <script type="text/javascript" src="toolbox.js"></script>
 		<script type="text/javascript" src="VOM.js"></script>
-		<script type="text/javascript" src="DOMinator.js"></script>
 		<script type="text/javascript" src="controller.js"></script>
 		<script type="text/javascript" src="schnauzer.js"></script>
-		<script type="text/javascript" src="circular.js"></script>
+		<script type="text/javascript" src="circular.js"></script> -->
 
- 		<!-- <script type="text/javascript" src="circular.min.js"></script> -->
+ 		<script type="text/javascript" src="circular.min.js"></script>
 	</head>
 	<body>
 		<div class="circularjs">
@@ -22,20 +21,23 @@
 			<div class="circularjs-creator">by <em class="em">WeekendProductions<sup class="sup">©</sup></em></div>
 		</div>
 
+
+
 		<section cr-component="counter" cr-container>
-		<script type="text/template" cr-template-for="counter">
-			<span class="items" >{{items}} Item{{#plural}}s{{/plural}} left</span>
-		</script>
+			<script type="text/template" cr-template-for="counter">
+				<span class="items" >{{items}} Item{{#plural}}s{{/plural}} left</span>
+			</script>
 		</section>
-		<section cr-component="app" cr-view="app" cr-container>
-			
-			<script type="text/template" cr-template-for="app">
+
+		<section cr-component="buttons" cr-container>
+			<script type="text/template" cr-template-for="buttons">
 				<div class="item" cr-event="click: clicker; mousedown: preventSelect">
 					Clicks{{#maxClicks}} (max {{maxClicks}}){{/maxClicks}}:
 					<span cr-view="clickCounter">{{clicks}}</span> so far
 				</div>
 			</script>
 		</section>
+
 	</body>
 
 	<script type="text/javascript">
@@ -44,7 +46,7 @@
 
 			var demo = window.demo = new Circular();
 
-			var buttons = demo.component('app', {
+			var buttons = demo.component('buttons', {
 					model: [{
 						clicks: 0,
 						maxClicks: 10
@@ -66,12 +68,12 @@
 							}
 						}
 
-						var itemsCount = this.getElementsByProperty().length;
+						itemsCount = this.getElementsByProperty().length;
 						counter.replaceChild({
 							items: itemsCount,
 							plural: itemsCount !== 1
 						}, counter.model[0]);
-						
+
 					},
 					eventListeners: {
 						clicker: function(e, element, item) {
@@ -82,10 +84,11 @@
 						}
 					}
 				}),
+				itemsCount = buttons.getElementsByProperty().length,
 				counter = demo.component('counter', {
 					model: [{
-						items: 0,
-						plural: false
+						items: itemsCount,
+						plural: itemsCount !== 1
 					}],
 					enhanceMap: ['items']
 				});
