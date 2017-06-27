@@ -77,7 +77,7 @@
 		_inst.template = data.template ? new (options.Template || Schnauzer)(
 			parameters.template || data.template, {
 				doEscape: false,
-				helpers: this.options.helpers || {} // TODO
+				helpers: parameters.helpers || this.options.helpers || {} // TODO
 			}) : null;
 
 		component.templates = data.templates;
@@ -120,8 +120,11 @@
 				getViews(options, item[options.views],
 					item[elements].element || component.element);
 
-				this.options.vom && this.options.vom.preRecursionCallback &&
-					this.options.vom.preRecursionCallback(item);
+				// this.options.vom && this.options.vom.preRecursionCallback &&
+				// 	this.options.vom.preRecursionCallback(item);
+
+				parameters.preRecursionCallback &&
+					parameters.preRecursionCallback.call(this, item);
 			},
 			enrichModelCallback: this.options.enrichModelCallback ||
 				parameters.enrichModelCallback || function() {},
@@ -170,6 +173,8 @@
 			}
 		}
 	}
+
+	Circular.Toolbox = Toolbox;
 
 	return Circular;
 

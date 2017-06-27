@@ -63,7 +63,8 @@
 
 			for (n = (Toolbox.addEvent.events || []).length; n--; ) {
 				item = Toolbox.addEvent.events[n];
-				elmCondition = !element || (item.e === element && (!type || type === item.t));
+				elmCondition = !element ||
+					(item.e === element && (!type || type === item.t));
 				if (item.i === (_this || Toolbox) && elmCondition) {
 					item.e.removeEventListener(item.t, item.f, item.c);
 					Toolbox.addEvent.events.splice(n, 1);
@@ -77,7 +78,7 @@
 			save: function (todos, key) {
 				Toolbox.lazy(function() {
 					localStorage.setItem(key, JSON.stringify(todos));
-				}, storageHelper);
+				}, Toolbox.storageHelper);
 			}
 		},
 		lazy: function(fn, obj) {
