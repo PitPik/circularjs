@@ -4,37 +4,22 @@ window.onload = function() {
 	'use strict';
 
 	var STORAGE_KEY = 'todos-circularjs-0.1',
-		todoStorage = {
-			fetch: function () {
-				return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-			},
-			save: function (todos) {
-				lazy(function() {
-					localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
-				}, todoStorage);
-			}
-		},
 		sortAsc = function(a, b, desc) {
-			var textA = a.text.toUpperCase();
-			var textB = b.text.toUpperCase();
-
-			return desc ?
-				textA < textB ? 1 : textA > textB ? -1 : 0 :
-				textA < textB ? -1 : textA > textB ? 1 : 0;
+			return Toolbox.itemsSorter(a, b, 'text', desc);
 		},
 		sortDesc = function(a, b) {
-			return sortAsc(a, b, true);
+			return sortAsc(a, b, 'text', true);
 		},
 		todo = window.todo = new Circular(),
 
 		list = todo.component('list', {
-			model: todoStorage.fetch(),
+			model: Toolbox.storageHelper.fetch(STORAGE_KEY),
 			enhanceMap: ['text', 'done'],
 			setterCallback: function(property, item, value, oldValue, type) {
 				listCallbacks[property] ?
 					listCallbacks[property](item, item.views, value) :
 					listCallbacks.nodeChange(item, item.views, value);
-				todoStorage.save(this.model); // persist
+				Toolbox.storageHelper.save(this.model, STORAGE_KEY); // persist
 			},
 			eventListeners: {
 				toggle: function (e, element, item) {
