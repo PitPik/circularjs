@@ -51,6 +51,9 @@
 								that.options.eventListeners[key]) {
 							stopPropagation = that.options.eventListeners[key]
 							.call(component, e, eventElement, item) === false;
+							if (stopPropagation) {
+								e.stopPropagation();
+							}
 						}
 					}
 
