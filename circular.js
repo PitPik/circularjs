@@ -263,7 +263,7 @@
 			templates = {};
 
 		for (var n = _templates.length; n--; ) { // TODO
-			templates[_templates[n].id] =
+			templates[_templates[n].id || _templates[n].getAttribute('name')] =
 				new (options.Template || Schnauzer)(_templates[n].innerHTML);
 		}
 
