@@ -215,15 +215,16 @@
 
 	function section(_this, func, key, _key, negative) {
 		return function fastLoop(data, dataTree, foundData) {
-			if (isArray(data[key])) { // array
-				data = data[key];
+			var _data = findData(data, dataTree, key); // TODO: check a.b.c.
+
+			if (isArray(_data)) { // array
 				if (negative) {
-					return !data.length ? func(data, dataTree) : '';
+					return !_data.length ? func(_data, dataTree) : '';
 				}
-				for (var n = 0, l = data.length, out = ''; n < l; n++) {
-					out = out + (typeof data[n] === 'object' ?
-						func(data[n], [data[n]].concat(dataTree)) :
-						func({'.': data[n]}, dataTree));
+				for (var n = 0, l = _data.length, out = ''; n < l; n++) {
+					out = out + (typeof _data[n] === 'object' ?
+						func(_data[n], [_data[n]].concat(dataTree)) :
+						func({'.': _data[n]}, dataTree));
 				}
 				return out; //.join('');
 			}
@@ -231,7 +232,7 @@
 				return _this.options.helpers[key].apply(tools(_this, data, dataTree),
 					[func(data, dataTree)].concat(_key.split(/\s+/)));
 			}
-			foundData = data[key] || findData(data, dataTree, key);
+			foundData = data[key] || _data;
 			if (foundData && isFunction(foundData)) { // functions
 				return foundData.apply(tools(_this, data, dataTree),
 					[func(data, dataTree)].concat(_key.split(/\s+/)));
