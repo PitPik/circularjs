@@ -197,11 +197,7 @@
 				operator = sibling ? 'insertBefore' : 'appendChild';
 			}
 
-			if (!parentNode) { // removed before appended
-				element.parentElement.removeChild(element);
-			} else {
-				parentNode[operator](element, sibling);
-			}
+			(parentNode || element.parentElement)[operator](element, sibling);
 		});
 
 		return element;
