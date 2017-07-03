@@ -59,7 +59,7 @@
 			data = getDomData(options, componentElement, name),
 			component = this.components[name] = {
 				name: name,
-				model: parameters.model || [{__init: true}],
+				model: parameters.model || [],
 				element: data.element,
 				container: data.container
 			};
@@ -139,7 +139,14 @@
 				if (property === 'removeChild') {
 					render(_inst.helper, element, property, element.parentElement);
 				} else if (property === 'sortChildren') {
-					render(_inst.helper, element, 'appendChild', parentElement);
+					// speed up sorting... TODO: check
+					// var previousSibling = item.parentNode.childNodes[item.index - 1];
+					// var previousElement = previousSibling && previousSibling.elements.element;
+					// var nextSibling = previousElement && previousElement.nextSibling;
+
+					// if (item.elements.element !== nextSibling) {
+						render(_inst.helper, element, 'appendChild', parentElement);
+					// }
 				} else if (!this.isNew && _inst.vom[property]) { // has method
 					render(_inst.helper, element, property, parentElement);
 				}
@@ -168,6 +175,7 @@
 
 		for (var component in _inst) {
 			for (var instance in _inst[component]) {
+				_inst[component][instance] &&
 				_inst[component][instance].destroy &&
 				_inst[component][instance].destroy();
 			}
