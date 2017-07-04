@@ -56,7 +56,7 @@
 			componentAttr = options.componentAttr,
 			componentElement = $(document, '[' + componentAttr + '="' + name + '"]'),
 			nestingData = checkRestoreNesting(componentElement, componentAttr),
-			data = getDomData(options, componentElement, name),
+			data = getDomData(options, parameters, componentElement, name),
 			component = this.components[name] = {
 				name: name,
 				model: parameters.model || [],
@@ -261,7 +261,7 @@
 	}
 
 	// ----- get component data
-	function getDomData(options, component, name) {
+	function getDomData(options, parameters, component, name) {
 		var containerAttr = options.containerAttr,
 			container = component.hasAttribute(containerAttr) ? component :
 				$(component, '[' + containerAttr + '="' + name + '"]') ||
@@ -272,7 +272,10 @@
 
 		for (var n = _templates.length; n--; ) { // TODO
 			templates[_templates[n].id || _templates[n].getAttribute('name')] =
-				new (options.Template || Schnauzer)(_templates[n].innerHTML);
+				new (options.Template || Schnauzer)(_templates[n].innerHTML, {
+					doEscape: false,
+					helpers: parameters.helpers || options.helpers || {}
+				});
 		}
 
 		return {
