@@ -147,7 +147,8 @@
 					// if (item.elements.element !== nextSibling) {
 						render(_inst.helper, element, 'appendChild', parentElement);
 					// }
-				} else if (!this.isNew && _inst.vom[property]) { // has method
+				} else if (!this.isNew && _inst.vom[property] // has method
+						&& property !== 'replaceChild') { // TODO: check for more
 					render(_inst.helper, element, property, parentElement);
 				}
 				delete this.isNew; // ???????
