@@ -27,7 +27,7 @@ The intention to build CircularJS was to create something small and fast that is
 * Automated view rendering when model changes
 * Easy detroy for effective garbage collection
 * Fast and easy i18n possible
-* Little code for powerful solutions
+* Write little code for powerful solutions
 * Great for mobile apps as it is tiny (5.5KB) and very fast (~8x to Angular)
 * Exchangeable rendering engine
 * Keep track of your logic as there is not much magic happening
