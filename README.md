@@ -19,6 +19,7 @@ The intention to build CircularJS was to create something small and fast that is
 * No dependencies to other frameworks
 * Other frameworks may co-exist (Angular, jQuery, ...)
 * Uses VanillaJS; Usage of VanillaJS welcome.
+* Unopinionated
 * No querySelectors in $('..') or querySelectorAll etc. needed in code
 * No class names in JS code needed (decouples css and JS)
 * Constant sync between model, view and server.
