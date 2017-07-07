@@ -31,6 +31,24 @@
 			return elm.querySelectorAll(selector);
 		},
 
+		addClass: function addClass(element, className) {
+			element.classList.add(className);
+		},
+
+		removeClass: function removeClass(element, className) {
+			element.classList.remove(className);
+		},
+
+		toggleClass: function toggleClass(element, className, condition) {
+			var hasClass = element.classList.contains(className);
+
+			if (hasClass && !condition) {
+				element.classList.remove(className);
+			} else if (!hasClass && condition !== false) {
+				element.classList.add(className);
+			}
+		},
+
 		addEvents: function (elements, type, func, cap, _this) {
 			for (var n = elements.length; n--; ) {
 				Toolbox.addEvent(elements[n], type, func, cap, _this);

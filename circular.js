@@ -90,7 +90,7 @@
 		// }
 		_inst.vom = new VOM(component.model, {
 			preRecursionCallback: function(item, type, siblingOrParent) {
-				var html = _inst.template &&_inst.template.partials.self &&
+				var html = _inst.template && _inst.template.partials.self &&
 						_inst.template.render(item),
 					operator = type || 'appendChild',
 					replaceElement = type === 'replaceChild' && siblingOrParent[elements].element,
@@ -103,7 +103,7 @@
 						render(_inst.helper, html, operator, parentNode, siblingElement) ||
 						component.element;
 
-				this.isNew = true; // ???????
+				item.__isNew = true;
 				// collect elements
 				this.reinforceProperty(item, elements, {
 					element: element,
@@ -131,6 +131,9 @@
 			 // TODO: get options via...
 			enhanceMap: this.options.enhanceMap || parameters.enhanceMap || [],
 			setterCallback: function(property, item, value, oldValue, sibling) {
+				var isNew = item.__isNew;
+
+				delete item.__isNew;
 				// if (options.skipOnSame && value === oldValue) return;
 				var element = item[elements] && item[elements].element,
 					parentElement = item.parentNode && item.parentNode[elements] ?
@@ -140,18 +143,27 @@
 					render(_inst.helper, element, property, element.parentElement);
 				} else if (property === 'sortChildren') {
 					// speed up sorting... TODO: check
-					// var previousSibling = item.parentNode.childNodes[item.index - 1];
-					// var previousElement = previousSibling && previousSibling.elements.element;
-					// var nextSibling = previousElement && previousElement.nextSibling;
+					render(_inst.helper, element, 'appendChild', parentElement);
+				} else if (!isNew && this[property]) { // has method
+					if (item === sibling) {
+						element = render(_inst.helper, _inst.template.render(item),
+							property, parentElement, sibling[elements].element);
+						item[elements].element = element;
+						item[elements].container = parameters.mountSelector &&
+							$(element, parameters.mountSelector);
 
-					// if (item.elements.element !== nextSibling) {
-						render(_inst.helper, element, 'appendChild', parentElement);
-					// }
-				} else if (!this.isNew && _inst.vom[property] // has method
-						&& property !== 'replaceChild') { // TODO: check for more
-					render(_inst.helper, element, property, parentElement);
+							item[options.events] = {};
+						_inst.controller && _inst.controller.getEventListeners(
+							this, item[elements].element ||
+							component.element, item[options.events], component);
+						item[options.views] = {};
+						getViews(options, item[options.views],
+							item[elements].element || component.element);
+					} else {
+						render(_inst.helper, element, property, parentElement,
+								sibling[elements] && sibling[elements].element);
+					}
 				}
-				delete this.isNew; // ???????
 				parameters.setterCallback && parameters.setterCallback
 					.call(this, property, item, value, oldValue);
 			},
