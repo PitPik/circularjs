@@ -98,7 +98,7 @@
 			var index = item.index,
 				parentNode = item.parentNode;
 
-			removeChild(this, item);
+			newItem !== item && removeChild(this, item);
 			moveItem(this, newItem, parentNode, index, 'replaceChild', item);
 			return item;
 		},
@@ -276,7 +276,7 @@
 		return Object.defineProperty(model, item, {
 			enumerable: !!enumarable,
 			configurable: false,
-			writable: false,
+			writable: true, // TODO: parameter
 			value: value
 		});
 	}
