@@ -271,12 +271,12 @@
 		return model;
 	}
 
-	function reinforceProperty(model, item, value, enumarable) {
+	function reinforceProperty(model, item, value, writeable, enumarable) {
 		delete model[item]; // in case it is set already...
 		return Object.defineProperty(model, item, {
 			enumerable: !!enumarable,
 			configurable: false,
-			writable: true, // TODO: parameter
+			writable: !!writeable,
 			value: value
 		});
 	}

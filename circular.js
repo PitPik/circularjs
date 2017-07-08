@@ -109,14 +109,14 @@
 					element: element,
 					container: parameters.mountSelector &&
 						$(element, parameters.mountSelector)
-				});
+				}, true);
 				// collect events
-				this.reinforceProperty(item, options.events, {});
+				this.reinforceProperty(item, options.events, {}, true);
 				_inst.controller && _inst.controller.getEventListeners( // TODO
 					this, item[elements].element ||
 					component.element, item[options.events], component);
 				// collect view elements
-				this.reinforceProperty(item, options.views, {});
+				this.reinforceProperty(item, options.views, {}, true);
 				getViews(options, item[options.views],
 					item[elements].element || component.element);
 
