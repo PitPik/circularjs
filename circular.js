@@ -103,7 +103,6 @@
 						render(_inst.helper, html, operator, parentNode, siblingElement) ||
 						component.element;
 
-				item.__isNew = true;
 				// collect elements
 				this.reinforceProperty(item, elements, {
 					element: element,
@@ -131,9 +130,6 @@
 			 // TODO: get options via...
 			enhanceMap: this.options.enhanceMap || parameters.enhanceMap || [],
 			setterCallback: function(property, item, value, oldValue, sibling) {
-				var isNew = item.__isNew;
-
-				delete item.__isNew;
 				// if (options.skipOnSame && value === oldValue) return;
 				var element = item[elements] && item[elements].element,
 					parentElement = item.parentNode && item.parentNode[elements] ?
@@ -144,7 +140,7 @@
 				} else if (property === 'sortChildren') {
 					// speed up sorting... TODO: check
 					render(_inst.helper, element, 'appendChild', parentElement);
-				} else if (!isNew && this[property]) { // has method
+				} else if (this[property]) { // has method
 					if (item === sibling) {
 						element = render(_inst.helper, _inst.template.render(item),
 							property, parentElement, sibling[elements].element);
@@ -159,7 +155,7 @@
 						item[options.views] = {};
 						getViews(options, item[options.views],
 							item[elements].element || component.element);
-					} else {
+					} else if (property !== 'replaceChild') {
 						render(_inst.helper, element, property, parentElement,
 								sibling[elements] && sibling[elements].element);
 					}
