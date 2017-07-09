@@ -41,6 +41,8 @@
 			_this.components = {};
 			_this.id = 'cr_' + id++;
 		},
+		_animate = window.requestAnimationFrame ||
+            window.webkitRequestAnimationFrame || function(cb){cb()},
 		$ = Toolbox.$,
 		$$ = Toolbox.$$,
 		id = 0,
@@ -207,7 +209,7 @@
 			element = html;
 		}
 
-		window.requestAnimationFrame(function() {
+		_animate(function() {
 			if (isPrepend || operator === 'insertAfter') {
 				sibling = sibling && sibling.nextSibling ||
 					isPrepend && parentNode.children[0];

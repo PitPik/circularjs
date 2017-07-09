@@ -31,15 +31,15 @@
 			return elm.querySelectorAll(selector);
 		},
 
-		addClass: function addClass(element, className) {
+		addClass: function(element, className) {
 			element.classList.add(className);
 		},
 
-		removeClass: function removeClass(element, className) {
+		removeClass: function(element, className) {
 			element.classList.remove(className);
 		},
 
-		toggleClass: function toggleClass(element, className, condition) {
+		toggleClass: function(element, className, condition) {
 			var hasClass = element.classList.contains(className);
 
 			if (hasClass && !condition) {
@@ -47,6 +47,10 @@
 			} else if (!hasClass && condition !== false) {
 				element.classList.add(className);
 			}
+		},
+
+		hasClass: function(element, className) {
+			return element.classList.contains(className);
 		},
 
 		addEvents: function (elements, type, func, cap, _this) {
