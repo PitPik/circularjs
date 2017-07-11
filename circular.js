@@ -3,7 +3,7 @@
 		module.exports = factory(root,
 			require('toolbox'),
 			require('controller'),
-			require('schnauzer'), // TODO: !!!!!!!!
+			require('schnauzer'),
 			require('VOM'));
 	} else if (typeof define === 'function' && define.amd) {
 		define('circular', ['toolbox', 'controller', 'schnauzer', 'VOM'],
@@ -48,15 +48,14 @@
 		id = 0,
 		instanceList = {};
 
-
 	Circular.prototype.component = function(name, parameters) {
-		var // self = this,
-			_inst = {}, // current instance
+		var _inst = {}, // current instance
 			proto = {},
 			options = this.options,
 			elements = options.elements,
 			componentAttr = options.componentAttr,
-			componentElement = $(document, '[' + componentAttr + '="' + name + '"]'),
+			componentSelector = '[' + componentAttr + '="' + name + '"]',
+			componentElement = $(document.body, componentSelector),
 			nestingData = checkRestoreNesting(componentElement, componentAttr),
 			data = getDomData(options, parameters, componentElement, name),
 			component = this.components[name] = {
@@ -69,7 +68,6 @@
 		instanceList[this.id] = instanceList[this.id] || {};
 		_inst = instanceList[this.id][name] = {};
 
-		// _inst.dominator = new DOMinator({});
 		_inst.helper = document.createElement('div');
 		_inst.controller = parameters.eventListeners && new Controller({
 			appElement: data.element,
@@ -83,27 +81,21 @@
 			}) : null;
 
 		component.templates = data.templates;
-		// if (parameters.templates) {
-		// 	for (var template in parameters.templates) {
-		// 		component.templates[template] = new (options.Template || Schnauzer)(
-		// 			parameters.templates[template].template,
-		// 			parameters.templates[template].options);
-		// 	}
-		// }
 		_inst.vom = new VOM(component.model, {
 			preRecursionCallback: function(item, type, siblingOrParent) {
 				var html = _inst.template && _inst.template.partials.self &&
 						_inst.template.render(item),
 					operator = type || 'appendChild',
-					replaceElement = type === 'replaceChild' && siblingOrParent[elements].element,
+					replaceElement = type === 'replaceChild' &&
+						siblingOrParent[elements].element,
 					container = item.parentNode[elements] &&
 						item.parentNode[elements].container,
-					parentNode = html && siblingElement || container || component.container,
-					siblingElement = parentNode ? replaceElement || undefined : siblingOrParent &&
-						siblingOrParent[elements].element,
-					element = html &&
-						render(_inst.helper, html, operator, parentNode, siblingElement) ||
-						component.element;
+					parentNode = html && siblingElement ||
+						container || component.container,
+					siblingElement = parentNode ? replaceElement || undefined :
+						siblingOrParent && siblingOrParent[elements].element,
+					element = html && render(_inst.helper, html, operator,
+						parentNode, siblingElement) || component.element;
 
 				// collect elements
 				this.reinforceProperty(item, elements, {
@@ -113,16 +105,13 @@
 				}, true);
 				// collect events
 				this.reinforceProperty(item, options.events, {}, true);
-				_inst.controller && _inst.controller.getEventListeners( // TODO
-					this, item[elements].element ||
-					component.element, item[options.events], component);
+				_inst.controller && _inst.controller.getEventListeners(this,
+					item[elements].element || component.element,
+					item[options.events], component);
 				// collect view elements
 				this.reinforceProperty(item, options.views, {}, true);
 				getViews(options, item[options.views],
 					item[elements].element || component.element);
-
-				// this.options.vom && this.options.vom.preRecursionCallback &&
-				// 	this.options.vom.preRecursionCallback(item);
 
 				parameters.preRecursionCallback &&
 					parameters.preRecursionCallback.call(this, item);
@@ -132,7 +121,6 @@
 			 // TODO: get options via...
 			enhanceMap: this.options.enhanceMap || parameters.enhanceMap || [],
 			setterCallback: function(property, item, value, oldValue, sibling) {
-				// if (options.skipOnSame && value === oldValue) return;
 				var element = item[elements] && item[elements].element,
 					parentElement = item.parentNode && item.parentNode[elements] ?
 						item.parentNode[elements].element : component.container;
@@ -277,8 +265,10 @@
 			container = component.hasAttribute(containerAttr) ? component :
 				$(component, '[' + containerAttr + '="' + name + '"]') ||
 				$(component, '[' + containerAttr + ']'),
-			template = $(document, '[' + options.templateAttr + '="' + name + '"]'),
-			_templates = ($$(document, '[' + options.templatesAttr + '="' + name + '"]') || []),
+			template = $(document.body,
+				'[' + options.templateAttr + '="' + name + '"]'),
+			_templates = ($$(document.body, 
+				'[' + options.templatesAttr + '="' + name + '"]') || []),
 			templates = {};
 
 		for (var n = _templates.length; n--; ) { // TODO
