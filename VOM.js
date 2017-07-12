@@ -262,8 +262,7 @@
 			internalProperty = item === 'parentNode' || item === strIndex;
 			if (item === _this.options.idProperty) {
 				reinforceProperty(model, item, model[item], ownProperty);
-			} else if (enhanceMap[item] || enhanceMap['*'] &&
-					enhanceMap.length === 1 || internalProperty) {
+			} else if (enhanceMap[item] || enhanceMap['*'] || internalProperty) {
 				_this.addProperty(item, model, null, internalProperty);
 			}
 		}
