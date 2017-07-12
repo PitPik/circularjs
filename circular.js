@@ -52,7 +52,7 @@
 		var _inst = {}, // current instance
 			proto = {},
 			options = this.options,
-			elements = options.elements,
+			elmsTxt = options.elements,
 			componentAttr = options.componentAttr,
 			componentSelector = '[' + componentAttr + '="' + name + '"]',
 			componentElement = $(document.body, componentSelector),
@@ -87,18 +87,18 @@
 						_inst.template.render(item),
 					operator = type || 'appendChild',
 					replaceElement = type === 'replaceChild' &&
-						siblingOrParent[elements].element,
-					container = item.parentNode[elements] &&
-						item.parentNode[elements].container,
+						siblingOrParent[elmsTxt].element,
+					container = item.parentNode[elmsTxt] &&
+						item.parentNode[elmsTxt].container,
 					parentNode = html && siblingElement ||
 						container || component.container,
 					siblingElement = parentNode ? replaceElement || undefined :
-						siblingOrParent && siblingOrParent[elements].element,
+						siblingOrParent && siblingOrParent[elmsTxt].element,
 					element = html && render(_inst.helper, html, operator,
 						parentNode, siblingElement) || component.element;
 
 				// collect elements
-				this.reinforceProperty(item, elements, {
+				this.reinforceProperty(item, elmsTxt, {
 					element: element,
 					container: parameters.mountSelector &&
 						$(element, parameters.mountSelector)
@@ -106,12 +106,12 @@
 				// collect events
 				this.reinforceProperty(item, options.events, {}, true);
 				_inst.controller && _inst.controller.getEventListeners(this,
-					item[elements].element || component.element,
+					item[elmsTxt].element || component.element,
 					item[options.events], component);
 				// collect view elements
 				this.reinforceProperty(item, options.views, {}, true);
 				getViews(options, item[options.views],
-					item[elements].element || component.element);
+					item[elmsTxt].element || component.element);
 
 				parameters.preRecursionCallback &&
 					parameters.preRecursionCallback.call(this, item);
@@ -121,9 +121,9 @@
 			 // TODO: get options via...
 			enhanceMap: this.options.enhanceMap || parameters.enhanceMap || [],
 			setterCallback: function(property, item, value, oldValue, sibling) {
-				var element = item[elements] && item[elements].element,
-					parentElement = item.parentNode && item.parentNode[elements] ?
-						item.parentNode[elements].element : component.container;
+				var element = item[elmsTxt] && item[elmsTxt].element,
+					parentElement = item.parentNode && item.parentNode[elmsTxt] ?
+						item.parentNode[elmsTxt].element : component.container;
 
 				if (property === 'removeChild') {
 					render(_inst.helper, element, property, element.parentElement);
@@ -133,21 +133,21 @@
 				} else if (this[property]) { // has method
 					if (item === sibling) {
 						element = render(_inst.helper, _inst.template.render(item),
-							property, parentElement, sibling[elements].element);
-						item[elements].element = element;
-						item[elements].container = parameters.mountSelector &&
+							property, parentElement, sibling[elmsTxt].element);
+						item[elmsTxt].element = element;
+						item[elmsTxt].container = parameters.mountSelector &&
 							$(element, parameters.mountSelector);
 
 							item[options.events] = {};
 						_inst.controller && _inst.controller.getEventListeners(
-							this, item[elements].element ||
+							this, item[elmsTxt].element ||
 							component.element, item[options.events], component);
 						item[options.views] = {};
 						getViews(options, item[options.views],
-							item[elements].element || component.element);
+							item[elmsTxt].element || component.element);
 					} else if (property !== 'replaceChild') {
 						render(_inst.helper, element, property, parentElement,
-								sibling[elements] && sibling[elements].element);
+								sibling[elmsTxt] && sibling[elmsTxt].element);
 					}
 				}
 				parameters.setterCallback && parameters.setterCallback
