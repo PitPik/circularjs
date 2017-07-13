@@ -57,7 +57,8 @@
 
 	Schnauzer.prototype = {
 		render: function(data, extra) {
-			return this.partials[this.options.recursion](data, extra && [extra]);
+			extra = extra && (isArray(extra) && extra || [extra]);
+			return this.partials[this.options.recursion](data, extra);
 		},
 		parse: function(html) {
 			this.partials[this.options.recursion] ||
