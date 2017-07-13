@@ -56,8 +56,8 @@
 		help = 0; // counter helper for nestings
 
 	Schnauzer.prototype = {
-		render: function(data) {
-			return this.partials[this.options.recursion](data);
+		render: function(data, extra) {
+			return this.partials[this.options.recursion](data, extra && [extra]);
 		},
 		parse: function(html) {
 			this.partials[this.options.recursion] ||

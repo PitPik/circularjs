@@ -53,6 +53,7 @@
 			proto = {},
 			options = this.options,
 			elmsTxt = options.elements,
+			extraModel = parameters.extraModel || options.extraModel,
 			componentAttr = options.componentAttr,
 			componentSelector = '[' + componentAttr + '="' + name + '"]',
 			componentElement = $(document.body, componentSelector),
@@ -77,14 +78,14 @@
 		_inst.template = data.template ? new (options.Template || Schnauzer)(
 			parameters.template || data.template, {
 				doEscape: false,
-				helpers: parameters.helpers || this.options.helpers || {} // TODO
+				helpers: parameters.helpers || options.helpers || {} // TODO
 			}) : null;
 
 		component.templates = data.templates;
 		_inst.vom = new VOM(component.model, {
 			preRecursionCallback: function(item, type, siblingOrParent) {
 				var html = _inst.template && _inst.template.partials.self &&
-						_inst.template.render(item),
+						_inst.template.render(item, extraModel),
 					operator = type || 'appendChild',
 					replaceElement = type === 'replaceChild' &&
 						siblingOrParent[elmsTxt].element,
@@ -132,7 +133,8 @@
 					render(_inst.helper, element, 'appendChild', parentElement);
 				} else if (this[property]) { // has method
 					if (item === sibling) {
-						element = render(_inst.helper, _inst.template.render(item),
+						element = render(_inst.helper,
+							_inst.template.render(item, extraModel),
 							property, parentElement, sibling[elmsTxt].element);
 						item[elmsTxt].element = element;
 						item[elmsTxt].container = parameters.mountSelector &&
