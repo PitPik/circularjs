@@ -266,7 +266,7 @@
 				$2 = $2.replace(new RegExp(stopper), '');
 
 				partCollector.push(new RegExp(options.tags[0] + '[#\^]').test($4) ?
-					section(_this, sizzleTemplate(_this, $4), $2, $3) :
+					section(_this, sizzleTemplate(_this, $4), $2, $3, $1 === '^') :
 					section(_this, variable(_this, $4), $2, $3, $1 === '^'));
 				return options.splitter;
 			}).split(options.splitter);
