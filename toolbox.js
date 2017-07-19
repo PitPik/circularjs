@@ -2,7 +2,7 @@
 	if (typeof exports === 'object') {
 		module.exports = factory(root);
 	} else if (typeof define === 'function' && define.amd) {
-		define('Toolbox', [], function () {
+		define('toolbox', [], function () {
 			return factory(root);
 		});
 	} else {
