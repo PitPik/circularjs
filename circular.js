@@ -174,7 +174,7 @@
 			enrichModelCallback: this.options.enrichModelCallback ||
 				parameters.enrichModelCallback || function() {},
 			 // TODO: get options via...
-			enhanceMap: this.options.enhanceMap || parameters.enhanceMap || [],
+			enhanceMap: this.options.listeners || parameters.listeners || [],
 			setterCallback: function(property, item, value, oldValue, sibling) {
 				var element = item[elmsTxt] && item[elmsTxt].element,
 					parentElement = item.parentNode && item.parentNode[elmsTxt] ?
@@ -207,7 +207,7 @@
 								sibling[elmsTxt] && sibling[elmsTxt].element);
 					}
 				}
-				parameters.setterCallback && parameters.setterCallback
+				parameters.subscribe && parameters.subscribe
 					.call(this, property, item, value, oldValue);
 				pubsubs && pubsubs.length && publish(_this, pubsubs, {
 					property: property,
