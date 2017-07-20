@@ -17,7 +17,7 @@
 }(this, function(window, Toolbox, Controller, Schnauzer, VOM) {
 	'use strict';
 
-	var Circular = function(options) {
+	var Circular = function(name, options) {
 			this.options = {
 				componentAttr: 'cr-component',
 				containerAttr: 'cr-container',
@@ -30,9 +30,14 @@
 				views: 'views'
 			};
 
-			initCircular(this, options);
+			initCircular(this, name, options);
 		},
-		initCircular = function(_this, options) {
+		initCircular = function(_this, name, options) {
+			var hasName = typeof name === 'string';
+
+			if (!hasName) {
+				options = name;
+			}
 			for (var option in options) {
 				_this.options[option] = options[option];
 			}
@@ -40,16 +45,64 @@
 			_this.version = '0.1.0';
 			_this.components = {};
 			_this.id = 'cr_' + id++;
+			_this.name = hasName ? name : _this.id;
+			pubsub[_this.name] = {}; // prepare
 		},
 		_animate = window.requestAnimationFrame ||
             window.webkitRequestAnimationFrame || function(cb){cb()},
 		$ = Toolbox.$,
 		$$ = Toolbox.$$,
 		id = 0,
-		instanceList = {};
+		instanceList = {},
+		pubsub = {};
+
+	Circular.prototype.subscribe = function(inst, comp, attr, callback, trigger) {
+		var component = {};
+		var model = {};
+		var data = {};
+
+		inst = inst || this.name;
+		component = pubsub[inst][comp] = pubsub[inst][comp] || {};
+		component[attr] = component[attr] || [];
+		callback && component[attr].push(callback);
+
+		model = this.components[comp] && this.components[comp].model;
+		data = model[trigger] && model[trigger][attr];
+		if (trigger !== undefined && model) {
+			model._initial = true;
+			callback.call(this, data === undefined || trigger === -1 ?
+				model : {
+					value: data,
+					property: attr,
+					item: model[trigger]
+				});
+			delete model._initial;
+		}
+	};
+
+	Circular.prototype.publish = function(inst, comp, attr, data) {
+		inst = inst || this.name;
+		comp = pubsub[inst][comp] = pubsub[inst][comp] || {};
+		publish(this, pubsubs, data);
+	};
+
+	Circular.prototype.unsubscribe = function(inst, comp, attr, callback) {
+		var funcNo = -1;
+		var funcs = {};
+
+		inst = inst || this.name;
+		if (pubsub[inst] && pubsub[inst][comp] && pubsub[inst][comp][attr]) {
+			funcs = pubsub[inst][comp][attr];
+			funcNo = funcs.indexOf(callback);
+			if (funcNo !== -1) {
+				funcs.splice(funcNo, 1);
+			}
+		}
+	};
 
 	Circular.prototype.component = function(name, parameters) {
-		var _inst = {}, // current instance
+		var _this = this,
+			_inst = {}, // current instance
 			proto = {},
 			options = this.options,
 			elmsTxt = options.elements,
@@ -65,6 +118,7 @@
 				element: data.element,
 				container: data.container
 			};
+			pubsub[this.name][name] = {}; // prepare
 
 		instanceList[this.id] = instanceList[this.id] || {};
 		_inst = instanceList[this.id][name] = {};
@@ -124,7 +178,8 @@
 			setterCallback: function(property, item, value, oldValue, sibling) {
 				var element = item[elmsTxt] && item[elmsTxt].element,
 					parentElement = item.parentNode && item.parentNode[elmsTxt] ?
-						item.parentNode[elmsTxt].element : component.container;
+						item.parentNode[elmsTxt].element : component.container,
+					pubsubs = pubsub[_this.name][name][property];
 
 				if (property === 'removeChild') {
 					render(_inst.helper, element, property, element.parentElement);
@@ -154,6 +209,12 @@
 				}
 				parameters.setterCallback && parameters.setterCallback
 					.call(this, property, item, value, oldValue);
+				pubsubs && pubsubs.length && publish(_this, pubsubs, {
+					property: property,
+					item: item,
+					value: value,
+					oldValue: oldValue
+				});
 			},
 			// moveCallback: function(item, type, sibling) {
 			// 	type !== 'appendChild' && _inst.dominator.appendImmediately();
@@ -288,6 +349,12 @@
 			container: container,
 			// appendMode: container && // ??????????? never used
 			// 	container.getAttribute([containerAttr]) || 'append' // replace
+		}
+	}
+
+	function publish(_this, pubsubs, data) {
+		for (var n = 0, m = pubsubs.length; n < m; n++) {
+			pubsubs[n].call(this, data);
 		}
 	}
 }));
