@@ -15,7 +15,7 @@
 			root.Schnauzer, root.VOM);
 	}
 }(this, function(window, Toolbox, Controller, Schnauzer, VOM) {
-	'use strict';
+	'use strict'; // 36.76 kB → 16.93 kB → 6 kB
 
 	var Circular = function(name, options) {
 			this.options = {
@@ -79,6 +79,7 @@
 				});
 			delete model._initial;
 		}
+		return callback;
 	};
 
 	Circular.prototype.publish = function(inst, comp, attr, data) {
