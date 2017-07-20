@@ -83,8 +83,10 @@
 
 	Circular.prototype.publish = function(inst, comp, attr, data) {
 		inst = inst || this.name;
-		comp = pubsub[inst][comp] = pubsub[inst][comp] || {};
-		comp[attr] && publish(this, comp[attr] || [], data);
+		if (pubsub[inst]) {
+			comp = pubsub[inst][comp] = pubsub[inst][comp] || {};
+			comp[attr] && publish(this, comp[attr] || [], data);
+		}
 	};
 
 	Circular.prototype.unsubscribe = function(inst, comp, attr, callback) {
