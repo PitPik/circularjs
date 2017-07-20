@@ -67,6 +67,7 @@
 		callback && component[attr].push(callback);
 
 		model = this.components[comp] && this.components[comp].model;
+		trigger = trigger === true ? 0 : trigger;
 		data = model[trigger] && model[trigger][attr];
 		if (trigger !== undefined && model) {
 			model._initial = true;
