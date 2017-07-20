@@ -32,6 +32,7 @@ The intention to build CircularJS was to create something small and fast that is
 * Great for mobile apps as it is tiny (5.5KB) and very fast (~8x to AngularJS)
 * Exchangeable rendering engine
 * Keep track of your logic as there is not much magic happening
+* pubsub for internal or custom events
 
 ## Coming up soon
 
