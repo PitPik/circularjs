@@ -2,20 +2,18 @@
 	if (typeof exports === 'object') {
 		module.exports = factory(root,
 			require('toolbox'),
-			require('controller'),
 			require('schnauzer'),
 			require('VOM'));
 	} else if (typeof define === 'function' && define.amd) {
-		define('circular', ['toolbox', 'controller', 'schnauzer', 'VOM'],
-			function (Toolbox, Controller, Schnauzer, VOM) {
-				return factory(root, Toolbox, Controller, Schnauzer, VOM);
+		define('circular', ['toolbox', 'schnauzer', 'VOM'],
+			function (Toolbox, Schnauzer, VOM) {
+				return factory(root, Toolbox, Schnauzer, VOM);
 			});
 	} else {
-		root.Circular = factory(root, root.Toolbox, root.Controller,
-			root.Schnauzer, root.VOM);
+		root.Circular = factory(root, root.Toolbox, root.Schnauzer, root.VOM);
 	}
-}(this, function(window, Toolbox, Controller, Schnauzer, VOM) {
-	'use strict'; // 36.76 kB → 16.93 kB → 6 kB
+}(this, function(window, Toolbox, Schnauzer, VOM) {
+	'use strict'; // all: 36.13 kB → 16.49 kB → 5.92 kB
 
 	var Circular = function(name, options) {
 			this.options = {
@@ -48,13 +46,29 @@
 			_this.name = hasName ? name : _this.id;
 			pubsub[_this.name] = {}; // prepare
 		},
+		Controller = function(options) {
+			this.options = {
+				appElement: document.body,
+				eventAttribute: 'cr-event',
+				// eventListeners: undefined
+			};
+			initController(this, options);
+		},
+		initController = function(_this, options) {
+			for (var option in options) { // extend options
+				_this.options[option] = options[option];
+			}
+
+			_this.events = {}; // listeners
+		},
 		_animate = window.requestAnimationFrame ||
-            window.webkitRequestAnimationFrame || function(cb){cb()},
+			window.webkitRequestAnimationFrame || function(cb){cb()},
 		$ = Toolbox.$,
 		$$ = Toolbox.$$,
 		id = 0,
 		instanceList = {},
-		pubsub = {};
+		pubsub = {},
+		routes = []; // TODO...
 
 	Circular.prototype.component = function(name, parameters) {
 		var _this = this,
@@ -74,24 +88,23 @@
 				element: data.element,
 				container: data.container
 			};
-			pubsub[this.name][name] = {}; // prepare
 
+		pubsub[this.name][name] = {}; // prepare
+		component.templates = data.templates;
 		instanceList[this.id] = instanceList[this.id] || {};
 		_inst = instanceList[this.id][name] = {};
-
 		_inst.helper = document.createElement('div');
+
 		_inst.controller = parameters.eventListeners && new Controller({
 			appElement: data.element,
+			eventAttribute: options.eventAttribute,
 			eventListeners: parameters.eventListeners
 		});
-
 		_inst.template = data.template ? new (options.Template || Schnauzer)(
 			parameters.template || data.template, {
 				doEscape: false,
 				helpers: parameters.helpers || options.helpers || {} // TODO
 			}) : null;
-
-		component.templates = data.templates;
 		_inst.vom = new VOM(component.model, {
 			preRecursionCallback: function(item, type, siblingOrParent) {
 				var html = _inst.template && _inst.template.partials.self &&
@@ -116,9 +129,9 @@
 				}, true);
 				// collect events
 				this.reinforceProperty(item, options.events, {}, true);
-				_inst.controller && _inst.controller.getEventListeners(this,
+				_inst.controller && _inst.controller.getEventListeners(
 					item[elmsTxt].element || component.element,
-					item[options.events], component);
+					item[options.events], component, this.options.idProperty);
 				// collect view elements
 				this.reinforceProperty(item, options.views, {}, true);
 				getViews(options, item[options.views],
@@ -134,8 +147,7 @@
 			setterCallback: function(property, item, value, oldValue, sibling) {
 				var element = item[elmsTxt] && item[elmsTxt].element,
 					parentElement = item.parentNode && item.parentNode[elmsTxt] ?
-						item.parentNode[elmsTxt].element : component.container,
-					pubsubs = pubsub[_this.name][name];
+						item.parentNode[elmsTxt].element : component.container;
 
 				if (property === 'removeChild') {
 					render(_inst.helper, element, property, element.parentElement);
@@ -143,7 +155,7 @@
 					// speed up sorting... TODO: check
 					render(_inst.helper, element, 'appendChild', parentElement);
 				} else if (this[property]) { // has method
-					if (item === sibling) {
+					if (item === sibling) { // replaceChild by itself
 						element = render(_inst.helper,
 							_inst.template.render(item, extraModel),
 							property, parentElement, sibling[elmsTxt].element);
@@ -151,10 +163,10 @@
 						item[elmsTxt].container = parameters.mountSelector &&
 							$(element, parameters.mountSelector);
 
-							item[options.events] = {};
+						item[options.events] = {};
 						_inst.controller && _inst.controller.getEventListeners(
-							this, item[elmsTxt].element ||
-							component.element, item[options.events], component);
+							item[elmsTxt].element || component.element,
+							item[options.events], component, this.options.idProperty);
 						item[options.views] = {};
 						getViews(options, item[options.views],
 							item[elmsTxt].element || component.element);
@@ -166,19 +178,13 @@
 				parameters.subscribe && parameters.subscribe
 					.call(this, property, item, value, oldValue);
 
-				pubsubs = pubsubs[property] = pubsubs[property] || [];
-				pubsubs.value = {
+				_this.publish(_this.name, name, property, {
 					property: property,
 					item: item,
 					value: value,
 					oldValue: oldValue
-				}
-				pubsubs.private = true;
-				pubsubs.length && publish(_this, pubsubs, pubsubs.value);
-			},
-			// moveCallback: function(item, type, sibling) {
-			// 	type !== 'appendChild' && _inst.dominator.appendImmediately();
-			// }
+				});
+			}
 		});
 
 		checkRestoreNesting(null, null, nestingData);
@@ -208,10 +214,8 @@
 		if (pubsub[inst]) {
 			comp = pubsub[inst][comp] = pubsub[inst][comp] || {};
 			comp[attr] = comp[attr] || [];
-			if (!comp[attr].private) {
-				comp[attr].value = data;
-				publish(this, comp[attr], data);
-			}
+			comp[attr].value = data;
+			publish(this, comp[attr], data);
 		}
 	};
 
@@ -242,6 +246,62 @@
 	};
 
 	Circular.Toolbox = Toolbox;
+
+
+	Controller.prototype = {
+		getEventListeners: function(element, events, component, idProperty) {
+			var eventAttribute = this.options.eventAttribute,
+				elements = element.querySelectorAll('[' + eventAttribute + ']'),
+				attribute = '',
+				eventItem = '',
+				eventType = '',
+				eventFunc = '',
+				eventParts = [];
+
+			elements = [element].concat([].slice.call(elements));
+
+			for (var n = elements.length; n--; ) { // reverse: stopPropagation
+				attribute = elements[n].getAttribute(eventAttribute);
+				if (!attribute) {
+					continue;
+				}
+				eventParts = attribute.split(/\s*;+\s*/);
+				for (var m = eventParts.length; m--; ) {
+					eventItem = eventParts[m].split(/\s*:+\s*/);
+					eventType = eventItem[0];
+					eventFunc = eventItem[1];
+
+					if (events[eventType] === undefined) { // write back to vom
+						events[eventType] = {};
+					}
+					if (events[eventType][eventFunc] === undefined) {
+						events[eventType][eventFunc] = [];
+					}
+					events[eventType][eventFunc].push(elements[n]);
+
+					if (!this.events[eventType]) { // register inside itself
+						this.events[eventType] = true;
+					}
+				}
+			}
+			if (!this.installed && this.events !== {}) {
+				this.installEventListeners(component, idProperty);
+			}
+		},
+		installEventListeners: function(component, idProperty) { // $$vom !!!!!
+			var that = this;
+
+			for (var key in this.events) {
+				Toolbox.addEvent(this.options.appElement, key, function(e) {
+					eventDistributor(e, idProperty, component, that);
+				}, /(?:focus|blur)/.test(key) ? true : false, this);
+			}
+			this.installed = true;
+		},
+		destroy: function() {
+			Toolbox.removeEvent(this); // TODO: more specific for controlled removal
+		}
+	};
 
 	return Circular;
 
@@ -352,6 +412,40 @@
 	function publish(_this, pubsubs, data) {
 		for (var n = 0, m = pubsubs.length; n < m; n++) {
 			pubsubs[n].call(this, data);
+		}
+	}
+
+	// -------- for Controller --------- //
+	// --------------------------------- //
+	function eventDistributor(e, idProperty, component, _this) {
+		// TODO: cache by e.target for next vars??
+		var element = Toolbox.closest(e.target,
+				'[' + idProperty + ']') || component.element,
+			id = element.getAttribute(idProperty),
+			item = component.getElementById(id) || component
+				.getElementsByProperty('elements.element', component.element)[0]; // TODO
+
+		if (!item) { // TODO
+			item = component.getElementsByProperty('elements.element', e.target)[0];
+		}
+
+		var eventElements = item && item.events[e.type],
+			stopPropagation = false,
+			eventElement = {};
+
+		for (var key in eventElements) { // TODO: check for optimisation
+			for (var n = eventElements[key].length; n--; ) {
+				eventElement = eventElements[key][n];
+				if (!stopPropagation && (eventElement === e.target ||
+							eventElement.contains(e.target)) &&
+						_this.options.eventListeners[key]) {
+					stopPropagation = _this.options.eventListeners[key]
+						.call(component, e, eventElement, item) === false;
+					if (stopPropagation) {
+						e.stopPropagation();
+					}
+				}
+			}
 		}
 	}
 }));
