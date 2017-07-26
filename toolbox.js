@@ -115,8 +115,81 @@
 			return asc ?
 				textA < textB ? 1 : textA > textB ? -1 : 0 :
 				textA < textB ? -1 : textA > textB ? 1 : 0;
-		}
+		},
 
+		ajax: function(url, prefs) {
+			var xhr = new XMLHttpRequest();
+			var method = (prefs.method || prefs.type || 'GET').toUpperCase();
+
+			if (!xhr) {
+				prefs.error && prefs.error(null,
+					'Giving up :( Cannot create an XMLHTTP instance');
+				return false;
+			}
+
+			if (!prefs) { // if no prefs defined then url is actually prefs
+				prefs = url;
+				url = prefs.url;
+			}
+			xhr.onreadystatechange = function() {
+				var data = getXHRData(this, prefs);
+
+				if (data !== undefined) {
+					return parseXHRData(data, prefs);
+				}
+			}
+			xhr.open(method, url);
+
+			if (prefs.dataType === 'xml') {
+				xhr.setRequestHeader('Content-Type', 'text/xml');
+			}
+			if (method !== 'GET' && prefs.csrf) {
+				xhr.setRequestHeader('X-CSRF-Token', getCSRFToken(prefs.csrf));
+			}
+			if (prefs.headers) { // add more headers
+				for (var header in prefs.headers) {
+					xhr.setRequestHeader(header, prefs.headers[header]);
+				}
+			}
+
+			xhr.send(prefs.data);
+		}
+	}
+
+	/* --------- AJAX ---------- */
+
+	function getCSRFToken(cookieKey) {
+		var start = document.cookie.split(cookieKey + '=')[1];
+
+		return start && start.split(';')[0];
+	}
+
+	function getXHRData(xhr, prefs) {
+		try {
+			if (xhr.readyState === XMLHttpRequest.DONE) {
+				if (xhr.status === 200) {
+					return xhr[prefs.dataType === 'xml' ?
+						'responseXML' : 'responseText'];
+				} else {
+					prefs.error && prefs.error(null,
+						'There was a problem with the xhr request.');
+				}
+			}
+		} catch(e) {
+			prefs.error && prefs.error(e, 'Caught Exception: ' + e.stack);
+		}
+	}
+
+	function parseXHRData(data, prefs) {
+		if (prefs.dataType === 'json') {
+			try {
+				data = JSON.parse(data);
+			} catch(e) {
+				prefs.error && prefs.error(e, 'Caught Exception: ' + e.stack);
+				return;
+			}
+		}
+		return prefs.success(data);
 	}
 
 	return Toolbox;

@@ -13,7 +13,7 @@
 		root.Circular = factory(root, root.Toolbox, root.Schnauzer, root.VOM);
 	}
 }(this, function(window, Toolbox, Schnauzer, VOM) {
-	'use strict'; // all: 36.13 kB → 16.49 kB → 5.92 kB
+	'use strict'; // all: 40.95 kB → 18.92 kB → 6.96 kB
 
 	var Circular = function(name, options) {
 			this.options = {
@@ -211,6 +211,7 @@
 		}
 	};
 
+	Circular.prototype.ajax = Toolbox.ajax;
 	Circular.Toolbox = Toolbox;
 
 	Circular.prototype.subscribe = function(inst, comp, attr, callback, trigger) {
