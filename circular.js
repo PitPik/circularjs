@@ -25,7 +25,8 @@
 				viewAttr: 'cr-view', // TODO...
 				elements: 'elements', // TODO: check usage
 				events: 'events',
-				views: 'views'
+				views: 'views',
+				hash: '#'
 			};
 
 			initCircular(this, name, options);
@@ -198,41 +199,6 @@
 		return component;
 	};
 
-	Circular.prototype.subscribe = function(inst, comp, attr, callback, trigger) {
-		inst = inst || this.name;
-		comp = pubsub[inst][comp] = pubsub[inst][comp] || {};
-		comp[attr] = comp[attr] || [];
-		callback && comp[attr].push(callback);
-		if (trigger && comp[attr].value !== undefined) {
-			callback.call(this, comp[attr].value);
-		}
-		return callback;
-	};
-
-	Circular.prototype.publish = function(inst, comp, attr, data) {
-		inst = inst || this.name;
-		if (pubsub[inst]) {
-			comp = pubsub[inst][comp] = pubsub[inst][comp] || {};
-			comp[attr] = comp[attr] || [];
-			comp[attr].value = data;
-			publish(this, comp[attr], data);
-		}
-	};
-
-	Circular.prototype.unsubscribe = function(inst, comp, attr, callback) {
-		var funcNo = -1;
-		var funcs = {};
-
-		inst = inst || this.name;
-		if (pubsub[inst] && pubsub[inst][comp] && pubsub[inst][comp][attr]) {
-			funcs = pubsub[inst][comp][attr];
-			funcNo = funcs.indexOf(callback);
-			if (funcNo !== -1) {
-				funcs.splice(funcNo, 1);
-			}
-		}
-	};
-
 	Circular.prototype.destroy = function() {
 		var _inst = instanceList[this.id];
 
@@ -247,6 +213,154 @@
 
 	Circular.Toolbox = Toolbox;
 
+	Circular.prototype.subscribe = function(inst, comp, attr, callback, trigger) {
+		inst = inst || this.name;
+		comp = pubsub[inst][comp] = pubsub[inst][comp] || {};
+		comp[attr] = comp[attr] || [];
+		if (callback) {
+			// check also for routers
+			comp[attr].push(callback.callback || callback);
+			if (callback.regexp && !comp[attr].regexp) {
+				comp[attr].regexp = callback.regexp;
+				comp[attr].names = callback.names;
+			}
+		}
+		if (trigger && comp[attr].value !== undefined) {
+			(callback.callback || callback).call(this, comp[attr].value);
+		}
+		return (callback.callback || callback);
+	};
+
+	Circular.prototype.publish = function(inst, comp, attr, data) {
+		inst = inst || this.name;
+		if (pubsub[inst]) {
+			comp = pubsub[inst][comp] = pubsub[inst][comp] || {};
+			comp[attr] = comp[attr] || [];
+			comp[attr].value = data;
+			publish(this, comp[attr], data);
+		}
+	};
+
+	Circular.prototype.unsubscribe = function(inst, comp, attr, callback) {
+		var funcNo = -1,
+			funcs = {};
+
+		inst = inst || this.name;
+		if (pubsub[inst] && pubsub[inst][comp] && pubsub[inst][comp][attr]) {
+			funcs = pubsub[inst][comp][attr];
+			funcNo = funcs.indexOf(callback.callback || callback);
+			if (funcNo !== -1) {
+				funcs.splice(funcNo, 1);
+			}
+		}
+		return (callback.callback || callback);
+	};
+
+	function publish(_this, pubsubs, data) {
+		for (var n = 0, m = pubsubs.length; n < m; n++) {
+			pubsubs[n].call(_this, data);
+		}
+	}
+
+	/* ---------------------------------------------------- */
+
+	Circular.prototype.addRoute = function(data, trigger) {
+		var path = typeof data.path === 'object' ?
+				data.path : routeToRegExp(data.path),
+			parts = extractRouteParameters(path, getPath(this.options.hash)),
+			routers = pubsub[this.name].router;
+
+		this.subscribe(null, 'router', data.path, {
+			callback: data.callback,
+			names: path.names,
+			regexp: path.regexp || path
+		}, trigger);
+
+		if (trigger && parts) {
+			data.callback.call(this, parts);
+		}
+		!routers && installRouter(pubsub[this.name].router, this);
+		return data.callback;
+	};
+
+	Circular.prototype.removedRoute = function(data) {
+		return this.unsubscribe(null, 'router', data.path, data.callback);
+	};
+
+	// Circular.prototype.toggleRoute = function(data, toggle) { // TODO
+	// 	var router = pubsub[this.name].router,
+	// 		callbacks = router[data.path],
+	// 		isOn = !toggle && !callbacks.paused;
+
+	// 	router[data.path] = isOn ? [] : callbacks.paused;
+	// 	callbacks.paused = isOn ? callbacks : null;
+	// 	console.log(pubsub[this.name].router);
+	// };
+
+	function installRouter(routes, _this) {
+		var event = window.onpopstate !== undefined ? 'popstate' : 'hashchange',
+			hash = _this.options.hash;
+
+		Toolbox.addEvent(window, event, function(e) {
+			var parts = {};
+
+			for (var route in routes) {
+				parts = extractRouteParameters(routes[route], getPath(hash));
+				parts && publish(_this, routes[route], parts);
+			}
+		}, _this);
+	}
+
+	function getPath(hash) {
+		return decodeURI(hash ? location.hash.substr(hash.length) :
+			location.pathname + location.search);
+	}
+
+	function routeToRegExp(route) {
+		var names = [];
+
+		route = route.replace(/[\-{}\[\]+?.,\\\^$|#\s]/g, '\\$&') // escape
+			.replace(/\((.*?)\)/g, '(?:$1)?') // optional
+			.replace(/(\(\?)?:\w+/g, function(match, optional) { // named
+				names.push(match.substr(1));
+				return optional ? match : '([^/?]+)';
+			})
+			.replace(/\*\w+/g, '([^?]*?)'); // splat
+
+		return {
+			regexp: new RegExp('^' + route + '(?:\\?([\\s\\S]*))?$'),
+			names: names
+		}
+	}
+
+	function extractSearchString(query) {
+		query = query ? query.split('&') : [];
+		for (var n = 0, m = query.length, out = {}, parts = []; n < m; n++) {
+			parts = query[n].split('=');
+			out[parts[0]] = parts[1];
+		}
+		return out;
+	}
+
+	function extractRouteParameters(route, fragment) {
+		var params = route.regexp.exec(fragment),
+			names = {};
+
+		if (!params) return null;
+		
+		params = params.slice(1);
+
+		for (var n = 0, m = params.length; n < m; n++) {
+			params[n] = params[n] ? (n === m - 1 ? params[n] :
+				decodeURIComponent(params[n])) : null;
+			route.names[n] && (names[route.names[n]] = params[n]);
+		}
+		params.parameters = names;
+		params.queries = extractSearchString(params[m - 1]);
+		return params;
+	}
+
+	/* ---------------------------------------------------- */
 
 	Controller.prototype = {
 		getEventListeners: function(element, events, component, idProperty) {
@@ -406,12 +520,6 @@
 			container: container,
 			// appendMode: container && // ??????????? never used
 			// 	container.getAttribute([containerAttr]) || 'append' // replace
-		}
-	}
-
-	function publish(_this, pubsubs, data) {
-		for (var n = 0, m = pubsubs.length; n < m; n++) {
-			pubsubs[n].call(this, data);
 		}
 	}
 
