@@ -288,15 +288,14 @@
 		return this.unsubscribe(null, 'router', data.path, data.callback);
 	};
 
-	// Circular.prototype.toggleRoute = function(data, toggle) { // TODO
-	// 	var router = pubsub[this.name].router,
-	// 		callbacks = router[data.path],
-	// 		isOn = !toggle && !callbacks.paused;
+	Circular.prototype.toggleRoute = function(data, toggle) { // TODO
+		var router = pubsub[this.name].router,
+			callbacks = router[data.path],
+			isOn = !toggle && !callbacks.paused;
 
-	// 	router[data.path] = isOn ? [] : callbacks.paused;
-	// 	callbacks.paused = isOn ? callbacks : null;
-	// 	console.log(pubsub[this.name].router);
-	// };
+		router[data.path] = isOn ? [] : callbacks.paused;
+		router[data.path].paused = isOn ? callbacks || callbacks.paused : null;
+	};
 
 	function installRouter(routes, _this) {
 		var event = window.onpopstate !== undefined ? 'popstate' : 'hashchange',
