@@ -269,9 +269,9 @@
 		var path = typeof data.path === 'object' ?
 				data.path : routeToRegExp(data.path),
 			parts = extractRouteParameters(path, getPath(this.options.hash)),
-			routers = pubsub[this.name].router;
+			routers = pubsub[this.name].__router;
 
-		this.subscribe(null, 'router', data.path, {
+		this.subscribe(null, '__router', data.path, {
 			callback: data.callback,
 			names: path.names,
 			regexp: path.regexp || path
@@ -280,21 +280,20 @@
 		if (trigger && parts) {
 			data.callback.call(this, parts);
 		}
-		!routers && installRouter(pubsub[this.name].router, this);
-		return data.callback;
+		!routers && installRouter(pubsub[this.name].__router, this);
+		return data;
 	};
 
 	Circular.prototype.removedRoute = function(data) {
-		return this.unsubscribe(null, 'router', data.path, data.callback);
+		return this.unsubscribe(null, '__router', data.path, data.callback);
 	};
 
-	Circular.prototype.toggleRoute = function(data, toggle) { // TODO
-		var router = pubsub[this.name].router,
-			callbacks = router[data.path],
-			isOn = !toggle && !callbacks.paused;
+	Circular.prototype.toggleRoute = function(data, isOn) { // TODO
+		var router = pubsub[this.name].__router,
+			callbacks = router[data.path].paused || router[data.path];
 
-		router[data.path] = isOn ? [] : callbacks.paused;
-		router[data.path].paused = isOn ? callbacks || callbacks.paused : null;
+		router[data.path] = isOn ? callbacks : [];
+		router[data.path].paused = !isOn ? callbacks : null;
 	};
 
 	function installRouter(routes, _this) {
@@ -343,11 +342,11 @@
 	}
 
 	function extractRouteParameters(route, fragment) {
-		var params = route.regexp.exec(fragment),
+		var params = route.regexp && route.regexp.exec(fragment),
 			names = {};
 
 		if (!params) return null;
-		
+
 		params = params.slice(1);
 
 		for (var n = 0, m = params.length; n < m; n++) {
@@ -501,7 +500,7 @@
 				$(component, '[' + containerAttr + ']'),
 			template = $(document.body,
 				'[' + options.templateAttr + '="' + name + '"]'),
-			_templates = ($$(document.body, 
+			_templates = ($$(document.body,
 				'[' + options.templatesAttr + '="' + name + '"]') || []),
 			templates = {};
 
