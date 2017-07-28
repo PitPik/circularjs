@@ -8,9 +8,14 @@ CircularJS is a tiny MVC like framework. It's goal is to help building web-apps 
 * Schnauzer, a tiny and fast Mustache/Handlebars like template rendering engine (can be replaced),
 * an event-listener controller for all UI actions an any other events,
 * DOMinator, a controller that automatically syncs the VOM model with the real DOM.
+* Full featured PubSub functionality
+* Promise/A+ implementation
+* Ajax with Promise
+* Open router for all kinds of purposes
+* Toolbox for common functionality like add/remove/toggle/hasClass, event handling, localStorage, cookies, etc.
 
 CircularJS combines all those tools to easily abstract app modules and build high performance SPAs.
-CircularJS is very small (~5.89KB gZip) and fast and therefore the best joice for mobile apps.
+CircularJS is very small (~6.5KB gZip) and fast and therefore the best joice for mobile apps.
 
 The intention to build CircularJS was to create something small and fast that is easy to learn and feels closer to javaScript rather than having to learn a new language or complicated patterns. Using CircularJS is quite easy and straight forward. It helps you to avoid bad practice patterns usually caused by wrongly set up event listeners, continuous element search in the DOM (also without caching) and using global variables to store information for other components...
 
@@ -29,7 +34,7 @@ The intention to build CircularJS was to create something small and fast that is
 * Easy detroy for effective garbage collection
 * Fast and easy i18n possible
 * Write little code for powerful solutions
-* Great for mobile apps as it is tiny (5.89KB) and very fast (~8x to AngularJS)
+* Great for mobile apps as it is tiny (~6.5KB) and very fast (~8x to AngularJS)
 * Exchangeable rendering engine
 * Keep track of your logic as there is not much magic happening
 * pubsub for internal or custom events
