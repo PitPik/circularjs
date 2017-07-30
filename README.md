@@ -11,7 +11,6 @@ CircularJS is a tiny MVC like framework. It's goal is to help building web-apps 
 * Full featured PubSub functionality
 * Simple Promise implementation (with .all())
 * Ajax returning Promise with automatic CSRF-Token
-* localStorage with naming and state management
 * Open router for all kinds of purposes
 * Toolbox for common functionality like add/remove/toggle/hasClass, event handling, localStorage, cookies, etc.
 

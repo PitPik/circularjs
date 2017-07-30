@@ -33,7 +33,6 @@
 		},
 		initCircular = function(_this, name, options) {
 			var hasName = typeof name === 'string';
-			var _storageSave = Toolbox.storageHelper.save;
 
 			if (!hasName) {
 				options = name;
@@ -47,15 +46,6 @@
 			_this.id = 'cr_' + id++;
 			_this.name = hasName ? name : _this.id;
 			pubsub[_this.name] = {}; // prepare
-			// localStorage management
-			pubsub[_this.name].storageHelper = {};
-			Toolbox.storageHelper.save = function(data, key) {
-				_this.publish(_this.name, 'storageHelper', 'save', {
-					key: key,
-					data: data
-				});
-				_storageSave(data, key);
-			};
 		},
 		Controller = function(options) {
 			this.options = {
