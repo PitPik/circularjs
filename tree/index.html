@@ -47,7 +47,6 @@
 
 <script type="text/javascript" src="../toolbox.js"></script>
 <script type="text/javascript" src="../VOM.js"></script>
-<script type="text/javascript" src="../controller.js"></script>
 <script type="text/javascript" src="../schnauzer.js"></script>
 <script type="text/javascript" src="../circular.js"></script>
 <script type="text/javascript" src="model.js"></script>
@@ -75,6 +74,14 @@
 		});
 
 	window.tree = circular.component('tree', {
+		model: treeModel,
+		mountSelector: '[data-jstree="branch"]',
+		listeners: ['text', 'isOpen'], // isOpen not present...??
+		subscribe: function(property, item, value, oldValue) {
+			if (property === 'text') {
+				item.views.text.textContent = value;
+			}
+		},
 		eventListeners: {
 			listLink: dummy,
 			dropdown: dummySP,
@@ -82,14 +89,6 @@
 			publish: dummySP,
 			mousedown: dummySP,
 			resize: dummySP
-		},
-		model: treeModel,
-		mountSelector: '[data-jstree="branch"]',
-		enhanceMap: ['text', 'isOpen'], // isOpen not present...??
-		setterCallback: function(property, item, value, oldValue) {
-			if (property === 'text') {
-				item.views.text.textContent = value;
-			}
 		}
 	});
 
