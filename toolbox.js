@@ -118,41 +118,113 @@
 		},
 
 		ajax: function(url, prefs) {
-			var xhr = new XMLHttpRequest();
-			var method = (prefs.method || prefs.type || 'GET').toUpperCase();
+			return new Toolbox.Promise(function(resolve, reject) {
+				var xhr = new XMLHttpRequest();
+				var method = (prefs.method || prefs.type || 'GET').toUpperCase();
 
-			if (!xhr) {
-				prefs.error && prefs.error(null,
-					'Giving up :( Cannot create an XMLHTTP instance');
-				return false;
-			}
-
-			if (!prefs) { // if no prefs defined then url is actually prefs
-				prefs = url;
-				url = prefs.url;
-			}
-			xhr.onreadystatechange = function() {
-				var data = getXHRData(this, prefs);
-
-				if (data !== undefined) {
-					return parseXHRData(data, prefs);
+				if (!xhr) {
+					reject('Giving up :( Cannot create an XMLHTTP instance');
 				}
-			}
-			xhr.open(method, url);
 
-			if (prefs.dataType === 'xml') {
-				xhr.setRequestHeader('Content-Type', 'text/xml');
-			}
-			if (method !== 'GET' && prefs.csrf) {
-				xhr.setRequestHeader('X-CSRF-Token', getCSRFToken(prefs.csrf));
-			}
-			if (prefs.headers) { // add more headers
-				for (var header in prefs.headers) {
-					xhr.setRequestHeader(header, prefs.headers[header]);
+				if (!prefs) { // if no prefs defined then url is actually prefs
+					prefs = url;
+					url = prefs.url;
 				}
+				xhr.onreadystatechange = function() {
+					var data = getXHRData(this, prefs.dataType, reject);
+
+					if (data !== undefined) {
+						if (prefs.dataType === 'json') {
+							try {
+								data = JSON.parse(data);
+							} catch(e) {
+								reject('Caught Exception: ' + e.stack);
+								return;
+							}
+						}
+						resolve(data);
+					}
+				}
+				xhr.open(method, url);
+
+				if (prefs.dataType === 'xml') {
+					xhr.setRequestHeader('Content-Type', 'text/xml');
+				}
+				if (method !== 'GET' && prefs.csrf) {
+					xhr.setRequestHeader('X-CSRF-Token', getCSRFToken(prefs.csrf));
+				}
+				if (prefs.headers) { // add more headers
+					for (var header in prefs.headers) {
+						xhr.setRequestHeader(header, prefs.headers[header]);
+					}
+				}
+
+				xhr.send(prefs.data);
+			});
+		},
+		Promise: function(fn) {
+			var PENDING = undefined;
+			var RESOLVED = true;
+			var REJECTED = false;
+			var state = PENDING;
+			var value;
+			var deferred = null;
+
+			function resolve(newValue) {
+				if(newValue && typeof newValue.then === 'function') {
+					newValue.then(resolve, reject);
+					return;
+				}
+				state = RESOLVED;
+				value = newValue;
+				deferred && handle(deferred);
 			}
 
-			xhr.send(prefs.data);
+			function reject(reason) {
+				state = REJECTED;
+				value = reason;
+				deferred && handle(deferred);
+			}
+
+			function handle(handler) {
+				if(state === PENDING) {
+					deferred = handler;
+					return;
+				}
+
+				setTimeout(function() {
+					var out;
+					var handlerCallback = state === RESOLVED ?
+							handler.onResolved : handler.onRejected;
+
+					if(!handlerCallback) {
+						handler[state === RESOLVED ? 'resolve' : 'reject'](value);
+						return;
+					}
+
+					try {
+						out = handlerCallback(value);
+					} catch(e) {
+						handler.reject(e);
+						return;
+					}
+
+					handler.resolve(out);
+				}, 0);
+			}
+
+			this.then = function(onResolved, onRejected) {
+				return new Toolbox.Promise(function(resolve, reject) {
+					handle({
+						onResolved: onResolved,
+						onRejected: onRejected,
+						resolve: resolve,
+						reject: reject
+					});
+				});
+			};
+
+			fn(resolve, reject);
 		}
 	}
 
@@ -164,32 +236,19 @@
 		return start && start.split(';')[0];
 	}
 
-	function getXHRData(xhr, prefs) {
+	function getXHRData(xhr, dataType, reject) {
 		try {
 			if (xhr.readyState === XMLHttpRequest.DONE) {
 				if (xhr.status === 200) {
-					return xhr[prefs.dataType === 'xml' ?
+					return xhr[dataType === 'xml' ?
 						'responseXML' : 'responseText'];
 				} else {
-					prefs.error && prefs.error(null,
-						'There was a problem with the xhr request.');
+					reject('There was a problem with the xhr request.');
 				}
 			}
 		} catch(e) {
-			prefs.error && prefs.error(e, 'Caught Exception: ' + e.stack);
+			reject('Caught Exception: ' + e.stack);
 		}
-	}
-
-	function parseXHRData(data, prefs) {
-		if (prefs.dataType === 'json') {
-			try {
-				data = JSON.parse(data);
-			} catch(e) {
-				prefs.error && prefs.error(e, 'Caught Exception: ' + e.stack);
-				return;
-			}
-		}
-		return prefs.success(data);
 	}
 
 	return Toolbox;

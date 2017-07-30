@@ -211,8 +211,7 @@
 		}
 	};
 
-	Circular.prototype.ajax = Toolbox.ajax;
-	Circular.Toolbox = Toolbox;
+	Circular.prototype.Toolbox = Toolbox;
 
 	Circular.prototype.subscribe = function(inst, comp, attr, callback, trigger) {
 		inst = inst || this.name;
