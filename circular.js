@@ -13,7 +13,7 @@
 		root.Circular = factory(root, root.Toolbox, root.Schnauzer, root.VOM);
 	}
 }(this, function(window, Toolbox, Schnauzer, VOM) {
-	'use strict'; // all: 40.95 kB → 18.92 kB → 6.96 kB
+	'use strict'; // all: 42.63 kB → 19.75 kB → 7.26 kB
 
 	var Circular = function(name, options) {
 			this.options = {
@@ -99,7 +99,8 @@
 		_inst.controller = parameters.eventListeners && new Controller({
 			appElement: data.element,
 			eventAttribute: options.eventAttribute,
-			eventListeners: parameters.eventListeners
+			eventListeners: parameters.eventListeners,
+			instanceID: _this.id
 		});
 		_inst.template = data.template ? new (options.Template || Schnauzer)(
 			parameters.template || data.template, {
@@ -199,14 +200,15 @@
 		return component;
 	};
 
-	Circular.prototype.destroy = function() {
-		var _inst = instanceList[this.id];
+	Circular.prototype.destroy = function(name) {
+		var _instList = instanceList[this.id];
+		var _instance = {};
 
-		for (var component in _inst) {
-			for (var instance in _inst[component]) {
-				_inst[component][instance] &&
-				_inst[component][instance].destroy &&
-				_inst[component][instance].destroy();
+		for (var component in _instList) {
+			if (name && name !== component) continue;
+			for (var instance in _instList[component]) {
+				_instance = _instList[component][instance];
+				_instance && _instance.destroy && _instance.destroy(component);
 			}
 		}
 	};
@@ -306,7 +308,7 @@
 				parts = extractRouteParameters(routes[route], getPath(hash));
 				parts && publish(_this, routes[route], parts);
 			}
-		}, _this);
+		}, _this.id);
 	}
 
 	function getPath(hash) {
@@ -406,12 +408,13 @@
 			for (var key in this.events) {
 				Toolbox.addEvent(this.options.appElement, key, function(e) {
 					eventDistributor(e, idProperty, component, that);
-				}, /(?:focus|blur)/.test(key) ? true : false, this);
+				}, /(?:focus|blur)/.test(key) ? true : false,
+					this.options.instanceID + '_' + component.name);
 			}
 			this.installed = true;
 		},
-		destroy: function() {
-			Toolbox.removeEvent(this); // TODO: more specific for controlled removal
+		destroy: function(component) {
+			Toolbox.removeEvent(this.options.instanceID + '_' + component.name);
 		}
 	};
 
