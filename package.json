@@ -1,0 +1,42 @@
+{
+  "name": "circularjs",
+  "version": "0.1.0",
+  "description": "Tiny and fast SPA creation tool (MVC like framework with templating engine, router, pubsub, etc.)",
+  "main": "circular.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "uglify": "uglifyjs toolbox.js schnauzer.js VOM.js circular.js -o circular.min.js --source-map -c -m"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PitPik/circularjs.git"
+  },
+  "keywords": [
+    "MVC",
+    "MVVM",
+    "MV*",
+    "PubSub",
+    "SPA",
+    "single",
+    "page",
+    "application",
+    "view",
+    "javascript",
+    "framework",
+    "tree",
+    "menu",
+    "categories",
+    "object",
+    "model",
+    "controller"
+  ],
+  "author": "Peter Dematté",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/PitPik/circularjs/issues"
+  },
+  "homepage": "https://github.com/PitPik/circularjs#readme",
+  "devDependencies": {
+    "uglify-js": "^3.0.26"
+  }
+}

@@ -163,9 +163,6 @@
 			});
 		},
 		Promise: function(fn) {
-			var PENDING = undefined;
-			var RESOLVED = true;
-			var REJECTED = false;
 			var state = PENDING;
 			var value;
 			var deferred = null;
@@ -250,6 +247,28 @@
 			reject('Caught Exception: ' + e.stack);
 		}
 	}
+
+	/* ---------------- Promise --------------- */
+	var PENDING = undefined;
+	var RESOLVED = true;
+	var REJECTED = false;
+
+	Toolbox.Promise.all = function(promises) {
+		var results = [];
+		var merged = promises.reduce(function(accumulator, promise) {
+				return accumulator.then(function() {
+					return promise;
+				}).then(function(result) {
+					return results.push(result);
+				})
+			}, new Toolbox.Promise(function(resolve, reject) {
+				resolve(null);
+			}));
+
+		return merged.then(function() {
+			return results;
+		});
+	};
 
 	return Toolbox;
 }));
