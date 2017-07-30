@@ -6,11 +6,10 @@
 		<link rel="stylesheet" href="index.css">
 		<link rel="stylesheet" href="todo.css">
 
-		<!-- <script type="text/javascript" src="../VOM.js"></script>
+		<script type="text/javascript" src="../VOM.js"></script>
 		<script type="text/javascript" src="../schnauzer.js"></script>
 		<script type="text/javascript" src="../toolbox.js"></script>
-		<script type="text/javascript" src="../controller.js"></script> -->
-		<script type="text/javascript" src="../circular.min.js"></script>
+		<script type="text/javascript" src="../circular.js"></script>
 
 		<script type="text/javascript" src="app.js"></script>
 	</head>
@@ -41,15 +40,9 @@
 					</script>
 				</span>
 				<ul class="filters">
-					<li>
-						<a href="#/" cr-view="all" cr-event="click: filter">All</a>
-					</li>
-					<li>
-						<a href="#/active" cr-view="active" cr-event="click: filter">Active</a>
-					</li>
-					<li>
-						<a href="#/completed" cr-view="completed" cr-event="click: filter">Completed</a>
-					</li>
+					<li><a href="#/" cr-view="all">All</a></li>
+					<li><a href="#/active" cr-view="active">Active</a></li>
+					<li><a href="#/completed" cr-view="completed">Completed</a></li>
 				</ul>
 				<button class="clear-completed" cr-event="click: deleteDone" cr-view="clear">Clear completed</button>
 			</footer>

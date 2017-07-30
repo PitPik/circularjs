@@ -14,8 +14,8 @@ window.onload = function() {
 
 		list = todo.component('list', {
 			model: Toolbox.storageHelper.fetch(STORAGE_KEY),
-			enhanceMap: ['text', 'done'],
-			setterCallback: function(property, item, value, oldValue, type) {
+			listeners: ['text', 'done'],
+			subscribe: function(property, item, value, oldValue, type) {
 				listCallbacks[property] ?
 					listCallbacks[property](item, item.views, value) :
 					listCallbacks.nodeChange(item, item.views, value);
@@ -68,7 +68,7 @@ window.onload = function() {
 		},
 
 		ui = todo.component('app', {
-			model: [{filter: getFilter(location.hash)}],
+			model: [{filter: 'all'}],
 			eventListeners: {
 				addItem: function (e, element, item) {
 					var text = element.value.replace(/(?:^\s+|\s+$)/, '');
@@ -102,19 +102,22 @@ window.onload = function() {
 					for (var n = items.length; n--; ) {
 						items[n].done = checked;
 					}
-				},
-				filter: function (e, element, item) {
-					var value = getFilter(e.target.hash);
-
-					renderFilters(item.views, value, item.filter);
-					item.filter = value;
 				}
 			}
-		});
+		}),
+		filterRoute = todo.addRoute({
+			path: '/(:filter)',
+			callback: function(data) {
+				var value = data.parameters.filter || 'all';
+				var item = ui.model[0];
+
+				renderFilters(item.views, value, item.filter);
+				item.filter = value;
+			}
+		}, true);
 
 	// --- INIT app
 	listCallbacks.nodeChange(); // triggers rendering...
-	renderFilters(ui.model[0].views, ui.model[0].filter);
 
 	// --- VIEW functions: don't know about models etc...
 	// following functions only use parameters, no other circular stuff
@@ -161,11 +164,6 @@ window.onload = function() {
 		views.clear.style.display = toggle ? '' : 'none';
 		views.footer.style.display = countAll ? '' : 'none';
 		views.main.style.display = countAll ? '' : 'none';
-	}
-
-	// --- helper functions
-	function getFilter(text) {
-		return (text.split('#/')[1] || '').split('/')[0] || 'all';
 	}
 
 	function lazy(fn, obj) {
