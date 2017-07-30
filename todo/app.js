@@ -106,7 +106,7 @@ window.onload = function() {
 			}
 		}),
 		filterRoute = todo.addRoute({
-			path: '/(:filter)',
+			path: '(/)(:filter)',
 			callback: function(data) {
 				var value = data.parameters.filter || 'all';
 				var item = ui.model[0];
