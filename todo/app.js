@@ -19,7 +19,7 @@ window.onload = function() {
 				listCallbacks[property] ?
 					listCallbacks[property](item, item.views, value) :
 					listCallbacks.nodeChange(item, item.views, value);
-				Toolbox.storageHelper.save(this.model, STORAGE_KEY); // persist
+				Toolbox.storageHelper.saveLazy(this.model, STORAGE_KEY); // persist
 			},
 			eventListeners: {
 				toggle: function (e, element, item) {

@@ -97,10 +97,13 @@
 			fetch: function (key) {
 				return JSON.parse(localStorage.getItem(key) || '[]');
 			},
-			save: function (todos, key) {
+			saveLazy: function (data, key) {
 				Toolbox.lazy(function() {
-					localStorage.setItem(key, JSON.stringify(todos));
+					Toolbox.storageHelper.save(data, key);
 				}, Toolbox.storageHelper);
+			},
+			save: function (data, key) {
+				localStorage.setItem(key, JSON.stringify(data));
 			}
 		},
 		lazy: function(fn, obj) {
