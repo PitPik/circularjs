@@ -211,7 +211,7 @@
 		}
 	};
 
-	Circular.prototype.Toolbox = Toolbox;
+	Circular.Toolbox = Toolbox;
 
 	Circular.prototype.subscribe = function(inst, comp, attr, callback, trigger) {
 		inst = inst || this.name;
