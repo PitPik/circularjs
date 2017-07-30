@@ -86,7 +86,8 @@
 				getChildNodes(parent, this.options.childNodes).length, 'appendChild', parent);
 		},
 		prependChild: function(item, parent) {
-			return moveItem(this, item, parent || this.model.root, 0, 'prependChild', parent);
+			parent = parent || this.model.root;
+			return moveItem(this, item, parent, 0, 'prependChild', parent);
 		},
 		insertBefore: function(item, sibling) {
 			return moveItem(this, item, sibling.parentNode, sibling.index, 'insertBefore', sibling);
