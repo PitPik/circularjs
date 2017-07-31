@@ -1,13 +1,13 @@
 # CircularJS
 
-CircularJS is a tiny MVC like framework. It's goal is to help building web-apps in a model-oriented easy way by building fast and convenient 2-way data binding.
+CircularJS is a tiny MV* like framework. It's goal is to help building web-apps in a model-oriented easy way by building fast and convenient 2-way data binding with the help of powerfull tools.
 
 ## CircularJS provides you with:
 
 * VOM, a Virtual Object Model controller that automatically reacts on changes of properties,
 * Schnauzer, a tiny and fast Mustache/Handlebars like template rendering engine (can be replaced),
 * an event-listener controller for all UI actions an any other events,
-* DOMinator, a controller that automatically syncs the VOM model with the real DOM.
+* DOMinator, a controller that automatically connects and syncs the VOM model with the real DOM.
 * Full featured PubSub functionality
 * Simple Promise implementation (with .all())
 * Ajax returning Promise with automatic CSRF-Token
@@ -21,29 +21,29 @@ The intention to build CircularJS was to create something small and fast that is
 
 ## Benefits
 
-* No dependencies to other frameworks
-* Other frameworks may co-exist (Angular, jQuery, ...)
+* No dependencies to other frameworks.
+* Other frameworks may co-exist (AngularJS, jQuery, ...).
 * Uses VanillaJS; Usage of VanillaJS welcome.
-* Unopinionated
-* No querySelectors in $('..') or querySelectorAll etc. needed in code
-* No class names in JS code needed (decouples css and JS)
+* Unopinionated.
+* No querySelectors like $('..') or querySelectorAll etc. needed in code.
+* No class names in JS code needed to fins elements (decouples css and JS).
 * Constant sync between model, view and server.
-* Seperation of model and view code
-* Automated event handling (in a memory friendly way)
-* Automated view rendering when model changes
-* Easy detroy for effective garbage collection
-* Fast and easy i18n possible
-* Write little code for powerful solutions
-* Great for mobile apps as it is tiny (~7.3KB) and very fast (~8x to AngularJS)
-* Exchangeable rendering engine
-* Keep track of your logic as there is not much magic happening
-* pubsub for internal or custom events
+* Seperation of model, view and service code.
+* Automated event handling (in a memory friendly way).
+* Automated view rendering when model changes (even with router).
+* Easy detroy for effective garbage collection.
+* Fast and easy i18n possible.
+* Write little code for powerful solutions.
+* Great for mobile apps as it is tiny (~7.3KB) and very fast (~8x to AngularJS).
+* Exchangeable rendering engine.
+* Keep track of your logic as there is not much magic happening (no digest etc.).
+* pubsub for internal or custom events (also set up pubsub for localStorage etc.).
 
-## Coming up soon
+## Coming up soon (...)
 
-* auto-model-creation from server-side-rendered view
 * cr-event change: automatic model update on input change
 * cr-class: automatic class name update due to model change
+* auto-model-creation from server-side-rendered view
 
 ## APIs
 
