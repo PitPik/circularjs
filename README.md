@@ -39,6 +39,16 @@ The intention to build CircularJS was to create something small and fast that is
 * Keep track of your logic as there is not much magic happening (no digest etc.).
 * pubsub for internal or custom events (also set up pubsub for localStorage etc.).
 
+## The usual flow how to built components with circularJS:
+
+ * You create a model that acts like a state controller (key task)
+ * You build a template that renders the initial view according to that model
+ * You add UI event listeners to the template that get picked up automatically.
+   Those event listeners then manipulate the model (the state, not the view)
+ * The change of the state triggers a callback that again triggers DOM manipulation according to what state changed (seperation of model and view rendering).
+ * To help you find DOM elements later on you can also define them in the template so they get cached in the model for convenient use.
+ * Use PubSub, Router or Promisses to change the state (that triggers rendering again...)
+
 ## Coming up soon (...)
 
 * cr-event change: automatic model update on input change
