@@ -145,8 +145,8 @@
 			enrichModelCallback: this.options.enrichModelCallback ||
 				parameters.enrichModelCallback || function() {},
 			 // TODO: get options via...
-			enhanceMap: this.options.listeners || parameters.listeners || [],
-			setterCallback: function(property, item, value, oldValue, sibling) {
+			listeners: this.options.listeners || parameters.listeners || [],
+			subscribe: function(property, item, value, oldValue, sibling) {
 				var element = item[elmsTxt] && item[elmsTxt].element,
 					parentElement = item.parentNode && item.parentNode[elmsTxt] ?
 						item.parentNode[elmsTxt].element : component.container;
@@ -200,6 +200,18 @@
 		return component;
 	};
 
+	// Circular.prototype.destroyComponent = function(name) {
+	// 	var component = typeof name === 'string' ? this.components[name] : name;
+	// 	var _inst = instanceList[this.id][component.name];
+
+	// 	if (component && _inst) {
+	// 		_inst.controller && _inst.controller.destroy(component);
+	// 		_inst.vom.destroy();
+	// 		_inst.template = null;
+	// 		component.container && (component.container.innerHTML = '');
+	// 	}
+	// }
+
 	Circular.prototype.destroy = function(name) {
 		var _instList = instanceList[this.id];
 		var _instance = {};
@@ -211,6 +223,14 @@
 				_instance && _instance.destroy && _instance.destroy(component);
 			}
 		}
+	};
+
+	Circular.prototype.model = function(model, options) {
+		return new VOM(model, options);
+	};
+
+	Circular.prototype.template = function(template, options) {
+		return new Schnauzer(template, options);
 	};
 
 	Circular.Toolbox = Toolbox;

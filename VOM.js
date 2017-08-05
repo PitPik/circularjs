@@ -15,11 +15,11 @@
 			this.options = {
 				parentCheck: false,
 				idProperty: 'id',
-				setterCallback: function() {},
+				subscribe: function() {},
 				enrichModelCallback: function() {},
 				preRecursionCallback: function() {},
 				moveCallback: function() {},
-				enhanceMap: [],
+				listeners: [],
 				childNodes: 'childNodes',
 				throwErrors: false
 			};
@@ -37,9 +37,9 @@
 			for (var option in options) { // extend options
 				_this.options[option] = options[option];
 			}
-			while (item = _this.options.enhanceMap.shift()) {
+			while (item = _this.options.listeners.shift()) {
 				item = item.split('.');
-				_this.options.enhanceMap[item[0]] = item;
+				_this.options.listeners[item[0]] = item;
 			}
 			rootItem[_this.options.childNodes] = _this.model;
 			reinforceProperty(_this.model, 'root', rootItem);
@@ -105,13 +105,13 @@
 		},
 		removeChild: function(item) {
 			removeChild(this, item);
-			this.options.setterCallback.call(this, 'removeChild', item); // order of arguments
+			this.options.subscribe.call(this, 'removeChild', item); // order of arguments
 			return item;
 		},
 		sortChildren: function(callback, model, children) {
 			model = (model || this.model).sort(callback);
 			for (var n = 0, l = model.length; n < l; n++) {
-				this.options.setterCallback.call(this, 'sortChildren', model[n]);
+				this.options.subscribe.call(this, 'sortChildren', model[n]);
 				if (children && model[n][this.options.childNodes]) {
 					this.sort(callback, model[n][this.options.childNodes], children);
 				}
@@ -230,7 +230,7 @@
 
 	function enhanceModel(_this, model, ownProperty) {
 		var internalProperty = false,
-			enhanceMap = _this.options.enhanceMap,
+			listeners = _this.options.listeners,
 
 			lastMapIdx = 0,
 			wildcardPos = 0,
@@ -243,12 +243,12 @@
 			pathArray = [];
 
 		for (var item in model) {
-			lastMapIdx = enhanceMap[item] && enhanceMap[item].length - 1;
+			lastMapIdx = listeners[item] && listeners[item].length - 1;
 			if (lastMapIdx) { // loop inside deep
-				wildcardPos = enhanceMap[item].indexOf('*');
-				_model = crawlObject(model, enhanceMap[item],
+				wildcardPos = listeners[item].indexOf('*');
+				_model = crawlObject(model, listeners[item],
 					wildcardPos > -1 ? lastMapIdx - wildcardPos + 1 : 1);
-				longItem = enhanceMap[item].join('.');
+				longItem = listeners[item].join('.');
 				path = longItem.split('*')[1] || '';
 				pathArray = path.split('.').splice(1);
 
@@ -263,7 +263,7 @@
 			internalProperty = item === 'parentNode' || item === strIndex;
 			if (item === _this.options.idProperty) {
 				reinforceProperty(model, item, model[item], ownProperty);
-			} else if (enhanceMap[item] || enhanceMap['*'] || internalProperty) {
+			} else if (listeners[item] || listeners['*'] || internalProperty) {
 				_this.addProperty(item, model, null, internalProperty);
 			}
 		}
@@ -300,7 +300,7 @@
 	function validate(property, object, value, oldValue, cache, _this, strIndex) {
 
 		if (property === _this.options.idProperty || property === strIndex ||
-			_this.options.setterCallback.call(_this, _this.type ||
+			_this.options.subscribe.call(_this, _this.type ||
 					property, (object[1] || object), value, oldValue, _this.sibling)) {
 				cache[property] = oldValue; // return value if not allowed
 				error('ERROR: Cannot set property \'' + property + '\' to \'' +
