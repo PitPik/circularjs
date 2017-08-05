@@ -122,6 +122,11 @@
 
 		ajax: function(url, prefs) {
 			return new Toolbox.Promise(function(resolve, reject) {
+				if (prefs.cache && ajaxCache[url] !== undefined) {
+					return resolver(resolve, url, prefs.cache);
+				}
+				ajaxCache[url] = ajaxCache[url] || '';
+
 				var xhr = new XMLHttpRequest();
 				var method = (prefs.method || prefs.type || 'GET').toUpperCase();
 
@@ -144,6 +149,9 @@
 								reject('Caught Exception: ' + e.stack);
 								return;
 							}
+						}
+						if (prefs.cache) {
+							ajaxCache[url] = data;
 						}
 						resolve(data);
 					}
@@ -229,6 +237,21 @@
 	}
 
 	/* --------- AJAX ---------- */
+
+	var ajaxCache = {};
+	var ajaxCacheTimer = {};
+
+	function resolver(resolve, url, time) {
+		if (ajaxCache[url]) {
+			clearInterval(ajaxCacheTimer[url]);
+			delete ajaxCacheTimer[url];
+			return resolve(ajaxCache[url]);
+		} else if (!ajaxCacheTimer[url]) { // wait until finished loading
+			ajaxCacheTimer[url] = setInterval(function() {
+				resolver(resolve, url);
+			}, time);
+		}
+	}
 
 	function getCSRFToken(cookieKey) {
 		var start = document.cookie.split(cookieKey + '=')[1];
