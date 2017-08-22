@@ -80,7 +80,8 @@
 			extraModel = parameters.extraModel || options.extraModel,
 			componentAttr = options.componentAttr,
 			componentSelector = '[' + componentAttr + '="' + name + '"]',
-			componentElement = $(document.body, componentSelector),
+			componentElement = parameters.componentElement ||
+				$(document.body, componentSelector),
 			nestingData = checkRestoreNesting(componentElement, componentAttr),
 			data = getDomData(options, parameters, componentElement, name),
 			component = this.components[name] = {
@@ -516,13 +517,14 @@
 
 	// ----- get component data
 	function getDomData(options, parameters, component, name) {
-		var containerAttr = options.containerAttr,
+		var searchContainer = parameters.componentElement || document.body,
+			containerAttr = options.containerAttr,
 			container = component.hasAttribute(containerAttr) ? component :
 				$(component, '[' + containerAttr + '="' + name + '"]') ||
 				$(component, '[' + containerAttr + ']'),
-			template = $(document.body,
+			template = $(searchContainer,
 				'[' + options.templateAttr + '="' + name + '"]'),
-			_templates = ($$(document.body,
+			_templates = ($$(searchContainer,
 				'[' + options.templatesAttr + '="' + name + '"]') || []),
 			templates = {};
 

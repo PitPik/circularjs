@@ -32,14 +32,16 @@
 		},
 
 		addClass: function(element, className) {
-			element.classList.add(className);
+			element && element.classList.add(className);
 		},
 
 		removeClass: function(element, className) {
-			element.classList.remove(className);
+			element && element.classList.remove(className);
 		},
 
 		toggleClass: function(element, className, condition) {
+			if (!element) return;
+
 			var hasClass = element.classList.contains(className);
 
 			if (hasClass && !condition) {
@@ -50,7 +52,7 @@
 		},
 
 		hasClass: function(element, className) {
-			return element.classList.contains(className);
+			return element && element.classList.contains(className);
 		},
 
 		addEvents: function (elements, type, func, cap, _this) {
@@ -123,7 +125,7 @@
 		ajax: function(url, prefs) {
 			return new Toolbox.Promise(function(resolve, reject) {
 				if (prefs.cache && ajaxCache[url] !== undefined) {
-					return resolver(resolve, url, prefs.cache);
+					return resolver(resolve, reject, url);
 				}
 				ajaxCache[url] = ajaxCache[url] || '';
 
@@ -241,15 +243,16 @@
 	var ajaxCache = {};
 	var ajaxCacheTimer = {};
 
-	function resolver(resolve, url, time) {
+	function resolver(resolve, reject, url) {
 		if (ajaxCache[url]) {
 			clearInterval(ajaxCacheTimer[url]);
 			delete ajaxCacheTimer[url];
 			return resolve(ajaxCache[url]);
 		} else if (!ajaxCacheTimer[url]) { // wait until finished loading
+			// should we reject it after a while?
 			ajaxCacheTimer[url] = setInterval(function() {
-				resolver(resolve, url);
-			}, time);
+				resolver(resolve, reject, url);
+			}, 16);
 		}
 	}
 
