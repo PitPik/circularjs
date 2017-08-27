@@ -238,6 +238,15 @@
 		}
 	}
 
+	window.Event = window.Event || function Event(event, params) {
+		var evt = document.createEvent('CustomEvent');
+
+		params = params || {};
+		evt.initCustomEvent(event,
+			params.bubbles || false, params.cancelable || false, params.detail);
+		return evt;
+	}
+
 	/* --------- AJAX ---------- */
 
 	var ajaxCache = {};

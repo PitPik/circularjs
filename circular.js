@@ -103,12 +103,15 @@
 			eventListeners: parameters.eventListeners,
 			instanceID: _this.id
 		});
-		_inst.template = data.template ? new (options.Template || Schnauzer)(
+		_inst.template = parameters.template && parameters.template.version ?
+			parameters.template :
+			data.template ? new (options.Template || Schnauzer)(
 			parameters.template || data.template, {
 				doEscape: false,
 				helpers: parameters.helpers || options.helpers || {} // TODO
 			}) : null;
 		_inst.vom = new VOM(component.model, {
+			idProperty: _this.options.idProperty || 'id',
 			preRecursionCallback: function(item, type, siblingOrParent) {
 				var html = _inst.template && _inst.template.partials.self &&
 						_inst.template.render(item, extraModel),
@@ -393,7 +396,7 @@
 				eventFunc = '',
 				eventParts = [];
 
-			elements = [element].concat([].slice.call(elements));
+			elements = [element].concat([].slice.call(elements), component.element);
 
 			for (var n = elements.length; n--; ) { // reverse: stopPropagation
 				attribute = elements[n].getAttribute(eventAttribute);
@@ -419,7 +422,7 @@
 					}
 				}
 			}
-			if (!this.installed && this.events !== {}) {
+			if (!this.installed) { // && this.events !== {}
 				this.installEventListeners(component, idProperty);
 			}
 		},
