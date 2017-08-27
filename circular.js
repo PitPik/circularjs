@@ -199,6 +199,12 @@
 		proto = transferMethods(VOM, _inst.vom, component, this, {
 			render: proto.render
 		});
+		proto.uncloak = function(item) {
+			var item = item && item.element || component.element;
+
+			Toolbox.removeClass(item, 'cr-cloak');
+			item.removeAttribute('cr-cloak');
+		}
 		component.__proto__ = proto;
 
 		return component;
