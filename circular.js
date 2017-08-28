@@ -81,7 +81,7 @@
 			componentAttr = options.componentAttr,
 			componentSelector = '[' + componentAttr + '="' + name + '"]',
 			componentElement = parameters.componentElement ||
-				$(document.body, componentSelector),
+				$(parameters.componentWrapper || document.body, componentSelector),
 			nestingData = checkRestoreNesting(componentElement, componentAttr),
 			data = getDomData(options, parameters, componentElement, name),
 			component = this.components[name] = {
@@ -526,7 +526,7 @@
 
 	// ----- get component data
 	function getDomData(options, parameters, component, name) {
-		var searchContainer = parameters.componentElement || document.body,
+		var searchContainer = component || document.body,
 			containerAttr = options.containerAttr,
 			container = component.hasAttribute(containerAttr) ? component :
 				$(component, '[' + containerAttr + '="' + name + '"]') ||
