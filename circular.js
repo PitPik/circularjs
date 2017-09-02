@@ -83,7 +83,8 @@
 			componentElement = parameters.componentElement ||
 				$(parameters.componentWrapper || document.body, componentSelector),
 			nestingData = checkRestoreNesting(componentElement, componentAttr),
-			data = getDomData(options, parameters, componentElement, name),
+			altName = componentElement && componentElement.getAttribute('name'),
+			data = getDomData(options, parameters, componentElement, altName || name),
 			component = this.components[name] = {
 				name: name,
 				model: parameters.model || [],
@@ -400,9 +401,10 @@
 				eventItem = '',
 				eventType = '',
 				eventFunc = '',
-				eventParts = [];
+				eventParts = [],
+				extraElement = element !== component.element ? component.element : [];
 
-			elements = [element].concat([].slice.call(elements), component.element);
+			elements = [element].concat([].slice.call(elements), extraElement);
 
 			for (var n = elements.length; n--; ) { // reverse: stopPropagation
 				attribute = elements[n].getAttribute(eventAttribute);
@@ -566,7 +568,8 @@
 				.getElementsByProperty('elements.element', component.element)[0]; // TODO
 
 		if (!item) { // TODO
-			item = component.getElementsByProperty('elements.element', e.target)[0];
+			item = component.getElementsByProperty('elements.element', e.target)[0]
+			|| component.model[0]; // TODO!!!!!!!
 		}
 
 		var eventElements = item && item.events[e.type],
