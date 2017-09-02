@@ -111,7 +111,7 @@
 				helpers: parameters.helpers || options.helpers || {} // TODO
 			}) : null;
 		_inst.vom = new VOM(component.model, {
-			idProperty: _this.options.idProperty || 'id',
+			idProperty: _this.options.idProperty || 'cr-id',
 			preRecursionCallback: function(item, type, siblingOrParent) {
 				var html = _inst.template && _inst.template.partials.self &&
 						_inst.template.render(item, extraModel),
@@ -462,7 +462,7 @@
 			element = html;
 		}
 
-		_animate(function() {
+		// _animate(function() {
 			if (isPrepend || operator === 'insertAfter') {
 				sibling = sibling && sibling.nextSibling ||
 					isPrepend && parentNode.children[0];
@@ -470,7 +470,7 @@
 			}
 
 			(parentNode || element.parentElement)[operator](element, sibling);
-		});
+		// });
 
 		return element;
 	}

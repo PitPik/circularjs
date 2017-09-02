@@ -32,7 +32,7 @@
 				helpers: {},
 				partials: {},
 				recursion: 'self',
-				characters: '$"<>%=@',
+				characters: '$"<>%-=@',
 				splitter: '|##|',
 				stopper: '__'
 			};

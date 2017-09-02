@@ -123,11 +123,13 @@
 		},
 
 		ajax: function(url, prefs) {
+			prefs = prefs || {};
+
 			return new Toolbox.Promise(function(resolve, reject) {
 				if (prefs.cache && ajaxCache[url] !== undefined) {
 					return resolver(resolve, reject, url);
 				}
-				ajaxCache[url] = ajaxCache[url] || '';
+				ajaxCache[url] = ajaxCache[url] || undefined;
 
 				var xhr = new XMLHttpRequest();
 				var method = (prefs.method || prefs.type || 'GET').toUpperCase();
