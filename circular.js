@@ -68,6 +68,9 @@
 		$$ = Toolbox.$$,
 		id = 0,
 		instanceList = {},
+		templateCache = {},
+		resourceCache = captureResources(),
+		DOC, // createHTMLDocument
 		pubsub = {},
 		routes = []; // TODO...
 
@@ -80,7 +83,7 @@
 			extraModel = parameters.extraModel || options.extraModel,
 			componentAttr = options.componentAttr,
 			componentSelector = '[' + componentAttr + '="' + name + '"]',
-			componentElement = parameters.componentElement ||
+			componentElement = parameters.componentElement || // TODO: ... no wrapper
 				$(parameters.componentWrapper || document.body, componentSelector),
 			nestingData = checkRestoreNesting(componentElement, componentAttr),
 			altName = componentElement && componentElement.getAttribute('name'),
@@ -91,7 +94,6 @@
 				element: data.element,
 				container: data.container
 			};
-
 		pubsub[this.name][name] = {}; // prepare
 		component.templates = data.templates;
 		instanceList[this.id] = instanceList[this.id] || {};
@@ -105,12 +107,13 @@
 			instanceID: _this.id
 		});
 		_inst.template = parameters.template && parameters.template.version ?
-			parameters.template :
+			parameters.template : templateCache[name] ? templateCache[name] :
 			data.template ? new (options.Template || Schnauzer)(
 			parameters.template || data.template, {
 				doEscape: false,
 				helpers: parameters.helpers || options.helpers || {} // TODO
 			}) : null;
+		_inst.template && (templateCache[name] = _inst.template);
 		_inst.vom = new VOM(component.model, {
 			idProperty: _this.options.idProperty || 'cr-id',
 			preRecursionCallback: function(item, type, siblingOrParent) {
@@ -248,6 +251,7 @@
 
 	Circular.prototype.subscribe = function(inst, comp, attr, callback, trigger) {
 		inst = inst || this.name;
+		pubsub[inst] = pubsub[inst] || {};
 		comp = pubsub[inst][comp] = pubsub[inst][comp] || {};
 		comp[attr] = comp[attr] || [];
 		if (callback) {
@@ -391,6 +395,99 @@
 		return params;
 	}
 
+	/* ----------------- resource loader ------------------ */
+
+	Circular.prototype.loadResource = function(fileName, cache) {
+		return Toolbox.ajax(fileName, {cache: cache}).then(function(data) {
+			var doc = DOC = DOC || document.implementation.createHTMLDocument();
+			var scripts = [];
+			var path = fileName.split('/').slice(0, -1);
+
+			doc.documentElement.innerHTML = data;
+			scripts = [].slice.call($$(doc, 'script') || [])
+				.filter(function(elm) {
+					if (elm.getAttribute('type') === 'text/javascript') {
+						elm.parentNode.removeChild(elm);
+						return true;
+					}
+					return false;
+				});
+
+			return {
+				links: [].slice.call($$(doc, 'link') || []),
+				styles: [].slice.call($$(doc, 'style') || []),
+				scripts: scripts,
+				body: $(doc, 'body'),
+				head: $(doc, 'head'),
+				path:path.join('/')
+			};
+		});
+	};
+
+	Circular.prototype.insertResource = function(container, data) {
+		var styles = data.links.concat(data.styles);
+		var fileName = data.fileName;
+		var resourceName = '';
+		var path = '';
+
+		for (var n = 0, m = styles.length; n < m; n++) {
+			resourceName = styles[n].getAttribute('href');
+			path = Toolbox.normalizePath(data.path + '/' + resourceName);
+			styles[n].href = path; // TODO: no href with <style>
+			if (!resourceCache[path]) {
+				resourceCache[path] = document.head.appendChild(styles[n]);
+			}
+		}
+
+		// container.insertAdjacentHTML('beforeend', data.body.innerHTML);
+		while(data.body.childNodes[0]) {
+			container.appendChild(data.body.childNodes[0]);
+		}
+
+		while(data.scripts.length) {
+			var item = data.scripts.shift();
+			var src = item.getAttribute('src');
+
+			path = Toolbox.normalizePath(data.path + '/' + src);
+			if (resourceCache[path]) {
+				continue;
+			}
+
+			var script = document.createElement('script');
+			script.setAttribute('type', 'text/javascript');
+			script.innerHTML = item.innerHTML;
+			src !== null && (resourceCache[path] = script);
+
+			if (src) {
+				script.src = path;
+				document.head.appendChild(script);
+			} else {
+				container.appendChild(script);
+			}
+		}
+	};
+
+	function captureResources() {
+		var cache = {};
+		var resources = [].slice.call($$(document, 'script'))
+				.concat([].slice.call($$(document, 'link')));
+		var path = '';
+
+		for (var n = resources.length; n--; ) {
+			path = resources[n].getAttribute('data-src') ||
+				resources[n].getAttribute('data-href') ||
+				resources[n].getAttribute('src') ||
+				resources[n].getAttribute('href');
+
+			if (path) {
+				path = Toolbox.normalizePath(path);
+				cache[path] = resources[n];
+			}
+		}
+
+		return cache;
+	}
+
 	/* ---------------------------------------------------- */
 
 	Controller.prototype = {
@@ -458,13 +555,14 @@
 			element = {};
 
 		if (isHTML) {
+			// helper.insertAdjacentHTML('beforeend', html);
 			helper.innerHTML = html;
 			element = helper.children[0];
 		} else {
 			element = html;
 		}
 
-		// _animate(function() {
+		var renderingFunc = function() {
 			if (isPrepend || operator === 'insertAfter') {
 				sibling = sibling && sibling.nextSibling ||
 					isPrepend && parentNode.children[0];
@@ -472,7 +570,13 @@
 			}
 
 			(parentNode || element.parentElement)[operator](element, sibling);
-		// });
+		};
+
+		// if (true) { // TODO: introduce asyncRendering
+			renderingFunc();
+		// } else {
+		// 	_animate(renderingFunc);
+		// }
 
 		return element;
 	}

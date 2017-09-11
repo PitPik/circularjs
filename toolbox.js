@@ -122,14 +122,40 @@
 				textA < textB ? -1 : textA > textB ? 1 : 0;
 		},
 
+		normalizePath: function(path) {
+			var target = [];
+			var src;
+			var token;
+			var start = '';
+
+			path.replace(/^([./]*)/g, function($0, $1) {
+				start = $1;
+			});
+			src = path.split('/');
+
+			for (var i = 0; i < src.length; ++i) {
+				token = src[i];
+				if (token === '..') {
+					target.pop();
+				} else if (token !== '' && token !== '.') {
+					target.push(token);
+				}
+			}
+			return start + target.join('/').replace(/[\/]{2,}/g, '/');
+		},
+
 		ajax: function(url, prefs) {
 			prefs = prefs || {};
 
 			return new Toolbox.Promise(function(resolve, reject) {
 				if (prefs.cache && ajaxCache[url] !== undefined) {
-					return resolver(resolve, reject, url);
+					var ss = resolver(resolve, reject, url, this);
+					// console.log(ss, this)
+					return ss; // this.previousPromise;
 				}
-				ajaxCache[url] = ajaxCache[url] || undefined;
+				ajaxCache[url] = ajaxCache[url] || '';
+				 // add previous this
+				// ajaxCache[url].previousPromise = this;
 
 				var xhr = new XMLHttpRequest();
 				var method = (prefs.method || prefs.type || 'GET').toUpperCase();
@@ -181,6 +207,8 @@
 			var state = PENDING;
 			var value;
 			var deferred = null;
+
+			fn = fn.bind(this);
 
 			function resolve(newValue) {
 				if(newValue && typeof newValue.then === 'function') {
@@ -254,7 +282,7 @@
 	var ajaxCache = {};
 	var ajaxCacheTimer = {};
 
-	function resolver(resolve, reject, url) {
+	function resolver(resolve, reject, url, _this) { // TODO: check for return... on else
 		if (ajaxCache[url]) {
 			clearInterval(ajaxCacheTimer[url]);
 			delete ajaxCacheTimer[url];
@@ -262,7 +290,7 @@
 		} else if (!ajaxCacheTimer[url]) { // wait until finished loading
 			// should we reject it after a while?
 			ajaxCacheTimer[url] = setInterval(function() {
-				resolver(resolve, reject, url);
+				return resolver(resolve, reject, url, _this);
 			}, 16);
 		}
 	}

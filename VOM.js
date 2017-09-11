@@ -126,8 +126,8 @@
 		getProperty: function(property, item) {
 			return crawlObject(item, property.split('.'));
 		},
-		getCleanModel: function() { // maybe not...
-			return JSON.parse(JSON.stringify(this.model));
+		getCleanModel: function(item) { // maybe not...
+			return JSON.parse(JSON.stringify(item || this.model));
 		},
 		destroy: function() {
 			return destroy(this, this.model);
