@@ -94,7 +94,7 @@
 	var components = {
 		'simple-select': function(_this, template, label) {
 			var options = _this.options;
-			var select = label.children[0];
+			var select = label.querySelector('select'); // .children[0];
 			var selectedIndex = select.options.selectedIndex;
 			var name = 'simple-select-' + _counter++;
 			var isInitialized = false;
@@ -245,7 +245,7 @@
 		},
 		'checkbox': function(_this, template, label) {
 			var options = _this.options;
-			var checkbox = label.children[0];
+			var checkbox = label.querySelector('input'); // .children[0];
 			var name = 'checkbox-' + _counter++;
 			var classNames = checkbox.className && checkbox.className
 					.split(/[-]{2,}/) || [];

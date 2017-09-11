@@ -426,7 +426,7 @@
 
 	Circular.prototype.insertResource = function(container, data) {
 		var styles = data.links.concat(data.styles);
-		var fileName = data.fileName;
+		var css;
 		var resourceName = '';
 		var path = '';
 
@@ -437,7 +437,10 @@
 			path = Toolbox.normalizePath(data.path + '/' + resourceName);
 			styles[n].href = path; // TODO: no href with <style>
 			if (!resourceCache[path]) {
-				resourceCache[path] = document.head.appendChild(styles[n]);
+				css = document.head.appendChild(styles[n]);
+			}
+			if (resourceName && css) {
+				resourceCache[path] = css;
 			}
 		}
 
