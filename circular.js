@@ -69,7 +69,7 @@
 		id = 0,
 		instanceList = {},
 		templateCache = {},
-		resourceCache = captureResources(),
+		resourceCache,
 		DOC, // createHTMLDocument
 		pubsub = {},
 		routes = []; // TODO...
@@ -430,6 +430,8 @@
 		var resourceName = '';
 		var path = '';
 
+		resourceCache = resourceCache || captureResources();
+
 		for (var n = 0, m = styles.length; n < m; n++) {
 			resourceName = styles[n].getAttribute('href');
 			path = Toolbox.normalizePath(data.path + '/' + resourceName);
@@ -443,13 +445,12 @@
 		while(data.body.childNodes[0]) {
 			container.appendChild(data.body.childNodes[0]);
 		}
-
 		while(data.scripts.length) {
 			var item = data.scripts.shift();
 			var src = item.getAttribute('src');
 
 			path = Toolbox.normalizePath(data.path + '/' + src);
-			if (resourceCache[path]) {
+			if (src && resourceCache[path]) {
 				continue;
 			}
 
