@@ -10,9 +10,10 @@ CircularJS is a tiny MV* like framework. It's goal is to help building web-apps 
 * DOMinator, a controller that automatically connects and syncs the VOM model with the real DOM.
 * Full featured PubSub functionality
 * Simple Promise implementation (with .all())
-* Ajax with automatic CSRF-Token returning a Promise
+* Ajax with automatic CSRF-Token returning a Promise (plus cache)
 * Open router for all kinds of purposes
 * Toolbox for common functionality like add/remove/toggle/hasClass, event handling, localStorage, cookies, etc.
+* Resource loader (for easy component development)
 
 CircularJS combines all those tools to easily abstract app modules and build high performance SPAs.
 CircularJS is very small (~7.3KB gZip) and fast and therefore the best joice for mobile apps.
