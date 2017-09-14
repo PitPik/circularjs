@@ -69,8 +69,8 @@
 		id = 0,
 		instanceList = {},
 		templateCache = {},
-		resourceCache,
-		DOC, // createHTMLDocument
+		resourceCache = null,
+		DOC = null, // createHTMLDocument
 		pubsub = {},
 		routes = []; // TODO...
 
@@ -399,12 +399,12 @@
 
 	Circular.prototype.loadResource = function(fileName, cache) {
 		return Toolbox.ajax(fileName, {cache: cache}).then(function(data) {
-			var doc = DOC = DOC || document.implementation.createHTMLDocument();
 			var scripts = [];
 			var path = fileName.split('/').slice(0, -1);
 
-			doc.documentElement.innerHTML = data;
-			scripts = [].slice.call($$(doc, 'script') || [])
+			DOC = DOC || document.implementation.createHTMLDocument();
+			DOC.documentElement.innerHTML = data;
+			scripts = [].slice.call($$(DOC, 'script') || [])
 				.filter(function(elm) {
 					if (elm.getAttribute('type') === 'text/javascript') {
 						elm.parentNode.removeChild(elm);
@@ -414,62 +414,60 @@
 				});
 
 			return {
-				links: [].slice.call($$(doc, 'link') || []),
-				styles: [].slice.call($$(doc, 'style') || []),
+				links: [].slice.call($$(DOC, 'link') || []),
+				styles: [].slice.call($$(DOC, 'style') || []),
 				scripts: scripts,
-				body: $(doc, 'body'),
-				head: $(doc, 'head'),
-				path:path.join('/')
+				body: $(DOC, 'body'),
+				head: $(DOC, 'head'),
+				path: path.join('/')
 			};
 		});
 	};
 
-	Circular.prototype.insertResource = function(container, data) {
-		var styles = data.links.concat(data.styles);
-		var css;
-		var resourceName = '';
-		var path = '';
-
-		resourceCache = resourceCache || captureResources();
-
-		for (var n = 0, m = styles.length; n < m; n++) {
-			resourceName = styles[n].getAttribute('href');
-			path = Toolbox.normalizePath(data.path + '/' + resourceName);
-			styles[n].href = path; // TODO: no href with <style>
-			if (!resourceCache[path]) {
-				css = document.head.appendChild(styles[n]);
-			}
-			if (resourceName && css) {
-				resourceCache[path] = css;
-			}
-		}
-
-		// container.insertAdjacentHTML('beforeend', data.body.innerHTML);
+	Circular.prototype.insertResources = function(container, data) {
+		requireResources(data, 'styles', container);
 		while(data.body.childNodes[0]) {
 			container.appendChild(data.body.childNodes[0]);
 		}
-		while(data.scripts.length) {
-			var item = data.scripts.shift();
-			var src = item.getAttribute('src');
+		requireResources(data, 'scripts', container);
+	};
 
-			path = Toolbox.normalizePath(data.path + '/' + src);
-			if (src && resourceCache[path]) {
+	function requireResources(data, type, container) {
+		var item = null;
+		var resourceName = '';
+		var path = '';
+		var text = '';
+		var isStyles = type === 'styles';
+		var attribute = isStyles ? 'href' : 'src';
+		var items = isStyles ? data.links.concat(data.styles) : data.scripts;
+
+		resourceCache = resourceCache || captureResources();
+
+		while (items.length) {
+			item = items.shift();
+			resourceName = item.getAttribute(attribute);
+			path = Toolbox.normalizePath(data.path + '/' + resourceName);
+
+			if (resourceName && resourceCache[path]) {
 				continue;
 			}
 
-			var script = document.createElement('script');
-			script.setAttribute('type', 'text/javascript');
-			script.innerHTML = item.innerHTML;
-			src !== null && (resourceCache[path] = script);
+			if (!isStyles) {
+				text = item.text;
+				item = document.createElement('script');
+				item.setAttribute('type', 'text/javascript');
+				!resourceName && (item.text = text);
+			}
 
-			if (src) {
-				script.src = path;
-				document.head.appendChild(script);
-			} else {
-				container.appendChild(script);
+			if (resourceName) {
+				item[attribute] = path;
+				document.head.appendChild(item);
+				resourceCache[path] = item;
+			} else if (container) { // TODO: check
+				container.appendChild(item);
 			}
 		}
-	};
+	}
 
 	function captureResources() {
 		var cache = {};
@@ -478,12 +476,10 @@
 		var path = '';
 
 		for (var n = resources.length; n--; ) {
-			path = resources[n].getAttribute('data-src') ||
-				resources[n].getAttribute('data-href') ||
-				resources[n].getAttribute('src') ||
+			path = resources[n].getAttribute('src') ||
 				resources[n].getAttribute('href');
 
-			if (path) {
+			if (path) { // TODO: cr-dev or cr-mock
 				path = Toolbox.normalizePath(path);
 				cache[path] = resources[n];
 			}
