@@ -14,6 +14,7 @@ CircularJS is a tiny MV* like framework. It's goal is to help building web-apps 
 * Open router for all kinds of purposes
 * Toolbox for common functionality like add/remove/toggle/hasClass, event handling, localStorage, cookies, etc.
 * Resource loader (for easy component development)
+* Auto AMD loader with lookahead for even faster loading times.
 
 CircularJS combines all those tools to easily abstract app modules and build high performance SPAs.
 CircularJS is very small (~7.3KB gZip) and fast and therefore the best joice for mobile apps.
