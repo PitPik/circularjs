@@ -12,7 +12,7 @@
 	'use strict';
 	// Schnauzer   4.00 KB,  1.77 KB vs
 	// Mustage     5.47 KB,  2.26 KB vs
-	// Handlebars 71.50 KB, 20.99 KB
+	// Handlebars 74.20 KB, 21.86 KB
 
 	var Schnauzer = function(template, options) {
 			this.version = '0.1.0';
