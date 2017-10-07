@@ -11,15 +11,14 @@ require(['circular'], function(Circular) {
 		sortDesc = function(a, b) {
 			return sortAsc(a, b, 'text', true);
 		},
-		todo = window.todo = new Circular(),
+		circular = new Circular(),
 
-		list = todo.component('list', {
+		list = circular.component('list', {
 			model: Toolbox.storageHelper.fetch(STORAGE_KEY),
 			listeners: ['text', 'done'],
 			subscribe: function(property, item, value, oldValue, type) {
-				listCallbacks[property] ?
-					listCallbacks[property](item, item.views, value) :
-					listCallbacks.nodeChange(item, item.views, value);
+				property = listCallbacks[property] ? property : 'nodeChange';
+				listCallbacks[property](item, item.views, value);
 				Toolbox.storageHelper.saveLazy(this.model, STORAGE_KEY); // persist
 			},
 			eventListeners: {
@@ -68,7 +67,7 @@ require(['circular'], function(Circular) {
 			}
 		},
 
-		ui = todo.component('app', {
+		ui = circular.component('app', {
 			model: [{filter: 'all'}],
 			eventListeners: {
 				addItem: function (e, element, item) {
@@ -106,7 +105,7 @@ require(['circular'], function(Circular) {
 				}
 			}
 		}),
-		filterRoute = todo.addRoute({
+		filterRoute = circular.addRoute({
 			path: '(/)(:filter)',
 			callback: function(data) {
 				var value = data.parameters.filter || 'all';
