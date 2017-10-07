@@ -98,7 +98,7 @@
                 module.factory.apply(null, module.resolvedDeps);
             notifyCaller(module);
             if (!require.options.debug) { // clean up
-                // delete module.factory;
+                delete module.factory;
                 // delete module.resolvedDeps;
                 if (module.name.indexOf('_mod') === 0) {
                     // delete modules[module.name];
