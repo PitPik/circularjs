@@ -1,9 +1,10 @@
 // Full spec-compliant TodoMVC with localStorage persistence
 // and hash-based routing in ~145 effective lines of JavaScript.
-window.onload = function() {
+require(['circular'], function(Circular) {
 	'use strict';
 
-	var STORAGE_KEY = 'todos-circularjs-0.1',
+	var Toolbox = Circular.Toolbox,
+		STORAGE_KEY = 'todos-circularjs-0.1',
 		sortAsc = function(a, b, desc) {
 			return Toolbox.itemsSorter(a, b, 'text', desc);
 		},
@@ -170,4 +171,4 @@ window.onload = function() {
 		clearTimeout(obj.timer);
 		obj.timer = setTimeout(fn, 0);
 	}
-};
+});

@@ -6,12 +6,7 @@
 		<link rel="stylesheet" href="index.css">
 		<link rel="stylesheet" href="todo.css">
 
-		<script type="text/javascript" src="../VOM.js"></script>
-		<script type="text/javascript" src="../schnauzer.js"></script>
-		<script type="text/javascript" src="../toolbox.js"></script>
-		<script type="text/javascript" src="../circular.js"></script>
-
-		<script type="text/javascript" src="app.js"></script>
+		<script type="text/javascript" src="../circular.min.js"></script>
 	</head>
 	<body>
 		<section class="todoapp" cr-component="app" cr-view="app">
@@ -24,7 +19,7 @@
 				<label for="toggle-all">Mark all as complete</label>
 				<ul class="todo-list" cr-component="list" cr-container="prepend">
 					<script type="text/template" id="item-template" cr-template-for="list">
-						<li id="{{id}}" class="todo-list-item{{#done}} completed{{/done}}">
+						<li cr-id="{{cr-id}}" class="todo-list-item{{#done}} completed{{/done}}">
 							<input cr-event="click: toggle" cr-view="toggle" class="toggle" type="checkbox"{{#done}} checked=""{{/done}}>
 							<label cr-event="dblclick: edit" cr-view="label">{{text}}</label>
 							<button class="destroy" cr-event="click: delete"></button>
@@ -52,5 +47,6 @@
 			<p>Created by <a href="https://github.com/PitPik">Peter Dematté</a></p>
 			<p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
 		</footer>
+		<script type="text/javascript" src="app.js"></script>
 	</body>
 </html>

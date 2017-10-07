@@ -13,7 +13,7 @@
 		root.Circular = factory(root, root.Toolbox, root.Schnauzer, root.VOM);
 	}
 }(this, function(window, Toolbox, Schnauzer, VOM) {
-	'use strict'; // all: 42.63 kB → 19.75 kB → 7.26 kB
+	'use strict';
 
 	var Circular = function(name, options) {
 			this.options = {
@@ -249,6 +249,8 @@
 
 	Circular.Toolbox = Toolbox;
 
+	/* --------------------  pubsub  ----------------------- */
+
 	Circular.prototype.subscribe = function(inst, comp, attr, callback, trigger) {
 		inst = inst || this.name;
 		pubsub[inst] = pubsub[inst] || {};
@@ -299,7 +301,7 @@
 		}
 	}
 
-	/* ---------------------------------------------------- */
+	/* ----------------------- routing -------------------------- */
 
 	Circular.prototype.addRoute = function(data, trigger) {
 		var path = typeof data.path === 'object' ?
@@ -425,70 +427,14 @@
 	};
 
 	Circular.prototype.insertResources = function(container, data) {
-		requireResources(data, 'styles', container);
+		Toolbox.requireResources(data, 'styles', container);
 		while(data.body.childNodes[0]) {
 			container.appendChild(data.body.childNodes[0]);
 		}
-		requireResources(data, 'scripts', container);
+		Toolbox.requireResources(data, 'scripts', container);
 	};
 
-	function requireResources(data, type, container) {
-		var item = null;
-		var resourceName = '';
-		var path = '';
-		var text = '';
-		var isStyles = type === 'styles';
-		var attribute = isStyles ? 'href' : 'src';
-		var items = isStyles ? data.links.concat(data.styles) : data.scripts;
-
-		resourceCache = resourceCache || captureResources();
-
-		while (items.length) {
-			item = items.shift();
-			resourceName = item.getAttribute(attribute);
-			path = Toolbox.normalizePath(data.path + '/' + resourceName);
-
-			if (resourceName && resourceCache[path]) {
-				continue;
-			}
-
-			if (!isStyles) {
-				text = item.text;
-				item = document.createElement('script');
-				item.setAttribute('type', 'text/javascript');
-				!resourceName && (item.text = text);
-			}
-
-			if (resourceName) {
-				item[attribute] = path;
-				document.head.appendChild(item);
-				resourceCache[path] = item;
-			} else if (container) { // TODO: check
-				container.appendChild(item);
-			}
-		}
-	}
-
-	function captureResources() {
-		var cache = {};
-		var resources = [].slice.call($$(document, 'script'))
-				.concat([].slice.call($$(document, 'link')));
-		var path = '';
-
-		for (var n = resources.length; n--; ) {
-			path = resources[n].getAttribute('src') ||
-				resources[n].getAttribute('href');
-
-			if (path) { // TODO: cr-dev or cr-mock
-				path = Toolbox.normalizePath(path);
-				cache[path] = resources[n];
-			}
-		}
-
-		return cache;
-	}
-
-	/* ---------------------------------------------------- */
+	/* --------------------  UI controller ------------------- */
 
 	Controller.prototype = {
 		getEventListeners: function(element, events, component, idProperty) {

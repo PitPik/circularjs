@@ -11,7 +11,8 @@
 }(this, function(window, undefined) {
 	'use strict';
 
-	var Toolbox = {
+	var resourceCache = null,
+		Toolbox = {
 		closest: function(element, selector, root) {
 			return element && element.closest(selector);
 
@@ -124,21 +125,14 @@
 
 		normalizePath: function(path) {
 			var target = [];
-			var src;
-			var token;
-			var start = '';
+			var src = path.split('/');
+			var start = path.match(/^([./]*)/g)[0];
 
-			path.replace(/^([./]*)/g, function($0, $1) {
-				start = $1;
-			});
-			src = path.split('/');
-
-			for (var i = 0; i < src.length; ++i) {
-				token = src[i];
-				if (token === '..') {
+			for (var n = 0; n < src.length; ++n) {
+				if (src[n] === '..') {
 					target.pop();
-				} else if (token !== '' && token !== '.') {
-					target.push(token);
+				} else if (src[n] !== '' && src[n] !== '.') {
+					target.push(src[n]);
 				}
 			}
 			return start + target.join('/').replace(/[\/]{2,}/g, '/');
@@ -265,6 +259,73 @@
 			};
 
 			fn(resolve, reject);
+		},
+
+		requireResources: function (data, type, container) {
+			var promises = [];
+			var item = null;
+			var resourceName = '';
+			var path = '';
+			var text = '';
+			var isStyles = type === 'styles';
+			var attribute = isStyles ? 'href' : 'src';
+			var items = isStyles ? data.links.concat(data.styles) : data.scripts;
+
+			resourceCache = resourceCache || captureResources();
+
+			while (items.length) {
+				item = items.shift();
+				resourceName = item.getAttribute(attribute);
+				path = Toolbox.normalizePath(data.path + '/' + resourceName);
+
+				if (resourceName && resourceCache[path]) {
+					continue;
+				}
+
+				if (!isStyles) {
+					text = item.text;
+					item = document.createElement('script');
+					item.setAttribute('type', 'text/javascript');
+					// item.async = true;
+					if (!resourceName) {
+						item.text = text;
+					}
+					promises.push(new Toolbox.Promise(function(resolve, reject) {
+						item.onload = function() {
+							resolve(item);
+						}
+					}));
+				}
+
+				if (resourceName) {
+					item[attribute] = path;
+					document.head.appendChild(item);
+					resourceCache[path] = item;
+				} else if (container) { // TODO: check
+					container.appendChild(item);
+				}
+			}
+
+			return Toolbox.Promise.all(promises);
+		},
+
+		captureResources: function() {
+			var cache = {};
+			var resources = [].slice.call($$(document, 'script'))
+					.concat([].slice.call($$(document, 'link')));
+			var path = '';
+
+			for (var n = resources.length; n--; ) {
+				path = resources[n].getAttribute('src') ||
+					resources[n].getAttribute('href');
+
+				if (path) { // TODO: cr-dev or cr-mock
+					path = Toolbox.normalizePath(path);
+					cache[path] = resources[n];
+				}
+			}
+
+			return cache;
 		}
 	}
 
