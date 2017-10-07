@@ -271,7 +271,7 @@
 			var attribute = isStyles ? 'href' : 'src';
 			var items = isStyles ? data.links.concat(data.styles) : data.scripts;
 
-			resourceCache = resourceCache || captureResources();
+			resourceCache = resourceCache || Toolbox.captureResources();
 
 			while (items.length) {
 				item = items.shift();
@@ -311,8 +311,8 @@
 
 		captureResources: function() {
 			var cache = {};
-			var resources = [].slice.call($$(document, 'script'))
-					.concat([].slice.call($$(document, 'link')));
+			var resources = [].slice.call(Toolbox.$$(document, 'script'))
+					.concat([].slice.call(Toolbox.$$(document, 'link')));
 			var path = '';
 
 			for (var n = resources.length; n--; ) {
