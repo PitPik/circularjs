@@ -109,7 +109,7 @@
         lookaheadForDeps = function(name) {
             var deps = require.lookaheadMap[name];
 
-            if (deps) {console.log(name)
+            if (deps) {
                 require(deps);
                 for (var n = 0, m = deps.length; n < m; n++) {
                     if (require.lookaheadMap[deps[n]]) {
