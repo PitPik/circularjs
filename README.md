@@ -17,7 +17,7 @@ CircularJS is a tiny MV* like framework. It's goal is to help building web-apps 
 * Auto AMD loader with lookahead for even faster loading times.
 
 CircularJS combines all those tools to easily abstract app modules and build high performance SPAs.
-CircularJS is very small (~7.3KB gZip) and fast and therefore the best joice for mobile apps.
+CircularJS is very small (~8.86KB gZip) and fast and therefore the best joice for mobile apps.
 
 The intention to build CircularJS was to create something small and fast that is easy to learn and feels closer to javaScript rather than having to learn a new language or complicated patterns. Using CircularJS is quite easy and straight forward. It helps you to avoid bad practice patterns usually caused by wrongly set up event listeners, continuous element search in the DOM (also without caching) and using global variables to store information for other components...
 
@@ -36,7 +36,7 @@ The intention to build CircularJS was to create something small and fast that is
 * Easy destroy for effective garbage collection.
 * Fast and easy i18n possible.
 * Write little code for powerful solutions.
-* Great for mobile apps as it is tiny (~7.3KB) and very fast (~8x to AngularJS).
+* Great for mobile apps as it is tiny (~8.86KB) and very fast (~8x to AngularJS).
 * Exchangeable rendering engine.
 * Keep track of your logic as there is not much magic happening (no digest etc.).
 * pubsub for internal or custom events (also set up pubsub for localStorage etc.).
