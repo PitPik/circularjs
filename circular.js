@@ -23,6 +23,7 @@
 				templatesAttr: 'cr-template',
 				eventAttribute: 'cr-event',
 				viewAttr: 'cr-view', // TODO...
+				devAttribute: 'cr-dev',
 				elements: 'elements', // TODO: check usage
 				events: 'events',
 				views: 'views',
@@ -400,6 +401,11 @@
 	/* ----------------- resource loader ------------------ */
 
 	Circular.prototype.loadResource = function(fileName, cache) {
+		var _this = this,
+			devFilter = function(elm) {
+				return !elm.hasAttribute(_this.options.devAttribute);
+			};
+
 		return Toolbox.ajax(fileName, {cache: cache}).then(function(data) {
 			var scripts = [];
 			var path = fileName.split('/').slice(0, -1);
@@ -410,14 +416,14 @@
 				.filter(function(elm) {
 					if (elm.getAttribute('type') === 'text/javascript') {
 						elm.parentNode.removeChild(elm);
-						return true;
+						return !elm.hasAttribute(_this.options.devAttribute);
 					}
 					return false;
 				});
 
 			return {
-				links: [].slice.call($$(DOC, 'link') || []),
-				styles: [].slice.call($$(DOC, 'style') || []),
+				links: [].slice.call($$(DOC, 'link') || []).filter(devFilter),
+				styles: [].slice.call($$(DOC, 'style') || []).filter(devFilter),
 				scripts: scripts,
 				body: $(DOC, 'body'),
 				head: $(DOC, 'head'),
