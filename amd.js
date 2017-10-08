@@ -9,7 +9,7 @@
         _timer = 0, // ... same here
         _foo = {},
         applyConfiguration = function(config) {
-            var parts = ['lookaheadMap', 'paths', 'options', 'baseUrl', 'minifyPrefix'];
+            var parts = ['lookaheadMap', 'paths', 'options', 'baseUrl'];
 
             for (var n = parts.length; n--; ) { // apply white-list
                 require[parts[n]] = config[parts[n]] || '';
@@ -110,7 +110,7 @@
             var deps = require.lookaheadMap[name];
 
             if (deps && (require.paths[name] || '')
-                    .indexOf(require.minifyPrefix) === -1) {
+                    .indexOf(require.options.minifyPrefix) === -1) {
                 require(deps);
                 for (var n = 0, m = deps.length; n < m; n++) {
                     if (require.lookaheadMap[deps[n]]) {

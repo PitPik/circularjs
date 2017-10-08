@@ -13,7 +13,7 @@
 		root.Circular = factory(root, root.Toolbox, root.Schnauzer, root.VOM);
 	}
 }(this, function(window, Toolbox, Schnauzer, VOM) {
-	'use strict'; // all: 54.71 KB, 24.52 KB, 8.86 KB
+	'use strict'; // all: 56.96 KB, 24.74 KB, 8.91 KB
 
 	var Circular = function(name, options) {
 			this.options = {
