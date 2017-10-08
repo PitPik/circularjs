@@ -138,7 +138,7 @@
 			return start + target.join('/').replace(/[\/]{2,}/g, '/');
 		},
 
-		ajax: function(url, prefs) {
+		ajax: function(url, prefs) { // TODO: fix cache
 			prefs = prefs || {};
 
 			return new Toolbox.Promise(function(resolve, reject) {
