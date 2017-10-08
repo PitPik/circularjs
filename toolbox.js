@@ -276,7 +276,8 @@
 			while (items.length) {
 				item = items.shift();
 				resourceName = item.getAttribute(attribute);
-				path = Toolbox.normalizePath(data.path + '/' + resourceName);
+				path = Toolbox.normalizePath(data.path ? data.path + '/' :
+					'' + resourceName);
 
 				if (resourceName && resourceCache[path]) {
 					continue;
