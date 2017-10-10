@@ -13,7 +13,7 @@
 		root.Circular = factory(root, root.Toolbox, root.Schnauzer, root.VOM);
 	}
 }(this, function(window, Toolbox, Schnauzer, VOM) {
-	'use strict'; // all: 56.96 KB, 24.74 KB, 8.91 KB
+	'use strict'; // all: 55.35 KB, 24.90 KB, 8.96 KB
 
 	var Circular = function(name, options) {
 			this.options = {
@@ -438,6 +438,17 @@
 			container.appendChild(data.body.childNodes[0]);
 		}
 		Toolbox.requireResources(data, 'scripts', container);
+	};
+
+	Circular.prototype.insertComponent = function(fileName, container) {
+		var _this = this;
+
+		return this.loadResource(fileName, true)
+			.then(function(data) {
+				_this.insertResources(container, data);
+			}, function(e) {
+				console.error(e);
+			});
 	};
 
 	/* --------------------  UI controller ------------------- */

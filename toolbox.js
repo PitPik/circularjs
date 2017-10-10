@@ -180,7 +180,7 @@
 						resolve(data);
 					}
 				}
-				xhr.open(method, url);
+				xhr.open(method, url, prefs.async || true, prefs.username, prefs.password);
 
 				if (prefs.dataType === 'xml') {
 					xhr.setRequestHeader('Content-Type', 'text/xml');
