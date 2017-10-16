@@ -12,7 +12,7 @@
 			var parts = ['lookaheadMap', 'paths', 'options', 'baseUrl'];
 
 			for (var n = parts.length; n--; ) { // apply white-list
-				require[parts[n]] = config[parts[n]] || '';
+				require[parts[n]] = config[parts[n]] || require[parts[n]] || '';
 			}
 		},
 		getListIndex = function(list, item) { // for old IE ([].indexOf())

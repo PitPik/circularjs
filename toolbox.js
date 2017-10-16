@@ -179,7 +179,7 @@
 						}
 						resolve(data);
 					}
-				}
+				};
 				xhr.open(method, url, prefs.async || true, prefs.username, prefs.password);
 
 				if (prefs.dataType === 'xml') {
