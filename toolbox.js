@@ -197,6 +197,9 @@
 				xhr.send(prefs.data);
 			});
 		},
+		errorHandler: function(e) {
+			console.error(e);
+		},
 		Promise: function(fn) {
 			var state = PENDING;
 			var value;
@@ -276,7 +279,7 @@
 			while (items.length) {
 				item = items.shift();
 				resourceName = item.getAttribute(attribute);
-				path = Toolbox.normalizePath(data.path ? data.path + '/' :
+				path = Toolbox.normalizePath(data.path ? data.path + '/' + resourceName :
 					'' + resourceName);
 
 				if (resourceName && resourceCache[path]) {

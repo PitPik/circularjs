@@ -170,8 +170,8 @@
 			},
 			require = root.require = function require(deps, factory, sync) {
 				return deps.constructor === Array ? // deps is also optional
-					define('_mod' + _rand() + _rand(), deps, factory, sync) :
-					define('_mod' + _rand() + _rand(), [], deps, factory);
+					define('_mod' + (_rand() + _rand()), deps, factory, sync) :
+					define('_mod' + (_rand() + _rand()), [], deps, factory);
 			},
 			modules      = require.modules   = {},
 			config       = require.config    = function(options) {
