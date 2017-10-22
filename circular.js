@@ -306,7 +306,7 @@
 
 	Circular.prototype.addRoute = function(data, trigger) {
 		var path = typeof data.path === 'object' ?
-				data.path : routeToRegExp(data.path),
+				{regexp: data.path} : routeToRegExp(data.path),
 			parts = extractRouteParameters(path, getPath(this.options.hash)),
 			routers = pubsub[this.name].__router;
 
@@ -395,6 +395,7 @@
 		}
 		params.parameters = names;
 		params.queries = extractSearchString(params[m - 1]);
+		params.path = fragment.replace(/^\//, '').split('/');
 		return params;
 	}
 
