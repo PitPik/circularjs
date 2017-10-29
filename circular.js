@@ -363,7 +363,7 @@
 				names.push(match.substr(1));
 				return optional ? match : '([^/?]+)';
 			})
-			.replace(/\*\w+/g, '([^?]*?)'); // splat
+			.replace(/\*/g, '([^?]*?)'); // splat
 
 		return {
 			regexp: new RegExp('^' + route + '(?:\\?([\\s\\S]*))?$'),
