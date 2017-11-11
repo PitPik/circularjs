@@ -227,7 +227,7 @@
 				}
 				for (var n = 0, l = _data.length, out = ''; n < l; n++) {
 					out = out + (typeof _data[n] === 'object' ?
-						func(_data[n], [_data[n]].concat(dataTree)) :
+						func(_data[n], [_data[n]].concat(data)) :
 						func({'.': _data[n]}, dataTree));
 				}
 				return out; //.join('');

@@ -139,63 +139,60 @@
 		},
 
 		ajax: function(url, prefs) { // TODO: fix cache
+			var promise = null;
+
 			prefs = prefs || {};
 
-			return new Toolbox.Promise(function(resolve, reject) {
-				if (prefs.cache && ajaxCache[url] !== undefined) {
-					var ss = resolver(resolve, reject, url, this);
-					// console.log(ss, this)
-					return ss; // this.previousPromise;
-				}
-				ajaxCache[url] = ajaxCache[url] || '';
-				 // add previous this
-				// ajaxCache[url].previousPromise = this;
+			promise = prefs.cache && ajaxCache[url] ||
+				new Toolbox.Promise(function(resolve, reject) {
+					var xhr = new XMLHttpRequest();
+					var method = (prefs.method || prefs.type || 'GET').toUpperCase();
 
-				var xhr = new XMLHttpRequest();
-				var method = (prefs.method || prefs.type || 'GET').toUpperCase();
+					if (!xhr) {
+						reject('Giving up :( Cannot create an XMLHTTP instance');
+					}
 
-				if (!xhr) {
-					reject('Giving up :( Cannot create an XMLHTTP instance');
-				}
+					if (!prefs) { // if no prefs defined then url is actually prefs
+						prefs = url;
+						url = prefs.url;
+					}
+					xhr.onreadystatechange = function() {
+						var data = getXHRData(this, prefs.dataType, reject);
 
-				if (!prefs) { // if no prefs defined then url is actually prefs
-					prefs = url;
-					url = prefs.url;
-				}
-				xhr.onreadystatechange = function() {
-					var data = getXHRData(this, prefs.dataType, reject);
-
-					if (data !== undefined) {
-						if (prefs.dataType === 'json') {
-							try {
-								data = JSON.parse(data);
-							} catch(e) {
-								reject('Caught Exception: ' + e.stack);
-								return;
+						if (data !== undefined) {
+							if (prefs.dataType === 'json') {
+								try {
+									data = JSON.parse(data);
+								} catch(e) {
+									reject('Caught Exception: ' + e.stack);
+									return;
+								}
 							}
+							resolve(data);
 						}
-						if (prefs.cache) {
-							ajaxCache[url] = data;
+					};
+					xhr.open(method, url, prefs.async || true, prefs.username, prefs.password);
+
+					if (prefs.dataType === 'xml') {
+						xhr.setRequestHeader('Content-Type', 'text/xml');
+					}
+					if (method !== 'GET' && prefs.csrf) {
+						xhr.setRequestHeader('X-CSRF-Token', getCSRFToken(prefs.csrf));
+					}
+					if (prefs.headers) { // add more headers
+						for (var header in prefs.headers) {
+							xhr.setRequestHeader(header, prefs.headers[header]);
 						}
-						resolve(data);
 					}
-				};
-				xhr.open(method, url, prefs.async || true, prefs.username, prefs.password);
 
-				if (prefs.dataType === 'xml') {
-					xhr.setRequestHeader('Content-Type', 'text/xml');
-				}
-				if (method !== 'GET' && prefs.csrf) {
-					xhr.setRequestHeader('X-CSRF-Token', getCSRFToken(prefs.csrf));
-				}
-				if (prefs.headers) { // add more headers
-					for (var header in prefs.headers) {
-						xhr.setRequestHeader(header, prefs.headers[header]);
-					}
-				}
+					xhr.send(prefs.data);
+				});
 
-				xhr.send(prefs.data);
-			});
+			if (prefs.cache) {
+				ajaxCache[url] = promise;
+			}
+
+			return promise;
 		},
 		errorHandler: function(e) {
 			console.error(e);
@@ -345,20 +342,6 @@
 	/* --------- AJAX ---------- */
 
 	var ajaxCache = {};
-	var ajaxCacheTimer = {};
-
-	function resolver(resolve, reject, url, _this) { // TODO: check for return... on else
-		if (ajaxCache[url]) {
-			clearInterval(ajaxCacheTimer[url]);
-			delete ajaxCacheTimer[url];
-			return resolve(ajaxCache[url]);
-		} else if (!ajaxCacheTimer[url]) { // wait until finished loading
-			// should we reject it after a while?
-			ajaxCacheTimer[url] = setInterval(function() {
-				return resolver(resolve, reject, url, _this);
-			}, 16);
-		}
-	}
 
 	function getCSRFToken(cookieKey) {
 		var start = document.cookie.split(cookieKey + '=')[1];
