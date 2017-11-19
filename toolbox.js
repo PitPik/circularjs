@@ -24,12 +24,12 @@
 			}
 		},
 
-		$: function(elm, selector) {
-			return elm.querySelector(selector);
+		$: function(selector, root) {
+			return (root || document.body).querySelector(selector);
 		},
 
-		$$: function(elm, selector) {
-			return elm.querySelectorAll(selector);
+		$$: function(selector, root) {
+			return (root || document.body).querySelectorAll(selector);
 		},
 
 		addClass: function(element, className) {
@@ -138,12 +138,12 @@
 			return start + target.join('/').replace(/[\/]{2,}/g, '/');
 		},
 
-		ajax: function(url, prefs) { // TODO: fix cache
+		ajax: function(url, prefs) {
 			var promise = null;
 
 			prefs = prefs || {};
 
-			promise = prefs.cache && ajaxCache[url] ||
+			promise = prefs.cache && !prefs.resetCache && ajaxCache[url] ||
 				new Toolbox.Promise(function(resolve, reject) {
 					var xhr = new XMLHttpRequest();
 					var method = (prefs.method || prefs.type || 'GET').toUpperCase();
@@ -197,69 +197,7 @@
 		errorHandler: function(e) {
 			console.error(e);
 		},
-		Promise: function(fn) {
-			var state = PENDING;
-			var value;
-			var deferred = null;
-
-			fn = fn.bind(this);
-
-			function resolve(newValue) {
-				if(newValue && typeof newValue.then === 'function') {
-					newValue.then(resolve, reject);
-					return;
-				}
-				state = RESOLVED;
-				value = newValue;
-				deferred && handle(deferred);
-			}
-
-			function reject(reason) {
-				state = REJECTED;
-				value = reason;
-				deferred && handle(deferred);
-			}
-
-			function handle(handler) {
-				if(state === PENDING) {
-					deferred = handler;
-					return;
-				}
-
-				setTimeout(function() {
-					var out;
-					var handlerCallback = state === RESOLVED ?
-							handler.onResolved : handler.onRejected;
-
-					if(!handlerCallback) {
-						handler[state === RESOLVED ? 'resolve' : 'reject'](value);
-						return;
-					}
-
-					try {
-						out = handlerCallback(value);
-					} catch(e) {
-						handler.reject(e);
-						return;
-					}
-
-					handler.resolve(out);
-				}, 0);
-			}
-
-			this.then = function(onResolved, onRejected) {
-				return new Toolbox.Promise(function(resolve, reject) {
-					handle({
-						onResolved: onResolved,
-						onRejected: onRejected,
-						resolve: resolve,
-						reject: reject
-					});
-				});
-			};
-
-			fn(resolve, reject);
-		},
+		Promise: Promise,
 
 		requireResources: function (data, type, container) {
 			var promises = [];
@@ -287,7 +225,7 @@
 					text = item.text;
 					item = document.createElement('script');
 					item.setAttribute('type', 'text/javascript');
-					// item.async = true;
+					item.async = true;
 					if (!resourceName) {
 						item.text = text;
 					}
@@ -312,8 +250,8 @@
 
 		captureResources: function() {
 			var cache = {};
-			var resources = [].slice.call(Toolbox.$$(document, 'script'))
-					.concat([].slice.call(Toolbox.$$(document, 'link')));
+			var resources = [].slice.call(Toolbox.$$('script', document))
+					.concat([].slice.call(Toolbox.$$('link', document)));
 			var path = '';
 
 			for (var n = resources.length; n--; ) {
@@ -365,11 +303,114 @@
 	}
 
 	/* ---------------- Promise --------------- */
-	var PENDING = undefined;
-	var RESOLVED = true;
-	var REJECTED = false;
 
-	Toolbox.Promise.all = function(promises) {
+	function Promise(fn) {
+		this._state = 0;
+		this._handled = false;
+		this._value = undefined;
+		this._deferreds = [];
+
+		doResolve(fn, this);
+	}
+
+	function handle(self, deferred) {
+		while (self._state === 3) {
+			self = self._value;
+		}
+		if (self._state === 0) {
+			self._deferreds.push(deferred);
+			return;
+		}
+		self._handled = true;
+		setTimeout(function () {
+			var cb = self._state === 1 ? deferred.onFulfilled : deferred.onRejected;
+			var ret;
+
+			if (cb === null) {
+				(self._state === 1 ? resolve : reject)(deferred.promise, self._value);
+				return;
+			}
+			try {
+				ret = cb(self._value);
+			} catch (e) {
+				reject(deferred.promise, e);
+				return;
+			}
+			resolve(deferred.promise, ret);
+		});
+	}
+
+	function resolve(self, newValue) {
+		try {
+			if (newValue) {
+				var then = newValue.then;
+				if (newValue instanceof Promise) {
+					self._state = 3;
+					self._value = newValue;
+					finale(self);
+					return;
+				} else if (typeof then === 'function') {
+					doResolve(then.bind(newValue), self);
+					return;
+				}
+			}
+			self._state = 1;
+			self._value = newValue;
+			finale(self);
+		} catch (e) {
+			reject(self, e);
+		}
+	}
+
+	function reject(self, newValue) {
+		self._state = 2;
+		self._value = newValue;
+		finale(self);
+	}
+
+	function finale(self) {
+		for (var i = 0, len = self._deferreds.length; i < len; i++) {
+			handle(self, self._deferreds[i]);
+		}
+		self._deferreds = null;
+	}
+
+	function doResolve(fn, self) {
+		var done = false;
+		var rejectFn = function (value) {
+			if (done) return;
+			done = true;
+			reject(self, value);
+		};
+		try {
+			fn(function (value) {
+				if (done) return;
+				done = true;
+				resolve(self, value);
+			}, rejectFn);
+		} catch (ex) {
+			rejectFn(ex);
+		}
+	}
+
+	Promise.prototype['catch'] = function (onRejected) {
+		return this.then(null, onRejected || function(error) {
+			console.error(error);
+		});
+	};
+
+	Promise.prototype.then = function (onFulfilled, onRejected) {
+		var promise = new Promise(function() {});
+
+		handle(this, {
+			onFulfilled: onFulfilled || null,
+			onRejected: onRejected || null,
+			promise: promise
+		});
+		return promise;
+	};
+
+	Promise.all = function(promises) {
 		var results = [];
 		var merged = promises.reduce(function(accumulator, promise) {
 				return accumulator.then(function() {
@@ -377,7 +418,7 @@
 				}).then(function(result) {
 					return results.push(result);
 				})
-			}, new Toolbox.Promise(function(resolve, reject) {
+			}, new Promise(function(resolve, reject) {
 				resolve(null);
 			}));
 

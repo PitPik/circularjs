@@ -85,7 +85,7 @@
 			componentAttr = options.componentAttr,
 			componentSelector = '[' + componentAttr + '="' + name + '"]',
 			componentElement = parameters.componentElement || // TODO: ... no wrapper
-				$(parameters.componentWrapper || document.body, componentSelector),
+				$(componentSelector, parameters.componentWrapper || document.body),
 			nestingData = checkRestoreNesting(componentElement, componentAttr),
 			altName = componentElement && componentElement.getAttribute('name'),
 			data = getDomData(options, parameters, componentElement, altName || name),
@@ -136,7 +136,7 @@
 				this.reinforceProperty(item, elmsTxt, {
 					element: element,
 					container: parameters.mountSelector &&
-						$(element, parameters.mountSelector)
+						$(parameters.mountSelector, element)
 				}, true);
 				// collect events
 				this.reinforceProperty(item, options.events, {}, true);
@@ -172,7 +172,7 @@
 							property, parentElement, sibling[elmsTxt].element);
 						item[elmsTxt].element = element;
 						item[elmsTxt].container = parameters.mountSelector &&
-							$(element, parameters.mountSelector);
+							$(parameters.mountSelector, element);
 
 						item[options.events] = {};
 						_inst.controller && _inst.controller.getEventListeners(
@@ -413,7 +413,7 @@
 
 			DOC = DOC || document.implementation.createHTMLDocument();
 			DOC.documentElement.innerHTML = data;
-			scripts = [].slice.call($$(DOC, 'script') || [])
+			scripts = [].slice.call($$('script', DOC) || [])
 				.filter(function(elm) {
 					if (elm.getAttribute('type') === 'text/javascript') {
 						elm.parentNode.removeChild(elm);
@@ -423,14 +423,14 @@
 				});
 
 			return {
-				links: [].slice.call($$(DOC, 'link') || []).filter(devFilter),
-				styles: [].slice.call($$(DOC, 'style') || []).filter(devFilter),
+				links: [].slice.call($$('link', DOC) || []).filter(devFilter),
+				styles: [].slice.call($$('style', DOC) || []).filter(devFilter),
 				scripts: scripts,
-				body: $(DOC, 'body'),
-				head: $(DOC, 'head'),
+				body: $('body', DOC),
+				head: $('head', DOC),
 				path: path.join('/')
 			};
-		});
+		}).catch();
 	};
 
 	Circular.prototype.insertResources = function(container, data) {
@@ -447,9 +447,8 @@
 		return this.loadResource(fileName, true)
 			.then(function(data) {
 				_this.insertResources(container, data);
-			}, function(e) {
-				console.error(e);
-			});
+				return data.path;
+			}).catch();
 	};
 
 	/* --------------------  UI controller ------------------- */
@@ -546,7 +545,7 @@
 	}
 
 	function getViews(options, views, element) {
-		var elements = $$(element, '[' + options.viewAttr + ']'),
+		var elements = $$('[' + options.viewAttr + ']', element),
 			attribute = '';
 
 		elements = [element].concat([].slice.call(elements));
@@ -584,7 +583,7 @@
 				restore[1].appendChild(restore[2]);
 			}
 		} else if (comp && attr) {
-			temp = $(comp, '[' + attr + ']');
+			temp = $('[' + attr + ']', comp);
 			if (temp) {
 				tempContainer = document.createDocumentFragment();
 				restore = [temp.nextSibling, temp.parentNode, tempContainer];
@@ -599,12 +598,12 @@
 		var searchContainer = component || document.body,
 			containerAttr = options.containerAttr,
 			container = component.hasAttribute(containerAttr) ? component :
-				$(component, '[' + containerAttr + '="' + name + '"]') ||
-				$(component, '[' + containerAttr + ']'),
-			template = $(searchContainer,
-				'[' + options.templateAttr + '="' + name + '"]'),
-			_templates = ($$(searchContainer,
-				'[' + options.templatesAttr + '="' + name + '"]') || []),
+				$('[' + containerAttr + '="' + name + '"]', component) ||
+				$('[' + containerAttr + ']', component),
+			template = $('[' + options.templateAttr + '="' + name + '"]',
+				searchContainer),
+			_templates = ($$('[' + options.templatesAttr + '="' + name + '"]',
+				searchContainer) || []),
 			templates = {};
 
 		for (var n = _templates.length; n--; ) { // TODO
