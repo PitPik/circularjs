@@ -45,6 +45,7 @@
 			_this.version = '0.1.0';
 			_this.components = {};
 			_this.id = 'cr_' + id++;
+			_this.Toolbox = Toolbox;
 			_this.name = hasName ? name : _this.id;
 			pubsub[_this.name] = {}; // prepare
 		},
@@ -76,6 +77,10 @@
 		routes = []; // TODO...
 
 	Circular.prototype.component = function(name, parameters) {
+		if (this.components[name]) { // TODO: make this possible: name???
+			return this.components[name].reset(parameters.model, parameters.extraModel);
+		}
+
 		var _this = this,
 			_inst = {}, // current instance
 			proto = {},
@@ -209,6 +214,18 @@
 
 			Toolbox.removeClass(item, 'cr-cloak');
 			item.removeAttribute('cr-cloak');
+		}
+		proto.reset = function(data, extra) { // TODO: extramodel
+			for (var n = this.model.length; n--; ) {
+				this.removeChild(this.model[n]);
+			}
+			if (extra) {
+				extraModel = extra;
+			}
+			for (var n = 0, m = data.length; n < m; n++) {
+				this.appendChild(data[n]);
+			}
+			return component;
 		}
 		component.__proto__ = proto;
 
