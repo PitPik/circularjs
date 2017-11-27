@@ -596,23 +596,29 @@
 	}
 
 	function checkRestoreNesting(comp, attr, restore) {
-		var temp = {},
-			tempContainer = {};
+		var temp = [],
+			tempContainer = {},
+			restores = [];
 
 		if (restore) {
-			if (restore[0]) {
-				restore[1].insertBefore(restore[2], restore[0]);
-			} else {
-				restore[1].appendChild(restore[2]);
+			for (var n = 0, m = restore.length; n < m; n++) {
+				if (restore[n][0]) {
+					restore[n][1].insertBefore(restore[n][2], restore[n][0]);
+				} else {
+					restore[n][1].appendChild(restore[n][2]);
+				}
+				restore[n] = null;
 			}
 		} else if (comp && attr) {
-			temp = $('[' + attr + ']', comp);
-			if (temp) {
+			temp = $$('[' + attr + ']', comp);
+			if (temp.length !== 0) {
 				tempContainer = document.createDocumentFragment();
-				restore = [temp.nextSibling, temp.parentNode, tempContainer];
-				tempContainer.appendChild(temp);
+				for (var n = 0, m = temp.length; n < m; n++) {
+					restores.push([temp[n].nextSibling, temp[n].parentNode, tempContainer]);
+					tempContainer.appendChild(temp[n]);
+				}
 			}
-			return restore;
+			return restores;
 		}
 	}
 
