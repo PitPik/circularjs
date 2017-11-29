@@ -54,8 +54,8 @@ require = window.require || {
         'dependency-01': ['dependency-03', 'dependency-04'],
     },
     paths: {
-        'dependency-01': 'js/deps.min',
-        'dependency-02': 'js/deps',
+        'dependency-01': 'js/deps1.min',
+        'dependency-02': 'js/deps2',
         'dependency-03': 'modules/module3/js/dep',
         'dependency-04': 'modules/module4/js/dep',
    },
