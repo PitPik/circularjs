@@ -7,6 +7,7 @@ Work in progress. This is just a collection of thoughts taht will hopefully soon
 ### define
 
 ```define``` and ```require``` are on the global scope (window). Those are the only ones though produced by CircularJS. From there on everything is handled through factories of amd.js.
+
 amd.js is a JavaScript file and module loader. Using a modular script loader like amd.js will improve the speed and quality of your code.
 amd.js works almost like requireJS, so probably nothing new for you.
 There are some features though that make amd.js even faster: "lookahead" that can be specified in your setup so when requiring a module the loader already knows about it's dependencies (which then knows about even those dependencies, and so on) so you can download all pependencies in parallel.
