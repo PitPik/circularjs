@@ -1,5 +1,7 @@
 # CircularJS API
 
+Work in progress. This is just a collection of thoughts taht will hopefully soon be finished.
+
 ## amd
 
 ### define
