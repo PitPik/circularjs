@@ -18,6 +18,25 @@ define('module-name', ['dependency-01', 'dependency-02'], function(dep1, dep2) {
 ```
 Calling ```define()``` without a name as first argument ends up as being called with ```require()```.
 
+Assume you have the following folder structure:
+
+```
+index.html
+  |_ js/
+  |   |_ deps1.js
+  |      deps1.min.js
+  |      deps2.js
+  |_ modules/
+      |_ module3/
+      |   |_ index.html
+      |   |_ js/
+      |       |_dep.js
+      |_ module4/
+          |_ index.html
+          |_ js/
+              |_dep.js
+```
+
 ### require
 
 ```js
