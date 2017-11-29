@@ -72,20 +72,20 @@ require = window.require || {
 
 ```js
 Circular.component(name: 'String', parameters: Object {
-	model: Array [],
-	extraModel: Object {} || Array [],
-	subscribe: function(property, item, value, oldValue, type),
-	listeners: Array [String 'modelItem', '*', ...],
-	eventListeners: Object {String 'name': function(), ...},
-	componentElement: Object DOMElement,
-	componentWrapper: Object DOMElement,
-	mountSelector: Object DOMElement,
+    model: Array [],
+    extraModel: Object {} || Array [],
+    subscribe: function(property, item, value, oldValue, type),
+    listeners: Array [String 'modelItem', '*', ...],
+    eventListeners: Object {String 'name': function(), ...},
+    componentElement: Object DOMElement,
+    componentWrapper: Object DOMElement,
+    mountSelector: Object DOMElement,
 
-	template: Object SchnauzerTemplate || String 'name'
-	helpers: Object {String 'name': function()}
+    template: Object SchnauzerTemplate || String 'name'
+    helpers: Object {String 'name': function()}
 
-	preRecursionCallback: function()
-	enrichModelCallback: function()
+    preRecursionCallback: function()
+    enrichModelCallback: function()
 })
 ```
 
