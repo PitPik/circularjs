@@ -126,13 +126,14 @@ Of course this doesn't make too much sense as almost all Hello World examples bu
         component: DOMElm,
         element: DOMElm,
         model: Array [{
+	    someCustomProperty: (...), ... // setter/getter if defined in listeners
             cr-id: String
-            elements: {
+            elements: Object {
 	        container: DOMElement,
 		element: DOMElement
 	    },
-            events: {
-	        click: {
+            events: Object {
+	        click: Object {
 		    cbName: [DOMElement]
 		}, ...
 	    },
