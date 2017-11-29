@@ -126,13 +126,22 @@ Of course this doesn't make too much sense as almost all Hello World examples bu
         component: DOMElm,
         element: DOMElm,
         model: Array [{
-            cr-id
-            elements
-            events
-            index
-            parentNode
-            views
-            [childNodes]
+            cr-id: String
+            elements: {
+	        container: DOMElement,
+		element: DOMElement
+	    },
+            events: {
+	        click: {
+		    cbName: [DOMElement]
+		}, ...
+	    },
+            index: Int
+            parentNode: Object {childNodes: []}
+            views: Object {
+	        nameOfView: DOMElement, ...
+	    },
+            [childNodes Array []]
         }, ...], root{childNodes: Array},
         name: String,
         templates: Object
