@@ -80,6 +80,9 @@ Circular.component(name: 'String', parameters: Object {
     componentElement: Object DOMElement,
     componentWrapper: Object DOMElement,
     mountSelector: Object DOMElement,
+    
+    beforeInit: function(component),
+    onInit: function(component),
 
     template: Object SchnauzerTemplate || String 'name'
     helpers: Object {String 'name': function()}
@@ -237,6 +240,7 @@ Circular.Toolbox
 	addClass
 	removeClass
 	toggleClass
+	toggleClasses
 	hasClass
 	addEvents
 	removeEvents
