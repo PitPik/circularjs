@@ -14,7 +14,7 @@
 	var resourceCache = null,
 		Toolbox = {
 		closest: function(element, selector, root) {
-			return element && element.closest(selector);
+			// return element && element.closest(selector);
 
 			while(element !== root && element.parentNode) { // can be faster (root...)
 				if (element.matches(selector)) { // matches(element, selector)) {
@@ -30,6 +30,15 @@
 
 		$$: function(selector, root) {
 			return (root || document.body).querySelectorAll(selector);
+		},
+
+		parentsIndexOf: function(elements, target) {
+			for (var n = elements.length; n--; ) {
+				if (elements[n].contains(target)) {
+					return n;
+				}
+			}
+			return -1;
 		},
 
 		addClass: function(element, className) {
@@ -54,6 +63,11 @@
 
 		hasClass: function(element, className) {
 			return element && element.classList.contains(className);
+		},
+
+		toggleClasses: function(oldElm, newElm, oldClass, newClass) {
+			oldElm && oldClass && Toolbox.removeClass(oldElm, oldClass);
+			newElm && Toolbox.addClass(newElm, newClass || oldClass);
 		},
 
 		addEvents: function (elements, type, func, cap, _this) {
@@ -322,7 +336,7 @@
 			return;
 		}
 		self._handled = true;
-		setTimeout(function () {
+		setTimeout(function() {
 			var cb = self._state === 1 ? deferred.onFulfilled : deferred.onRejected;
 			var ret;
 
@@ -369,6 +383,14 @@
 	}
 
 	function finale(self) {
+		if (self._state === 2 && self._deferreds.length === 0) {
+			setTimeout(function() {
+				if (!self._handled) {
+					console.warn('Possible Unhandled Promise Rejection:', self._value);
+				}
+			});
+		}
+
 		for (var i = 0, len = self._deferreds.length; i < len; i++) {
 			handle(self, self._deferreds[i]);
 		}
@@ -378,10 +400,11 @@
 	function doResolve(fn, self) {
 		var done = false;
 		var rejectFn = function (value) {
-			if (done) return;
-			done = true;
-			reject(self, value);
-		};
+				if (done) return;
+				done = true;
+				reject(self, value);
+			};
+
 		try {
 			fn(function (value) {
 				if (done) return;

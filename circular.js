@@ -106,6 +106,8 @@
 		_inst = instanceList[this.id][name] = {};
 		_inst.helper = document.createElement('div');
 
+		parameters.onBeforeInit && parameters.onBeforeInit(component);
+
 		_inst.controller = parameters.eventListeners && new Controller({
 			appElement: data.element,
 			eventAttribute: options.eventAttribute,
@@ -235,6 +237,8 @@
 		}
 		component.__proto__ = proto;
 
+		parameters.onInit && parameters.onInit(component);
+
 		return component;
 	};
 
@@ -296,6 +300,7 @@
 
 	Circular.prototype.publish = function(inst, comp, attr, data) {
 		inst = inst || this.name;
+		pubsub[inst] = pubsub[inst] || {};
 		if (pubsub[inst]) {
 			comp = pubsub[inst][comp] = pubsub[inst][comp] || {};
 			comp[attr] = comp[attr] || [];
@@ -597,25 +602,25 @@
 
 	function checkRestoreNesting(comp, attr, restore) {
 		var temp = [],
-			tempContainer = {},
-			restores = [];
+			tempContainer = checkRestoreNesting.tempContainer =
+				checkRestoreNesting.tempContainer || document.createDocumentFragment(),
+			restores = [],
+			collect = {};
 
 		if (restore) {
-			for (var n = 0, m = restore.length; n < m; n++) {
-				if (restore[n][0]) {
-					restore[n][1].insertBefore(restore[n][2], restore[n][0]);
-				} else {
-					restore[n][1].appendChild(restore[n][2]);
-				}
+			for (var n = restore.length; n--; ) {
+				collect = restore[n];
+				collect[2][collect[1] ? 'insertBefore' : 'appendChild'](
+					collect[0], collect[1]);
 				restore[n] = null;
 			}
 		} else if (comp && attr) {
 			temp = $$('[' + attr + ']', comp);
 			if (temp.length !== 0) {
-				tempContainer = document.createDocumentFragment();
 				for (var n = 0, m = temp.length; n < m; n++) {
-					restores.push([temp[n].nextSibling, temp[n].parentNode, tempContainer]);
-					tempContainer.appendChild(temp[n]);
+					collect = temp[n];
+					restores.push([collect, collect.nextElementSibling, collect.parentNode]);
+					tempContainer.appendChild(collect);
 				}
 			}
 			return restores;
