@@ -74,7 +74,8 @@
 		resourceCache = null,
 		DOC = null, // createHTMLDocument
 		pubsub = {},
-		routes = []; // TODO...
+		routes = [], // TODO...
+		appComponents = {};
 
 	Circular.prototype.component = function(name, parameters) {
 		if (this.components[name]) { // TODO: make this possible: name???
@@ -90,7 +91,7 @@
 			componentAttr = options.componentAttr,
 			componentSelector = '[' + componentAttr + '="' + name + '"]',
 			componentElement = parameters.componentElement || // TODO: ... no wrapper
-				$(componentSelector, parameters.componentWrapper || document.body),
+				$(componentSelector, parameters.componentWrapper || document),
 			nestingData = checkRestoreNesting(componentElement, componentAttr),
 			altName = componentElement && componentElement.getAttribute('name'),
 			data = getDomData(options, parameters, componentElement, altName || name),
@@ -476,6 +477,50 @@
 			.then(function(data) {
 				_this.insertResources(container, data);
 				return data.path;
+			}).catch();
+	};
+
+	Circular.prototype.renderComponent = function(data) {
+		var cache = null,
+			components = appComponents, // speeds up
+			name = data.name;
+
+		if (components[data.previousName]) { // remove old app
+			var children = [].slice.call(data.container.childNodes);
+
+			for (var n = 0, m = children.length; n < m; n++) {
+				components[data.previousName].cache.appendChild(children[n]);
+			}
+		}
+		if (name && components[name]) { // append current app and initialize
+			components[name].init && data.init !== false &&
+				components[name].init(data.data, components[name].path);
+			data.container.appendChild(components[name].cache);
+			return new Toolbox.Promise(function(resolve) {
+				resolve(components[name].init);
+			});
+		}
+		// create new app and initialize
+		return this.insertComponent(data.path, data.container)
+			.then(function(path) { // TODO: return Promise with data...
+				return new Toolbox.Promise(function(resolve) {
+					var moduleName = data.require === true ? name :
+							data.require === false ? '' : data.require;
+
+					components[name] = {
+						path: path,
+						cache: document.createDocumentFragment()
+					};
+					if (moduleName) {
+						require([moduleName], function(init) {
+							components[name].init = init;
+							data.init !== false && init(data.data, path);
+							resolve(init);
+						});
+					} else {
+						resolve();
+					}
+				})
 			}).catch();
 	};
 
