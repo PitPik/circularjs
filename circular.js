@@ -501,7 +501,8 @@
 			});
 		}
 		// create new app and initialize
-		return this.insertComponent(data.path, data.container)
+		cache = document.createDocumentFragment();
+		return name ? this.insertComponent(data.path, data.container || cache)
 			.then(function(path) { // TODO: return Promise with data...
 				return new Toolbox.Promise(function(resolve) {
 					var moduleName = data.require === true ? name :
@@ -509,7 +510,7 @@
 
 					components[name] = {
 						path: path,
-						cache: document.createDocumentFragment()
+						cache: cache
 					};
 					if (moduleName) {
 						require([moduleName], function(init) {
@@ -521,7 +522,7 @@
 						resolve();
 					}
 				})
-			}).catch();
+			}).catch() : new Toolbox.Promise(function(a){a()});
 	};
 
 	/* --------------------  UI controller ------------------- */
