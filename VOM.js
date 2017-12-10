@@ -142,6 +142,7 @@
 				destroy(_this, items[n][_this.options.childNodes]);
 			}
 			delete NODES[_this.id][items[n][_this.options.idProperty]];
+			items.pop();
 		}
 		return items;
 	};

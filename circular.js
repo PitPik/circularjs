@@ -219,18 +219,8 @@
 			item.removeAttribute('cr-cloak');
 		}
 		proto.reset = function(data, extra) { // TODO: extramodel
-			if (data.length === 0) {
-				_inst.vom.destroy();
-				// console.log(this.container)
-				this.container && (this.container.innerHTML = '');
-			} else {
-				for (var n = this.model.length; n--; ) {
-					this.removeChild(this.model[n]);
-				}
-				if (extra) {
-					extraModel = extra;
-				}
-			}
+			_inst.vom.destroy();
+			this.container && (this.container.innerHTML = '');
 			for (var n = 0, m = data.length; n < m; n++) {
 				this.appendChild(data[n]);
 			}
@@ -255,7 +245,7 @@
 	// 	}
 	// }
 
-	Circular.prototype.destroy = function(name) {
+	Circular.prototype.destroy = function(name) { // TODO: review -> use reset
 		var _instList = instanceList[this.id];
 		var _instance = {};
 
