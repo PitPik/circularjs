@@ -245,7 +245,7 @@
 					}
 					promises.push(new Toolbox.Promise(function(resolve, reject) {
 						item.onload = function() {
-							resolve(item);
+							resolve(this);
 						}
 					}));
 				}
