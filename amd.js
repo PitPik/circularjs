@@ -94,8 +94,10 @@
 		},
 		markAsDone = function(module) { // culd be called more than once on same
 			// setTimeout(function(){
-			module.done = module.done ? module.done : !module.factory ? true :
-				module.factory.apply(null, module.resolvedDeps);
+			if (!module.done) {
+				module.done = (module.factory || function(){})
+					.apply(null, module.resolvedDeps); // TODO: function(){}
+			}
 			notifyCaller(module);
 			if (!require.options.debug) { // clean up
 				delete module.factory;
