@@ -243,9 +243,14 @@
 					if (!resourceName) {
 						item.text = text;
 					}
-					promises.push(new Toolbox.Promise(function(resolve, reject) {
-						item.onload = function() {
-							resolve(this);
+					promises.push(new Toolbox.Promise(function(resolve) {
+						if (!item.onload) {
+							resolve(item);
+						} else {
+							item.onload = function() {
+								resolve(this);
+							}
+
 						}
 					}));
 				}
@@ -257,6 +262,11 @@
 				} else if (container) { // TODO: check
 					container.appendChild(item);
 				}
+			}
+			if (promises.length === 0) {
+				promises.push(new Toolbox.Promise(function(resolve) {
+					resolve(function(){});
+				}));
 			}
 
 			return Toolbox.Promise.all(promises);
