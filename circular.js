@@ -457,7 +457,7 @@
 		while(data.body.childNodes[0]) {
 			container.appendChild(data.body.childNodes[0]);
 		}
-		Toolbox.requireResources(data, 'scripts', container);
+		return Toolbox.requireResources(data, 'scripts', container);
 	};
 
 	Circular.prototype.insertComponent = function(fileName, container) {
@@ -465,8 +465,12 @@
 
 		return this.loadResource(fileName, true)
 			.then(function(data) {
-				_this.insertResources(container, data);
-				return data.path;
+				return new Toolbox.Promise(function(resolve) {
+					_this.insertResources(container, data).
+					then(function(){
+						resolve(data.path);
+					});
+				});
 			}).catch();
 	};
 
