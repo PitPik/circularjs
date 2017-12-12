@@ -460,7 +460,7 @@
 		return Toolbox.requireResources(data, 'scripts', container);
 	};
 
-	Circular.prototype.insertComponent = function(fileName, container) {
+	Circular.prototype.insertModule = function(fileName, container) {
 		var _this = this;
 
 		return this.loadResource(fileName, true)
@@ -474,7 +474,7 @@
 			}).catch();
 	};
 
-	Circular.prototype.renderComponent = function(data) {
+	Circular.prototype.renderModule = function(data) {
 		var cache = null,
 			components = appComponents, // speeds up
 			name = data.name;
@@ -496,7 +496,7 @@
 		}
 		// create new app and initialize
 		cache = document.createDocumentFragment();
-		return name ? this.insertComponent(data.path, data.container || cache)
+		return name ? this.insertModule(data.path, data.container || cache)
 			.then(function(path) { // TODO: return Promise with data...
 				return new Toolbox.Promise(function(resolve) {
 					var moduleName = data.require === true ? name :
