@@ -19,7 +19,7 @@ If you are familiar with the concepts of the DOM-API, Promise, PubSub, Mustage o
 
 Circular apps are modular. Every module can be developed standalone taking care of its own dependencies and components and therefore being independend from other modules.
 
-You basically set up a HTML page prefereable with all the <link> and <script> tags/resources defined. If you need resources for development only (mocks, css, etc.) you just need to add "cr-dev" to the resource and it will be ignored when being injected.
+You basically set up a HTML page prefereable with all the `<link>` and `<script>` tags/resources defined and use components to build the desired functionality. If you need resources for development only (mocks, css, etc.) you just need to add "cr-dev" to the resource and it will be ignored when being injected.
 
 This page with all its dependencies/resources can then later be injected into the main app by calling circular.renderModule(). This method returns a Promise() that returns the main dependency that was defined in circular.renderModule() that can be a class, a function or anything else you need it to be to start it up. There are actually more methods to inject modules (insertModule, insertResources or loadResource), but this one is the most convenient way.
 
