@@ -72,7 +72,7 @@ Given you have the following template:
 <ul cr-component="tree" cr-container="">
     <script type="text/template" cr-template-for="tree">
     <li cr-id="{{cr-id}}">
-        <a href="#/{{link}}" cr-event="click: listLink">{{text}}</a>
+        <a href="{{root}}{{link}}" cr-event="click: listLink">{{text}}</a>
         <ul cr-view="container"></ul>
     </li>
     </script>
@@ -84,35 +84,36 @@ and a model for the component like this:
 var circular = new Circular();
     model = [{
         "id": "0",
-        "link": "#/tree/root-0",
+        "link": "root-0",
         "text": "Root item 0",
         "childNodes": [{
             "id": "0-0",
-            "link": "#/tree/root-0/0",
+            "link": "root-0/0",
             "text": "Some item 0-0"
         }, {
             "id": "0-1",
-            "link": "#/tree/root-0/1",
+            "link": "root-0/1",
             "text": "Some item 0-1"
         }]
     }, {
         "id": "1",
-        "link": "#/tree/root-1",
+        "link": "root-1",
         "text": "Root item 1",
         "childNodes": [{
             "id": "1-0",
-            "link": "#/tree/root-1/0",
+            "link": "root-1/0",
             "text": "Some item 1-1"
         }]
     }, {
         "id": "2",
-        "link": "#/tree/root-2",
+        "link": "root-2",
         "text": "Root item 2"
     }
 }];
 
 circular.component('tree', {
     model: model,
+    extraModel: {root: '#/tree/'}
     mountSelector: '[cr-view="container"]',
     listeners: ['text'],
     subscribe: function(property, item, value, oldValue) {
@@ -130,6 +131,8 @@ circular.component('tree', {
 You would get a perfectly rendered tree where you can change the link's visual text by just changing the .text property or reshuffle the children by using the VOM's API. If you would appendChild() an new model even with children in it, Circular would render the whole depth of the structure in one go.
 
 Maybe you noticed that `circular.component('tree', {...` and `<ul cr-component="tree"` in the template are coupled. That's how `circular.component()` knows wich part of the template to use. Names are like IDs and can be used only once per instance of `new Circular()`. If you would call `circular.component('tree', {...` with the same name again than it works like a reset. It empties the current view and re-renders this component completely according to the new model passed.
+
+You can also see that the `extraModel` in the component helps rendering things with Schnauzer. The extra model is always present in the model structure processed by Schnauzer.
 
 ## Templates
 
