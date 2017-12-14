@@ -231,7 +231,7 @@ define('my-dependency', ['someClass'], function(MyClass) {
 ```
 
 ## Wrap up
-You've learned the basics about the seven main building blocks of an Circular application:
+You've learned the basics about the seven main building blocks of a Circular application:
 
  - Modules
  - Components
