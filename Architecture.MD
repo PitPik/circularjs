@@ -129,7 +129,7 @@ circular.component('tree', {
 ```
 You would get a perfectly rendered tree where you can change the link's visual text by just changing the .text property or reshuffle the children by using the VOM's API. If you would appendChild() an new model even with children in it, Circular would render the whole depth of the structure in one go.
 
-Maybe you noticed that `circular.component('tree', {...` and `<ul cr-component="tree"` in the template are coupled. That's how `circular.component()` knows wich part of the template to use. Names are like IDs and can be used only once per instance of `new Circular()`. If you would call `circular.component('tree', {...` with the same name again than it works like a reset. It empties the current view and re-renders this component completely.
+Maybe you noticed that `circular.component('tree', {...` and `<ul cr-component="tree"` in the template are coupled. That's how `circular.component()` knows wich part of the template to use. Names are like IDs and can be used only once per instance of `new Circular()`. If you would call `circular.component('tree', {...` with the same name again than it works like a reset. It empties the current view and re-renders this component completely according to the new model passed.
 
 ## Templates
 
