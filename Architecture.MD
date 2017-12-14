@@ -204,6 +204,7 @@ Circular doesn't enforce these principles. It won't complain if you write a "kit
 Services can be made available to components through dependency injection.
 
 ## Dependency injection
+
 Dependency injection is a way to supply a class, function or anything else with the fully-formed dependencies it requires. Most dependencies are services. Circular uses dependency injection to provide new components with the services they need.
 
 Dependency injection is as simple as using require() or define() where you define all the dependencies you need for your component.
@@ -215,6 +216,19 @@ function(Circular, appService) {
 });
 ```
 Of Course those dependencies can rely on any other dependencies again that can be defined the same way.
+
+If you need to inject pre-defined instances of a class (used as decorators) just define that in your code and define this module with define();
+
+```JS
+define('my-dependency', ['someClass'], function(MyClass) {
+    var myInstance = new MyClass({
+        name: 'John',
+        value: 'good'
+    });
+
+    return myInstance;
+});
+```
 
 ## Wrap up
 You've learned the basics about the seven main building blocks of an Circular application:
