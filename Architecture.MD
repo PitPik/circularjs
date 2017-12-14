@@ -62,7 +62,7 @@ VOM provides an API similar to the DOM-API (appendChild, replaceChild, insertBef
 
 You can use VOM inside Circular in three ways:
 
- - Control a single part of your view by setting up a model that keeps track of the state of the view (no Schnauzer template required, just use cr-view pointers to control view).
+ - Control a single part of your view by setting up a model that keeps track of the state of the view (no Schnauzer template required, just use cr-view pointers to control view on model manipulation).
  - Set up a list of molecules that are rendered by Schnauzer templates and can be shuffled with appendChild, insertBefore, sortChildren, etc.
  - Use a deep or nested model (with child nodes) to render a tree structured view and always keep track of it.
 
