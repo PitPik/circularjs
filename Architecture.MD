@@ -15,8 +15,6 @@ Of course, there is more to it than this. You'll learn the details in the pages 
 If you are familiar with the concepts of the DOM-API, Promise, PubSub, Mustage or Handlebars, jQuery ajax and simple routing patterns then you are already familiar with more than half of what you need to know to use circularJS.
 The intention to build circularJS was to get a powerful MVC framework that can abstract and handle HTML as it is (without making it what it isn't: markup with magic functionality), build blasting fast SPAs by using patterns one is used to and familiar with. Write less code for powerful and fast interactions with code that is least possible opinionated and logically structured.
 
-
-
 ## Modules
 
 Circular apps are modular. Every module can be developed standalone taking care of its own dependencies and components and therefore being independent from other modules.
@@ -33,8 +31,6 @@ You can though easily set up a functionality to preload parts or all the modules
 There is even a "look-ahead" functionality to faster load dependencies of dependencies.
 
 You'll be using define() and require() from amd.js as you're probably already familiar with by previously already having been used requireJS or other AMD resource loaders. This is a very convenient way to modularize and reuse code. Packing and minifying code to big junks is the logic consequence and very easy to do with amd.js if you need to speed up download times without the need to change all your setups.
-
-
 
 ## Components / Services
 
@@ -56,7 +52,82 @@ See the API documentation for details.
 
 A component also keeps track of (automatically installed) event-listeners defined with "cr-event" and pointers to DOM-Elements defined with "cr-view" attributes inside the templates to easily realize one or two way data binding in combination with the subscribers mentioned earlier.
 
+## VOM (Virtual Object Model)
 
+VOM.js is the heart of CircularJS. It is a tiny model controller that can be used to either abstract the element structure on a DOM-document such as containers, widgets, form items, element groups, etc. to build complex components or to just simply create a flat model and keep track of changes in this model and reflect them in the view of a component.
+Think as it as an abstraction layer to your DOM-structure. You compose your atoms (elements of a part of the page) to molecules and reflect those segments in one property of the VOM model. This property can also hold information about the molecule's atoms (cr-view, cr-event, etc.) but mainly only information about the whole molecule. It also knows about children of the molecule and treats them as it were children of the DOM (appendChild, insertBefore, removeChild, etc.). CircularJS has an optimised rendering strategy for child nodes.
+
+The strong point of VOM is that it automatically registers changes in its model and can react on that. It is aware of depth of the model, just like in a DOM structure and can represent this structure in a nested DOM-tree structure.
+VOM provides an API similar to the DOM-API (appendChild, replaceChild, insertBefore, ...) so it is quite easy to understand and to learn.
+
+You can use VOM inside Circular in three ways:
+
+ - Control a single part of your view by setting up a model that keeps track of the state of the view (no Schnauzer template required, just use cr-view pointers to control view).
+ - Set up a list of molecules that are rendered by Schnauzer templates and can be shuffled with appendChild, insertBefore, sortChildren, etc.
+ - Use a deep or nested model (with child nodes) to render a tree structured view and always keep track of it.
+
+Given you have the following template:
+
+```HTML
+<ul cr-component="tree" cr-container="">
+    <script type="text/template" cr-template-for="tree">
+    <li cr-id="{{cr-id}}">
+        <a href="#/{{link}}" cr-event="click: listLink">{{text}}</a>
+        <ul cr-view="container"></ul>
+    </li>
+    </script>
+</ul>
+```
+and a model for the component like this:
+
+```JS
+var circular = new Circular();
+    model = [{
+        "id": "0",
+        "link": "#/tree/root-0",
+        "text": "Root item 0",
+        "childNodes": [{
+            "id": "0-0",
+            "link": "#/tree/root-0/0",
+            "text": "Some item 0-0"
+        }, {
+            "id": "0-1",
+            "link": "#/tree/root-0/1",
+            "text": "Some item 0-1"
+        }]
+    }, {
+        "id": "1",
+        "link": "#/tree/root-1",
+        "text": "Root item 1",
+        "childNodes": [{
+            "id": "1-0",
+            "link": "#/tree/root-1/0",
+            "text": "Some item 1-1"
+        }]
+    }, {
+        "id": "2",
+        "link": "#/tree/root-2",
+        "text": "Root item 2"
+    }
+}];
+
+circular.component('tree', {
+    model: model,
+    mountSelector: '[cr-view="container"]',
+    listeners: ['text'],
+    subscribe: function(property, item, value, oldValue) {
+        if (property === 'text') {
+            item.views.text.textContent = value;
+        }
+    },
+    eventListeners: {
+        listLink: function(e, element, item) {
+            console.log(element);
+        }
+    }
+});
+```
+You would get a perfectly rendered tree where you can change the link's visual text by just changing the .text property or reshuffle the children by using the VOM's API. If you would appendChild() an new model even with children in it, Circular would render the whole depth of the structure in one go.
 
 ## Templates
 
@@ -87,8 +158,6 @@ Although this template uses typical HTML elements like `<h2>` and `<p>`, it also
 In the last line of the template, the `<div cr-view="app-details">` tag is a regular element that represents a view element in the model of a component. This reference can be used to easily tell circular.renderModule() where to render the details-view module.
 
 
-
-
 ## Data binding
 Without a framework, you would be responsible for pushing data values into the HTML controls and turning user responses into actions and value updates. Writing such push/pull logic by hand is tedious, error-prone, and a nightmare to read as any experienced jQuery programmer can attest.
 
@@ -108,7 +177,6 @@ The initial rendering through {{name}} happens when passing the model to the com
 
 Data binding, 1-way or 2-way, can be realized in many ways. It needs some manual work but therefore you have more control over what happens in your component.
 Data binding plays an important role in communication between a template and its component.
-
 
 ## Services
 Service is a broad category encompassing any value, function, or feature that your application needs.
@@ -149,10 +217,11 @@ function(Circular, appService) {
 Of Course those dependencies can rely on any other dependencies again that can be defined the same way.
 
 ## Wrap up
-You've learned the basics about the six main building blocks of an Circular application:
+You've learned the basics about the seven main building blocks of an Circular application:
 
  - Modules
  - Components
+ - VOM (Virtual Object Model)
  - Templates
  - Data binding
  - Services
