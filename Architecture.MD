@@ -219,7 +219,7 @@ function(Circular, appService) {
 ```
 Of Course those dependencies can rely on any other dependencies again that can be defined the same way.
 
-If you need to inject pre-defined instances of a class (used as decorators) just define that in your code and define this module with define();
+If you need to inject pre-defined instances of a class (used as decorators) just define that in your code and define this module with define(); (don't get confused with the "modules" from Circular here. We just talked about JavaScript modules defined by amd module loading system).
 
 ```JS
 define('my-dependency', ['someClass'], function(MyClass) {
