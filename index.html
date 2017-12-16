@@ -1,109 +1,110 @@
 <!doctype html>
 <html lang="en" data-framework="circularJS">
-	<head>
-		<meta charset="utf-8">
-		<title>Circular.js • Demo</title>
+<head>
+	<meta charset="utf-8">
+	<title>Circular.js • Demo</title>
 
-		<link rel="stylesheet" type="text/css" href="index.css">
+	<link rel="stylesheet" type="text/css" href="index.css">
 
-		<script type="text/javascript" src="toolbox.js"></script>
-		<script type="text/javascript" src="VOM.js"></script>
-		<script type="text/javascript" src="schnauzer.js"></script>
-		<script type="text/javascript" src="circular.js"></script>
-
- 		<!-- <script type="text/javascript" src="circular.min.js"></script> -->
-	</head>
-	<body>
-		<div class="circularjs">
-			<div class="circularjs-logo"></div>
-			<div class="circularjs-text">ircul<span class="span">a</span>r<em class="em">JS</em></div>
-			<div class="circularjs-creator">by <em class="em">WeekendProductions<sup class="sup">©</sup></em></div>
-		</div>
-
+	<script type="text/javascript" src="toolbox.js"></script>
+	<script type="text/javascript" src="VOM.js"></script>
+	<script type="text/javascript" src="schnauzer.js"></script>
+	<script type="text/javascript" src="circular.js"></script>
+	<!-- <script type="text/javascript" src="circular.min.js"></script> -->
+</head>
+<body>
+	<div class="circularjs">
+		<div class="circularjs-logo"></div>
+		<div class="circularjs-text">ircul<span class="span">a</span>r<em class="em">JS</em></div>
+		<div class="circularjs-creator">by <em class="em">WeekendProductions<sup class="sup">©</sup></em></div>
+	</div>
 
 
-		<section cr-component="counter" cr-container>
-			<script type="text/template" cr-template-for="counter">
-				<span class="items">{{items}} Item{{#plural}}s{{/plural}} left</span>
-			</script>
-		</section>
 
-		<section cr-component="buttons" cr-container>
-			<script type="text/template" cr-template-for="buttons">
-				<div class="item" cr-event="click: clicker; mousedown: preventSelect">
-					Clicks{{#maxClicks}} (max {{maxClicks}}){{/maxClicks}}:
-					<span cr-view="clickCounter">{{clicks}}</span> so far
-				</div>
-			</script>
-		</section>
+	<section cr-component="counter" cr-container>
+		<script type="text/template" cr-template-for="counter">
+			<span class="items">{{items}} Item{{#plural}}s{{/plural}} left</span>
+		</script>
+	</section>
 
-	</body>
+	<section cr-component="buttons" cr-container>
+		<script type="text/template" cr-template-for="buttons">
+			<div class="item" cr-event="click: clicker; mousedown: preventSelect">
+				Clicks{{#maxClicks}} (max {{maxClicks}}){{/maxClicks}}:
+				<span cr-view="clickCounter">{{clicks}}</span> so far
+			</div>
+		</script>
+	</section>
 
-	<script type="text/javascript">
-		(function(window, undefined){
-			'use strict';
+</body>
 
-			var demo = window.demo = new Circular();
+<script type="text/javascript">
+(function(window, undefined){
+	'use strict';
 
-			var buttons = demo.component('buttons', {
-					model: [{
-						clicks: 0,
-						maxClicks: 10
-					}, {
-						clicks: 0,
-						maxClicks: 2
-					}, {
-						clicks: 0,
-						maxClicks: 1
-					}],
-					listeners: ['clicks'],
-					subscribe: function(property, item, value, oldValue) {
-						// console.log(property, item, value, oldValue);
-						if (property === 'clicks') {
-							if (value <= item.maxClicks || !item.maxClicks) {
-								item.views.clickCounter.textContent = value;
-							} else {
-								this.removeChild(item);
-							}
-						}
-
-						itemsCount = this.getElementsByProperty().length;
-						counter.replaceChild({
-							items: itemsCount,
-							plural: itemsCount !== 1
-						}, counter.model[0]);
-
-					},
-					eventListeners: {
-						clicker: function(e, element, item) {
-							item.clicks++;
-						},
-						preventSelect: function(e, element, item) {
-							e.preventDefault();
-						}
+	var demo = window.demo = new Circular();
+	var model = [{
+			clicks: 0,
+			maxClicks: 10
+		}, {
+			clicks: 0,
+			maxClicks: 2
+		}, {
+			clicks: 0,
+			maxClicks: 1
+		}];
+	var buttons = demo.component('buttons', {
+			model: model,
+			listeners: ['clicks'],
+			subscribe: function(property, item, value, oldValue) {
+				if (property === 'clicks') {
+					if (value <= item.maxClicks || !item.maxClicks) {
+						item.views.clickCounter.textContent = value;
+					} else {
+						this.removeChild(item);
+						updateCounter();
 					}
-				}),
-				itemsCount = buttons.getElementsByProperty().length,
-				counter = demo.component('counter', {
-					model: [{
-						items: itemsCount,
-						plural: itemsCount !== 1
-					}]
-				});
-
-
-			var more = [{ // test prependChild order
-					clicks: 0,
-					maxClicks: 8
-				}, {
-					clicks: 0
-				}];
-
-			for (var n = 0, l = more.length; n < l; n++) {
-				buttons.prependChild(more[n]);
+				}
+			},
+			eventListeners: {
+				clicker: function(e, element, item) {
+					item.clicks++;
+				},
+				preventSelect: function(e, element, item) {
+					e.preventDefault();
+				}
 			}
+		});
+	var updateCounter = function() {
+			itemsCount = buttons.getElementsByProperty().length;
+			counter.replaceChild({
+				items: itemsCount,
+				plural: itemsCount !== 1
+			}, counter.model[0]);
+		};
 
-			console.log(demo);
-		})(this);
-	</script>
+	var itemsCount = buttons.getElementsByProperty().length;
+	var counter = demo.component('counter', {
+			model: [{
+				items: itemsCount,
+				plural: itemsCount !== 1
+			}]
+		});
+
+
+	var more = [{ // test prependChild order
+			clicks: 0,
+			maxClicks: 8
+		}, {
+			clicks: 0
+		}];
+
+	for (var n = 0, l = more.length; n < l; n++) {
+		buttons.prependChild(more[n]);
+	}
+	updateCounter();
+
+	console.log(demo);
+})(this);
+</script>
 </html>
