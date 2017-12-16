@@ -64,6 +64,8 @@
 						this.removeChild(item);
 						updateCounter();
 					}
+				} else { // replaceChild
+					updateCounter();
 				}
 			},
 			eventListeners: {
@@ -102,7 +104,6 @@
 	for (var n = 0, l = more.length; n < l; n++) {
 		buttons.prependChild(more[n]);
 	}
-	updateCounter();
 
 	console.log(demo);
 })(this);
