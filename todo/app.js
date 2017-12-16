@@ -69,7 +69,7 @@ require(['circular'], function(Circular) {
 			model: [uiModel],
 			eventListeners: {
 				addItem: function (e, element, item) {
-					var text = element.value.replace(/(?:^\s+|\s+$)/, '');
+					var text = element.value.trim();
 
 					if ((e.which === 13 || e.keyCode === 13) && text) {
 						list.appendChild({
