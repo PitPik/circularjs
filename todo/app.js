@@ -1,5 +1,5 @@
-// Full spec-compliant TodoMVC with localStorage persistence
-// and hash-based routing in ~145 effective lines of JavaScript.
+// Full spec-compliant TodoMVC with localStorage persistence + sorting
+// and hash-based routing in ~130 (+15 sorting) effective lines of JavaScript.
 require(['circular'], function(Circular) {
 	'use strict';
 
@@ -50,25 +50,23 @@ require(['circular'], function(Circular) {
 				markItem(item.elements.element, views.toggle, value);
 				listCallbacks.nodeChange();
 			},
-			removeChild: function (item) {
-				listCallbacks.nodeChange();
-			},
 			nodeChange: function () {
-				lazy(function() {
+				Toolbox.lazy(function() {
 					var getItems = list.getElementsByProperty,
 						all = getItems().length,
 						checked = getItems('done', true).length;
 
-					renderFooter(ui.model[0].views, checked, all);
+					renderFooter(uiModel.views, checked, all);
 					renderLeft(ui.templates.itemsLeft.partials.self,
-						ui.model[0].views.counter, all - checked);
-					renderMarkAll(ui.model[0].views.toggle, all === checked);
+						uiModel.views.counter, all - checked);
+					renderMarkAll(uiModel.views.toggle, all === checked);
 				}, listCallbacks.nodeChange);
 			}
 		},
 
+		uiModel = {filter: 'all'},
 		ui = circular.component('app', {
-			model: [{filter: 'all'}],
+			model: [uiModel],
 			eventListeners: {
 				addItem: function (e, element, item) {
 					var text = element.value.replace(/(?:^\s+|\s+$)/, '');
@@ -103,23 +101,22 @@ require(['circular'], function(Circular) {
 						items[n].done = checked;
 					}
 				}
+			},
+			onInit: function(component) {
+				circular.addRoute({
+					path: '(/)(:filter)',
+					callback: function(data) {
+						var value = data.parameters.filter || 'all';
+						var item = component.model[0];
+
+						renderFilters(item.views, value, item.filter);
+						item.filter = value;
+					}
+				}, true);
+				listCallbacks.nodeChange();
 			}
-		}),
-		filterRoute = circular.addRoute({
-			path: '(/)(:filter)',
-			callback: function(data) {
-				var value = data.parameters.filter || 'all';
-				var item = ui.model[0];
+		});
 
-				renderFilters(item.views, value, item.filter);
-				item.filter = value;
-			}
-		}, true);
-
-	// --- INIT app
-	listCallbacks.nodeChange(); // triggers rendering...
-
-	// --- VIEW functions: don't know about models etc...
 	// following functions only use parameters, no other circular stuff
 	function markItem(element, input, toggle) {
 		element.classList.toggle('completed', toggle);
@@ -164,10 +161,5 @@ require(['circular'], function(Circular) {
 		views.clear.style.display = toggle ? '' : 'none';
 		views.footer.style.display = countAll ? '' : 'none';
 		views.main.style.display = countAll ? '' : 'none';
-	}
-
-	function lazy(fn, obj) {
-		clearTimeout(obj.timer);
-		obj.timer = setTimeout(fn, 0);
 	}
 });
