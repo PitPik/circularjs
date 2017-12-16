@@ -1,0 +1,8 @@
+[cr-component="hero-detail"] label {
+	display: block;
+	margin: 12px 0;
+}
+
+[cr-component="hero-detail"] [cr-view="name"] {
+	text-transform: uppercase;
+}

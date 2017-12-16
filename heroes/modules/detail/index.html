@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+	<link cr-dev rel="stylesheet" type="text/css" href="../../libs/bootstrap/css/bootstrap.css">
+	<link cr-dev rel="stylesheet" type="text/css" href="../../css/index.css">
+	<link rel="stylesheet" type="text/css" href="css/index.css">
+
+	<script cr-dev type="text/javascript" src="../../../circular.min.js"></script>
+
+	<title>Dashboard</title>
+</head>
+<body>
+	<div class="module">
+		<div cr-component="hero-detail" cr-container>
+			<script type="text/template" cr-template-for="hero-detail">
+			<div>
+				<h2><span cr-view="name">{{name}}</span> Details</h2>
+				<div><span>id: </span>{{id}}{{^id}}--{{/id}}</div>
+				<label>name:
+			    	<input cr-event="keyup: updateName" placeholder="name" value="{{name}}" />
+			    </label>
+				<button cr-event="click: goBack">go back</button>
+	  			<button cr-event="click: save">save</button>
+			</div>
+			</script>
+		</div>
+	</div>
+	<script type="text/javascript" src="../../shared-modules/data-provider.js"></script>
+	<script type="text/javascript" src="js/detail.js"></script>
+	<script cr-dev type="text/javascript">
+		// for standalone development
+		require.config({ baseUrl: './' });
+		require(['app-detail'], function(initFn) {
+			initFn();
+		});
+	</script>
+</body>
+</html>

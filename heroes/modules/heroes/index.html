@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+	<link cr-dev rel="stylesheet" type="text/css" href="../../libs/bootstrap/css/bootstrap.css">
+	<link cr-dev rel="stylesheet" type="text/css" href="../../css/index.css">
+	<link rel="stylesheet" type="text/css" href="css/index.css">
+
+	<script cr-dev type="text/javascript" src="../../../circular.min.js"></script>
+	<title>Dashboard</title>
+</head>
+<body>
+	<div class="module" cr-component="heroes">
+		<h2>My Heroes</h2>
+		<form cr-event="submit: addHero">
+			<label>Hero name:
+				<input name="hero" type="text" />
+			</label>
+			<button type="submit">add</button>
+		</form>
+		<ul class="heroes" cr-component="heroes-list" cr-container>
+			<script type="text/template" cr-template-for="heroes-list">
+			{{heroes}}
+			<li cr-id={{cr-id}}>
+				<a href="#/detail/{{id}}">
+				  <span class="badge">{{id}}</span> {{name}}
+				</a>
+				<button class="delete" title="delete hero" cr-event="click: deleteHero">x</button>
+			</li>
+			{{/heroes}}
+			</script>
+		</ul>
+	</div>
+	<script type="text/javascript" src="../../shared-modules/data-provider.js"></script>
+	<script type="text/javascript" src="js/heroes.js"></script>
+	<script cr-dev type="text/javascript">
+		// for standalone development
+		require.config({ baseUrl: './' });
+		require(['app-heroes'], function(initFn) {
+			initFn();
+		});
+	</script>
+</body>
+</html>

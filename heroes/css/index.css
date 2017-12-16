@@ -1,0 +1,38 @@
+body, html {
+  height: 100%;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  font: normal normal normal 0.98em/1.35em "Trebuchet MS", Helvetica, sans-serif;
+  color: #333;
+  font-size: 1;
+}
+body {
+  padding: 2em;
+}
+
+h1 {
+  font-size: 1.2em;
+  color: #999;
+  margin-bottom: 0;
+}
+
+h2, h3 {
+  color: #444;
+  font-weight: lighter;
+}
+
+.app-modules { /* used in modulaes */
+  margin-top: 1em;
+  padding-top: 1em;
+  border-top: 1px solid #ddd;
+}
+
+.app-nav a {
+  padding: 5px 10px;
+  text-decoration: none;
+  margin-top: 10px;
+  display: inline-block;
+  background-color: #eee;
+  border-radius: 4px;
+}

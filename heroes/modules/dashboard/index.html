@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+	<link cr-dev rel="stylesheet" type="text/css" href="../../libs/bootstrap/css/bootstrap.css">
+	<link cr-dev rel="stylesheet" type="text/css" href="../../css/index.css">
+	<link rel="stylesheet" type="text/css" href="css/index.css">
+
+	<script cr-dev type="text/javascript" src="../../../circular.min.js"></script>
+
+	<title>Dashboard</title>
+</head>
+<body>
+	<div class="module">
+		<h2>Top Heroes</h2>
+		<div class="grid grid-pad clearfix" cr-component="heroes-dashboard" cr-container>
+		<script type="text/template" cr-template-for="heroes-dashboard">
+			{{heroes}}
+			<a class="col-1-4" href="#/detail/{{id}}">
+				<div class="module hero">
+					<h4>{{name}}</h4>
+				</div>
+			</a>
+			{{/heroes}}
+		</script>
+		</div>
+		<div cr-component="heroes-search">
+			<h4>Hero Search</h4>
+
+			<input #searchBox id="search-box" cr-view="search" cr-event="keyup: search" />
+
+			<ul class="search-result" cr-component="heroes-search-list" cr-event="click: select" cr-container>
+				<script type="text/template" cr-template-for="heroes-search-list">
+				{{heroes}}
+					<li><a href="#/detail/{{id}}">{{name}}</a></li>
+				{{/heroes}}
+				</script>
+			</ul>
+		</div>
+	</div>
+	<script type="text/javascript" src="../../shared-modules/data-provider.js"></script>
+	<script type="text/javascript" src="js/dashboard.js"></script>
+	<script type="text/javascript" src="js/search.js"></script>
+	<script cr-dev type="text/javascript">
+		// for standalone development
+		require.config({ baseUrl: './' });
+		require(['app-dashboard'], function(initFn) {
+			initFn();
+		});
+	</script>
+</body>
+</html>
