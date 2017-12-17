@@ -1,5 +1,5 @@
 // Full spec-compliant TodoMVC with localStorage persistence + sorting
-// and hash-based routing in ~130 (+15 sorting) effective lines of JavaScript.
+// and hash-based routing in ~132 (+13 sorting) effective lines of JavaScript.
 require(['circular'], function(Circular) {
 	'use strict';
 
