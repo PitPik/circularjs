@@ -244,7 +244,8 @@
 						item.text = text;
 					}
 					promises.push(new Toolbox.Promise(function(resolve) {
-						if (item.onload !== null) {
+						if (!resourceName) {
+							container && container.appendChild(item);
 							resolve(item);
 						} else {
 							item.onload = function() {
@@ -259,7 +260,7 @@
 					item[attribute] = path;
 					document.head.appendChild(item);
 					resourceCache[path] = item;
-				} else if (container) { // TODO: check
+				} else if (container && isStyles) { // TODO: check
 					container.appendChild(item);
 				}
 			}

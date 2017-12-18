@@ -1,6 +1,6 @@
 require = window.require || {
 	lookaheadMap: {
-		'app-dashboard': ['circular', 'data-provider', 'data-search'],
+		'app-dashboard': ['circular', 'data-provider', 'app-search'],
 		'app-search': ['circular', 'data-provider'],
 		'app-detail': ['circular', 'data-provider'],
 		'app-heroes': ['circular', 'data-provider'],
