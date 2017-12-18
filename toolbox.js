@@ -244,7 +244,7 @@
 						item.text = text;
 					}
 					promises.push(new Toolbox.Promise(function(resolve) {
-						if (!item.onload) {
+						if (item.onload !== null) {
 							resolve(item);
 						} else {
 							item.onload = function() {

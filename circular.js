@@ -436,7 +436,7 @@
 				.filter(function(elm) {
 					if (elm.getAttribute('type') === 'text/javascript') {
 						elm.parentNode.removeChild(elm);
-						return !elm.hasAttribute(_this.options.devAttribute);
+						return devFilter(elm);
 					}
 					return false;
 				});
