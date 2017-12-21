@@ -22,7 +22,7 @@ h2, h3 {
   font-weight: lighter;
 }
 
-.app-modules { /* used in modulaes */
+[cr-view="app-modules"] { /* used in modulaes */
   margin-top: 1em;
   padding-top: 1em;
   border-top: 1px solid #ddd;
