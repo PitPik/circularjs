@@ -4,18 +4,23 @@ function(Circular, heroService) {
 
     var circular = new Circular(),
         debounce = null,
-        searchModel = {},
-        searchComponent = circular.component('heroes-search', {
-            model: [searchModel],
-            eventListeners: {
-                search: function(e, element, item) {
-                    clearTimeout(debounce);
-                    debounce = setTimeout(function() {
-                        search(element.value);
-                    }, 300);
-                }
+        searchModel = {};
+
+    circular.component('heroes-search', {
+        model: [searchModel],
+        eventListeners: {
+            search: function(e, element, item) {
+                clearTimeout(debounce);
+                debounce = setTimeout(function() {
+                    search(element.value);
+                }, 300);
             }
-        });
+        }
+    });
+
+    function search(text) {
+        heroService.searchHeroes(text).then(setupList);
+    }
 
     function setupList(model) {
         circular.component('heroes-search-list', {
@@ -27,9 +32,5 @@ function(Circular, heroService) {
     function resetSearch() {
         searchModel.views.search.value = '';
         setupList([]);
-    }
-
-    function search(text) {
-        heroService.searchHeroes(text).then(setupList);
     }
 });
