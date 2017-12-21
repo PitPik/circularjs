@@ -3,14 +3,21 @@ function(Circular, heroService) {
     'use strict';
 
     var circular = new Circular();
-    var heroDetail = circular.component('hero-detail', {
-            model: [{}],
+
+    function heroDetail(data) {
+        heroDetail = circular.component('hero-detail', {
+            model: [data || {}],
             eventListeners: {
-                save: updateHero,
                 updateName: updateName,
+                save: updateHero,
                 goBack: goBack
             }
         });
+    }
+
+    function updateName(e, element, item) {
+        item.name = item.views.name.textContent = element.value.trim();
+    }
 
     function updateHero(e, element, item) {
         (item.id === undefined ? heroService.addHero(item.name) :
@@ -18,21 +25,15 @@ function(Circular, heroService) {
         .then(goBack);
     }
 
-    function updateName(e, element, item) {
-        item.name = item.views.name.textContent = element.value.trim();
-    }
-
     function goBack() {
         window.history.back();
     }
 
     circular.addRoute({
-        path: '/detail(/:heroId)',
+        path: '/detail(/)(:heroId)',
         callback: function(data) {
-            heroService.getHero(+data.parameters.heroId)
-            .then(function(model) {
-                heroDetail.replaceChild(model, heroDetail.model[0]);
-            });
+            heroService.getHero(parseInt(data.parameters.heroId))
+            .then(heroDetail);
         }
     }, true);
 });
