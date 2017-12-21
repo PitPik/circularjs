@@ -10,12 +10,6 @@ function(Circular, heroService) {
         eventListeners: { addHero: addHero }
     });
 
-    function deleteHero(e, element, item) {
-        heroService.deleteHero(item.id).then(function() {
-            heroList.removeChild(item);
-        });
-    }
-
     function addHero(e, element, item) {
         var name = element.hero.value.trim();
 
@@ -27,12 +21,22 @@ function(Circular, heroService) {
         });
     }
 
-    return function init(data, path) {
-        heroService.getHeroes().then(function(model) {
+    function init(data, path) {
+        heroService.getHeroes()
+        .then(function(model) {
             heroList = circular.component('heroes-list', {
                 model: model,
                 eventListeners: { deleteHero: deleteHero }
             });
         });
     }
+
+    function deleteHero(e, element, item) {
+        heroService.deleteHero(item.id)
+        .then(function() {
+            heroList.removeChild(item);
+        });
+    }
+
+    return init;
 });
