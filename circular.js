@@ -430,7 +430,7 @@
 			var scripts = [];
 			var path = fileName.split('/').slice(0, -1);
 
-			DOC = DOC || document.implementation.createHTMLDocument();
+			DOC = DOC || document.implementation.createHTMLDocument('');
 			DOC.documentElement.innerHTML = data;
 			scripts = [].slice.call($$('script', DOC) || [])
 				.filter(function(elm) {
