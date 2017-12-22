@@ -36,3 +36,20 @@ function(Circular, heroService) {
         }
     }, true);
 });
+
+/**
+ * 'hero-detail' is the component that listenes to mouse event of
+ * htree different HTML-Elements: the input field for renaming the
+ * current hero, the 'save' button and the 'go back' button and
+ * referring to the according functions.
+ *
+ * 'updateName()' adds 'name' to the model and updates the view
+ * 'name' on key up, which is the headline.
+ *
+ * 'updateHero()' is called when the form is submitted and then
+ * adds a new hero or updates a hero via 'heroService.updateHero()'
+ *
+ * The router's callback gets according to 'detail/id' the hero model
+ * and then replaces the model of 'hero-detail' so it can re-render
+ * automatically.
+ */
