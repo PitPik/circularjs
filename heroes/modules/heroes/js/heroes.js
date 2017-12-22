@@ -40,3 +40,20 @@ function(Circular, heroService) {
 
     return init;
 });
+
+/**
+ * 'heroes' is the component that listens to the form for adding
+ * heroes by calling 'addHero()'.
+ * 'addHero()' tells 'heroService' to add a hero and then clears
+ * the form and appends the new hero to the 'heroes-list'.
+ *
+ * 'heroes-list' is created on init as its wrapped function is
+ * returned as an initiation function and gets called when the
+ * whole module is (re-)loaded.
+ * The items in the 'heroes-list' have an eventListener on click
+ * to delete items with 'deleteHero()'.
+ *
+ * 'addHero()' and 'deleteHero()' use VOM's API to manipulate the
+ * model in 'heroes-list' to append and remove children that then
+ * triggers a re-rendering automatically.
+ */
