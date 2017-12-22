@@ -56,6 +56,8 @@ There are two kinds of components:
 
   - The regular module that typically has a container for Schnauzer templates that reflect the model one to one and
   - the one that has a model with only one element in it (just like a state model) but no direct template reflecting it. You can still use Schnauzer templates to render parts of its view but there is no auto-trigger to use it. Those components can also be nested with others.
+  
+You can also use modules with containers to nest other modules unless the nesting doesn't happen inside the container.
 
 ## VOM (Virtual Object Model)
 
