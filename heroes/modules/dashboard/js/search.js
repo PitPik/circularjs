@@ -33,15 +33,3 @@ function(Circular, heroService) {
         setupList([]);
     }
 });
-
-/**
- * 'heroes-search' is a component that has only one purpose. It
- * holds a view of an input field that listens to keyUp that triggers
- * 'search()'. This function tells heroService to look for heroes
- * via 'searchHeroes()' that again triggers 'setupList()'.
- *
- * 'setupList()' creates or updates the 'heroes-search-list' component
- * that gets rendered underneath the previous mentioned input field.
- * The list also listens to click so it can reset the view to an empty
- * list and empty the input field via 'resetSearch()'.
- */

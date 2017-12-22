@@ -31,19 +31,3 @@ define('app', ['circular'], function(Circular) {
         }
     }, true);
 });
-
-/**
- * The component 'app' is created to keep track of the app's state.
- * The according model holds 'title' (won't change) and 'currentApp'.
- * The component listens to the changes to 'currentApp' and will then
- * call 'renderModule()' to append the module inside the set container.
- * 'renderModule()' also gets the previousName, the previous module
- * that it then will hide from the view. There is also 'require', the
- * js-mudule that will be loaded and executed to start the new module.
- *
- * 'onInit' gets executed once to render the headline which view is
- * defined in the template.
- *
- * The router is triggered by the links in the HTML page and just re-
- * defines the 'app' component's 'currentApp'.
- */
