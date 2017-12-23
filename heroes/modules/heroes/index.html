@@ -21,14 +21,12 @@
 		</form>
 		<ul class="heroes" cr-component="heroes-list" cr-container>
 			<script type="text/template" cr-template-for="heroes-list">
-			{{heroes}}
 			<li cr-id={{cr-id}}>
 				<a href="#/detail/{{id}}">
 				  <span class="badge">{{id}}</span> {{name}}
 				</a>
 				<button class="delete" title="delete hero" cr-event="click: deleteHero">x</button>
 			</li>
-			{{/heroes}}
 			</script>
 		</ul>
 	</div>
