@@ -20,7 +20,7 @@ By the end of the tutorial you will be able to do the following:
 ## app.js
 
 The component "app" is created to keep track of the app's state.
-The according model holds 'title' (won't change) and `currentApp`.
+The according model holds `title` (won't change) and `currentApp`.
 The component listens to the changes to `currentApp` and will then
 call `renderModule()` to append the module inside the set container.
 `renderModule()` also gets the `previousName`, the previous module
