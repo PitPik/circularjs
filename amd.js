@@ -8,11 +8,19 @@
 		_documentFragment = null, // used in appendScript() ...
 		_timer = 0, // ... same here
 		_foo = {},
+		extend = function(oldObj, newObj) {
+			oldObj = newObj && (oldObj || {});
+			for (var key in newObj) {
+				var item = newObj[key];
+				oldObj[key] = oldObj[key] === undefined || typeof item !== "object" ?
+					item : extend(oldObj[key], item);
+			}
+			return oldObj;
+		},
 		applyConfiguration = function(config) {
 			var parts = ['lookaheadMap', 'paths', 'options', 'baseUrl'];
-
 			for (var n = parts.length; n--; ) { // apply white-list
-				require[parts[n]] = config[parts[n]] || require[parts[n]] || '';
+				require[parts[n]] = extend(require[parts[n]], config[parts[n]]) || '';
 			}
 		},
 		getListIndex = function(list, item) { // for old IE ([].indexOf())
