@@ -17,7 +17,12 @@ By the end of the tutorial you will be able to do the following:
  - Use routing to navigate among different views and their components.
  - You'll learn enough Circular to get started and gain confidence that Circular can do whatever you need it to do.
 
-## app.js
+
+## The files from the hero app
+
+Explanations about the HTML files will follow...
+
+### app.js
 
 The component "app" is created to keep track of the app's state.
 The according model holds `title` (won't change) and `currentApp`.
@@ -34,7 +39,7 @@ The router is triggered by the links in the HTML page and just
 re-defines the "app" component's `currentApp`.
 
 
-## dashbord.js
+### dashbord.js
 
 This file is part of a module, the HTML and it's resources. This
 module returns a initialisation function `init`. The purpose of
@@ -44,7 +49,7 @@ in the hero list that we get via `heroService.getHeroes()`.
 The rest of the module is defined in the HTML file (index.html)
 
 
- ## search.js
+### search.js
 
 "heroes-search" is a component that has only one purpose. It
 holds a view of an input field that listens to keyUp that triggers
@@ -57,7 +62,7 @@ The list also listens to click so it can reset the view to an empty
 list and empty the input field via `resetSearch()`.
 
 
-## detail.js
+### detail.js
 
 "hero-detail" is the component that listenes to mouse event of
 htree different HTML-Elements: the input field for renaming the
@@ -75,7 +80,7 @@ and then replaces the model of "hero-detail" so it can re-render
 automatically.
 
 
-## heroes.js
+### heroes.js
 
 "heroes" is the component that listens to the form for adding
 heroes by calling `addHero()`.
