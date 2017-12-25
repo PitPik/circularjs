@@ -25,7 +25,7 @@
 		</div>
 		<div cr-component="heroes-search">
 			<h4>Hero Search</h4>
-			<input #searchBox id="search-box" cr-view="search" cr-event="keyup: search" />
+			<input id="search-box" cr-view="search" cr-event="keyup: search" />
 			<ul class="search-result" cr-component="heroes-search-list" cr-event="click: select" cr-container>
 				<script type="text/template" cr-template-for="heroes-search-list">
 				<li><a href="#/detail/{{id}}">{{name}}</a></li>
