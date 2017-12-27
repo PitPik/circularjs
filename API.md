@@ -97,6 +97,8 @@ Circular.component(name: 'String', parameters: Object {
 
 ### parameters for ```components```
 
+```Circular.component()``` returns the component object that will be described further down in "the model of a component".
+
 #### model: Array of Objects
 The model that reflects the view. Needs to be an Array (look at it as the children of a DOM body)
 
@@ -127,13 +129,13 @@ The function takes parameters such as:
 If you choose not to have a element defined with ```cr-component="myName"``` you have to let circularJS know what DOM Element should be the component by defining it here.
 
 #### componentWrapper: Object DOMElement,
-??? TODO: find what it is
+Is the container or context where to look for the component with the given name. In case there are more components with the same name but the "wrapper" is known, this can help to pick the correct component.
 
 #### mountSelector: String selector,
 If you're building a nested construct like a link tree then you need to let the rendereing engine know where to render the children of the just rendered item. This points to the container element of the child.
 
 #### beforeInit: function(component),
-A callback function being called right after the component is initialized. (TODO: ...)
+A callback function being called right before the component is initialized. The model can still be manipulated and the event listeners and the templates are are not installed at this moment. ```component``` is the object that is also returned by ```component()``` itself.
 
 #### onInit: function(component),
 A callback function being called right after the component is initialized.
@@ -233,13 +235,20 @@ In our previous example we created a module stored in ```helloWorld```. This mod
  - destroy
  - uncloak
  - reset
- - render
 
-To learn what they do please refer to VOM.js and its API documentation. Every method that changes the model in VOM will automatically be reflected/rendered.
+To learn what they do please refer to VOM.js and its API documentation.
+Every method that changes the model in VOM will automatically be reflected/rendered.
 
-The last three methods ```uncloak, reset, render``` are Circular and Schnautzer related.
+The last three methods ```uncloak, reset``` are Circular related:
 
-Quick example with previous demo:
+#### uncloak(item)
+Pass the model item to the function and it will remove the attribute ```cr-cloak``` and the className ```cr-cloak``` from the item's ```element```.
+
+#### reset(model)
+Does practically the same as calling ```component('myName', {model: model})``` on an existing component. It empties the view and re-renders it according to the new model.
+
+
+### Quick example with previous demo:
 
 ```js
 helloWorld.replaceChild({name: 'FooBar'}, helloWorld.model[0]);

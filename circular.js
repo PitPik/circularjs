@@ -208,10 +208,8 @@
 
 		checkRestoreNesting(null, null, nestingData);
 
-		proto = transferMethods(Schnauzer, _inst.template, component, this, proto);
-		proto = transferMethods(VOM, _inst.vom, component, this, {
-			render: proto.render
-		});
+		// proto = transferMethods(Schnauzer, _inst.template, component, this, proto);
+		proto = transferMethods(VOM, _inst.vom, component, this, proto);
 		proto.uncloak = function(item) {
 			var item = item && item.element || component.element;
 
