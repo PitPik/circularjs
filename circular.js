@@ -472,30 +472,41 @@
 			}).catch();
 	};
 
+	function moveChildrenToCache(data) {
+		var children = [].slice.call(data.container.childNodes);
+
+		for (var n = 0, m = children.length; n < m; n++) {
+			appComponents[data.previousName].cache.appendChild(children[n]);
+		}
+	}
+
 	Circular.prototype.renderModule = function(data) {
 		var cache = null,
+			temp = null,
+			isInsideDoc = data.container,
 			components = appComponents, // speeds up
 			name = data.name;
 
 		if (components[data.previousName]) { // remove old app
-			var children = [].slice.call(data.container.childNodes);
-
-			for (var n = 0, m = children.length; n < m; n++) {
-				components[data.previousName].cache.appendChild(children[n]);
-			}
+			moveChildrenToCache(data);
 		}
 		if (name && components[name]) { // append current app and initialize
+			data.container.appendChild(components[name].cache);
 			components[name].init && data.init !== false &&
 				components[name].init(data.data, components[name].path);
-			data.container.appendChild(components[name].cache);
 			return new Toolbox.Promise(function(resolve) {
 				resolve(components[name].init);
 			});
 		}
 		// create new app and initialize
 		cache = document.createDocumentFragment();
-		return name ? this.insertModule(data.path, data.container || cache)
-			.then(function(path) { // TODO: return Promise with data...
+		if (!isInsideDoc) { // TODO: find other solution
+			temp = document.createElement('div');
+			temp.style.display = 'none';
+			document.body.appendChild(temp);
+		}
+		return name ? this.insertModule(data.path, data.container || temp)
+			.then(function(path) {
 				return new Toolbox.Promise(function(resolve) {
 					var moduleName = data.require === true ? name :
 							data.require === false ? '' : data.require;
@@ -508,9 +519,16 @@
 						require([moduleName], function(init) {
 							components[name].init = init;
 							data.init !== false && init(data.data, path);
+							if (!isInsideDoc) {
+								data.container = temp;
+								moveChildrenToCache(data);
+								temp.parentElement.removeChild(temp);
+							}
 							resolve(init);
 						});
 					} else {
+						moveChildrenToCache(data);
+						temp.parentElement.removeChild(temp);
 						resolve();
 					}
 				})
