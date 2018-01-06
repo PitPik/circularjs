@@ -2,6 +2,10 @@
 
 CircularJS is a tiny MV* like framework. It's goal is to help building web-apps in a model-oriented easy way by building fast and convenient 2-way data binding with the help of powerfull tools.
 
+## Quickstart
+
+To quickly get started try the ["Heroes" tutorial](heroes) and read [ARCHITECTURE.md](ARCHITECTURE.md) and [API.md](API.md) for a better overview.
+
 ## CircularJS provides you with:
 
 * VOM, a Virtual Object Model controller that automatically reacts on changes of properties,
@@ -52,16 +56,11 @@ The intention to build CircularJS was to create something small and fast that is
  * To help you find DOM elements later on you can also define them in the template so they get cached in the model for convenient use.
  * Use PubSub, Router or Promisses to change the state (that triggers rendering again...)
 
-## Coming up soon (...)
-
-* cr-event change: automatic model update on input change
-* cr-class: automatic class name update due to model change
-* auto-model-creation from server-side-rendered view
-
 ## APIs
 
 This documentation will be continued soon. For now you can see some demos (also delivered by this repository) to explore how CircularJS works.
 
+* ["Heroes" tutorial](http://dematte.at/circularjs/heroes)
 * [Simple button demo](http://dematte.at/circularjs/)
 * [TODO list demo](http://dematte.at/circularjs/todo/)
 * [Nested tree demo](http://dematte.at/circularjs/tree/)
