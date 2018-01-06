@@ -140,7 +140,7 @@
 		normalizePath: function(path) {
 			var target = [];
 			var src = path.split('/');
-			var start = path.match(/^([./]*)/g)[0];
+			var start = path.match(/^([./]*)/g)[0].replace(/^.\//, '');
 
 			for (var n = 0; n < src.length; ++n) {
 				if (src[n] === '..') {
