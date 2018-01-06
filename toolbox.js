@@ -156,6 +156,7 @@
 			var promise = null;
 
 			prefs = prefs || {};
+			url = Toolbox.normalizePath(url);
 
 			promise = prefs.cache && !prefs.resetCache && ajaxCache[url] ||
 				new Toolbox.Promise(function(resolve, reject) {
