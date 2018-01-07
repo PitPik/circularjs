@@ -91,8 +91,11 @@
 			componentAttr = options.componentAttr,
 			componentSelector = '[' + componentAttr + '="' + name + '"]',
 			componentElement = parameters.componentElement || // TODO: ... no wrapper
-				$(componentSelector, parameters.componentWrapper || document),
-			nestingData = checkRestoreNesting(componentElement, componentAttr),
+				$(componentSelector, parameters.componentWrapper || document);
+
+		if (!componentElement) return;
+
+		var nestingData = checkRestoreNesting(componentElement, componentAttr),
 			altName = componentElement && componentElement.getAttribute('name'),
 			data = getDomData(options, parameters, componentElement, altName || name),
 			component = this.components[name] = {
