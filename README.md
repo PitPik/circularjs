@@ -4,7 +4,7 @@ CircularJS is a tiny MV* like framework. It's goal is to help building web-apps 
 
 ## Quickstart
 
-To quickly get started try the ["Heroes" tutorial](heroes) and read [ARCHITECTURE.md](ARCHITECTURE.md) and [API.md](API.md) for a better overview.
+To quickly get started try the ["Tour of Heroes" tutorial](heroes) and read [ARCHITECTURE.md](ARCHITECTURE.md) and [API.md](API.md) for a better overview.
 
 ## CircularJS provides you with:
 
