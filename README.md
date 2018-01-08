@@ -60,7 +60,7 @@ The intention to build CircularJS was to create something small and fast that is
 
 This documentation will be continued soon. For now you can see some demos (also delivered by this repository) to explore how CircularJS works.
 
-* ["Heroes" tutorial](http://dematte.at/circularjs/heroes)
+* ["tour of Heroes" tutorial](http://dematte.at/circularjs/heroes)
 * [Simple button demo](http://dematte.at/circularjs/)
 * [TODO list demo](http://dematte.at/circularjs/todo/)
 * [Nested tree demo](http://dematte.at/circularjs/tree/)
