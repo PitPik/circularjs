@@ -12,7 +12,7 @@ Of course, there is more to it than this. You'll learn the details in the pages 
 
 {{PICTURE}}
 
-If you are familiar with the concepts of the DOM-API, Promise, PubSub, Mustage or Handlebars, jQuery ajax and simple routing patterns then you are already familiar with more than half of what you need to know to use circularJS.
+If you are familiar with the concepts of the DOM-API, AMD module loaders like requireJS, Promise, PubSub, Mustage or Handlebars, jQuery ajax and simple routing patterns then you are already familiar with more than half of what you need to know to use circularJS.
 The intention to build circularJS was to get a powerful MVC framework that can abstract and handle HTML as it is (without making it what it isn't: markup with magic functionality), build blasting fast SPAs by using patterns one is used to and familiar with. Write less code for powerful and fast interactions with code that is least possible opinionated and logically structured.
 
 ## Modules
