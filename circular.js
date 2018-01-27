@@ -454,9 +454,12 @@
 	};
 
 	Circular.prototype.insertResources = function(container, data) {
+		var body = $('[' + this.options.devAttribute +'="container"]',
+				data.body) || data.body;
+
 		Toolbox.requireResources(data, 'styles', container);
-		while(data.body.childNodes[0]) {
-			container.appendChild(data.body.childNodes[0]);
+		while(body.childNodes[0]) {
+			container.appendChild(body.childNodes[0]);
 		}
 		return Toolbox.requireResources(data, 'scripts', container);
 	};
@@ -466,13 +469,11 @@
 
 		return this.loadResource(fileName, true)
 			.then(function(data) {
-				return new Toolbox.Promise(function(resolve) {
-					_this.insertResources(container, data).
-					then(function(){
-						resolve(data.path);
+				return _this.insertResources(container, data).
+					then(function(_data){
+						return _data.path;
 					});
-				});
-			}).catch();
+			});
 	};
 
 	function moveChildrenToCache(data) {
