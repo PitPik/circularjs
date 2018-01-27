@@ -259,6 +259,7 @@
 				var replacer = $5 + $1 + $2 + $3 + $6,
 					index = $4.lastIndexOf(replacer);
 
+				if (nesting.length) return _;
 				counter++;
 				if (index !== -1) { // only if nesting occures
 					nesting.push(counter--);
