@@ -470,8 +470,8 @@
 		return this.loadResource(fileName, true)
 			.then(function(data) {
 				return _this.insertResources(container, data).
-					then(function(_data){
-						return _data.path;
+					then(function(){
+						return data.path;
 					});
 			});
 	};
