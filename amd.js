@@ -9,6 +9,7 @@
 		_timer = 0, // ... same here
 		_foo = {},
 		extend = function(oldObj, newObj) {
+			if (typeof newObj !== "object") return newObj;
 			oldObj = newObj && (oldObj || {});
 			for (var key in newObj) {
 				var item = newObj[key];
