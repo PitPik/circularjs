@@ -255,7 +255,7 @@
 			counter = -1,
 			stop = '',
 			parts = html.replace(_this.sectionRegExp, function(_, $1, $2, $3, $4, $5, $6) {
-				var replacer = $5 + $1 + $2 + $3 + $6,
+				var replacer = $5 + $1 + $2,
 					index = $4.lastIndexOf(replacer);
 
 				if (nesting.length) return _; // skip for next replace
@@ -263,7 +263,7 @@
 				if (index !== -1) { // only if nesting occures
 					nesting.push(counter--);
 					stop = Array(++help).join('.');
-					return replacer + $4.substring(0, index) + $5 + $1 + stop + $2 + $6 +
+					return replacer + $3 + $6 + $4.substring(0, index) + $5 + $1 + stop + $2 +
 						$4.substring(index + replacer.length) + $5 + '/' + stop + $2 + $6;
 				}
 				$2 = $2.replace(_this.stopRegExp, '');
