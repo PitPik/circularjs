@@ -33,8 +33,7 @@
 				partials: {},
 				recursion: 'self',
 				characters: '$"<>%-=@',
-				splitter: '|##|',
-				stopper: '__'
+				splitter: '|##|'
 			};
 			init(this, options || {}, template);
 		},
@@ -49,6 +48,7 @@
 				}
 				return new RegExp('[' + output + ']', 'g');
 			})(options.entityMap, []);
+			_this.stopRegExp = new RegExp(/^\.+/);
 			switchTags(_this, options.tags);
 			_this.partials = {};
 			for (var name in options.partials) {
@@ -56,7 +56,7 @@
 			}
 			template && _this.registerPartial(options.recursion, template);
 		},
-		help = 0; // counter helper for nestings
+		help = 1; // counter helper for nestings
 
 	Schnauzer.prototype = {
 		render: function(data, extra) {
@@ -253,21 +253,20 @@
 			output = [],
 			nesting = [],
 			counter = -1,
-			stop = options.stopper,
-			stopper = stop + '\\d+' + stop,
+			stop = '',
 			parts = html.replace(_this.sectionRegExp, function(_, $1, $2, $3, $4, $5, $6) {
 				var replacer = $5 + $1 + $2 + $3 + $6,
 					index = $4.lastIndexOf(replacer);
 
-				if (nesting.length) return _;
+				if (nesting.length) return _; // skip for next replace
 				counter++;
 				if (index !== -1) { // only if nesting occures
 					nesting.push(counter--);
-					return replacer + $4.substring(0, index) + $5 + $1 + $2 +
-						stop + help + stop + $6 + $4.substring(index + replacer.length) +
-						$5 + '/' + $2 + stop + help++ + stop + $6;
+					stop = Array(++help).join('.');
+					return replacer + $4.substring(0, index) + $5 + $1 + stop + $2 + $6 +
+						$4.substring(index + replacer.length) + $5 + '/' + stop + $2 + $6;
 				}
-				$2 = $2.replace(new RegExp(stopper), '');
+				$2 = $2.replace(_this.stopRegExp, '');
 
 				partCollector.push(new RegExp(options.tags[0] + '[#\^]').test($4) ?
 					section(_this, sizzleTemplate(_this, $4), $2, $3, $1 === '^') :
