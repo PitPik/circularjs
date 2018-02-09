@@ -12,13 +12,13 @@
 		<section class="todoapp" cr-component="app" cr-view="app">
 			<header class="header">
 				<h1>todos</h1>
-				<input class="new-todo" cr-event="keypress: addItem; keydown: sort" placeholder="What needs to be done?" autofocus>
+				<input class="new-todo" cr-event="keypress: addItem" placeholder="What needs to be done?" autofocus>
 			</header>
 			<section class="main" cr-view="main">
 				<input cr-view="toggle" cr-event="click: toggleAll" class="toggle-all" id="toggle-all" type="checkbox">
 				<label for="toggle-all">Mark all as complete</label>
 				<ul class="todo-list" cr-component="list" cr-container="prepend">
-					<script type="text/template" id="item-template" cr-template-for="list">
+					<script type="text/template" cr-template-for="list">
 						<li cr-id="{{cr-id}}" class="todo-list-item{{#done}} completed{{/done}}">
 							<input cr-event="click: toggle" cr-view="toggle" class="toggle" type="checkbox"{{#done}} checked=""{{/done}}>
 							<label cr-event="dblclick: edit" cr-view="label">{{text}}</label>
@@ -30,7 +30,7 @@
 			</section>
 			<footer class="footer" cr-view="footer">
 				<span class="todo-count" cr-view="counter">
-					<script type="text/template" id="itemsLeft" cr-template="app">
+					<script type="text/template" name="itemsLeft" cr-template="app">
 						<strong>{{count}}</strong> <span>item{{#plural}}s{{/plural}} left</span>
 					</script>
 				</span>

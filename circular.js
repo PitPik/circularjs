@@ -108,7 +108,7 @@
 		component.templates = data.templates;
 		instanceList[this.id] = instanceList[this.id] || {};
 		_inst = instanceList[this.id][name] = {};
-		_inst.helper = document.createElement('div');
+		_inst.helper = document.createElement('tbody');
 
 		parameters.onBeforeInit && parameters.onBeforeInit(component);
 
@@ -624,7 +624,7 @@
 		};
 
 		// if (true) { // TODO: introduce asyncRendering
-			renderingFunc();
+			element && renderingFunc();
 		// } else {
 		// 	_animate(renderingFunc);
 		// }

@@ -93,20 +93,20 @@ Circular.component(name: 'String', parameters: Object {
 ```
 
 
-```component()``` initializes a named component and renders it right away according to its model if you're using a template. Setting up a component assumes to have a HTML-tag set in the document that has an argument ```cr-componen=""``` with the value of the component's name (names are like IDs, so last of same name would overwrite privous one or actually reinitialize). Inside the component you can use Schnauzer.js templates (works almost as Handlebars) to render the model. Therefore you need to define cr-container to let ```component()``` know where to render the items into and a script tag with the attribute ```cr-template-for``` with the name of the component. 
+```component()``` initializes a named component and renders it right away according to its model if you're using a template. Setting up a component assumes to have a HTML-tag set in the document that has an argument ```cr-componen=""``` with the value of the component's name (names are like IDs, so last of same name would overwrite privous one or actually reinitialize). Inside the component you can use Schnauzer.js templates (works almost as Handlebars) to render the model. Therefore you need to define cr-container to let ```component()``` know where to render the items into and a script tag with the attribute ```cr-template-for``` with the name of the component. With ```mountSelector``` you can determine the selector of the container inside your template for nested children.
 
 ### parameters for ```components```
 
 ```Circular.component()``` returns the component object that will be described further down in "the model of a component".
 
 #### model: Array of Objects
-The model that reflects the view. Needs to be an Array (look at it as the children of a DOM body)
+The model that reflects the view. Needs to be an Array (look at it as the children of a DOM body).
 
 #### extraModel: Object {} || Array [],
 This is used to get some more data to the model for rendering inside templates without polluting the model itself. Those datas are available in any branch of the model, no matter how deep it is (as if it was present with evey child).
 
 #### listeners: Array [String 'modelItem', '*', ...],
-Defines the properties of the model items to listen to changes. If they get set, the callback function defined in ```subscribe``` gets called.
+Defines the properties of the model items to listen to changes. If they get set, the callback function defined in ```subscribe``` gets called. '*' means all of the properties.
 
 #### subscribe: function(property, item, value, oldValue, type)
 The callback function being called when properties of the model change defined in ```listeners```. The function takes parameters such as:

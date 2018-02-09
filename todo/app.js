@@ -1,25 +1,18 @@
 // Full spec-compliant TodoMVC with localStorage persistence + sorting
-// and hash-based routing in ~132 (+13 sorting) effective lines of JavaScript.
+// and hash-based routing in ~132 effective lines of JavaScript.
 require(['circular'], function(Circular) {
 	'use strict';
 
 	var Toolbox = Circular.Toolbox,
 		STORAGE_KEY = 'todos-circularjs-0.1',
-		sortAsc = function(a, b, desc) {
-			return Toolbox.itemsSorter(a, b, 'text', desc);
-		},
-		sortDesc = function(a, b) {
-			return sortAsc(a, b, 'text', true);
-		},
 		circular = new Circular(),
-
 		list = circular.component('list', {
 			model: Toolbox.storageHelper.fetch(STORAGE_KEY),
 			listeners: ['text', 'done'],
 			subscribe: function(property, item, value, oldValue, type) {
 				property = listCallbacks[property] ? property : 'nodeChange';
 				listCallbacks[property](item, item.views, value);
-				Toolbox.storageHelper.saveLazy(this.model, STORAGE_KEY); // persist
+				Toolbox.storageHelper.saveLazy(this.model, STORAGE_KEY);
 			},
 			eventListeners: {
 				toggle: function (e, element, item) {
@@ -57,33 +50,26 @@ require(['circular'], function(Circular) {
 						checked = getItems('done', true).length;
 
 					renderFooter(uiModel.views, checked, all);
-					renderLeft(ui.templates.itemsLeft.partials.self,
+					renderLeft(app_ui.templates.itemsLeft.partials.self,
 						uiModel.views.counter, all - checked);
 					renderMarkAll(uiModel.views.toggle, all === checked);
-				}, listCallbacks.nodeChange);
+				}, list);
 			}
 		},
 
 		uiModel = {filter: 'all'},
-		ui = circular.component('app', {
+		app_ui = circular.component('app', {
 			model: [uiModel],
 			eventListeners: {
 				addItem: function (e, element, item) {
 					var text = element.value.trim();
 
-					if ((e.which === 13 || e.keyCode === 13) && text) {
+					if ((e.which || e.keyCode) === 13 && text) {
 						list.appendChild({
 							text: text,
 							done: false
 						});
 						element.value = '';
-					}
-				},
-				sort: function (e, element, item) {
-					if (e.keyCode === 38 && e.altKey) { // arrow up
-						list.sortChildren(sortAsc);
-					} else if (e.keyCode === 40 && e.altKey) { // arrow down
-						list.sortChildren(sortDesc);
 					}
 				},
 				deleteDone: function (e, element, item) {
@@ -135,7 +121,7 @@ require(['circular'], function(Circular) {
 	}
 
 	function escapeItem(e, elm, label, value) {
-		if (e.which === 27 || e.keyCode === 27) {
+		if ((e.which || e.keyCode) === 27) {
 			elm.value = value;
 			blurItem(elm, label, value);
 		}

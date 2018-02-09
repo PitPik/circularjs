@@ -137,7 +137,7 @@
 	}
 
 	function escapeHtml(string, _this) {
-		return String(string).replace(_this.entityRegExp, function escape(char) {
+		return String(string).replace(_this.entityRegExp, function(char) {
 			return _this.options.entityMap[char];
 		});
 	}
@@ -227,7 +227,7 @@
 				}
 				for (var n = 0, l = _data.length, out = ''; n < l; n++) {
 					out = out + (typeof _data[n] === 'object' ?
-						func(_data[n], [_data[n]].concat(data)) :
+						func(_data[n], [_data[n]].concat(data, dataTree)) :
 						func({'.': _data[n]}, dataTree));
 				}
 				return out; //.join('');
