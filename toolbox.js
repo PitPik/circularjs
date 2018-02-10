@@ -154,12 +154,17 @@
 
 		ajax: function(url, prefs) {
 			var promise = null;
+			var cache = false;
+			var now = new Date().getTime();
 
 			prefs = prefs || {};
 			url = Toolbox.normalizePath(url);
+			cache = prefs.cache === true ? now + 1e8 : // 1e8 ~= 1 year
+				!prefs.cache ? 0 : now + prefs.cache;
+			promise = cache && !prefs.resetCache && ajaxCache[url] &&
+				ajaxCache[url].time > now ? ajaxCache[url] : null;
 
-			promise = prefs.cache && !prefs.resetCache && ajaxCache[url] ||
-				new Toolbox.Promise(function(resolve, reject) {
+			promise = promise || new Toolbox.Promise(function(resolve, reject) {
 					var xhr = new XMLHttpRequest();
 					var method = (prefs.method || prefs.type || 'GET').toUpperCase();
 
@@ -203,8 +208,11 @@
 					xhr.send(prefs.data);
 				});
 
-			if (prefs.cache) {
+			if (cache) {
 				ajaxCache[url] = promise;
+				ajaxCache[url].time = cache;
+			} else {
+				delete ajaxCache[url];
 			}
 
 			return promise;
