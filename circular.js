@@ -324,10 +324,11 @@
 
 	/* ----------------------- routing -------------------------- */
 
-	Circular.prototype.addRoute = function(data, trigger) {
+	Circular.prototype.addRoute = function(data, trigger, hash) {
 		var path = typeof data.path === 'object' ?
 				{regexp: data.path} : routeToRegExp(data.path),
-			parts = extractRouteParameters(path, getPath(this.options.hash)),
+			_hash = hash || this.options.hash,
+			parts = extractRouteParameters(path, getPath(_hash)),
 			routers = pubsub[this.name].__router;
 
 		this.subscribe(null, '__router', data.path, {
@@ -339,7 +340,7 @@
 		if (trigger && parts) {
 			data.callback.call(this, parts);
 		}
-		!routers && installRouter(pubsub[this.name].__router, this);
+		!routers && installRouter(pubsub[this.name].__router, this, _hash);
 		return data;
 	};
 
@@ -355,9 +356,8 @@
 		router[data.path].paused = !isOn ? callbacks : null;
 	};
 
-	function installRouter(routes, _this) {
-		var event = window.onpopstate !== undefined ? 'popstate' : 'hashchange',
-			hash = _this.options.hash;
+	function installRouter(routes, _this, hash) {
+		var event = window.onpopstate !== undefined ? 'popstate' : 'hashchange';
 
 		Toolbox.addEvent(window, event, function(e) {
 			var parts = {};
