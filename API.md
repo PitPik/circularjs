@@ -48,7 +48,7 @@ require(['dependency-01', 'dependency-02'], function(dep1, dep2) {
 ### require.config
 
 ```
-require = window.require || {
+require.config({
     baseUrl: '',
     lookaheadMap: {
         'dependency-01': ['dependency-03', 'dependency-04'],
@@ -63,10 +63,38 @@ require = window.require || {
         minifyPrefix: '.min',
         debug: false
     }
-};
+});
 ```
 
 ## Circular
+
+```
+new Circular({
+    componentAttr: 'cr-component',
+    containerAttr: 'cr-container',
+    templateAttr: 'cr-template-for',
+    templatesAttr: 'cr-template',
+    devAttribute: 'cr-dev',
+    eventAttribute: 'cr-event',
+    viewAttr: 'cr-view',
+    devAttribute: 'cr-dev',
+    elements: 'elements',
+    events: 'events',
+    views: 'views',
+    hash: '#',
+    
+    extraModel:
+    Template:
+    helpers:
+    idProperty: 'cr-id',
+    enrichModelCallback:
+    listeners:
+    eventListeners:
+    
+    instanceID:
+    appElement:
+});
+```
 
 ### component
 
@@ -81,7 +109,7 @@ Circular.component(name: 'String', parameters: Object {
     componentWrapper: Object DOMElement,
     mountSelector: Object DOMElement,
     
-    beforeInit: function(component),
+    onBeforeInit: function(component),
     onInit: function(component),
 
     template: Object SchnauzerTemplate || String 'name'
@@ -92,8 +120,9 @@ Circular.component(name: 'String', parameters: Object {
 })
 ```
 
+A component controls a patch of screen called a view. This patch can have some ```cr-...``` attributes on its DOM-Elements to be picked up and processed by ```component()``` that are also then reflected in the component's model.
 
-```component()``` initializes a named component and renders it right away according to its model if you're using a template. Setting up a component assumes to have a HTML-tag set in the document that has an argument ```cr-componen=""``` with the value of the component's name (names are like IDs, so last of same name would overwrite privous one or actually reinitialize). Inside the component you can use Schnauzer.js templates (works almost as Handlebars) to render the model. Therefore you need to define cr-container to let ```component()``` know where to render the items into and a script tag with the attribute ```cr-template-for``` with the name of the component. With ```mountSelector``` you can determine the selector of the container inside your template for nested children.
+```component()``` initializes a named component and renders it right away according to its model if you're using a template. Setting up a component assumes to have a HTML-tag set in the document that has an attribute ```cr-componen=""``` with the value of the component's name (names are like IDs, so last of same name would overwrite privous one or actually reinitialize). Inside the component you can use "Schnauzer" templates (works almost as Handlebars) to render the model. Therefore you need to define ```cr-container``` attribute to let ```component()``` know where to render the items into and a script tag with the attribute ```cr-template-for``` with the name of the component. With ```mountSelector``` you can determine the selector of the container inside your template for nested children. ```cr-view``` attributes are used to store a reference of the DOM-Element in the component's model and ```cr-event``` to automatically install event listeners. Usage: ```cr-event="click: myClickHandler; mouseover: myMouseOverHandler"```. See in "parameters for components -> eventListeners" for how it's used. If ```component()``` is used with a template, the ```cr-view``` and ```cr-event``` only work within the template.
 
 ### parameters for ```components```
 
@@ -134,7 +163,7 @@ Is the container or context where to look for the component with the given name.
 #### mountSelector: String selector,
 If you're building a nested construct like a link tree then you need to let the rendereing engine know where to render the children of the just rendered item. This points to the container element of the child.
 
-#### beforeInit: function(component),
+#### onBeforeInit: function(component),
 A callback function being called right before the component is initialized. The model can still be manipulated and the event listeners and the templates are are not installed at this moment. ```component``` is the object that is also returned by ```component()``` itself.
 
 #### onInit: function(component),
@@ -217,16 +246,34 @@ component: {
 
 ### the methods of a component (modules)
 
+The following methods are part of the VOM.js found at https://github.com/PitPik/VOM. Within circular.js those methods will be immediately reflected in the view (triggers rendering).
 In our previous example we created a module stored in ```helloWorld```. This module has a lot of methods you can use:
 
- - getElementById
- - getElementsByProperty
- - appendChild
- - prependChild
- - insertBefore
- - insertAfter
- - replaceChild
- - removeChild
+#### getElementById(ID)
+Return the Object of the component's model that has the ID being passed.
+
+#### getElementsByProperty(property, value)
+Return an Array of items with the given property - value pair. If value is undefined, all items that have that property (no matter what value) are returned.
+I property is also undefined, all items are returned.
+
+#### appendChild(item, parent)
+That's like in the DOM-Api, the element gets appended to the parent as last child. If parent is undefined, the child will be appended to the root element.
+
+#### prependChild(item, parent)
+Same as ```appendChild(item, parent)``` but the child will be the first.
+
+#### insertBefore(item, sibling)
+Inserts item before the sibling.
+
+#### insertAfter(item, sibling)
+Insetrs the item before the sibling item.
+
+#### replaceChild(newItem, item)
+Replaces the item with newItem.
+
+#### removeChild(item)
+Removes the item from the collection.
+
  - sortChildren
  - reinforceProperty
  - addProperty
@@ -237,9 +284,9 @@ In our previous example we created a module stored in ```helloWorld```. This mod
  - reset
 
 To learn what they do please refer to VOM.js and its API documentation.
-Every method that changes the model in VOM will automatically be reflected/rendered.
+Every method that changes the model in VOM will automatically be reflected/rendered in the DOM.
 
-The last three methods ```uncloak, reset``` are Circular related:
+The last three methods ```destroy, uncloak, reset``` are Circular related:
 
 #### uncloak(item)
 Pass the model item to the function and it will remove the attribute ```cr-cloak``` and the className ```cr-cloak``` from the item's ```element```.
@@ -287,51 +334,82 @@ You probably see where this is going. It is therefore quite easy to render a tre
 
 ## more methods... to be continued
 
-Circular.destroy
-Circular.model
-Circular.template
+### Circular.destroy
 
-Circular.subscribe
-Circular.publish
-Circular.unsubscribe
+### Circular.model(model, options)
+Return a VOM instance in case you don't need things to be rendered but you need the convenience of a VOM model.
 
-Circular.addRoute
+### Circular.template(template, options)
+Returns an instance of a Schnauzer template just as if you used ```new Schnauzer(template, options)```
+
+### Circular.subscribe(inst, comp, attr, callback, trigger)
+This is just like a standard pubsub implementation. ```inst, comp```and ``` attr``` are Strings to seperate the concerns (like "Channel" and "Topic" and a third part "comp" to be more specific.
+```trigger``` is a boolean, that determinse if the callback should be called on istall in case there was a ```publish``` already triggered before.
+
+### Circular.publish(inst, comp, attr, data)
+Publishes to ```inst, comp```and ``` attr``` listeners the ```data```.
+
+### Circular.unsubscribe(inst, comp, attr, callback)
+Removes the listener with given ```callback```. If ```callback``` is not defined, all listener with given description are removed.
+Returns the ```callback```.
+
+### Circular.addRoute(data, trigger, hash)
+Circular routers use ```Circular.publish``` internally. So ```trigger``` is used just like in ```Circular.subscribe()```. With ```hash``` you can overwrite the global setting for the delimiter in the URL.
+
 Circular.removedRoute
 Circular.toggleRoute
 
 Circular.loadResource
 Circular.insertResources
 Circular.insertComponent
+#### renderModule(options)
+
+This is probably one of the most powerful methods in circularJS.
+This method loads an HTML page, processes its dependencies like scripts, style-links and styles, puts them into the current page and then appends the body's or the defined container's (```cr-dev="container"```) children to the mai-document's container defined by ```renderModule({container: ...})```.
+It uses ```Circular.loadResource()```, ```Circular.insertResources()``` and ```Circular.insertComponent()``` to achieve that.
+This way you can develop widget like modules and easily append it to the main app.
+
+```
+renderModule({
+    data: Data getting sent to the required module (aside with path)
+    name: 
+    previousName: 
+    path: String: path to the modules's HTML file
+    container: 
+    require: String:  module name
+    init: Boolean: auto-start required module (also if undefined)
+})
+```
 
 Circular.Toolbox
-	closest
-	$
-	$$
-	addClass
-	removeClass
-	toggleClass
-	toggleClasses
-	hasClass
-	addEvents
-	removeEvents
-	addEvent
-	removeEvent
-	storageHelper
-	lazy
-	itemsSorter
-	normalizePath
-	ajax
-	errorHandler
-	Promise
+    closest
+    $
+    $$
+    addClass
+    removeClass
+    toggleClass
+    toggleClasses
+    hasClass
+    addEvents
+    removeEvents
+    addEvent
+    removeEvent
+    storageHelper
+    lazy
+    itemsSorter
+    normalizePath
+    ajax
+    errorHandler
+    Promise
 
-	requireResources
-	captureResources
+    requireResources
+    captureResources
 
 Schnauzer
-	render
-	parse
-	registerHelper
-	unregisterHelper
-	registerPartial
-	unregisterPartial
-	setTags
+    render
+    parse
+    registerHelper
+    unregisterHelper
+    registerPartial
+    unregisterPartial
+    setTags
