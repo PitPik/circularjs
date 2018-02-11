@@ -1,68 +1,47 @@
-# CircularJS
+# What is CircularJS
 
-CircularJS is a tiny MV* like framework. It's goal is to help building web-apps in a model-oriented easy way by building fast and convenient 2-way data binding with the help of powerfull tools.
+CircularJS is a tiny MV* like framework with its goal to help building single-page-web-apps in a model-oriented easy way with the help of powerful tools:
+ - amd: a poerful module loader with look-ahead for even faster resource loading.
+ - ajax: resource loader with cache, timed cache and auto XSRF returning a promise.
+ - promise: also used by ajax. A well known design pattern, easy to use.
+ - resource/module loader: A convenient widget loader with powerful options.
+ - pubsub: A well known design pattern for transmitting data along the whole app.
+ - router: an easy but poerful routing system using internal pubsub.
+ - VOM: a fast and convenient ObjectModel manager. Works like the DOM-API.
+ - Schnauzer: fast an small rendering engine (like Handlebars) to reflect VOM models on the fly.
+ - rendering module: internal module syncing VOM model, using Schnauzer templates, with the DOM-model.
+ - automatic event management.
+ - automatic DOM-Element reference management.
+ - Loads of helper functions like 'addClass...', '$' and '$$', 'sorter' and many more...
+
+CircularJS combines all those tools to easily abstract app modules and build high performance SPAs. CircularJS is very small (~9.9KB gZip, 27.5KB) and fast and therefore the best joice for mobile apps.
 
 ## Quickstart
 
-To quickly get started try the ["Tour of Heroes" tutorial](heroes) and read [ARCHITECTURE.md](ARCHITECTURE.md) and [API.md](API.md) for a better overview.
+To quickly get started try the ["Tour of Heroes" tutorial](heroes), see the [TODO list demo](http://dematte.at/circularjs/todo/) and read [ARCHITECTURE.md](ARCHITECTURE.md) and [API.md](API.md) for a better overview.
 
-## CircularJS provides you with:
+## Why CircularJS
 
-* VOM, a Virtual Object Model controller that automatically reacts on changes of properties,
-* Schnauzer, a tiny and fast Mustache/Handlebars like template rendering engine (can be replaced),
-* an event-listener controller for all UI actions an any other events,
-* DOMinator, a controller that automatically connects and syncs the VOM model with the real DOM.
-* Full featured PubSub functionality
-* Simple Promise implementation (with .all())
-* Ajax with automatic CSRF-Token returning a Promise (plus cache)
-* Open router for all kinds of purposes
-* Toolbox for common functionality like add/remove/toggle/hasClass, event handling, localStorage, cookies, etc.
-* Resource loader (for easy component development)
-* Auto AMD loader with lookahead for even faster loading times.
+The intention to build CircularJS was to create something small and fast that is easy to learn and feels closer to javaScript rather than having to learn a new language or complicated framework dependend patterns.
+Using CircularJS is quite easy and straight forward.
+When developing components and modules with circularJS you usually don't need to search the DOM any more, so no futher selectors needed, never install any event listener and never need to use the global scope for storing app dependend variables. You probably don't even need any other dependencies to manage your views although they might co-exist as circualrJS is highly un-oppinionated.
+You usually end up writing very little code to manage big tasks in you SPI's views with powerful functionality.
 
-CircularJS combines all those tools to easily abstract app modules and build high performance SPAs.
-CircularJS is very small (~9.64KB gZip, 27.06KB) and fast and therefore the best joice for mobile apps.
+## Architecture
 
-The intention to build CircularJS was to create something small and fast that is easy to learn and feels closer to javaScript rather than having to learn a new language or complicated patterns. Using CircularJS is quite easy and straight forward. It helps you to avoid bad practice patterns usually caused by wrongly set up event listeners, continuous element search in the DOM (also without caching) and using global variables to store information for other components...
+With circularJS you basically develop components, modules and services.
+A component controls a patch of screen called a view, also used for state management, where as modules are a compositions of several components in a widget like HTML document that can be rendered inside an excisting app or even component.
+Services are actually not features provided by CircularJS but a logic design pattern to decouple views from business-logig and server syncronisation.
+See [ARCHITECTURE.md](ARCHITECTURE.md) for more information.
 
-## Benefits
+## CircularJS API
 
-* No dependencies to other frameworks.
-* Other frameworks may co-exist (AngularJS, jQuery, ...).
-* Uses VanillaJS; Usage of VanillaJS welcome.
-* Unopinionated.
-* No querySelectors like $('..') or querySelectorAll etc. needed in code.
-* No class names in JS code needed to find elements (decouples css and JS).
-* Constant sync between model, view and server.
-* Seperation of model, view and service code.
-* Automated event handling (in a memory friendly way).
-* Automated view rendering when model changes (even with router).
-* Easy destroy for effective garbage collection.
-* Fast and easy i18n possible.
-* Write little code for powerful solutions.
-* Enables widget-like development of components by usage of resource-loder.
-* Great for mobile apps as it is tiny (~9.64KB) and very fast (~8x to AngularJS).
-* Exchangeable rendering engine.
-* Keep track of your logic as there is not much magic happening (no digest etc.).
-* pubsub for internal or custom events (also set up pubsub for localStorage etc.).
+See [API.md](API.md) for more information.
 
-## The usual flow how to built components with circularJS:
 
- * You create a model that acts like a state controller (key task)
- * You build a template that renders the initial view according to that model
- * You add UI event listeners to the template that get picked up automatically.
-   Those event listeners then manipulate the model (the state, not the view)
- * The change of the state triggers a callback that again triggers DOM manipulation according to what state changed (seperation of model and view rendering).
- * To help you find DOM elements later on you can also define them in the template so they get cached in the model for convenient use.
- * Use PubSub, Router or Promisses to change the state (that triggers rendering again...)
-
-## APIs
-
-This documentation will be continued soon. For now you can see some demos (also delivered by this repository) to explore how CircularJS works.
+For now you can see some demos (also delivered by this repository) to explore how CircularJS works.
 
 * ["Tour of Heroes" tutorial](http://dematte.at/circularjs/heroes)
 * [Simple button demo](http://dematte.at/circularjs/)
 * [TODO list demo](http://dematte.at/circularjs/todo/)
 * [Nested tree demo](http://dematte.at/circularjs/tree/)
-
-See you soon ;o)
