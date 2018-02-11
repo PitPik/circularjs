@@ -24,14 +24,17 @@ To quickly get started try the ["Tour of Heroes" tutorial](heroes), see the [TOD
 
 The intention to build **CircularJS** was to create something small and fast that is easy to learn and feels closer to javaScript rather than having to learn a new language or complicated framework dependend patterns.
 Using **CircularJS** is quite easy and straight forward.
+
 When developing **components** and **modules** with **circularJS** you usually don't need to search the DOM any more, so no futher selectors needed, never install any event listener and never need to use the global scope for storing app dependend variables. You probably don't even need any other dependencies to manage your views although they might co-exist as **circualrJS** is **highly un-oppinionated**.
+
 You usually end up writing **very little code** to manage big tasks in you SPI's views with powerful functionality.
 
 ## Architecture
 
 With **circularJS** you basically develop **components**, **modules** and **services**.
 A **component** controls a patch of screen called a view, also used for **state management**, where as **modules** are a compositions of several components in a widget like HTML document that can be rendered inside an excisting app or even component.
-**Services** are actually not features provided by CircularJS but a logic design pattern to decouple views from business-logig and server syncronisation.
+
+**Services** are actually not features provided by CircularJS but a logic design pattern to decouple views from business-logig and server syncronisation. They can easily be managed through the amd module loader.
 See [ARCHITECTURE.md](ARCHITECTURE.md) for more information.
 
 ## CircularJS API
