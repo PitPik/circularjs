@@ -12,6 +12,7 @@ CircularJS is a tiny **MV\* like framework** with its goal to help building **si
  - **rendering module**: internal module syncing VOM model, using Schnauzer templates, with the DOM-model.
  - **automatic event management**.
  - **automatic DOM-Element reference management**.
+ - Enhanced **resource loading management** for parallel loading of data/view/resources/modules(-preload), rtc.
  - Loads of **helper functions** like 'addClass...', '$' and '$$', 'sorter' and many more...
 
 **CircularJS** combines all those tools to easily abstract app modules and build **high performance SPAs**. CircularJS is very small (~9.9KB gZip, 27.5KB) and fast and therefore the best joyce for **mobile apps**.
