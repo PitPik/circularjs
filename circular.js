@@ -129,7 +129,9 @@
 		_inst.vom = new VOM(component.model, {
 			idProperty: _this.options.idProperty || 'cr-id',
 			preRecursionCallback: function(item, type, siblingOrParent) {
-				var html = _inst.template && _inst.template.partials.self &&
+				var idProperty = this.options.idProperty,
+					id = item[idProperty],
+					html = _inst.template && _inst.template.partials.self &&
 						_inst.template.render(item, extraModel),
 					operator = type || 'appendChild',
 					replaceElement = type === 'replaceChild' &&
@@ -141,7 +143,7 @@
 					siblingElement = parentNode ? replaceElement || undefined :
 						siblingOrParent && siblingOrParent[elmsTxt].element,
 					element = html && render(_inst.helper, html, operator,
-						parentNode, siblingElement) || component.element;
+						parentNode, siblingElement, idProperty, id) || component.element;
 
 				// collect elements
 				this.reinforceProperty(item, elmsTxt, {
@@ -153,7 +155,7 @@
 				this.reinforceProperty(item, options.events, {}, true);
 				_inst.controller && _inst.controller.getEventListeners(
 					item[elmsTxt].element || component.element,
-					item[options.events], component, this.options.idProperty);
+					item[options.events], component, idProperty);
 				// collect view elements
 				this.reinforceProperty(item, options.views, {}, true);
 				getViews(options, item[options.views],
@@ -167,12 +169,15 @@
 			 // TODO: get options via...
 			listeners: this.options.listeners || parameters.listeners || [],
 			subscribe: function(property, item, value, oldValue, sibling) {
-				var element = item[elmsTxt] && item[elmsTxt].element,
+				var idProperty = this.options.idProperty,
+					id = item[idProperty],
+					element = item[elmsTxt] && item[elmsTxt].element,
 					parentElement = item.parentNode && item.parentNode[elmsTxt] ?
 						item.parentNode[elmsTxt].element : component.container;
 
 				if (property === 'removeChild') {
-					render(_inst.helper, element, property, element.parentElement);
+					render(_inst.helper, element, property,
+						element.parentElement);
 				} else if (property === 'sortChildren') {
 					// speed up sorting... TODO: check
 					render(_inst.helper, element, 'appendChild', parentElement);
@@ -180,7 +185,8 @@
 					if (item === sibling) { // replaceChild by itself
 						element = render(_inst.helper,
 							_inst.template.render(item, extraModel),
-							property, parentElement, sibling[elmsTxt].element);
+							property, parentElement, sibling[elmsTxt].element,
+							idProperty, item[idProperty]);
 						item[elmsTxt].element = element;
 						item[elmsTxt].container = parameters.mountSelector &&
 							$(parameters.mountSelector, element);
@@ -600,7 +606,7 @@
 
 	return Circular;
 
-	function render(helper, html, operator, parentNode, sibling) {
+	function render(helper, html, operator, parentNode, sibling, idProperty, id) {
 		var isHTML = typeof html === 'string',
 			isPrepend = operator === 'prependChild',
 			element = {};
@@ -609,6 +615,7 @@
 			// helper.insertAdjacentHTML('beforeend', html);
 			helper.innerHTML = html;
 			element = helper.children[0];
+			element.setAttribute(idProperty, id);
 		} else {
 			element = html;
 		}
