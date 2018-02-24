@@ -9,19 +9,20 @@
 		_timer = 0, // ... same here
 		_foo = {},
 		extend = function(oldObj, newObj) {
-			if (typeof newObj !== "object") return newObj;
-			oldObj = newObj && (oldObj || {});
+			if (typeof newObj !== "object" || !newObj) return newObj;
+			oldObj = oldObj || {};
 			for (var key in newObj) {
-				var item = newObj[key];
-				oldObj[key] = oldObj[key] === undefined || typeof item !== "object" ?
-					item : extend(oldObj[key], item);
+				oldObj[key] = newObj[key].constructor === Array ? newObj[key] :
+					typeof newObj[key] === 'object' ?
+					extend(oldObj[key], newObj[key]) : newObj[key];
 			}
 			return oldObj;
 		},
 		applyConfiguration = function(config) {
 			var parts = ['lookaheadMap', 'paths', 'options', 'baseUrl'];
 			for (var n = parts.length; n--; ) { // apply white-list
-				require[parts[n]] = extend(require[parts[n]], config[parts[n]]) || '';
+				require[parts[n]] = extend(require[parts[n]], config[parts[n]]) ||
+					require[parts[n]] || '';
 			}
 		},
 		getListIndex = function(list, item) { // for old IE ([].indexOf())
