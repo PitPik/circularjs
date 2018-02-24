@@ -133,7 +133,6 @@
 					id = item[idProperty],
 					html = _inst.template && _inst.template.partials.self &&
 						_inst.template.render(item, extraModel),
-					operator = type || 'appendChild',
 					replaceElement = type === 'replaceChild' &&
 						siblingOrParent[elmsTxt].element,
 					container = item.parentNode[elmsTxt] &&
@@ -142,7 +141,7 @@
 						container || component.container,
 					siblingElement = parentNode ? replaceElement || undefined :
 						siblingOrParent && siblingOrParent[elmsTxt].element,
-					element = html && render(_inst.helper, html, operator,
+					element = html && render(_inst.helper, html, type || 'appendChild',
 						parentNode, siblingElement, idProperty, id) || component.element;
 
 				// collect elements
@@ -615,7 +614,7 @@
 			// helper.insertAdjacentHTML('beforeend', html);
 			helper.innerHTML = html;
 			element = helper.children[0];
-			element.setAttribute(idProperty, id);
+			element && element.setAttribute(idProperty, id);
 		} else {
 			element = html;
 		}
