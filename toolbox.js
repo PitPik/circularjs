@@ -12,6 +12,7 @@
 	'use strict';
 
 	var resourceCache = null,
+		_link = document.createElement('a'),
 		Toolbox = {
 		closest: function(element, selector, root) {
 			// return element && element.closest(selector);
@@ -138,18 +139,8 @@
 		},
 
 		normalizePath: function(path) {
-			var target = [];
-			var src = path.split('/');
-			var start = path.match(/^([./]*)/g)[0].replace(/^.\//, '');
-
-			for (var n = 0; n < src.length; ++n) {
-				if (src[n] === '..') {
-					target.pop();
-				} else if (src[n] !== '' && src[n] !== '.') {
-					target.push(src[n]);
-				}
-			}
-			return start + target.join('/').replace(/[\/]{2,}/g, '/');
+			_link.href = path;
+			return _link.pathname;
 		},
 
 		ajax: function(url, prefs) {
@@ -469,6 +460,15 @@
 			return results;
 		});
 	};
+
+	if (window.require) {
+		require.getFile = function(resource, markAsDone) {
+			Toolbox.ajax(resource.path).then(function(data) {
+				resource.done = data;
+				markAsDone(resource);
+			})
+		}
+	}
 
 	return Toolbox;
 }));

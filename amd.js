@@ -8,6 +8,7 @@
 		_documentFragment = null, // used in appendScript() ...
 		_timer = 0, // ... same here
 		_foo = {},
+		_link = document.createElement('a'),
 		extend = function(oldObj, newObj) {
 			if (typeof newObj !== "object" || !newObj) return newObj;
 			oldObj = oldObj || {};
@@ -34,25 +35,16 @@
 			return -1;
 		},
 		getPathFromName = function(name, _path, _postFix) {
-			_postFix = /(?:^\/|^http[s]*:|.*\.js$)/.test(_path) ? '' : '.js';
+			_postFix = /(?:^\!|^http[s]*:|.*\.js$)/.test(name) ? '' : '.js';
+			name = name.replace(/^\!/, '');
 			_path = _postFix ? normalizePath((require.baseUrl || '.') + '/' +
 				(require.paths[name] || name) + _postFix).replace(/^.\//, '') : name;
 
 			return _path;
 		},
-		normalizePath = function(path) { // converts foo/bar/../none -> foo/none
-			var target = [];
-			var src = path.split('/');
-			var start = path.match(/^([./]*)/g)[0];
-
-			for (var n = 0; n < src.length; ++n) {
-				if (src[n] === '..') {
-					target.pop();
-				} else if (src[n] !== '' && src[n] !== '.') {
-					target.push(src[n]);
-				}
-			}
-			return start + target.join('/').replace(/[\/]{2,}/g, '/');
+		normalizePath = function(path) {
+			_link.href = path;
+			return _link.pathname;
 		},
 		applyScript = function(module, sync) { // creates script tag
 			var script = root.document.createElement('script');
@@ -165,12 +157,17 @@
 					if (!modules[deps[n]]) {
 						modules[deps[n]] = {
 							name: deps[n],
+							isFile: deps[n].substr(0, 1) === '!',
 							path: getPathFromName(deps[n]),
 							resolvedDeps: [],
 							parentNames: [name]
 						};
-						appendScript(applyScript(modules[deps[n]], sync));
-						lookaheadForDeps(deps[n]);
+						if (modules[deps[n]].isFile) {
+							require.getFile(modules[deps[n]], markAsDone);
+						} else {
+							appendScript(applyScript(modules[deps[n]], sync));
+							lookaheadForDeps(deps[n]);
+						}
 					} else if (getListIndex(parentNames, name) === -1) {
 						parentNames.push(name);
 					}
@@ -190,6 +187,8 @@
 				applyConfiguration(_config = options);
 			};
 
+		// see Toolbox for require.getFile
+		require.getFile = function(resource, markAsDone) { return resource; };
 		define.amd = {}; // what are we gonna do with this?
 		config(_config);
 	}
