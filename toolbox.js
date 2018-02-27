@@ -463,7 +463,9 @@
 
 	if (window.require) {
 		require.getFile = function(resource, markAsDone) {
-			Toolbox.ajax(resource.path).then(function(data) {
+			Toolbox.ajax(resource.path, {
+				cache: resource.name.substr(0, 2) !== '!!'
+			}).then(function(data) {
 				resource.done = data;
 				markAsDone(resource);
 			})
