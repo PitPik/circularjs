@@ -113,7 +113,8 @@
 		},
 		storageHelper: {
 			fetch: function (key) {
-				return JSON.parse(localStorage.getItem(key) || '[]');
+				var data = localStorage.getItem(key);
+				return data ? JSON.parse(data) : data;
 			},
 			saveLazy: function (data, key) {
 				Toolbox.lazy(function() {

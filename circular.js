@@ -103,7 +103,15 @@
 				model: parameters.model || [],
 				element: data.element,
 				container: data.container
-			};
+			},
+			hasStorage = parameters.storage,
+			storage = hasStorage || {},
+			storageHelper = Toolbox.storageHelper,
+			storageData = hasStorage && storageHelper.fetch(storage.name) || {},
+			storageCategory = storage.category,
+			storageAll = storage.storeAll ||
+				parameters.listeners && parameters.listeners.indexOf('*') !== -1;
+
 		pubsub[this.name][name] = {}; // prepare
 		component.templates = data.templates;
 		instanceList[this.id] = instanceList[this.id] || {};
@@ -126,6 +134,14 @@
 				helpers: parameters.helpers || options.helpers || {} // TODO
 			}) : null;
 		_inst.template && (templateCache[name] = _inst.template);
+		if (hasStorage) {
+			for (var key in component.model[0]) {
+				if (storageData[storageCategory] &&
+						storageData[storageCategory][key] !== undefined) {
+					component.model[0][key] = storageData[storageCategory][key];
+				}
+			}
+		}
 		_inst.vom = new VOM(component.model, {
 			idProperty: _this.options.idProperty || 'cr-id',
 			preRecursionCallback: function(item, type, siblingOrParent) {
@@ -201,6 +217,16 @@
 						render(_inst.helper, element, property, parentElement,
 								sibling[elmsTxt] && sibling[elmsTxt].element);
 					}
+				} else if (hasStorage && (parameters.listeners[property] || storageAll)) {
+					if (!storageAll) {
+						storageData[storageCategory] = storageData[storageCategory] || {};
+						storageData[storageCategory][property] = value;
+					} else {
+						storageData[storageCategory] = component.model[0];
+					}
+					storageHelper[storage.saveLazy === false ?
+						'save' : 'saveLazy'](storageCategory ?
+							storageData : storageData[storageCategory], storage.name);
 				}
 				parameters.subscribe && parameters.subscribe
 					.call(this, property, item, value, oldValue);
