@@ -135,10 +135,10 @@
 			}) : null;
 		_inst.template && (templateCache[name] = _inst.template);
 		if (hasStorage) {
+			var _data = storageData[storageCategory] || storageData;
 			for (var key in component.model[0]) {
-				if (storageData[storageCategory] &&
-						storageData[storageCategory][key] !== undefined) {
-					component.model[0][key] = storageData[storageCategory][key];
+				if (_data && _data[key] !== undefined) {
+					component.model[0][key] = _data[key];
 				}
 			}
 		}
