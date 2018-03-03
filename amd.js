@@ -37,8 +37,8 @@
 		getPathFromName = function(name, _path, _postFix) {
 			_postFix = /(?:^\!|^http[s]*:|.*\.js$)/.test(name) ? '' : '.js';
 			name = (require.paths[name] || name).replace(/^\!/, '');
-			_path = _postFix ? normalizePath((require.baseUrl || '.') + '/' +
-				name + _postFix).replace(/^.\//, '') : name;
+			_path = normalizePath((require.baseUrl || '.') + '/' +
+				name + _postFix).replace(/^.\//, '');
 
 			return _path;
 		},
