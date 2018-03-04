@@ -109,8 +109,9 @@
 			storageHelper = Toolbox.storageHelper,
 			storageData = hasStorage && storageHelper.fetch(storage.name) || {},
 			storageCategory = storage.category,
+			storageListeners = storage.listeners || parameters.listeners,
 			storageAll = storage.storeAll ||
-				parameters.listeners && parameters.listeners.indexOf('*') !== -1;
+				storageListeners && storageListeners.indexOf('*') !== -1;
 
 		pubsub[this.name][name] = {}; // prepare
 		component.templates = data.templates;
@@ -217,7 +218,7 @@
 						render(_inst.helper, element, property, parentElement,
 								sibling[elmsTxt] && sibling[elmsTxt].element);
 					}
-				} else if (hasStorage && (parameters.listeners[property] || storageAll)) {
+				} else if (hasStorage && (storageListeners[property] || storageAll)) {
 					if (!storageAll) {
 						storageData[storageCategory] = storageData[storageCategory] || {};
 						storageData[storageCategory][property] = value;
