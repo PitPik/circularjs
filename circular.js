@@ -111,7 +111,7 @@
 			storageCategory = storage.category,
 			storageListeners = storage.listeners || parameters.listeners,
 			storageAll = storage.storeAll ||
-				storageListeners && storageListeners.indexOf('*') !== -1;
+				(storageListeners && storageListeners.indexOf('*') !== -1);
 
 		pubsub[this.name][name] = {}; // prepare
 		component.templates = data.templates;
@@ -218,7 +218,7 @@
 						render(_inst.helper, element, property, parentElement,
 								sibling[elmsTxt] && sibling[elmsTxt].element);
 					}
-				} else if (hasStorage && (storageListeners[property] || storageAll)) {
+				} else if (hasStorage && (storageAll || storageListeners.indexOf(property) !== -1)) {
 					if (!storageAll) {
 						storageData[storageCategory] = storageData[storageCategory] || {};
 						storageData[storageCategory][property] = value;
