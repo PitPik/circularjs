@@ -78,8 +78,9 @@
 		appComponents = {};
 
 	Circular.prototype.component = function(name, parameters) {
+		this.extraModel = parameters.extraModel || this.options.extraModel; // TODO
 		if (this.components[name]) { // TODO: make this possible: name???
-			return this.components[name].reset(parameters.model, parameters.extraModel);
+			return this.components[name].reset(parameters.model);
 		}
 
 		var _this = this,
@@ -87,7 +88,6 @@
 			proto = {},
 			options = this.options,
 			elmsTxt = options.elements,
-			extraModel = parameters.extraModel || options.extraModel,
 			componentAttr = options.componentAttr,
 			componentSelector = '[' + componentAttr + '="' + name + '"]',
 			componentElement = parameters.componentElement || // TODO: ... no wrapper
@@ -149,7 +149,7 @@
 				var idProperty = this.options.idProperty,
 					id = item[idProperty],
 					html = _inst.template && _inst.template.partials.self &&
-						_inst.template.render(item, extraModel),
+						_inst.template.render(item, _this.extraModel),
 					replaceElement = type === 'replaceChild' &&
 						siblingOrParent[elmsTxt].element,
 					container = item.parentNode[elmsTxt] &&
@@ -200,7 +200,7 @@
 				} else if (this[property]) { // has method
 					if (item === sibling) { // replaceChild by itself
 						element = render(_inst.helper,
-							_inst.template.render(item, extraModel),
+							_inst.template.render(item, _this.extraModel),
 							property, parentElement, sibling[elmsTxt].element,
 							idProperty, item[idProperty]);
 						item[elmsTxt].element = element;
@@ -251,12 +251,12 @@
 			Toolbox.removeClass(item, 'cr-cloak');
 			item.removeAttribute('cr-cloak');
 		}
-		proto.reset = function(data, extra) { // TODO: extramodel
+		proto.reset = function(data) {
 			_inst.vom.destroy();
 			this.container && (this.container.innerHTML = '');
 			for (var n = 0, m = data.length; n < m; n++) {
 				this.appendChild(data[n]);
-			}
+			} // onInit here ??
 			return component;
 		}
 		component.__proto__ = proto;
