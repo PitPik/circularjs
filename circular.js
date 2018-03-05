@@ -78,7 +78,8 @@
 		appComponents = {};
 
 	Circular.prototype.component = function(name, parameters) {
-		this.extraModel = parameters.extraModel || this.options.extraModel; // TODO
+		this.extraModel = parameters.extraModel ||
+			this.options.extraModel || this.extraModel;
 		if (this.components[name]) { // TODO: make this possible: name???
 			return this.components[name].reset(parameters.model);
 		}
