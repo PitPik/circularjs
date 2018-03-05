@@ -78,11 +78,10 @@
 		appComponents = {};
 
 	Circular.prototype.component = function(name, parameters) {
-		this.extraModel = parameters.extraModel ||
-			this.options.extraModel || this.extraModel;
 		if (this.components[name]) { // TODO: make this possible: name???
-			return this.components[name].reset(parameters.model);
+			return this.components[name].reset(parameters.model, parameters.extraModel);
 		}
+		this.extraModel = parameters.extraModel || this.options.extraModel;
 
 		var _this = this,
 			_inst = {}, // current instance
@@ -252,7 +251,8 @@
 			Toolbox.removeClass(item, 'cr-cloak');
 			item.removeAttribute('cr-cloak');
 		}
-		proto.reset = function(data) {
+		proto.reset = function(data, extraModel) {
+			_this.extraModel = extraModel || _this.options.extraModel || _this.extraModel;
 			_inst.vom.destroy();
 			this.container && (this.container.innerHTML = '');
 			for (var n = 0, m = data.length; n < m; n++) {
