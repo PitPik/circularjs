@@ -81,7 +81,7 @@
 		if (this.components[name]) { // TODO: make this possible: name???
 			return this.components[name].reset(parameters.model, parameters.extraModel);
 		}
-		this.extraModel = parameters.extraModel || this.options.extraModel;
+		this.data[name] = {};
 
 		var _this = this,
 			_inst = {}, // current instance
@@ -112,6 +112,8 @@
 			storageListeners = storage.listeners || parameters.listeners,
 			storageAll = storage.storeAll ||
 				(storageListeners && storageListeners.indexOf('*') !== -1);
+
+		this.data[name].extraModel = parameters.extraModel || options.extraModel;
 
 		pubsub[this.name][name] = {}; // prepare
 		component.templates = data.templates;
@@ -149,7 +151,7 @@
 				var idProperty = this.options.idProperty,
 					id = item[idProperty],
 					html = _inst.template && _inst.template.partials.self &&
-						_inst.template.render(item, _this.extraModel),
+						_inst.template.render(item, _this.data[name].extraModel),
 					replaceElement = type === 'replaceChild' &&
 						siblingOrParent[elmsTxt].element,
 					container = item.parentNode[elmsTxt] &&
@@ -200,7 +202,7 @@
 				} else if (this[property]) { // has method
 					if (item === sibling) { // replaceChild by itself
 						element = render(_inst.helper,
-							_inst.template.render(item, _this.extraModel),
+							_inst.template.render(item, _this.data[name].extraModel),
 							property, parentElement, sibling[elmsTxt].element,
 							idProperty, item[idProperty]);
 						item[elmsTxt].element = element;
@@ -252,7 +254,9 @@
 			item.removeAttribute('cr-cloak');
 		}
 		proto.reset = function(data, extraModel) {
-			_this.extraModel = extraModel || _this.options.extraModel || _this.extraModel;
+			if (extraModel) {
+				_this.data[component.name].extraModel = extraModel;
+			}
 			_inst.vom.destroy();
 			this.container && (this.container.innerHTML = '');
 			for (var n = 0, m = data.length; n < m; n++) {
