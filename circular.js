@@ -44,6 +44,7 @@
 
 			_this.version = '0.1.0';
 			_this.components = {};
+			_this.data = {};
 			_this.id = 'cr_' + id++;
 			_this.Toolbox = Toolbox;
 			_this.name = hasName ? name : _this.id;
