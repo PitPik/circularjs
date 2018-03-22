@@ -3,10 +3,13 @@
 require(['circular'], function(Circular) {
 	'use strict';
 
-	var Toolbox = Circular.Toolbox,
-		STORAGE_KEY = 'todos-circularjs-0.1',
-		circular = new Circular(),
-		list = circular.component('list', {
+	var ENTER_KEY = 13;
+	var ESCAPE_KEY = 27;
+	var STORAGE_KEY = 'todos-circularjs-0.1';
+
+	var Toolbox = Circular.Toolbox;
+	var circular = new Circular();
+	var list = circular.component('list', {
 			model: Toolbox.storageHelper.fetch(STORAGE_KEY),
 			listeners: ['text', 'done'],
 			subscribe: function(property, item, value, oldValue, type) {
@@ -34,8 +37,8 @@ require(['circular'], function(Circular) {
 					escapeItem(e, element, item.views.label, item.text);
 				}
 			}
-		}),
-		listCallbacks = {
+		});
+	var listCallbacks = {
 			text: function (item, views, value) {
 				blurItem(views.text, views.label, value);
 			},
@@ -45,26 +48,25 @@ require(['circular'], function(Circular) {
 			},
 			nodeChange: function () {
 				Toolbox.lazy(function() {
-					var getItems = list.getElementsByProperty,
-						all = getItems().length,
-						checked = getItems('done', true).length;
+					var getItems = list.getElementsByProperty;
+					var all = getItems().length;
+					var checked = getItems('done', true).length;
+					var uiViews = app_ui.model[0].views;
 
-					renderFooter(uiModel.views, checked, all);
+					renderFooter(uiViews, checked, all);
 					renderLeft(app_ui.templates.itemsLeft.partials.self,
-						uiModel.views.counter, all - checked);
-					renderMarkAll(uiModel.views.toggle, all === checked);
+						uiViews.counter, all - checked);
+					renderMarkAll(uiViews.toggle, all === checked);
 				}, list);
 			}
-		},
-
-		uiModel = {filter: 'all'},
-		app_ui = circular.component('app', {
-			model: [uiModel],
+		};
+	var app_ui = circular.component('app', {
+			model: [{ filter: 'all' }],
 			eventListeners: {
 				addItem: function (e, element, item) {
 					var text = element.value.trim();
 
-					if ((e.which || e.keyCode) === 13 && text) {
+					if ((e.which || e.keyCode) === ENTER_KEY && text) {
 						list.appendChild({
 							text: text,
 							done: false
@@ -80,8 +82,8 @@ require(['circular'], function(Circular) {
 					}
 				},
 				toggleAll: function (e, element, item) {
-					var checked = e.target.checked,
-						items = list.getElementsByProperty('done', !checked);
+					var checked = e.target.checked;
+					var items = list.getElementsByProperty('done', !checked);
 
 					for (var n = items.length; n--; ) {
 						items[n].done = checked;
@@ -121,7 +123,7 @@ require(['circular'], function(Circular) {
 	}
 
 	function escapeItem(e, elm, label, value) {
-		if ((e.which || e.keyCode) === 27) {
+		if ((e.which || e.keyCode) === ESCAPE_KEY) {
 			elm.value = value;
 			blurItem(elm, label, value);
 		}
