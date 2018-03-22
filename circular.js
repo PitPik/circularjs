@@ -222,6 +222,7 @@
 								sibling[elmsTxt] && sibling[elmsTxt].element);
 					}
 				} else if (hasStorage && (storageAll || storageListeners.indexOf(property) !== -1)) {
+					storageData = storageHelper.fetch(storage.name) || {};
 					if (!storageAll) {
 						storageData[storageCategory] = storageData[storageCategory] || {};
 						storageData[storageCategory][property] = value;
