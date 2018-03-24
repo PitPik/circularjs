@@ -191,8 +191,9 @@
 				var idProperty = this.options.idProperty,
 					id = item[idProperty],
 					element = item[elmsTxt] && item[elmsTxt].element,
-					parentElement = item.parentNode && item.parentNode[elmsTxt] ?
-						item.parentNode[elmsTxt].element : component.container;
+					parentElement = (item.parentNode && item.parentNode[elmsTxt] ?
+						item.parentNode[elmsTxt].container ||
+							item.parentNode[elmsTxt].element : component.container);
 
 				if (property === 'removeChild') {
 					render(_inst.helper, element, property,
