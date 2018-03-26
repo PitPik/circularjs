@@ -116,18 +116,18 @@
 				var data = localStorage.getItem(key);
 				return data ? JSON.parse(data) : data;
 			},
-			saveLazy: function (data, key) {
+			saveLazy: function (data, key, obj) {
 				Toolbox.lazy(function() {
 					Toolbox.storageHelper.save(data, key);
-				}, Toolbox.storageHelper);
+				}, obj || Toolbox.storageHelper);
 			},
 			save: function (data, key) {
 				localStorage.setItem(key, JSON.stringify(data));
 			}
 		},
 		lazy: function(fn, obj) {
-			clearTimeout(obj.timer);
-			obj.timer = setTimeout(fn, 0);
+			clearTimeout(obj._timer);
+			obj._timer = setTimeout(fn, 0);
 		},
 
 		itemsSorter: function(a, b, type, asc) {

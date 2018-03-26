@@ -232,7 +232,7 @@
 					}
 					storageHelper[storage.saveLazy === false ?
 						'save' : 'saveLazy'](storageCategory ?
-							storageData : storageData[storageCategory], storage.name);
+							storageData : storageData[storageCategory], storage.name, this);
 				}
 				parameters.subscribe && parameters.subscribe
 					.call(this, property, item, value, oldValue);
