@@ -341,7 +341,7 @@
 			comp = pubsub[inst][comp] = pubsub[inst][comp] || {};
 			comp[attr] = comp[attr] || [];
 			comp[attr].value = data;
-			publish(this, comp[attr], data);
+			comp[attr][0] && publish(this, comp[attr], data);
 		}
 	};
 
