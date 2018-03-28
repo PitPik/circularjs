@@ -48,7 +48,6 @@
 			_this.id = 'cr_' + id++;
 			_this.Toolbox = Toolbox;
 			_this.name = hasName ? name : _this.id;
-			pubsub[_this.name] = {}; // prepare
 		},
 		Controller = function(options) {
 			this.options = {
@@ -92,13 +91,13 @@
 			componentAttr = options.componentAttr,
 			componentSelector = '[' + componentAttr + '="' + name + '"]',
 			componentElement = parameters.componentElement || // TODO: ... no wrapper
-				$(componentSelector, parameters.componentWrapper || document);
+				$(componentSelector, parameters.componentWrapper || document);
 
 		if (!componentElement) return;
 
 		var nestingData = checkRestoreNesting(componentElement, componentAttr),
 			altName = componentElement && componentElement.getAttribute('name'),
-			data = getDomData(options, parameters, componentElement, altName || name),
+			data = getDomData(options, parameters, componentElement, altName || name),
 			component = this.components[name] = {
 				name: name,
 				model: parameters.model || [],
@@ -114,8 +113,9 @@
 			storageAll = storage.storeAll ||
 				(storageListeners && storageListeners.indexOf('*') !== -1);
 
-		this.data[name].extraModel = parameters.extraModel || options.extraModel;
+		this.data[name].extraModel = parameters.extraModel || options.extraModel;
 
+		pubsub[this.name] = pubsub[this.name] || {}; // prepare
 		pubsub[this.name][name] = {}; // prepare
 		component.templates = data.templates;
 		instanceList[this.id] = instanceList[this.id] || {};
@@ -237,7 +237,7 @@
 				parameters.subscribe && parameters.subscribe
 					.call(this, property, item, value, oldValue);
 
-				_this.publish(_this.name, name, property, {
+				_this.publish(component, name, property, {
 					property: property,
 					item: item,
 					value: value,
@@ -251,7 +251,7 @@
 		// proto = transferMethods(Schnauzer, _inst.template, component, this, proto);
 		proto = transferMethods(VOM, _inst.vom, component, this, proto);
 		proto.uncloak = function(item) {
-			var item = item && item.element || component.element;
+			var item = item && item.element || component.element;
 
 			Toolbox.removeClass(item, 'cr-cloak');
 			item.removeAttribute('cr-cloak');
@@ -312,26 +312,30 @@
 	/* --------------------  pubsub  ----------------------- */
 
 	Circular.prototype.subscribe = function(inst, comp, attr, callback, trigger) {
-		inst = inst || this.name;
+		inst = inst ? inst.name || inst.components && inst.components[comp] || inst : this.name;
 		pubsub[inst] = pubsub[inst] || {};
 		comp = pubsub[inst][comp] = pubsub[inst][comp] || {};
-		comp[attr] = comp[attr] || [];
+		comp[attr] = comp[attr] || [];
 		if (callback) {
 			// check also for routers
-			comp[attr].push(callback.callback || callback);
+			comp[attr].push(callback.callback || callback);
 			if (callback.regexp && !comp[attr].regexp) {
 				comp[attr].regexp = callback.regexp;
 				comp[attr].names = callback.names;
 			}
 		}
-		if (trigger && comp[attr].value !== undefined) {
-			(callback.callback || callback).call(this, comp[attr].value);
+		if (!attr || !comp[attr]) {
+			delete pubsub[inst];
+			return;
 		}
-		return (callback.callback || callback);
+		if (trigger && comp[attr].value !== undefined) {
+			(callback.callback || callback).call(this, comp[attr].value);
+		}
+		return (callback.callback || callback);
 	};
 
 	Circular.prototype.publish = function(inst, comp, attr, data) {
-		inst = inst || this.name;
+		inst = typeof inst === 'string' ? inst : this.name;
 		pubsub[inst] = pubsub[inst] || {};
 		if (pubsub[inst]) {
 			comp = pubsub[inst][comp] = pubsub[inst][comp] || {};
@@ -348,12 +352,12 @@
 		inst = inst || this.name;
 		if (pubsub[inst] && pubsub[inst][comp] && pubsub[inst][comp][attr]) {
 			funcs = pubsub[inst][comp][attr];
-			funcNo = funcs.indexOf(callback.callback || callback);
+			funcNo = funcs.indexOf(callback.callback || callback);
 			if (funcNo !== -1) {
 				funcs.splice(funcNo, 1);
 			}
 		}
-		return (callback.callback || callback);
+		return (callback.callback || callback);
 	};
 
 	function publish(_this, pubsubs, data) {
@@ -374,7 +378,7 @@
 		this.subscribe(null, '__router', data.path, {
 			callback: data.callback,
 			names: path.names,
-			regexp: path.regexp || path
+			regexp: path.regexp || path
 		}, trigger);
 
 		if (trigger && parts) {
@@ -471,7 +475,7 @@
 			var scripts = [];
 			var path = fileName.split('/').slice(0, -1);
 
-			DOC = DOC || document.implementation.createHTMLDocument('');
+			DOC = DOC || document.implementation.createHTMLDocument('');
 			DOC.documentElement.innerHTML = data;
 			scripts = [].slice.call($$('script', DOC) || [])
 				.filter(function(elm) {
@@ -483,8 +487,8 @@
 				});
 
 			return {
-				links: [].slice.call($$('link', DOC) || []).filter(devFilter),
-				styles: [].slice.call($$('style', DOC) || []).filter(devFilter),
+				links: [].slice.call($$('link', DOC) || []).filter(devFilter),
+				styles: [].slice.call($$('style', DOC) || []).filter(devFilter),
 				scripts: scripts,
 				body: $('body', DOC),
 				head: $('head', DOC),
@@ -730,7 +734,7 @@
 
 	// ----- get component data
 	function getDomData(options, parameters, component, name) {
-		var searchContainer = component || document.body,
+		var searchContainer = component || document.body,
 			containerAttr = options.containerAttr,
 			container = component.hasAttribute(containerAttr) ? component :
 				$('[' + containerAttr + '="' + name + '"]', component) ||
@@ -771,7 +775,7 @@
 
 		if (!item) { // TODO
 			item = component.getElementsByProperty('elements.element', e.target)[0]
-			|| component.model[0]; // TODO!!!!!!!
+			|| component.model[0]; // TODO!!!!!!!
 		}
 
 		var eventElements = item && item.events[e.type],
