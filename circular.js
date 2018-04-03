@@ -90,7 +90,7 @@
 			options = this.options,
 			elmsTxt = options.elements,
 			componentAttr = options.componentAttr,
-			componentSelector = '[' + componentAttr + '="' + name + '"]',
+			componentSelector = attrSelector(componentAttr, name),
 			componentElement = parameters.componentElement || // TODO: ... no wrapper
 				$(componentSelector, parameters.componentWrapper || document);
 
@@ -113,7 +113,7 @@
 			storageListeners = storage.listeners || parameters.listeners,
 			storageAll = storage.storeAll ||
 				(storageListeners && storageListeners.indexOf('*') !== -1),
-			mountSelector = parameters.mountSelector || ('[' + options.mountAttribute + ']'),
+			mountSelector = parameters.mountSelector || attrSelector(options.mountAttribute),
 			template = parameters.template;
 
 		this.data[name].extraModel = parameters.extraModel || options.extraModel;
@@ -500,7 +500,7 @@
 	};
 
 	Circular.prototype.insertResources = function(container, data) {
-		var body = $('[' + this.options.devAttribute +'="container"]',
+		var body = $(attrSelector(this.options.devAttribute, 'container'),
 				data.body) || data.body;
 
 		Toolbox.requireResources(data, 'styles', container);
@@ -590,7 +590,7 @@
 	Controller.prototype = {
 		getEventListeners: function(element, events, component, idProperty) {
 			var eventAttribute = this.options.eventAttribute,
-				elements = element.querySelectorAll('[' + eventAttribute + ']'),
+				elements = element.querySelectorAll(attrSelector(eventAttribute)),
 				attribute = '',
 				eventItem = '',
 				eventType = '',
@@ -680,7 +680,7 @@
 	}
 
 	function getViews(options, views, element) {
-		var elements = $$('[' + options.viewAttr + ']', element),
+		var elements = $$(attrSelector(options.viewAttr), element),
 			attribute = '';
 
 		elements = [element].concat([].slice.call(elements));
@@ -722,7 +722,7 @@
 				restore[n] = null;
 			}
 		} else if (comp && attr) {
-			temp = $$('[' + attr + ']', comp);
+			temp = $$(attrSelector(attr), comp);
 			if (temp.length !== 0) {
 				for (var n = 0, m = temp.length; n < m; n++) {
 					collect = temp[n];
@@ -739,11 +739,11 @@
 		var searchContainer = component || document.body,
 			containerAttr = options.containerAttr,
 			container = component.hasAttribute(containerAttr) ? component :
-				$('[' + containerAttr + '="' + name + '"]', component) ||
-				$('[' + containerAttr + ']', component),
-			template = $('[' + options.templateAttr + '="' + name + '"]',
+				$(attrSelector(containerAttr, name), component) ||
+				$(attrSelector(containerAttr), component),
+			template = $(attrSelector(options.templateAttr, name),
 				searchContainer),
-			_templates = ($$('[' + options.templatesAttr + '="' + name + '"]',
+			_templates = ($$(attrSelector(options.templatesAttr, name),
 				searchContainer) || []),
 			templates = {};
 
@@ -765,12 +765,16 @@
 		}
 	}
 
+	function attrSelector(attr, value) {
+		return '[' + attr + (value ? '="' + value + '"]' : ']');
+	}
+
 	// -------- for Controller --------- //
 	// --------------------------------- //
 	function eventDistributor(e, idProperty, component, _this) {
 		// TODO: cache by e.target for next vars??
 		var element = Toolbox.closest(e.target,
-				'[' + idProperty + ']') || component.element,
+				attrSelector(idProperty)) || component.element,
 			id = element.getAttribute(idProperty),
 			item = component.getElementById(id) || component
 				.getElementsByProperty('elements.element', component.element)[0]; // TODO
