@@ -24,6 +24,7 @@
 				eventAttribute: 'cr-event',
 				viewAttr: 'cr-view', // TODO...
 				devAttribute: 'cr-dev',
+				mountAttribute: 'cr-mount',
 				elements: 'elements', // TODO: check usage
 				events: 'events',
 				views: 'views',
@@ -111,7 +112,9 @@
 			storageCategory = storage.category,
 			storageListeners = storage.listeners || parameters.listeners,
 			storageAll = storage.storeAll ||
-				(storageListeners && storageListeners.indexOf('*') !== -1);
+				(storageListeners && storageListeners.indexOf('*') !== -1),
+			mountSelector = parameters.mountSelector || ('[' + options.mountAttribute + ']'),
+			template = parameters.template;
 
 		this.data[name].extraModel = parameters.extraModel || options.extraModel;
 
@@ -130,14 +133,15 @@
 			eventListeners: parameters.eventListeners,
 			instanceID: _this.id
 		});
-		_inst.template = parameters.template && parameters.template.version ?
-			parameters.template : templateCache[name] ? templateCache[name] :
+		_inst.template = template && template.version ?
+			template : templateCache[name] ? templateCache[name] :
 			data.template ? new (options.Template || Schnauzer)(
-			parameters.template || data.template, {
+			template || data.template, {
 				doEscape: false,
 				helpers: parameters.helpers || options.helpers || {} // TODO
 			}) : null;
 		_inst.template && (templateCache[name] = _inst.template);
+
 		if (hasStorage) {
 			var _data = storageData[storageCategory] || storageData;
 			for (var key in component.model[0]) {
@@ -167,8 +171,7 @@
 				// collect elements
 				this.reinforceProperty(item, elmsTxt, {
 					element: element,
-					container: parameters.mountSelector &&
-						$(parameters.mountSelector, element)
+    				container: $(mountSelector, element)
 				}, true);
 				// collect events
 				this.reinforceProperty(item, options.events, {}, true);
@@ -208,8 +211,7 @@
 							property, parentElement, sibling[elmsTxt].element,
 							idProperty, item[idProperty]);
 						item[elmsTxt].element = element;
-						item[elmsTxt].container = parameters.mountSelector &&
-							$(parameters.mountSelector, element);
+						item[elmsTxt].container = $(mountSelector, element);
 
 						item[options.events] = {};
 						_inst.controller && _inst.controller.getEventListeners(
