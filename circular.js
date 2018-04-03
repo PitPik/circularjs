@@ -596,6 +596,7 @@
 				eventType = '',
 				eventFunc = '',
 				eventParts = [],
+				eventFuncs = {},
 				extraElement = element !== component.element ? component.element : [];
 
 			elements = [element].concat([].slice.call(elements), extraElement);
@@ -611,13 +612,11 @@
 					eventType = eventItem[0];
 					eventFunc = eventItem[1];
 
-					if (events[eventType] === undefined) { // write back to vom
-						events[eventType] = {};
+					eventFuncs = events[eventType] = events[eventType] || {};
+					if (eventFuncs[eventFunc] === undefined) {
+						eventFuncs[eventFunc] = [];
 					}
-					if (events[eventType][eventFunc] === undefined) {
-						events[eventType][eventFunc] = [];
-					}
-					events[eventType][eventFunc].push(elements[n]);
+					eventFuncs[eventFunc].push(elements[n]);
 
 					if (!this.events[eventType]) { // register inside itself
 						this.events[eventType] = true;
