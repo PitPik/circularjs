@@ -375,7 +375,7 @@
 				{regexp: data.path} : routeToRegExp(data.path),
 			_hash = hash || this.options.hash,
 			parts = extractRouteParameters(path, getPath(_hash)),
-			routers = pubsub[this.name].__router;
+			routers = pubsub[this.name] && pubsub[this.name].__router;
 
 		this.subscribe(null, '__router', data.path, {
 			callback: data.callback,
