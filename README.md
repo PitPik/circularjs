@@ -17,6 +17,8 @@ CircularJS is a tiny **MV\* like framework** with its goal to help building **si
 
 **CircularJS** combines all those tools to easily abstract app modules and build **high performance SPAs**. CircularJS is very small (~9.9KB gZip, 27.5KB) and fast and therefore the best joyce for **mobile apps**.
 
+**CircularJS** is very easy to learn as 60% - 70% of functionality used within the framework like pubsub, ajax, handlebars, amd, promise and even routers and methods like "appendChild", "removeChild" etc. is already known by most developers.
+
 ## Quick Start
 
 To quickly get started try the ["Tour of Heroes" tutorial](heroes), see the [TODO list demo](http://dematte.at/circularjs/todo/) and read [ARCHITECTURE.md](ARCHITECTURE.md) and [API.md](API.md) for a better overview.
