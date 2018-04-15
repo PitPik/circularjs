@@ -576,7 +576,7 @@
 							}
 							resolve(init);
 						});
-					} else {
+					} else if (temp) {
 						moveChildrenToCache(data);
 						temp.parentElement.removeChild(temp);
 						resolve();

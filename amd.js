@@ -44,7 +44,8 @@
 		},
 		normalizePath = function(path) {
 			_link.href = path;
-			return _link.pathname;
+			return (path.indexOf(_link.host) !== -1 ? _link.origin : '') +
+				_link.pathname + _link.search;
 		},
 		applyScript = function(module, sync) { // creates script tag
 			var script = root.document.createElement('script');

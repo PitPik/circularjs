@@ -141,7 +141,8 @@
 
 		normalizePath: function(path) {
 			_link.href = path;
-			return _link.pathname;
+			return (path.indexOf(_link.host) !== -1 ? _link.origin : '') +
+				_link.pathname + _link.search;
 		},
 
 		ajax: function(url, prefs) {
@@ -339,6 +340,8 @@
 		doResolve(fn, this);
 	}
 
+	Promise._cache = {};
+
 	function handle(self, deferred) {
 		while (self._state === 3) {
 			self = self._value;
@@ -443,6 +446,14 @@
 			promise: promise
 		});
 		return promise;
+	};
+
+	Promise.prototype.cancelable = function (id) {
+		var oldDeferreds = (Promise._cache._id || {})._deferreds;
+
+		oldDeferreds && (oldDeferreds[0].onFulfilled =
+			oldDeferreds[0].onRejected = function(){});
+		return (Promise._cache._id = this);
 	};
 
 	Promise.all = function(promises) {
