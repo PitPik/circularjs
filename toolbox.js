@@ -149,13 +149,14 @@
 			var promise = null;
 			var cache = false;
 			var now = new Date().getTime();
+			var time = 0;
 
 			prefs = prefs || {};
 			url = Toolbox.normalizePath(url);
+			time = ajaxCache[url] && ajaxCache[url].time || 0;
 			cache = prefs.cache === true ? now + 1e8 : // 1e8 ~= 1 year
-				!prefs.cache ? 0 : now + prefs.cache;
-			promise = cache && !prefs.resetCache && ajaxCache[url] &&
-				ajaxCache[url].time > now ? ajaxCache[url] : null;
+				!prefs.cache ? 0 : (time > now ? time : now + prefs.cache);
+			promise = cache && !prefs.resetCache && time > now ? ajaxCache[url] : null;
 
 			promise = promise || new Toolbox.Promise(function(resolve, reject) {
 					var xhr = new XMLHttpRequest();
