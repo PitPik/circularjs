@@ -448,12 +448,16 @@
 		return promise;
 	};
 
-	Promise.prototype.cancelable = function (id) {
-		var oldDeferreds = (Promise._cache._id || {})._deferreds;
+	Promise.prototype.cancel = function (id) {
+		var promise = Promise._cache[id];
 
-		oldDeferreds && (oldDeferreds[0].onFulfilled =
-			oldDeferreds[0].onRejected = function(){});
-		return (Promise._cache._id = this);
+		if (promise) {
+			promise._deferreds = [];
+			promise.then = promise['catch'] = function(){};
+			promise._handled = true;
+		}
+
+		return (Promise._cache[id] = this);
 	};
 
 	Promise.all = function(promises) {
