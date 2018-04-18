@@ -318,18 +318,19 @@
 	function getXHRData(xhr, dataType, reject) {
 		try {
 			if (xhr.readyState === XMLHttpRequest.DONE) {
-				if (xhr.status === 200) {
+				if (xhr.status < 200 || xhr.status > 299) {
+					var error = new Error(xhr.statusText);
+					error.response = xhr.response;
+					reject(error);
+				} else {
 					return xhr[dataType === 'xml' ?
 						'responseXML' : 'responseText'];
-				} else {
-					reject('There was a problem with the xhr request.');
 				}
 			}
 		} catch(e) {
 			reject('Caught Exception: ' + e.stack);
 		}
 	}
-
 	/* ---------------- Promise --------------- */
 
 	function Promise(fn) {

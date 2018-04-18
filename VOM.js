@@ -299,7 +299,6 @@
 	}
 
 	function validate(property, object, value, oldValue, cache, _this, strIndex) {
-
 		if (property === _this.options.idProperty || property === strIndex ||
 			_this.options.subscribe.call(_this, _this.type ||
 					property, (object[1] || object), value, oldValue, _this.sibling)) {
