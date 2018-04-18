@@ -70,7 +70,7 @@ require.config({
 
 ```
 new Circular({
-    componentAttr: 'cr-component',
+    componentAttr: 'cr-component', // attributes used by circular...
     containerAttr: 'cr-container',
     templateAttr: 'cr-template-for',
     templatesAttr: 'cr-template',
@@ -78,21 +78,20 @@ new Circular({
     eventAttribute: 'cr-event',
     viewAttr: 'cr-view',
     devAttribute: 'cr-dev',
-    elements: 'elements',
-    events: 'events',
-    views: 'views',
-    hash: '#',
-    
-    extraModel:
-    Template:
-    helpers:
+    mountAttribute: 'cr-mount',
     idProperty: 'cr-id',
-    enrichModelCallback:
-    listeners:
-    eventListeners:
-    
-    instanceID:
-    appElement:
+    elements: 'elements', // name of elements in circular model
+    events: 'events', // same for cr-event elements
+    views: 'views', // same for cr-view elements
+    hash: '#', // default delimiter for Router
+
+    extraModel: {} || [], // Schnauzer templates will use this model(s) for lookup
+    Template: Schnauzer, // Templating engine to be used in Circular
+    helpers: {}, // Schnauzer helpers -> functions
+
+    enrichModelCallback: () => {},
+    listeners: Array [String 'modelItem', '*', ...], // component's subscribe gets called if defined vars are changed
+    eventListeners: Object {String 'name': function(), ...}, // cb functions defined by cr-event (on every component)
 });
 ```
 
@@ -100,23 +99,31 @@ new Circular({
 
 ```js
 Circular.component(name: 'String', parameters: Object {
-    model: Array [],
-    extraModel: Object {} || Array [],
-    subscribe: function(property, item, value, oldValue, type),
-    listeners: Array [String 'modelItem', '*', ...],
-    eventListeners: Object {String 'name': function(), ...},
-    componentElement: Object DOMElement,
-    componentWrapper: Object DOMElement,
-    mountSelector: Object DOMElement,
+    model: Array [], // the model that is the base of the component
+    extraModel: Object {} || Array [], // Schnauzer templates will use this model(s) for lookup
+    subscribe: function(property, item, value, oldValue, type), // subscribe gets called if vars defined in listeners are changed
+    listeners: Array [String 'modelItem', '*', ...], // subscribe gets called if defined vars are changed
+    eventListeners: Object {String 'name': function(), ...}, // cb functions defined by cr-event
+    componentElement: Object DOMElement, // in case there is no cr-component
+    componentWrapper: Object DOMElement, // in case there is no cr-component and we know it's wrapped
+    mountSelector: Object DOMElement, // selector of containers where children will be rendered into
     
-    onBeforeInit: function(component),
-    onInit: function(component),
+    onBeforeInit: function(component), // one time callback on before first init of component
+    onInit: function(component), // one time callback on first init of component
 
-    template: Object SchnauzerTemplate || String 'name'
-    helpers: Object {String 'name': function()}
+    template: Object SchnauzerTemplate || String 'name',
+    helpers: Object {String 'name': function()}, // Schnauzer helpers -> functions
 
     preRecursionCallback: function()
-    enrichModelCallback: function()
+    enrichModelCallback: function(),
+    
+    storage: {
+        name: '', // name of storage
+        category: '', // optional to structure storage model
+        storeAll: Boolean, // all listeners
+        saveLazy: Boolean, // wait a tick in case there are a lot of requests
+        listeners: Array [String 'modelItem', '*', ...], // see listenrs
+    }
 })
 ```
 
