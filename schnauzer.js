@@ -207,8 +207,7 @@
 							[''].concat(keys[n][1])) :
 						isFunction(tmp) ? tmp.apply(tools(_this, data, dataTree),
 							[''].concat(keys[n][1])) : // inline function
-						key.name === 'executor' ?
-						key(data, dataTree) : tmp && (keys[n][3] ? tmp :
+						key.isExecutor ? key(data, dataTree) : tmp && (keys[n][3] ? tmp :
 						escapeHtml(tmp, _this));
 				}
 				tmp !== undefined && (out = out + tmp); // out.push(tmp);
@@ -283,6 +282,7 @@
 		}
 
 		return function executor(data, dataTree, keys) {
+			executor.isExecutor = true;
 			for (var n = 0, l = output.length, out = ''; n < l; n++) {
 				out = out + (output[n](data, dataTree || [data], keys) || '');
 			}
