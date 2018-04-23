@@ -80,7 +80,7 @@ Given you have the following template:
     <script type="text/template" cr-template-for="tree">
     <li cr-id="{{cr-id}}">
         <a href="{{root}}{{link}}" cr-event="click: listLink">{{text}}</a>
-        <ul cr-view="container"></ul>
+        <ul cr-mount></ul>
     </li>
     </script>
 </ul>
@@ -88,7 +88,7 @@ Given you have the following template:
 and a model for the component like this:
 
 ```JS
-var circular = new Circular();
+var circular = new Circular(),
     model = [{
         "id": "0",
         "link": "root-0",
@@ -115,13 +115,11 @@ var circular = new Circular();
         "id": "2",
         "link": "root-2",
         "text": "Root item 2"
-    }
-}];
+    }];
 
 circular.component('tree', {
     model: model,
-    extraModel: {root: '#/tree/'}
-    mountSelector: '[cr-view="container"]',
+    extraModel: {root: '#/tree/'},
     listeners: ['text'],
     subscribe: function(property, item, value, oldValue) {
         if (property === 'text') {
