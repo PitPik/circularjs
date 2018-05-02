@@ -15,7 +15,7 @@ CircularJS is a tiny **MV\* like framework** with its goal to help building **we
  - Enhanced **resource loading management** for parallel loading of data/view/resources/modules(-preload), rtc.
  - Loads of **helper functions** like 'addClass...', '$' and '$$', 'sorter' and many more...
 
-**CircularJS** combines all those tools to easily abstract app modules and build **high performance SPAs**. CircularJS is very small (~9.9KB gZip, 27.5KB) and fast and therefore the best joyce for **mobile apps**.
+**CircularJS** combines all those tools to easily abstract app modules and build **high performance SPAs**. CircularJS is very small (~9.9KB gZip, 27.5KB) and fast and therefore the best joyce for **mobile apps**. **CircularJS** can optimize apps when used with HTTP 2.0 as you can make your app load all resources at the same time.
 
 **CircularJS** is very easy to learn as 60% - 70% of functionality used within the framework like pubsub, ajax, handlebars, amd, promise and even routers and methods like "appendChild", "removeChild" etc. is already known by most developers.
 
