@@ -8,7 +8,7 @@
 	} else {
 		root.Schnauzer = factory(root);
 	}
-}(this, function SchnauzerFactory(root, undefined) {
+}(this, function SchnauzerFactory(root, undefined, help) {
 	'use strict';
 	// Schnauzer   4.00 KB,  1.77 KB vs
 	// Mustage     5.47 KB,  2.26 KB vs
@@ -41,6 +41,7 @@
 			for (var option in options) {
 				_this.options[option] = options[option];
 			}
+			help = 1; // counter helper for nestings
 			options = _this.options;
 			_this.entityRegExp = (function(entityMap, output){
 				for (var symbol in entityMap) {
@@ -55,8 +56,7 @@
 				_this.registerPartial(name, options.partials[name]);
 			}
 			template && _this.registerPartial(options.recursion, template);
-		},
-		help = 1; // counter helper for nestings
+		};
 
 	Schnauzer.prototype = {
 		render: function(data, extra) {
