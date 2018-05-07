@@ -95,7 +95,7 @@
 			'([>!&=]\\s*)*([\\w\\'+ _this.options.characters +
 			'\\.\\s*]+)*' + _tags[1], 'g');
 		_this.sectionRegExp = new RegExp(
-			_tags[0] + '(#|\\^)([\\w\\.]*)\\s*(.*?)' + _tags[1] +
+			_tags[0] + '(#|\\^)([@\\w\\.]*)\\s*(.*?)' + _tags[1] +
 			'([\\S\\s]*?)(' + _tags[0] + ')\\/\\2(' + _tags[1] + ')', 'g');
 	}
 
@@ -225,9 +225,10 @@
 					return !_data.length ? func(_data, dataTree) : '';
 				}
 				for (var n = 0, l = _data.length, out = ''; n < l; n++) {
+					var extra = {'@index': n, '@last': n === l - 1, '@fist': !n};
 					out = out + (typeof _data[n] === 'object' ?
-						func(_data[n], [_data[n]].concat(data, dataTree, {'@index': n})) :
-						func({'.': _data[n], '@index': n}, dataTree));
+						func(_data[n], [_data[n]].concat(data, dataTree, extra)) :
+						func((extra['.'] = _data[n], extra), dataTree));
 				}
 				return out; //.join('');
 			}
