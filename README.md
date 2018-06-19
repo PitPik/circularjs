@@ -1,9 +1,9 @@
 # What is CircularJS
 
-CircularJS is a tiny **MV\* like framework** with its goal to help building **web-pages** and **single-page-web-apps** in a **model-oriented** easy way with the help of powerful tools:
+CircularJS is a tiny, progressive **MV\* like framework** with its goal to help building **web-pages** and **single-page-web-apps** in a **model-oriented** easy way with the help of powerful tools:
  - **amd**: a powerful module loader with look-ahead for even faster resource loading.
  - **ajax**: resource loader with cache, timed cache and auto XSRF returning a promise.
- - **promise**: also used by ajax. A well known design pattern, easy to use (cancelable).
+ - **promise**: also used by ajax. A well known design pattern, easy to use (cacheable and cancelable).
  - **resource/module loader**: A convenient widget loader with powerful options.
  - **pubsub**: A well known design pattern for transmitting data along the whole app.
  - **router**: an easy but powerful routing system using internal pubsub.
@@ -26,9 +26,9 @@ To quickly get started try the ["Tour of Heroes" tutorial](heroes), see the [TOD
 ## Why CircularJS
 
 The intention to build **CircularJS** was to create something small and fast that is easy to learn and feels closer to javaScript rather than having to learn a new language or complicated framework dependent patterns.
-Using **CircularJS** is quite easy and straight forward.
+Using **CircularJS** is quite easy and straight forward but it provides a lot of power to create powerful UIs.
 
-When developing **components** and **modules** with **circularJS** you usually don't need to search the DOM any more, so no further selectors needed, never install any event listener and never need to use the global scope for storing app dependent variables. You probably don't even need any other dependencies to manage your views although they might co-exist as **circualrJS** is **highly un-oppinionated**.
+When developing **components** and **modules** with **circularJS** you usually don't need to search the DOM any more, so no further selectors needed, never install any event listener and never need to use the global scope for storing app dependent variables. You probably don't even need any other dependencies to manage your views although they might co-exist as **circualrJS** is **highly un-oppinionated**. Unlike other monolithic frameworks, **CircularJS** is designed to be incrementally adoptable. The library is focused on the view layer, and is easy to pick up and integrate with other libraries or existing projects. On the other hand, **CircularJS** is also perfectly capable of powering sophisticated Single-Page Applications.
 
 You usually end up writing **very little code** to manage big tasks in you SPI's views with powerful functionality.
 
