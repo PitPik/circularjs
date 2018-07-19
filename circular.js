@@ -103,7 +103,8 @@
 				name: name,
 				model: parameters.model || [],
 				element: data.element,
-				container: data.container
+				container: data.container,
+				templates: data.templates
 			},
 			hasStorage = parameters.storage,
 			storage = hasStorage || {},
@@ -120,7 +121,6 @@
 
 		pubsub[this.name] = pubsub[this.name] || {}; // prepare
 		pubsub[this.name][name] = {}; // prepare
-		component.templates = data.templates;
 		instanceList[this.id] = instanceList[this.id] || {};
 		_inst = instanceList[this.id][name] = {};
 		_inst.helper = document.createElement('tbody');
@@ -770,36 +770,29 @@
 
 	// -------- for Controller --------- //
 	// --------------------------------- //
-	function eventDistributor(e, idProperty, component, _this) {
-		// TODO: cache by e.target for next vars??
-		var element = Toolbox.closest(e.target,
-				attrSelector(idProperty)) || component.element,
-			id = element.getAttribute(idProperty),
-			item = component.getElementById(id) || component
-				.getElementsByProperty('elements.element', component.element)[0]; // TODO
+function eventDistributor(e, idProperty, component, _this) {
+	// TODO: cache by e.target for next vars??
+	var element = Toolbox.closest(e.target, attrSelector(idProperty)) || component.element,
+		id = element.getAttribute(idProperty),
+		elms = 'elements.element',
+		item = component.getElementById(id) ||
+			component.getElementsByProperty(elms, component.element)[0] || // TODO
+			component.getElementsByProperty(elms, e.target)[0] || component.model[0],
+		eventElements = item && item.events[e.type],
+		eventElement = {},
+		stopPropagation = false,
+		eventListener;
 
-		if (!item) { // TODO
-			item = component.getElementsByProperty('elements.element', e.target)[0]
-			|| component.model[0]; // TODO!!!!!!!
-		}
-
-		var eventElements = item && item.events[e.type],
-			stopPropagation = false,
-			eventElement = {};
-
-		for (var key in eventElements) { // TODO: check for optimisation
-			for (var n = eventElements[key].length; n--; ) {
-				eventElement = eventElements[key][n];
-				if (!stopPropagation && (eventElement === e.target ||
-							eventElement.contains(e.target)) &&
-						_this.options.eventListeners[key]) {
-					stopPropagation = _this.options.eventListeners[key]
-						.call(component, e, eventElement, item) === false;
-					if (stopPropagation) {
-						e.stopPropagation();
-					}
-				}
+	for (var key in eventElements) { // TODO: check for optimisation
+		eventListener = _this.options.eventListeners[key];
+		if (!eventListener) continue;
+		for (var n = eventElements[key].length; n--; ) {
+			eventElement = eventElements[key][n];
+			if (!stopPropagation && (eventElement === e.target || eventElement.contains(e.target))) {
+				stopPropagation = eventListener.call(component, e, eventElement, item) === false;
+				if (stopPropagation) e.stopPropagation();
 			}
 		}
 	}
+}
 }));

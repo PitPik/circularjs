@@ -1,13 +1,13 @@
-/**! @license schnauzer v1.0.00; Copyright (C) 2017-2018 by Peter Dematté */
+/**! @license schnauzer v1.2.0; Copyright (C) 2017-2018 by Peter Dematté */
 (function defineSchnauzer(root, factory) {
   if (typeof exports === 'object') module.exports = factory(root);
   else if (typeof define === 'function' && define.amd) define('schnauzer', [],
     function () { return factory(root); });
   else root.Schnauzer = factory(root);
-}(this, function SchnauzerFactory(root, undefined, help) { 'use strict';
-// Schnauzer 4.84 KB, 2.14 KB, Mustage 5.47 KB, 2.26 KB, Handlebars 74.20 KB, 21.86 KB
+}(this, function SchnauzerFactory(root, undefined) { 'use strict';
+// Schnauzer 5.18 KB, 2.26 KB, Mustage 5.50 KB, 2.27 KB, Handlebars 74.20 KB, 21.86 KB
 var Schnauzer = function(template, options) {
-    this.version = '1.0.0';
+    this.version = '1.2.0';
     this.options = {
       tags: ['{{', '}}'],
       entityMap: {
@@ -24,7 +24,7 @@ var Schnauzer = function(template, options) {
       helpers: {},
       partials: {},
       recursion: 'self',
-      characters: '$"<>%-=@°',
+      characters: '$"<>%-=@',
       splitter: '|##|'
     };
     init(this, options || {}, template);
@@ -33,21 +33,24 @@ var Schnauzer = function(template, options) {
     for (var option in options) {
       _this.options[option] = options[option];
     }
-    help = 1; // counter helper for nestings
     options = _this.options;
-    _this.entityRegExp = (function(entityMap, output){
-      for (var symbol in entityMap) {
-        output += symbol;
-      }
-      return new RegExp('[' + output + ']', 'g');
-    })(options.entityMap, []);
-    _this.stopRegExp = new RegExp(/^°+/);
+    _this.entityRegExp = new RegExp('[' + getKeys(options.entityMap, []).join('') + ']', 'g');
     switchTags(_this, options.tags);
     _this.partials = {};
     for (var name in options.partials) {
       _this.registerPartial(name, options.partials[name]);
     }
     template && _this.registerPartial(options.recursion, template);
+  },
+  isArray = Array.isArray || function(obj) { // obj instanceof Array;
+    return obj && obj.constructor === Array;
+  },
+  isFunction = function(obj) {
+    return obj && typeof obj === 'function';
+  },
+  getKeys = Object.keys || function(obj, keys) { // keys = []
+    for (var key in obj) obj.hasOwnProperty(key) && keys.push(key);
+    return keys;
   };
 
 Schnauzer.prototype = {
@@ -68,7 +71,7 @@ Schnauzer.prototype = {
     return this.partials[name] = sizzleTemplate(this, html);
   },
   unregisterPartial: function(name) {
-    delete this.options.partials[name];
+    delete this.partials[name];
   },
   setTags: function(tags) {
     switchTags(this, tags);
@@ -78,35 +81,32 @@ Schnauzer.prototype = {
 return Schnauzer;
 
 function switchTags(_this, tags) {
-  var _tags = _this.options.tags = tags[0] === '{{' ? ['{{2,3}', '}{2,3}'] : tags,
-    chars = _this.options.characters;
+  var _tags = tags[0] === '{{' ? ['{{2,3}', '}{2,3}'] : tags;
+  var chars = _this.options.characters;
 
   _this.variableRegExp = new RegExp('(' + _tags[0] + ')' +
-    '([>!&=]\\s*)*([\\w\\'+ chars + '\\.\\s*]+)*' + _tags[1], 'g');
-  _this.sectionRegExp = new RegExp(
-    _tags[0] + '(#|\\^)([\\w'+ chars + ']*)\\s*(.*?)' + _tags[1] +
-    '([\\S\\s]*?)(' + _tags[0] + ')\\/\\2(' + _tags[1] + ')', 'g');
-  _this.partRegExp = new RegExp(_tags[0] + '[#\^]');
-  _this.escapeRegExp = new RegExp(_tags[0]);
+    '([>!&=])*([\\w\\'+ chars + '\\.]+)\\s*([\\w' + chars + '\\.\\s]*)' + _tags[1], 'g');
+  _this.sectionRegExp = new RegExp('(' + _tags[0] + ')([#^])([\\w' + chars + ']*)' +
+    '(?:\\s+([\\w$\\s|./' + chars + ']*))*(' + _tags[1] + ')((?:(?!\\1[#^])[\\S\\s])*?)' +
+    '\\1\\/\\3\\5', 'g');
+  _this.elseSplitter = new RegExp(_tags[0] + 'else' + _tags[1]);
 }
 
-function isArray(obj) { // obj instanceof Array;
-  return obj && obj.constructor === Array;
+function concat(array, newArray) { // way faster then [].concat
+  for (var n = 0, l = array.length; n < l; n++) {
+    newArray[newArray.length] = array[n];
+  }
+  return newArray;
 }
 
-function isFunction(obj) {
-  return obj && typeof obj === 'function';
-}
-
-function getDataSource(data, extra, newData, helpers) {
+function getSource(data, extra, newData, helpers) {
+  var isNew = newData !== undefined;
   return {
-    data: newData || data.data || data,
-    extra: extra && [extra] || data.extra || [],
-    path: [].concat(data.path !== undefined ? data.path : data, newData || []),
-    helpers: [].concat(data.helpers || [], helpers || []),
-    __schnauzer: true,
+    extra: extra ? concat(extra, isNew && data.extra || []) : isNew && data.extra || [],
+    path: isNew ? concat(data.path, [newData] || []) : data.path || [data],
+    helpers: helpers ? concat(data.helpers || [], isNew && [helpers] || [{}]) : data.helpers || [],
   };
-};
+}
 
 function crawlObjectUp(data, keys) { // faster than while
   for (var n = 0, m = keys.length; n < m; n++) {
@@ -116,48 +116,47 @@ function crawlObjectUp(data, keys) { // faster than while
 }
 
 function findData(data, key, keys, pathDepth) {
-  var _keys = [],
-    seachDepth = (data.path.length - 1) - pathDepth,
-    _data = data.path[seachDepth] || {},
-    helpers = data.helpers[seachDepth - 1] || {},
-    value = helpers[key] !== undefined ? helpers[key] : _data[key] !== undefined ? _data[key] :
-      crawlObjectUp(_data, _keys = keys || key.split(/[\.\/]/));
+  var _data = data.path[pathDepth] || {};
+  var helpers = data.helpers[pathDepth] || {};
+  var value = helpers[key] !== undefined ? helpers[key] : crawlObjectUp(helpers, keys);
 
+  if (value === undefined || keys[0] === '.') {
+    value = _data[key] !== undefined ? _data[key] : crawlObjectUp(_data, keys);
+  }
   if (value !== undefined) return value;
   for (var n = data.extra.length; n--; ) {
     if (data.extra[n][key] !== undefined) return data.extra[n][key];
-    value = crawlObjectUp(data.extra[n], _keys);
+    value = crawlObjectUp(data.extra[n], keys);
     if (value !== undefined) return value;
   }
 }
 
-function getVar(text, data) {
+function getVar(text) {
   var parts = text.split(/\s*=\s*/);
   var value = parts.length > 1 ? parts[1] : parts[0];
-  var isString = value[0] === '"' || value[0] === "'";
+  var isString = value.charAt(0) === '"' || value.charAt(0) === "'";
   var depth = 0;
   var keys = [];
-  var isStrict = false;
+  var path = [];
+  var strict = false;
 
   if (isString) {
     value = value.replace(/(?:^['"]|['"]$)/g, '');
   } else {
-    var path = value.split('../');
+    path = value.split('../');
     if (path.length > 1) {
-      value = path.pop();
+      value = (path[0] === '@' && '@' || '') + path.pop();
       depth = path.length;
     }
-    name = name.replace(/^(?:\.|this)\//, function() {
-      isStrict = true;
-      return '';
-    });
+    name = name.replace(/^(?:\.|this)\//, function() { strict = true; return ''; });
     keys = value.split(/[\.\/]/);
+    value = value.replace(/^\.\//, function() { strict = true; keys[0] = '.'; return ''; });
   }
   return {
     name: parts.length > 1 ? parts[0] : value,
-    value: isString || !data ? value : findData(data, value, keys, depth),
+    value: value,
     isString: isString,
-    isStrict: isStrict,
+    strict: strict,
     keys: keys,
     depth: depth,
   };
@@ -169,158 +168,147 @@ function escapeHtml(string, _this) {
   });
 }
 
-function tools(_this, data, dataTree) {
+function tools(_this, data, parts, body, altBody) {
   return {
-    getData: function getData(key) { return getVar(key, data) },
-    escapeHtml: function escape(string) { return escapeHtml(string, _this) }
+    getData: function getData(key) {
+      key = parts.rawParts[key] || { value: key, keys: [key], depth: 0 };
+      return key.isString ? key.value : findData(data, key.value, key.keys, key.depth);
+    },
+    escapeHtml: function escape(string) { return escapeHtml(string, _this) },
+    getBody: function() { return body && body(data) || '' },
+    gatAltBody: function() { return altBody && altBody(data) || '' },
+    data: data.path[0]
   }
 }
 
-function variable(_this, html) {
-  var keys = [],
-    options = _this.options;
+function addToHelper(helpers, keys, name, value) {
+  if (keys) { helpers[keys[0]] = value;  helpers[keys[1]] = name; }
+  return helpers;
+}
 
-  html = html.replace(_this.variableRegExp, function(all, $1, $2, $3) {
-    var char1 =  $2 && $2[0] || '',
-      isPartial = char1 === '>',
-      isSelf = false,
-      name = '',
-      isStrict = false,
-      _data = {};
+function splitVars(_this, vars, _data, unEscaped, char0) {
+  var options = _this.options;
+  var parts = {};
+  var rawParts = {};
 
-    if (char1 === '!' || char1 === '=') return '';
+  for (var n = vars.length, tmp = {}; n--; ) {
+    tmp = getVar(vars[n]);
+    parts[tmp.name] = tmp;
+    rawParts[vars[n]] = tmp; // for tools.getData()
+  }
+  return {
+    name: _data.name,
+    vars: vars,
+    parts: parts,
+    rawParts: rawParts,
+    partial: char0 === '>' && (_this.partials[_data.name] || _this.partials[options.recursion]),
+    isUnescaped: !options.doEscape || char0 === '&' || unEscaped,
+    depth: _data.depth,
+    strict: _data.strict,
+    keys: _data.keys,
+  };
+}
 
-    $3 = $3.split(/\s+/); // split variables
-    name = $3.shift();
+function inline(_this, html, sections) {
+  var keys = [];
+  var splitter = _this.options.splitter;
 
-    if (!isPartial) {
-      _data = getVar(name);
-      isStrict = _data.isStrict;
-      name = _data.name;
-    } else {
-      for (var n = $3.length, tmp = {}; n--; ) {
-        tmp = getVar($3[n]);
-        _data[tmp.name] = tmp;
-      }
+  html = html.replace(_this.variableRegExp, function(all, start, type, name, vars) {
+    var char0 =  type && type.charAt(0) || '';
+
+    if (name === '-section-') {
+      keys.push({ section : vars });
+      return splitter;
     }
-    isSelf = name === options.recursion;
-    isPartial = isPartial && (!!_this.partials[name] || isSelf);
-    keys.push({
-      value: isPartial ? _this.partials[name] : name,
-      data: isPartial ? _data : $3,
-      isPartial: isPartial,
-      isUnescaped: !options.doEscape || char1 === '&' ||
-        (_this.escapeRegExp.test($1) && $1.length === 3),
-      isSelf: isSelf,
-      depth: isPartial ? undefined : _data.depth,
-      isStrict: isStrict,
-      keys: isPartial ? undefined : _data.keys
-    });
-    return options.splitter;
-  }).split(options.splitter);
+    if (char0 === '!' || char0 === '=') return '';
+    vars = vars.split(/\s+/); // split variables
+    keys.push(splitVars(_this, vars, getVar(name), start === '{{{', char0));
+    return splitter;
+  }).split(splitter);
 
   return function fastReplace(data) {
-    for (var n = 0, l = html.length, out = '', tmp, value, _data, _func, part; n < l; n++) {
+    for (var n = 0, l = html.length, out = '', _out, _fn, _data, newData, part; n < l; n++) {
       out = out + html[n];
-      if (keys[n] === undefined) continue; // no other functions, just html
       part = keys[n];
-      value = part.value;
-      if (part.isPartial === true) { // partial -> executor
-        var newData = {}; // create new scope (but keep functions in scope)
-        for (var item in data.data) newData[item] = data.data[item];
-        for (var key in part.data) {
-          _data = part.data[key];
+      if (part === undefined) continue; // no other functions, just html
+      if (part.section) { out += sections[part.section](data) || ''; continue; }
+      if (part.partial) { // partial -> executor
+        newData = {}; // create new scope (but keep functions in scope)
+        for (var item in data.path[0]) newData[item] = data.path[0][item];
+        for (var key in part.parts) { // TODO: this also for section.fastLoop
+          _data = part.parts[key];
           newData[key] = _data.isString ? _data.value :
             findData(data, _data.value, _data.keys, _data.depth);
         }
-        tmp = (value || _this.partials[options.recursion])(getDataSource(newData, data.extra));
+        _out = part.partial(getSource(newData));
       } else {
-        tmp = findData(data, value, part.keys, part.depth);
-        _func = !part.isStrict && options.helpers[value] || isFunction(tmp) && tmp;
-        tmp = _func ? _func.apply(tools(_this, data), part.data) :
-          value.isExecutor ? value(data) :
-          tmp && (part.isUnescaped ? tmp : escapeHtml(tmp, _this));
+        _out = findData(data, part.name, part.keys, part.depth);
+        _fn = !part.strict && _this.options.helpers[part.name] || isFunction(_out) && _out;
+        _out = _fn ? _fn.apply(tools(_this, data, part), part.vars) :
+          _out && (part.isUnescaped ? _out : escapeHtml(_out, _this));
       }
-      if (tmp !== undefined) out = out + tmp;
+      if (_out !== undefined) out = out + _out;
     }
     return out;
   };
 }
 
-function section(_this, func, key, vars, negative) {
-  key = getVar(key);
+function section(_this, fn, name, vars, unEscaped, isNot) {
+  var type = name;
+  name = getVar(vars.length && (name === 'if' || name === 'each' ||
+    name === 'with' || name === 'unless') ? vars.shift() : name);
+  var keys = vars[0] === 'as' && [vars[1], vars[2]];
+  vars = splitVars(_this, vars, getVar(name.name), unEscaped, '');
+
   return function fastLoop(data) {
-    var _data = findData(data, key.name, key.keys, key.depth);
+    var _data = findData(data, name.name, name.keys, name.depth);
+    var _isArray = isArray(_data);
+    var objData = type === 'each' && !_isArray && typeof _data === 'object' && _data;
 
-    if (isArray(_data)) {
-      if (negative) return !_data.length ? func(_data) : '';
+    _data = type === 'unless' ? !_data : objData ? getKeys(_data, []) : _data;
+    if (_isArray || objData) {
+      if (isNot) return !_data.length ? fn[0](_data) : '';
+      data.path.unshift({}); data.helpers.unshift({});
       for (var n = 0, l = _data.length, out = ''; n < l; n++) {
-        var helpers = {'@index': '' + n, '@last': n === l - 1,
-          '@first': !n, '.': _data[n], 'this': _data[n] };
-
-        data = getDataSource(data, data.extra, _data[n], helpers);
-        out = out + func(data);
-        data.path.pop();
-        data.helpers.pop();
+        data.path[0] = _isArray ? _data[n] : objData[_data[n]];
+        data.helpers[0] = addToHelper({ '@index': '' + n, '@last': n === l - 1, '@first': !n,
+            '.': data.path[0], 'this': data.path[0], '@key': _isArray ? n : _data[n] },
+            keys, _isArray ? n : _data[n], data.path[0]);
+        out = out + fn[0](data);
       }
+      data.path.shift(); data.helpers.shift(); // jump back out of scope-level
       return out;
     }
-
-    var foundData = typeof _data === 'object' ? _data : data; // is object
-    var _func = (!key.isStrict && _this.options.helpers[key.name]) || (isFunction(_data) && _data);
-    if (_func) { // helpers or inline functions
-      return _func.apply(tools(_this, data), [func(data)].concat(vars.split(/\s+/)));
+    var _fn = (!name.strict && _this.options.helpers[name.name]) || (isFunction(_data) && _data);
+    if (_fn) { // helpers or inline functions
+      return _fn.apply(tools(_this, data, vars, fn[0], fn[1]), vars.vars);
     }
-    if (negative && !_data || !negative && _data) { // regular replace
-      return func(getDataSource(data, data.extra, foundData, { '.': _data, 'this': _data }));
+    if (isNot && !_data || !isNot && _data) { // regular replace
+      return fn[0](type === 'unless' || type === 'if' ? data : getSource(data, undefined, _data,
+        addToHelper({ '.': _data, 'this': _data, '@key': name.name }, keys, name.name, _data)));
     }
+   return fn[1] && fn[1](data); // else
   }
 }
 
 function sizzleTemplate(_this, html) {
-  var options = _this.options,
-    partCollector = [],
-    output = [],
-    nesting = [],
-    counter = -1,
-    stop = '',
-    parts = html.replace(_this.sectionRegExp, function(_, $1, $2, $3, $4, $5, $6) {
-      var replacer = $5 + $1 + $2,
-        index = $4.lastIndexOf(replacer);
-      if (nesting.length) return _; // skip for next replace
-      counter++;
-      if (index !== -1) { // only if nesting occures
-        nesting.push(counter--);
-        stop = Array(++help).join('°');
-        return replacer + $3 + $6 + $4.substring(0, index) + $5 + $1 + stop + $2 +
-          $4.substring(index + replacer.length) + $5 + '/' + stop + $2 + $6;
-      }
-      $2 = $2.replace(_this.stopRegExp, '');
+  var _html = '';
+  var sections = [];
+  var tags = _this.options.tags;
 
-      partCollector.push(_this.partRegExp.test($4) ?
-        section(_this, sizzleTemplate(_this, $4), $2, $3, $1 === '^') :
-        section(_this, variable(_this, $4), $2, $3, $1 === '^'));
-      return options.splitter;
-    }).split(options.splitter);
-
-  for (var n = 0, l = nesting.length; n < l; n++) {
-    parts[nesting[n]] = sizzleTemplate(_this, parts[nesting[n]]);
+  while (_html !== html && (_html = html)) {
+    html = html.replace(_this.sectionRegExp, function(all, start, type, name, vars, end, text) {
+      text = text.split(_this.elseSplitter);
+      sections.push(section(_this, [inline(_this, text[0], sections),
+        text[1] && inline(_this, text[1], sections)],
+        name, vars && vars.replace(/\|/g, '').split(/\s+/) || [], start === '{{{', type === '^'));
+      return (tags[0] + '-section- ' + (sections.length - 1) + tags[1]);
+    });
   }
-  for (var n = 0, l = parts.length; n < l; n++) { // rearrange
-    output.push(isFunction(parts[n]) ? parts[n] : variable(_this, parts[n]));
-    partCollector[n] && output.push(partCollector[n]);
-  }
+  html = inline(_this, html, sections);
 
   return function executor(data, extra) {
-    if (!data.__schnauzer || extra) { // oninit or partials
-      data = getDataSource(data, extra);
-    }
-    executor.isExecutor = true;
-    for (var n = 0, l = output.length, out = ''; n < l; n++) {
-      out = out + (output[n](data) || '');
-    }
-    return out;
-  }
+    return html(getSource(data, extra && (isArray(extra) && extra || [extra])));
+  };
 }
-
 }));
