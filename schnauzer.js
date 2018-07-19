@@ -100,11 +100,15 @@ function concat(array, newArray) { // way faster then [].concat
 }
 
 function getSource(data, extra, newData, helpers) {
-  var isNew = newData !== undefined;
+  var hasNewData = newData !== undefined;
+  var isNew = !data.__schnauzerData;
+  var _extra = hasNewData && !isNew && data.extra || [];
+  var _helpers = !isNew && data.helpers || [];
   return {
-    extra: extra ? concat(extra, isNew && data.extra || []) : isNew && data.extra || [],
-    path: isNew ? concat(data.path, [newData] || []) : data.path || [data],
-    helpers: helpers ? concat(data.helpers || [], isNew && [helpers] || [{}]) : data.helpers || [],
+    extra: extra ? concat(extra, _extra) : _extra,
+    path: isNew ? [data] : hasNewData ? concat(data.path, [newData]) : data.path,
+    helpers: helpers ? concat(_helpers, hasNewData && [helpers] || [{}]) : _helpers,
+    __schnauzerData: true,
   };
 }
 
