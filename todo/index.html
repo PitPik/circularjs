@@ -19,8 +19,8 @@
 				<label for="toggle-all">Mark all as complete</label>
 				<ul class="todo-list" cr-component="list" cr-container="prepend">
 					<script type="text/template" cr-template-for="list">
-						<li cr-id="{{cr-id}}" class="todo-list-item{{#done}} completed{{/done}}">
-							<input cr-event="click: toggle" cr-view="toggle" class="toggle" type="checkbox"{{#done}} checked=""{{/done}}>
+						<li cr-id="{{cr-id}}" class="todo-list-item{{#if done}} completed{{/if}}">
+							<input cr-event="click: toggle" cr-view="toggle" class="toggle" type="checkbox"{{#if done}} checked=""{{/if}}>
 							<label cr-event="dblclick: edit" cr-view="label">{{text}}</label>
 							<button class="destroy" cr-event="click: delete"></button>
 							<input class="edit" cr-event="change: save; blur: blurItem; keyup: escape" cr-view="text" value="{{text}}">
@@ -31,11 +31,11 @@
 			<footer class="footer" cr-view="footer">
 				<span class="todo-count" cr-view="counter">
 					<script type="text/template" name="itemsLeft" cr-template="app">
-						<strong>{{count}}</strong> <span>item{{#plural}}s{{/plural}} left</span>
+						<strong>{{count}}</strong> <span>item{{#if plural}}s{{/if}} left</span>
 					</script>
 				</span>
 				<ul class="filters">
-					<li><a href="#/" cr-view="all">All</a></li>
+					<li><a href="#" cr-view="all">All</a></li>
 					<li><a href="#/active" cr-view="active">Active</a></li>
 					<li><a href="#/completed" cr-view="completed">Completed</a></li>
 				</ul>
