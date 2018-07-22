@@ -6,15 +6,16 @@ var ENTER_KEY = 13;
 var ESCAPE_KEY = 27;
 var STORAGE_KEY = 'todos-circularjs-0.1';
 
-var Toolbox = Circular.Toolbox;
 var circular = new Circular();
+var storage = Circular.Toolbox.storageHelper;
+
 var list = circular.component('list', {
-  model: Toolbox.storageHelper.fetch(STORAGE_KEY),
+  model: storage.fetch(STORAGE_KEY),
   listeners: ['text', 'done'],
   subscribe: function(property, item, value, oldValue, type) {
-    property = listCallbacks[property] ? property : 'nodeChange';
-    listCallbacks[property](item, item.views, value);
-    Toolbox.storageHelper.saveLazy(this.model, STORAGE_KEY);
+    listCallbacks[listCallbacks[property] ?
+      property : 'nodeChange'](item, item.views, value);
+    storage.saveLazy(this.model, STORAGE_KEY);
   },
   eventListeners: {
     toggle: function (e, element, item) {
@@ -45,21 +46,24 @@ var listCallbacks = {
     markItem(item.elements.element, views.toggle, value);
     listCallbacks.nodeChange();
   },
-  nodeChange: function () {
-    Toolbox.lazy(function() {
-      var getItems = list.getElementsByProperty;
-      var all = getItems().length;
-      var checked = getItems('done', true).length;
-      var uiViews = app_ui.model[0].views;
-
-      renderFooter(uiViews, checked, all);
-      renderLeft(app_ui.templates.itemsLeft.partials.self,
-        uiViews.counter, all - checked);
-      renderMarkAll(uiViews.toggle, all === checked);
-    }, list);
+  nodeChange: function (immediate) {
+    immediate === true ? updateUI() : Circular.Toolbox.lazy(updateUI, list);
   }
 };
-var app_ui = circular.component('app', {
+function updateUI() {
+  var all = list.getElementsByProperty().length;
+  var checked = list.getElementsByProperty('done', true).length;
+  var UI = circular.components['app'];
+  var uiViews = UI.model[0].views;
+
+  renderFooter(uiViews, checked, all);
+  renderLeft(UI.templates.itemsLeft.partials.self,
+    uiViews.counter, all - checked);
+  renderMarkAll(uiViews.toggle, all === checked);
+};
+
+
+circular.component('app', {
   model: [{ filter: 'all' }],
   eventListeners: {
     addItem: function (e, element, item) {
@@ -100,7 +104,7 @@ var app_ui = circular.component('app', {
         item.filter = value;
       }
     }, true);
-    listCallbacks.nodeChange();
+    listCallbacks.nodeChange(true);
   }
 });
 
@@ -110,36 +114,35 @@ function markItem(element, input, toggle) {
   input.checked = toggle;
 }
 
-function makeItemEditable(elm, value) {
-  elm.style.display = 'block';
-  elm.focus();
-  elm.value = value;
+function makeItemEditable(element, value) {
+  element.style.display = 'block';
+  element.focus();
+  element.value = value;
 }
 
-function blurItem(elm, label, value) {
-  elm.style.display = '';
+function blurItem(element, label, value) {
+  element.style.display = '';
   label.textContent = value;
 }
 
-function escapeItem(e, elm, label, value) {
+function escapeItem(e, element, label, value) {
   if ((e.which || e.keyCode) === ESCAPE_KEY) {
-    elm.value = value;
-    blurItem(elm, label, value);
+    element.value = value;
+    blurItem(element, label, value);
   }
 }
 
-function renderLeft(template, elm, count) {
-  elm.innerHTML = template({count: count, plural: count !== 1});
+function renderLeft(template, element, count) {
+  element.innerHTML = template({count: count, plural: count !== 1});
 }
 
-function renderMarkAll(elm, value) {
-  elm.checked = value;
+function renderMarkAll(element, value) {
+  element.checked = value;
 }
 
-function renderFilters(views, value, filter) { // TODO
-  filter && views[filter].classList.remove('selected');
+function renderFilters(views, value, filter) {
+  views[filter].classList.remove('selected');
   views[value].classList.add('selected');
-
   views.app.classList.remove(filter);
   views.app.classList.add(value);
 }
