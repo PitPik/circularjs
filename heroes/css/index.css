@@ -27,6 +27,9 @@ h2, h3 {
   padding-top: 1em;
   border-top: 1px solid #ddd;
 }
+[cr-view="app-modules-preload"] {
+  display: none;
+}
 
 .app-nav a {
   padding: 5px 10px;
