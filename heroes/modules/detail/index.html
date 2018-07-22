@@ -17,7 +17,7 @@
 			<script type="text/template" cr-template-for="hero-detail">
 			<div>
 				<h2><span cr-view="name">{{name}}</span> Details</h2>
-				<div><span>id: </span>{{id}}{{^id}}--{{/id}}</div>
+				<div><span>id: </span>{{#if id}}{{id}}{{else}}--{{/if}}</div>
 				<label>name:
 			    	<input cr-event="keyup: updateName" placeholder="name" value="{{name}}" />
 			    </label>
