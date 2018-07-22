@@ -62,7 +62,6 @@ function updateUI() {
   renderMarkAll(uiViews.toggle, all === checked);
 };
 
-
 circular.component('app', {
   model: [{ filter: 'all' }],
   eventListeners: {
