@@ -236,9 +236,7 @@ function tools(_this, fn, name, params, data, parts, body, altBody) {
         return altBody && altBody(data) || '';
       },
       data: data.path[0]
-    }, parts.isInline ? [function() {
-      return body || '';
-    }] : params);
+    }, parts.isInline ? [function() { return body || '' }, parts.parts, _this] : params);
 }
 
 function splitVars(_this, vars, _data, unEscaped, char0) {
