@@ -5,7 +5,8 @@
   "main": "circular.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "uglify": "uglifyjs amd.js toolbox.js schnauzer.js VOM.js circular.js -o circular.min.js --source-map -c -m"
+    "uglify": "uglifyjs amd.js toolbox.js schnauzer.js blick.js VOM.js circular.js -o circular.min.js --source-map -c -m",
+    "combine": "uglifyjs amd.js toolbox.js schnauzer.js blick.js VOM.js circular.js -o circular.all.js -b"
   },
   "repository": {
     "type": "git",

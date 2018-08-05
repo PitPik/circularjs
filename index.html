@@ -9,6 +9,7 @@
 	<script type="text/javascript" src="toolbox.js"></script>
 	<script type="text/javascript" src="VOM.js"></script>
 	<script type="text/javascript" src="schnauzer.js"></script>
+	<script type="text/javascript" src="blick.js"></script>
 	<script type="text/javascript" src="circular.js"></script>
 	<!-- <script type="text/javascript" src="circular.min.js"></script> -->
 </head>
@@ -23,7 +24,7 @@
 
 	<section cr-component="counter" cr-container>
 		<script type="text/template" cr-template-for="counter">
-			<span class="items">{{items}} Item{{#plural}}s{{/plural}} left</span>
+			<span class="items">{{%items}} Item{{#%plural}}s{{/%plural}} left</span>
 		</script>
 	</section>
 
@@ -31,7 +32,7 @@
 		<script type="text/template" cr-template-for="buttons">
 			<div class="item" cr-event="click: clicker; mousedown: preventSelect">
 				Clicks{{#maxClicks}} (max {{.}}){{/maxClicks}}:
-				<span cr-view="clickCounter">{{clicks}}</span> so far
+				<span cr-view="clickCounter">{{%clicks}}</span> so far
 			</div>
 		</script>
 	</section>
@@ -59,7 +60,7 @@
 			subscribe: function(property, item, value, oldValue) {
 				if (property === 'clicks') {
 					if (value <= item.maxClicks || !item.maxClicks) {
-						item.views.clickCounter.textContent = value;
+						// item.views.clickCounter.textContent = value;
 					} else {
 						this.removeChild(item);
 						updateCounter();
@@ -79,10 +80,12 @@
 		});
 	var updateCounter = function() {
 			itemsCount = buttons.getElementsByProperty().length;
-			counter.replaceChild({
-				items: itemsCount,
-				plural: itemsCount !== 1
-			}, counter.model[0]);
+			counter.model[0].items = itemsCount;
+			counter.model[0].plural = itemsCount !== 1; console.log(counter.model[0].plural)
+			// counter.replaceChild({
+			// 	items: itemsCount,
+			// 	plural: itemsCount !== 1
+			// }, counter.model[0]);
 		};
 
 	var itemsCount = buttons.getElementsByProperty().length;
@@ -90,7 +93,8 @@
 			model: [{
 				items: itemsCount,
 				plural: itemsCount !== 1
-			}]
+			}],
+			listeners: ['items'],
 		});
 
 

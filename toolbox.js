@@ -24,6 +24,25 @@
 				element = element.parentNode;
 			}
 		},
+		// closest: Element.prototype.closest ? function(element, selector, root) {
+  //           return element.closest(selector)
+  //       } : (function(element, selector, root) {
+  //           Element.prototype.matches = Element.prototype.msMatchesSelector || 
+  //               Element.prototype.webkitMatchesSelector;
+  //           Element.prototype.closest = function(s) {
+  //               var el = this;
+  //               if (!document.documentElement.contains(el)) return null;
+  //               do {
+  //                   if (el.matches(s)) return el;
+  //                   el = el.parentElement || el.parentNode;
+  //               } while (el !== null && el.nodeType === 1); 
+  //               return null;
+  //           };
+
+  //           return function(element, selector, root) {
+  //               return element.closest(selector)
+  //           }
+  //       })(),
 
 		$: function(selector, root) {
 			return (root || document.body).querySelector(selector);
