@@ -745,6 +745,20 @@ function checkRestoreNesting(comp, attr, restore) {
 	}
 }
 
+function processTemplate(template, options) {
+	var isScript = template.tagName.toLowerCase() === 'script';
+	var html = '';
+
+	if (!isScript) {
+		template.removeAttribute(options.templateAttr);
+		html = template.outerHTML;
+		template.parentNode.removeChild(template);
+		return html;
+	}
+
+	return template.innerHTML;
+}
+
 // ----- get component data
 function getDomData(options, parameters, component, name) {
 	var searchContainer = component || document.body,
@@ -752,6 +766,7 @@ function getDomData(options, parameters, component, name) {
 		container = component.hasAttribute(containerAttr) ? component :
 			$(attrSelector(containerAttr, name), component) ||
 			$(attrSelector(containerAttr), component),
+		_template,
 		template = $(attrSelector(options.templateAttr, name),
 			searchContainer),
 		_templates = ($$(attrSelector(options.templatesAttr, name),
@@ -759,16 +774,16 @@ function getDomData(options, parameters, component, name) {
 		templates = {};
 
 	for (var n = _templates.length; n--; ) { // TODO
+		_template = processTemplate(_templates[n], options);
 		templates[_templates[n].id || _templates[n].getAttribute('name')] =
-			new Blick(_templates[n].innerHTML, {
-				doEscape: false,
-				helpers: parameters.helpers || options.helpers || {}
-			});
+			new Blick(_template, {
+					doEscape: false,
+					helpers: parameters.helpers || options.helpers || {}
+				});
 	}
-
 	return {
 		element: component,
-		template: template ? template.innerHTML : template, // TODO && container??
+		template: template ? processTemplate(template, options) : template, // TODO && container??
 		templates: templates, // TODO && container??
 		container: container,
 		// appendMode: container && // ??????????? never used
