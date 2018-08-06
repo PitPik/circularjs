@@ -30,7 +30,7 @@
 
 	<section cr-component="buttons" cr-container>
 		<script type="text/template" cr-template-for="buttons">
-			<div class="item{{#%last}} last{{/%last}}" cr-event="click: clicker; mousedown: preventSelect">
+			<div class="item{{#if %last}} last{{/if}}" cr-event="click: clicker; mousedown: preventSelect">
 				Clicks{{#maxClicks}} (max {{.}}){{/maxClicks}}:
 				<span cr-view="clickCounter">{{%clicks}}</span> so far
 			</div>
