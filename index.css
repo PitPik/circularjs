@@ -17,9 +17,13 @@ body{
 	padding: 0 6px;
 	/*cursor: pointer;*/
 }
+.item {
+	cursor: pointer;
+}
 .items {
 	float: none;
 	display: inline-block;
+	background-color: #efefff;
 }
 .circularjs {
 	 margin: 40px 10px 50px;  /* only for demo on this page */
