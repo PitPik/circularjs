@@ -341,11 +341,11 @@ function inline(_this, text, sections, extType) {
   extType = getVar(extType).name; // remove %
 
   return function fastReplace(data) {
-    return replace(_this, data, text, sections, extType, parts, fastReplace);
+    return replace(_this, data, text, sections, extType, parts);
   };
 }
 
-function replace(_this, data, text, sections, extType, parts, fastReplace) {
+function replace(_this, data, text, sections, extType, parts) {
   var out = '';
   var _out = '';
   var _fn = null;
@@ -387,15 +387,24 @@ function replace(_this, data, text, sections, extType, parts, fastReplace) {
       newData.extra = [data.extra[0]];
       _out = part.partial(newData);
     } else { // helpers and regular stuff
-      _out = findData(data, part.name, part.keys, part.depth);
-      _fn = !part.strict && _this.helpers[part.name] || isFunction(_out) && _out;
-      _out = _fn ? apply(_this, _fn, part.name, part.vars, data, part) :
-        _out && (part.isUnescaped ? _out : escapeHtml(_out, _this));
+      _fn = _replace(_this, part);
+      _out = _fn(data);
     }
-    out = render(_this, part, data, fastReplace, out, _out, extType);
+    out = render(_this, part, data, _fn, out, _out, extType);
   }
 
   return out;
+}
+
+function _replace(_this, part) {
+  return function(data) {
+    var out = findData(data, part.name, part.keys, part.depth);
+    var fn = !part.strict && _this.helpers[part.name] || isFunction(out) && out;
+
+    out = fn ? apply(_this, fn, part.name, part.vars, data, part) :
+      out && (part.isUnescaped ? out : escapeHtml(out, _this));
+    return out;
+  }
 }
 
 function section(_this, fn, name, vars, unEscaped, isNot) {
@@ -406,11 +415,11 @@ function section(_this, fn, name, vars, unEscaped, isNot) {
   vars = splitVars(_this, vars, getVar(name.name), unEscaped, '');
 
   return function fastLoop(data) {
-    return _fastLoop(_this, data, fn, name, vars, isNot, type);
+    return loop(_this, data, fn, name, vars, isNot, type);
   };
 }
 
-function _fastLoop(_this, data, fn, name, vars, isNot, type) {
+function loop(_this, data, fn, name, vars, isNot, type) {
   var _data = findData(data, name.name, name.keys, name.depth);
   var helper = !name.strict && (_this.helpers[name.name] || isFunction(_data) && _data);
   var helperOut = helper && apply(_this, helper, name.name, vars.vars, data, vars, fn[0], fn[1]);

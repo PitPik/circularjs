@@ -59,13 +59,10 @@
 			listeners: ['clicks'],
 			subscribe: function(property, item, value, oldValue) {
 				if (property === 'clicks') {
-					if (value <= item.maxClicks || !item.maxClicks) {
-						// item.views.clickCounter.textContent = value;
-					} else {
+					if (item.maxClicks && value > item.maxClicks) {
 						this.removeChild(item);
-						updateCounter();
 					}
-				} else { // replaceChild
+				} else { // removeChild | prependChild
 					updateCounter();
 				}
 			},
@@ -80,21 +77,18 @@
 		});
 	var updateCounter = function() {
 			itemsCount = buttons.getElementsByProperty().length;
-			counter.model[0].items = itemsCount;
-			counter.model[0].plural = itemsCount !== 1; console.log(counter.model[0].plural)
-			// counter.replaceChild({
-			// 	items: itemsCount,
-			// 	plural: itemsCount !== 1
-			// }, counter.model[0]);
+			counterModel.items = itemsCount;
+			counterModel.plural = itemsCount !== 1;
 		};
 
 	var itemsCount = buttons.getElementsByProperty().length;
+	var counterModel = {
+			items: itemsCount,
+			plural: itemsCount !== 1
+		}
 	var counter = demo.component('counter', {
-			model: [{
-				items: itemsCount,
-				plural: itemsCount !== 1
-			}],
-			listeners: ['items'],
+			model: [counterModel],
+			listeners: ['items', 'plural'],
 		});
 
 

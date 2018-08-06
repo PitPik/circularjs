@@ -242,7 +242,7 @@ Circular.prototype.component = function(name, parameters) {
 			var cItem = _inst.collector[property];
 			if (cItem) {
 				for (var n = cItem.length; n--; ) { // TODO: no loop
-					if (cItem[n].item === item) {
+					if (cItem[n].item === item && value !== oldValue) {
 						cItem[n].fn(value);
 						break;
 					}
@@ -260,7 +260,6 @@ Circular.prototype.component = function(name, parameters) {
 			});
 		}
 	});
-console.log(_inst.collector);
 	checkRestoreNesting(null, null, nestingData);
 
 	// proto = transferMethods(Schnauzer, _inst.template, component, this, proto);

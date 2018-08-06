@@ -64,6 +64,7 @@ function checkSection(part) {
 }
 
 function clearMemory(array) { // TODO: check for better
+  return array;
   var a = true;
   var keep = { replacer: a, lastNode: a, fn: a, children: a, unregister: a, data: a };
 
@@ -138,22 +139,22 @@ function resolveReferences(_this, memory, html, container, fragment) {
       window.console && console.warn('There is a possible error in the schnauzer template');
     } else if (foundNode.ownerElement) { // attribute
       original = foundNode.textContent;
-      part.replacer = (function(elm, name, search, orig, fn) { // TODO: no part.replacer...
-        return function updateAttribute(data) { // TODO: respect attributes' behaviours
-          elm.textContent = orig.replace(search, fn(data));
+      part.replacer = (function(elm, search, orig, item) { // TODO: no part.replacer...
+        return function updateAttribute() { // TODO: respect attributes' behaviours
+          elm.textContent = orig.replace(search, item.fn(item.data));
         }
-      })(foundNode, foundNode.name, search, original, part.fn);
+      })(foundNode, search, original, part);
       foundNode.textContent = original.replace(search, part.value);
       registerProperty(part.name, part.replacer, part.data.path[0]);
       openSections = checkSectionChild(foundNode.ownerElement.previousSibling,
         part, openSections, options);
     } else if (!checkSection(part)) { // inline var - inline section
       foundNode = textNodeSplitter(foundNode, first, last);
-      part.replacer = (function(elm, fn, value) {
-        return function updateTextNode(data) {console.log(value)
-          elm.textContent = data; // TODO: fn(data);
+      part.replacer = (function(elm, item) {
+        return function updateTextNode() {
+          elm.textContent = item.fn(item.data);
         }
-      })(foundNode, part.fn, part.data);
+      })(foundNode, part);
       foundNode.textContent = part.value;
       registerProperty(part.name, part.replacer, part.data.path[0]);
       openSections = checkSectionChild(foundNode, part, openSections, options);
@@ -165,14 +166,14 @@ function resolveReferences(_this, memory, html, container, fragment) {
       lastNode.textContent = '';
       foundNode = foundNode.splitText(foundNode.textContent.indexOf(first));
       part.replacer = (function(elm, item) {
-        return function updateSection(data) {
+        return function updateSection() {
           while (item.lastNode.previousSibling && item.lastNode.previousSibling !== elm) {
             elm.parentNode.removeChild(item.lastNode.previousSibling);
           }
           for (var n = item.children.length; n--; ) {
             item.children[n].unregister();
           }
-          newMemory = resolveReferences(_this, dump, item.fn(data), elm, fragment);
+          newMemory = resolveReferences(_this, dump, item.fn(item.data), elm, fragment);
           item.children = clearMemory(newMemory); // possible new children to be deleted...
         }
       })(foundNode, part);
@@ -185,5 +186,4 @@ function resolveReferences(_this, memory, html, container, fragment) {
   dump = [];
   return container ? memory : out;
 }
-
 }));

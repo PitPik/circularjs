@@ -848,10 +848,10 @@
         }).split(splitter);
         extType = getVar(extType).name;
         return function fastReplace(data) {
-            return replace(_this, data, text, sections, extType, parts, fastReplace);
+            return replace(_this, data, text, sections, extType, parts);
         };
     }
-    function replace(_this, data, text, sections, extType, parts, fastReplace) {
+    function replace(_this, data, text, sections, extType, parts) {
         var out = "";
         var _out = "";
         var _fn = null;
@@ -890,23 +890,30 @@
                 newData.extra = [ data.extra[0] ];
                 _out = part.partial(newData);
             } else {
-                _out = findData(data, part.name, part.keys, part.depth);
-                _fn = !part.strict && _this.helpers[part.name] || isFunction(_out) && _out;
-                _out = _fn ? apply(_this, _fn, part.name, part.vars, data, part) : _out && (part.isUnescaped ? _out : escapeHtml(_out, _this));
+                _fn = _replace(_this, part);
+                _out = _fn(data);
             }
-            out = render(_this, part, data, fastReplace, out, _out, extType);
+            out = render(_this, part, data, _fn, out, _out, extType);
         }
         return out;
+    }
+    function _replace(_this, part) {
+        return function(data) {
+            var out = findData(data, part.name, part.keys, part.depth);
+            var fn = !part.strict && _this.helpers[part.name] || isFunction(out) && out;
+            out = fn ? apply(_this, fn, part.name, part.vars, data, part) : out && (part.isUnescaped ? out : escapeHtml(out, _this));
+            return out;
+        };
     }
     function section(_this, fn, name, vars, unEscaped, isNot) {
         var type = name;
         name = getVar(vars.length && (name === "if" || name === "each" || name === "with" || name === "unless") ? vars.shift() : name);
         vars = splitVars(_this, vars, getVar(name.name), unEscaped, "");
         return function fastLoop(data) {
-            return _fastLoop(_this, data, fn, name, vars, isNot, type);
+            return loop(_this, data, fn, name, vars, isNot, type);
         };
     }
-    function _fastLoop(_this, data, fn, name, vars, isNot, type) {
+    function loop(_this, data, fn, name, vars, isNot, type) {
         var _data = findData(data, name.name, name.keys, name.depth);
         var helper = !name.strict && (_this.helpers[name.name] || isFunction(_data) && _data);
         var helperOut = helper && apply(_this, helper, name.name, vars.vars, data, vars, fn[0], fn[1]);
@@ -1019,6 +1026,7 @@
         return part.section && !part.type && part.value.indexOf("{{#") !== -1;
     }
     function clearMemory(array) {
+        return array;
         var a = true;
         var keep = {
             replacer: a,
@@ -1091,22 +1099,21 @@
                 window.console && console.warn("There is a possible error in the schnauzer template");
             } else if (foundNode.ownerElement) {
                 original = foundNode.textContent;
-                part.replacer = function(elm, name, search, orig, fn) {
-                    return function updateAttribute(data) {
-                        elm.textContent = orig.replace(search, fn(data));
+                part.replacer = function(elm, search, orig, item) {
+                    return function updateAttribute() {
+                        elm.textContent = orig.replace(search, item.fn(item.data));
                     };
-                }(foundNode, foundNode.name, search, original, part.fn);
+                }(foundNode, search, original, part);
                 foundNode.textContent = original.replace(search, part.value);
                 registerProperty(part.name, part.replacer, part.data.path[0]);
                 openSections = checkSectionChild(foundNode.ownerElement.previousSibling, part, openSections, options);
             } else if (!checkSection(part)) {
                 foundNode = textNodeSplitter(foundNode, first, last);
-                part.replacer = function(elm, fn, value) {
-                    return function updateTextNode(data) {
-                        console.log(value);
-                        elm.textContent = data;
+                part.replacer = function(elm, item) {
+                    return function updateTextNode() {
+                        elm.textContent = item.fn(item.data);
                     };
-                }(foundNode, part.fn, part.data);
+                }(foundNode, part);
                 foundNode.textContent = part.value;
                 registerProperty(part.name, part.replacer, part.data.path[0]);
                 openSections = checkSectionChild(foundNode, part, openSections, options);
@@ -1121,14 +1128,14 @@
                 lastNode.textContent = "";
                 foundNode = foundNode.splitText(foundNode.textContent.indexOf(first));
                 part.replacer = function(elm, item) {
-                    return function updateSection(data) {
+                    return function updateSection() {
                         while (item.lastNode.previousSibling && item.lastNode.previousSibling !== elm) {
                             elm.parentNode.removeChild(item.lastNode.previousSibling);
                         }
                         for (var n = item.children.length; n--; ) {
                             item.children[n].unregister();
                         }
-                        newMemory = resolveReferences(_this, dump, item.fn(data), elm, fragment);
+                        newMemory = resolveReferences(_this, dump, item.fn(item.data), elm, fragment);
                         item.children = clearMemory(newMemory);
                     };
                 }(foundNode, part);
@@ -1538,7 +1545,7 @@
                 var cItem = _inst.collector[property];
                 if (cItem) {
                     for (var n = cItem.length; n--; ) {
-                        if (cItem[n].item === item) {
+                        if (cItem[n].item === item && value !== oldValue) {
                             cItem[n].fn(value);
                             break;
                         }
@@ -1553,7 +1560,6 @@
                 });
             }
         });
-        console.log(_inst.collector);
         checkRestoreNesting(null, null, nestingData);
         proto = transferMethods(VOM, _inst.vom, component, this, proto);
         proto.uncloak = function(item) {
