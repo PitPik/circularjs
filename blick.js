@@ -64,12 +64,10 @@ function checkSection(part) {
 }
 
 function clearMemory(array) { // TODO: check for better
-  return array;
   var a = true;
   var keep = { replacer: a, lastNode: a, fn: a, children: a, unregister: a, data: a };
 
   for (var n = array.length; n--; ) {
-    if (!array[n].isSection) delete array[n].fn;
     for (var key in array[n]) if (!keep[key]) delete array[n][key];
     array[n] = null;
   }

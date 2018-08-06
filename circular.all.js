@@ -1026,7 +1026,6 @@
         return part.section && !part.type && part.value.indexOf("{{#") !== -1;
     }
     function clearMemory(array) {
-        return array;
         var a = true;
         var keep = {
             replacer: a,
@@ -1037,7 +1036,6 @@
             data: a
         };
         for (var n = array.length; n--; ) {
-            if (!array[n].isSection) delete array[n].fn;
             for (var key in array[n]) if (!keep[key]) delete array[n][key];
             array[n] = null;
         }
