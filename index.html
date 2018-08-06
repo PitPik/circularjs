@@ -30,7 +30,7 @@
 
 	<section cr-component="buttons" cr-container>
 		<script type="text/template" cr-template-for="buttons">
-			<div class="item" cr-event="click: clicker; mousedown: preventSelect">
+			<div class="item{{#%last}} last{{/%last}}" cr-event="click: clicker; mousedown: preventSelect">
 				Clicks{{#maxClicks}} (max {{.}}){{/maxClicks}}:
 				<span cr-view="clickCounter">{{%clicks}}</span> so far
 			</div>
@@ -46,17 +46,20 @@
 	var demo = window.demo = new Circular();
 	var model = [{
 			clicks: 0,
-			maxClicks: 10
+			maxClicks: 10,
+			last: false,
 		}, {
 			clicks: 0,
-			maxClicks: 2
+			maxClicks: 2,
+			last: false,
 		}, {
 			clicks: 0,
-			maxClicks: 1
+			maxClicks: 1,
+			last: false,
 		}];
 	var buttons = demo.component('buttons', {
 			model: model,
-			listeners: ['clicks'],
+			listeners: ['clicks', 'last'],
 			subscribe: function(property, item, value, oldValue) {
 				if (property === 'clicks') {
 					if (item.maxClicks && value > item.maxClicks) {
@@ -69,6 +72,7 @@
 			eventListeners: {
 				clicker: function(e, element, item) {
 					item.clicks++;
+					item.last = item.maxClicks && item.maxClicks - item.clicks === 0;
 				},
 				preventSelect: function(e, element, item) {
 					e.preventDefault();
@@ -94,7 +98,8 @@
 
 	var more = [{ // test prependChild order
 			clicks: 0,
-			maxClicks: 8
+			maxClicks: 8,
+			last: false,
 		}, {
 			clicks: 0
 		}];
