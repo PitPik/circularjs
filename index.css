@@ -2,7 +2,9 @@ body{
 	font: normal normal normal .80em/1.6em "Trebuchet MS", Arial, Helvetica, sans-serif, Arial, Helvetica, sans-serif;
 	color: #333;
 }
-
+[cr-template-for] {
+	display: none;
+}
 .item, .items {
 	float: left;
 	/*width: 50px;*/
