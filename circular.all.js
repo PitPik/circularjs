@@ -987,17 +987,32 @@
     var Blick = function(template, options) {
         this.version = "0.0.1";
         this.options = {
-            registerProperty: function(name, fn) {},
-            unregisterProperty: function(name, fn) {}
+            registerProperty: dummy,
+            unregisterProperty: dummy,
+            attributes: {
+                disabled: disableAttribute
+            }
         };
         init(this, options || {}, template);
     }, init = function(_this, options, template) {
         for (var option in options) {
-            _this.options[option] = options[option];
+            if (option === "attributes") {
+                for (var attr in options[option]) {
+                    _this.options[option][attr] = options[option][attr];
+                }
+            } else {
+                _this.options[option] = options[option];
+            }
         }
         options.render = renderHook;
         _this.schnauzer = new Schnauzer(template, options);
-    }, dump = [];
+    }, dump = [], dummy = function() {}, disableAttribute = function(node, value) {
+        if (value === true || value === "true") {
+            node.ownerElement.setAttribute(node.name, "");
+        } else {
+            node.ownerElement.removeAttribute(node.name);
+        }
+    };
     Blick.prototype = {
         render: function(data, extra) {
             var fragment = document.createDocumentFragment();
@@ -1099,10 +1114,16 @@
                 original = foundNode.textContent;
                 part.replacer = function(elm, search, orig, item) {
                     return function updateAttribute() {
-                        elm.textContent = orig.replace(search, item.fn(item.data));
+                        var value = item.fn(item.data);
+                        if (value === undefined) value = "";
+                        if (options.attributes[elm.name]) {
+                            elm.ownerElement && options.attributes[elm.name](elm, value);
+                        } else if (value !== undefined) {
+                            elm.textContent = orig.replace(search, value);
+                        }
                     };
                 }(foundNode, search, original, part);
-                foundNode.textContent = original.replace(search, part.value);
+                part.replacer();
                 registerProperty(part.name, part.replacer, part.data.path[0]);
                 openSections = checkSectionChild(foundNode.ownerElement.previousSibling, part, openSections, options);
             } else if (!checkSection(part)) {
@@ -1480,11 +1501,10 @@
             helpers: parameters.helpers || options.helpers || {},
             registerProperty: function(name, fn, data) {
                 _inst.collector[name] = _inst.collector[name] || [];
-                var item = {
+                _inst.collector[name].push({
                     item: data,
                     fn: fn
-                };
-                _inst.collector[name].push(item);
+                });
             }
         }) : null;
         _inst.template && (templateCache[name] = _inst.template);
@@ -1544,8 +1564,7 @@
                 if (cItem) {
                     for (var n = cItem.length; n--; ) {
                         if (cItem[n].item === item && value !== oldValue) {
-                            cItem[n].fn(value);
-                            break;
+                            cItem[n].fn();
                         }
                     }
                 }

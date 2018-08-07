@@ -136,11 +136,10 @@ Circular.prototype.component = function(name, parameters) {
 			/////////////////////////////////////////////////
 			registerProperty: function(name, fn, data) {
 				_inst.collector[name] = _inst.collector[name] || [];
-				var item = {
+				_inst.collector[name].push({
 					item: data,
 					fn: fn,
-				};
-				_inst.collector[name].push(item);
+				});
 			}
 		}) : null;
 	_inst.template && (templateCache[name] = _inst.template);
@@ -243,8 +242,7 @@ Circular.prototype.component = function(name, parameters) {
 			if (cItem) {
 				for (var n = cItem.length; n--; ) { // TODO: no loop
 					if (cItem[n].item === item && value !== oldValue) {
-						cItem[n].fn(value);
-						break;
+						cItem[n].fn();
 					}
 				}
 			}
