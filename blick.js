@@ -151,8 +151,8 @@ function resolveReferences(_this, memory, html, container, fragment) {
     foundNode = findNode(helperContainer, first);
 
     if (!foundNode) { // error
-      window.console && console.warn('There is a possible error in the schnauzer template');
- } else if (foundNode.ownerElement) { // attribute
+
+    } else if (foundNode.ownerElement) { // attribute
       part.replacer = (function(elm, search, orig, item) { // TODO: no part.replacer...
         return function updateAttribute() { // TODO: respect attributes' behaviours
           var value = item.fn(item.data);
@@ -172,7 +172,15 @@ function resolveReferences(_this, memory, html, container, fragment) {
       foundNode = textNodeSplitter(foundNode, first, last);
       part.replacer = (function(elm, item) {
         return function updateTextNode() {
-          elm.textContent = item.fn(item.data);
+          var value = item.fn(item.data);
+          helperContainer.innerHTML = value;
+          if (helperContainer.children.length) {
+            newMemory = resolveReferences(_this, dump, value, elm, fragment);
+            item.children = clearMemory(newMemory);
+            return;
+          } else {
+            elm.textContent = item.fn(item.data);
+          }
         }
       })(foundNode, part);
       foundNode.textContent = part.value;
@@ -184,6 +192,7 @@ function resolveReferences(_this, memory, html, container, fragment) {
       lastNode = findNode(foundNode.parentNode, last);
       part.lastNode = lastNode = lastNode.splitText(lastNode.textContent.lastIndexOf(last));
       lastNode.textContent = '';
+      foundNode = foundNode.splitText(foundNode.textContent.indexOf(first));
       foundNode.textContent = foundNode.textContent.replace(first, '');
       part.replacer = (function(elm, item) {
         return function updateSection() {
