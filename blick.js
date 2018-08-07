@@ -153,7 +153,6 @@ function resolveReferences(_this, memory, html, container, fragment) {
     if (!foundNode) { // error
       window.console && console.warn('There is a possible error in the schnauzer template');
  } else if (foundNode.ownerElement) { // attribute
-      original = foundNode.textContent;
       part.replacer = (function(elm, search, orig, item) { // TODO: no part.replacer...
         return function updateAttribute() { // TODO: respect attributes' behaviours
           var value = item.fn(item.data);
@@ -164,11 +163,11 @@ function resolveReferences(_this, memory, html, container, fragment) {
             elm.textContent = orig.replace(search, value);
           }
         }
-      })(foundNode, search, original, part);
-      part.replacer();
+      })(foundNode, search, foundNode.textContent, part);
       registerProperty(part.name, part.replacer, part.data.path[0]);
       openSections = checkSectionChild(foundNode.ownerElement.previousSibling,
         part, openSections, options);
+      part.replacer();
     } else if (!checkSection(part)) { // inline var - inline section
       foundNode = textNodeSplitter(foundNode, first, last);
       part.replacer = (function(elm, item) {
