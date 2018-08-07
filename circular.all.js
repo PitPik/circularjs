@@ -1012,7 +1012,7 @@
         } else {
             node.ownerElement.removeAttribute(node.name);
         }
-    };
+    }, tester = document.createElement("tbody");
     Blick.prototype = {
         render: function(data, extra) {
             var fragment = document.createDocumentFragment();
@@ -1038,6 +1038,8 @@
         return node.splitText(node.textContent.indexOf(first));
     }
     function checkSection(part) {
+        tester.innerHTML = part.value;
+        if (tester.children.length) return true;
         return part.section && !part.type && part.value.indexOf("{{#") !== -1;
     }
     function clearMemory(array) {
@@ -1108,9 +1110,7 @@
             last = "{{/" + n + "}}";
             part = memory[n];
             foundNode = findNode(helperContainer, first);
-            if (!foundNode) {
-                window.console && console.warn("There is a possible error in the schnauzer template");
-            } else if (foundNode.ownerElement) {
+            if (!foundNode) {} else if (foundNode.ownerElement) {
                 part.replacer = function(elm, search, orig, item) {
                     return function updateAttribute() {
                         var value = item.fn(item.data);
@@ -1129,7 +1129,15 @@
                 foundNode = textNodeSplitter(foundNode, first, last);
                 part.replacer = function(elm, item) {
                     return function updateTextNode() {
-                        elm.textContent = item.fn(item.data);
+                        var value = item.fn(item.data);
+                        helperContainer.innerHTML = value;
+                        if (helperContainer.children.length) {
+                            newMemory = resolveReferences(_this, dump, value, elm, fragment);
+                            item.children = clearMemory(newMemory);
+                            return;
+                        } else {
+                            elm.textContent = item.fn(item.data);
+                        }
                     };
                 }(foundNode, part);
                 foundNode.textContent = part.value;
@@ -1144,6 +1152,7 @@
                 lastNode = findNode(foundNode.parentNode, last);
                 part.lastNode = lastNode = lastNode.splitText(lastNode.textContent.lastIndexOf(last));
                 lastNode.textContent = "";
+                foundNode = foundNode.splitText(foundNode.textContent.indexOf(first));
                 foundNode.textContent = foundNode.textContent.replace(first, "");
                 part.replacer = function(elm, item) {
                     return function updateSection() {

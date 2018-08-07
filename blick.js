@@ -38,7 +38,8 @@ var Blick = function(template, options) {
     } else {
       node.ownerElement.removeAttribute(node.name);
     }
-  };
+  },
+  tester = document.createElement('tbody');
 
 Blick.prototype = {
   render: function(data, extra) {
@@ -77,6 +78,8 @@ function textNodeSplitter(node, first, last) {
 }
 
 function checkSection(part) {
+  tester.innerHTML = part.value; // TODO: less expensive
+  if (tester.children.length) return true;
   return part.section && !part.type && part.value.indexOf('{{#') !== -1;
 }
 
@@ -173,7 +176,7 @@ function resolveReferences(_this, memory, html, container, fragment) {
       part.replacer = (function(elm, item) {
         return function updateTextNode() {
           var value = item.fn(item.data);
-          helperContainer.innerHTML = value;
+          helperContainer.innerHTML = value; // TODO: less expensive
           if (helperContainer.children.length) {
             newMemory = resolveReferences(_this, dump, value, elm, fragment);
             item.children = clearMemory(newMemory);
