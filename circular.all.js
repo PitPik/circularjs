@@ -1111,7 +1111,6 @@
             if (!foundNode) {
                 window.console && console.warn("There is a possible error in the schnauzer template");
             } else if (foundNode.ownerElement) {
-                original = foundNode.textContent;
                 part.replacer = function(elm, search, orig, item) {
                     return function updateAttribute() {
                         var value = item.fn(item.data);
@@ -1122,10 +1121,10 @@
                             elm.textContent = orig.replace(search, value);
                         }
                     };
-                }(foundNode, search, original, part);
-                part.replacer();
+                }(foundNode, search, foundNode.textContent, part);
                 registerProperty(part.name, part.replacer, part.data.path[0]);
                 openSections = checkSectionChild(foundNode.ownerElement.previousSibling, part, openSections, options);
+                part.replacer();
             } else if (!checkSection(part)) {
                 foundNode = textNodeSplitter(foundNode, first, last);
                 part.replacer = function(elm, item) {
