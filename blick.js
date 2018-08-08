@@ -196,7 +196,7 @@ function resolveReferences(_this, memory, html, container, fragment) {
       openSections.push({ search: first, children: part.children = [] });
       lastNode = findNode(foundNode.parentNode, last);
       part.lastNode = lastNode = lastNode.splitText(lastNode.textContent.lastIndexOf(last));
-      lastNode.textContent = '';
+      lastNode.textContent = lastNode.textContent.replace(last, '');
       foundNode = foundNode.splitText(foundNode.textContent.indexOf(first));
       foundNode.textContent = foundNode.textContent.replace(first, '');
       part.replacer = (function(elm, item) {
