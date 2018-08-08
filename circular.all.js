@@ -1154,7 +1154,7 @@
                 });
                 lastNode = findNode(foundNode.parentNode, last);
                 part.lastNode = lastNode = lastNode.splitText(lastNode.textContent.lastIndexOf(last));
-                lastNode.textContent = "";
+                lastNode.textContent = lastNode.textContent.replace(last, "");
                 foundNode = foundNode.splitText(foundNode.textContent.indexOf(first));
                 foundNode.textContent = foundNode.textContent.replace(first, "");
                 part.replacer = function(elm, item) {
@@ -1575,6 +1575,10 @@
                 var cItem = _inst.collector[property];
                 if (cItem) {
                     for (var n = cItem.length; n--; ) {
+                        if (!cItem[n].item.elements.element.parentNode) {
+                            cItem.splice(n, 1);
+                            continue;
+                        }
                         if (cItem[n].item === item && value !== oldValue) {
                             cItem[n].fn();
                         }

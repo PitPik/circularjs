@@ -241,6 +241,10 @@ Circular.prototype.component = function(name, parameters) {
 			var cItem = _inst.collector[property];
 			if (cItem) {
 				for (var n = cItem.length; n--; ) { // TODO: no loop
+					if (!cItem[n].item.elements.element.parentNode) {
+						cItem.splice(n, 1); // cleanup
+						continue;
+					}
 					if (cItem[n].item === item && value !== oldValue) {
 						cItem[n].fn();
 					}
