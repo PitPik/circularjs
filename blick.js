@@ -210,6 +210,7 @@ function resolveReferences(_this, memory, html, container, fragment) {
           elm.textContent = '';
           newMemory = resolveReferences(_this, dump, item.fn(item.data), elm, fragment);
           item.children = clearMemory(newMemory); // possible new children to be deleted...
+          return elm.nextSibling;
         }
       })(foundNode, part);
       registerProperty(part.name, part.replacer, part.data.path[0], foundNode);

@@ -1168,6 +1168,7 @@
                         elm.textContent = "";
                         newMemory = resolveReferences(_this, dump, item.fn(item.data), elm, fragment);
                         item.children = clearMemory(newMemory);
+                        return elm.nextSibling;
                     };
                 }(foundNode, part);
                 registerProperty(part.name, part.replacer, part.data.path[0], foundNode);
@@ -1573,6 +1574,7 @@
                     storageHelper[storage.saveLazy === false ? "save" : "saveLazy"](storageCategory ? storageData : storageData[storageCategory], storage.name, this);
                 }
                 var cItem = _inst.collector[property];
+                var elm;
                 if (cItem) {
                     for (var n = cItem.length; n--; ) {
                         if (!cItem[n].item.elements.element.parentNode) {
@@ -1580,7 +1582,12 @@
                             continue;
                         }
                         if (cItem[n].item === item && value !== oldValue) {
-                            cItem[n].fn();
+                            elm = cItem[n].fn();
+                            if (elm && elm.nodeType === 1) {
+                                if (_inst.controller) {
+                                    _inst.controller.getEventListeners(elm, item[options.events], component, idProperty, true);
+                                }
+                            }
                         }
                     }
                 }
@@ -1846,7 +1853,7 @@
         });
     };
     Controller.prototype = {
-        getEventListeners: function(element, events, component, idProperty) {
+        getEventListeners: function(element, events, component, idProperty, extra) {
             var eventAttribute = this.options.eventAttribute, elements = element.querySelectorAll(attrSelector(eventAttribute)), attribute = "", eventItem = "", eventType = "", eventFunc = "", eventParts = [], eventFuncs = {}, extraElement = element !== component.element ? component.element : [];
             elements = [ element ].concat([].slice.call(elements), extraElement);
             for (var n = elements.length; n--; ) {
@@ -1869,18 +1876,20 @@
                     }
                 }
             }
-            if (!this.installed) {
+            if (!this.installed || extra) {
                 this.installEventListeners(component, idProperty);
             }
         },
         installEventListeners: function(component, idProperty) {
             var that = this;
+            this.installed = this.installed || {};
             for (var key in this.events) {
+                if (this.installed[key]) continue;
                 Toolbox.addEvent(this.options.appElement, key, function(e) {
                     eventDistributor(e, idProperty, component, that);
                 }, /(?:focus|blur)/.test(key) ? true : false, this.options.instanceID + "_" + component.name);
+                this.installed[key] = true;
             }
-            this.installed = true;
         },
         destroy: function(component) {
             Toolbox.removeEvent(this.options.instanceID + "_" + component.name);
@@ -1986,6 +1995,10 @@
             if (!eventListener) continue;
             for (var n = eventElements[key].length; n--; ) {
                 eventElement = eventElements[key][n];
+                if (!eventElement.parentNode) {
+                    eventElements[key].splice(n, 1);
+                    continue;
+                }
                 if (!stopPropagation && (eventElement === e.target || eventElement.contains(e.target))) {
                     stopPropagation = eventListener.call(component, e, eventElement, item) === false;
                     if (stopPropagation) e.stopPropagation();

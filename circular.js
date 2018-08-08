@@ -239,6 +239,7 @@ Circular.prototype.component = function(name, parameters) {
 			}
 			/////////////////////////
 			var cItem = _inst.collector[property];
+			var elm;
 			if (cItem) {
 				for (var n = cItem.length; n--; ) { // TODO: no loop
 					if (!cItem[n].item.elements.element.parentNode) {
@@ -246,7 +247,13 @@ Circular.prototype.component = function(name, parameters) {
 						continue;
 					}
 					if (cItem[n].item === item && value !== oldValue) {
-						cItem[n].fn();
+						elm = cItem[n].fn();
+						if (elm && elm.nodeType === 1) {
+							if (_inst.controller) {
+								_inst.controller.getEventListeners(
+									elm, item[options.events], component, idProperty, true);
+							}
+						}
 					}
 				}
 			}
@@ -602,7 +609,7 @@ Circular.prototype.renderModule = function(data) {
 /* --------------------  UI controller ------------------- */
 
 Controller.prototype = {
-	getEventListeners: function(element, events, component, idProperty) {
+	getEventListeners: function(element, events, component, idProperty, extra) {
 		var eventAttribute = this.options.eventAttribute,
 			elements = element.querySelectorAll(attrSelector(eventAttribute)),
 			attribute = '',
@@ -637,20 +644,22 @@ Controller.prototype = {
 				}
 			}
 		}
-		if (!this.installed) { // && this.events !== {}
+		if (!this.installed || extra) { // && this.events !== {}
 			this.installEventListeners(component, idProperty);
 		}
 	},
 	installEventListeners: function(component, idProperty) { // $$vom !!!!!
 		var that = this;
 
+		this.installed = this.installed || {};
 		for (var key in this.events) {
+			if (this.installed[key]) continue;
 			Toolbox.addEvent(this.options.appElement, key, function(e) {
 				eventDistributor(e, idProperty, component, that);
 			}, /(?:focus|blur)/.test(key) ? true : false,
 				this.options.instanceID + '_' + component.name);
+			this.installed[key] = true;
 		}
-		this.installed = true;
 	},
 	destroy: function(component) {
 		Toolbox.removeEvent(this.options.instanceID + '_' + component.name);
@@ -817,6 +826,10 @@ function eventDistributor(e, idProperty, component, _this) {
 		if (!eventListener) continue;
 		for (var n = eventElements[key].length; n--; ) {
 			eventElement = eventElements[key][n];
+			if (!eventElement.parentNode) {
+				eventElements[key].splice(n, 1); // cleanup
+				continue;
+			}
 			if (!stopPropagation && (eventElement === e.target || eventElement.contains(e.target))) {
 				stopPropagation = eventListener.call(component, e, eventElement, item) === false;
 				if (stopPropagation) e.stopPropagation();
