@@ -242,17 +242,15 @@ Circular.prototype.component = function(name, parameters) {
 			var elm;
 			if (cItem) {
 				for (var n = cItem.length; n--; ) { // TODO: no loop
-					if (!cItem[n].item.elements.element.parentNode) {
+					if (!_inst.controller.options.appElement.contains(cItem[n].item.elements.element)) {
 						cItem.splice(n, 1); // cleanup
 						continue;
 					}
-					if (cItem[n].item === item && value !== oldValue) {
+					if (_inst.controller && cItem[n].item === item && value !== oldValue) {
 						elm = cItem[n].fn();
-						if (elm && elm.nodeType === 1) {
-							if (_inst.controller) {
-								_inst.controller.getEventListeners(
-									elm, item[options.events], component, idProperty, true);
-							}
+						if (elm) for (var m = elm.length; m--; ) {
+							_inst.controller.getEventListeners(
+								elm[m], item[options.events], component, idProperty, true);
 						}
 					}
 				}
@@ -826,7 +824,7 @@ function eventDistributor(e, idProperty, component, _this) {
 		if (!eventListener) continue;
 		for (var n = eventElements[key].length; n--; ) {
 			eventElement = eventElements[key][n];
-			if (!eventElement.parentNode) {
+			if (!_this.options.appElement.contains(eventElement)) {
 				eventElements[key].splice(n, 1); // cleanup
 				continue;
 			}

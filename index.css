@@ -7,17 +7,14 @@ body{
 }
 .item, .items {
 	float: left;
-	/*width: 50px;*/
-	/*display: inline-block;*/
 	height: 50px;
 	line-height: 50px;
-	/*text-align: center;*/
 	border: 1px solid #aaa;
 	border-radius: 3px;
-	background-color: #efefef;
+	background-color: #e0e0e0;
 	margin: 0 4px 4px 0;
 	padding: 0 6px;
-	/*cursor: pointer;*/
+	user-select: none;
 }
 .item {
 	cursor: pointer;
@@ -25,13 +22,13 @@ body{
 .items {
 	float: none;
 	display: inline-block;
-	background-color: #efefff;
+	background-color: #e0e0ff;
 }
 .circularjs {
 	 margin: 40px 10px 50px;  /* only for demo on this page */
 }
-.last {
-	background-color: #ffefef;
+.last, [disabled] {
+	background-color: #ffe0e0;
 }
 
 /* -------------------- LOGO ------------------- */

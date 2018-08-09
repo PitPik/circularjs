@@ -103,20 +103,14 @@ function clearMemory(array) { // TODO: check for better
   return null;
 }
 
-function render(_this, container, helperContainer, fragment) {
-  // TODO: use _this on how to render...
+function render(container, helperContainer, fragment) {
   while (helperContainer.childNodes.length) {
     fragment.appendChild(helperContainer.childNodes[0]);
   }
   if (container) { // internal only
-    if (container.nextSibling) {
-      container.parentNode.insertBefore(fragment, container.nextSibling);
-    } else {
-      container.parentNode.appendChild(fragment);
-    }
+    container.parentNode.insertBefore(fragment, container.nextSibling);
   } else {
     return fragment;
-    // container.appendChild(fragment); // return fragment
   }
 }
 
@@ -210,14 +204,22 @@ function resolveReferences(_this, memory, html, container, fragment) {
           elm.textContent = '';
           newMemory = resolveReferences(_this, dump, item.fn(item.data), elm, fragment);
           item.children = clearMemory(newMemory); // possible new children to be deleted...
-          return elm.nextSibling;
+
+          var collector = [];
+          var node = item.lastNode;
+          while (node !== elm && (node = node.previousSibling)) {
+            if (node.nodeType === 1) {
+              collector.push(node);
+            }
+          }
+          return collector;
         }
       })(foundNode, part);
       registerProperty(part.name, part.replacer, part.data.path[0], foundNode);
     }
   }
 
-  out = render(_this, container, helperContainer, fragment); // todo
+  out = render(container, helperContainer, fragment); // todo
   if (!container) memory = clearMemory(memory);
   dump = [];
   return container ? memory : out;

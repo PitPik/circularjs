@@ -1066,16 +1066,12 @@
         }
         return null;
     }
-    function render(_this, container, helperContainer, fragment) {
+    function render(container, helperContainer, fragment) {
         while (helperContainer.childNodes.length) {
             fragment.appendChild(helperContainer.childNodes[0]);
         }
         if (container) {
-            if (container.nextSibling) {
-                container.parentNode.insertBefore(fragment, container.nextSibling);
-            } else {
-                container.parentNode.appendChild(fragment);
-            }
+            container.parentNode.insertBefore(fragment, container.nextSibling);
         } else {
             return fragment;
         }
@@ -1168,13 +1164,20 @@
                         elm.textContent = "";
                         newMemory = resolveReferences(_this, dump, item.fn(item.data), elm, fragment);
                         item.children = clearMemory(newMemory);
-                        return elm.nextSibling;
+                        var collector = [];
+                        var node = item.lastNode;
+                        while (node !== elm && (node = node.previousSibling)) {
+                            if (node.nodeType === 1) {
+                                collector.push(node);
+                            }
+                        }
+                        return collector;
                     };
                 }(foundNode, part);
                 registerProperty(part.name, part.replacer, part.data.path[0], foundNode);
             }
         }
-        out = render(_this, container, helperContainer, fragment);
+        out = render(container, helperContainer, fragment);
         if (!container) memory = clearMemory(memory);
         dump = [];
         return container ? memory : out;
@@ -1577,16 +1580,14 @@
                 var elm;
                 if (cItem) {
                     for (var n = cItem.length; n--; ) {
-                        if (!cItem[n].item.elements.element.parentNode) {
+                        if (!_inst.controller.options.appElement.contains(cItem[n].item.elements.element)) {
                             cItem.splice(n, 1);
                             continue;
                         }
-                        if (cItem[n].item === item && value !== oldValue) {
+                        if (_inst.controller && cItem[n].item === item && value !== oldValue) {
                             elm = cItem[n].fn();
-                            if (elm && elm.nodeType === 1) {
-                                if (_inst.controller) {
-                                    _inst.controller.getEventListeners(elm, item[options.events], component, idProperty, true);
-                                }
+                            if (elm) for (var m = elm.length; m--; ) {
+                                _inst.controller.getEventListeners(elm[m], item[options.events], component, idProperty, true);
                             }
                         }
                     }
@@ -1995,7 +1996,7 @@
             if (!eventListener) continue;
             for (var n = eventElements[key].length; n--; ) {
                 eventElement = eventElements[key][n];
-                if (!eventElement.parentNode) {
+                if (!_this.options.appElement.contains(eventElement)) {
                     eventElements[key].splice(n, 1);
                     continue;
                 }
