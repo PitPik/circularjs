@@ -1903,18 +1903,12 @@
     };
     return Circular;
     function render(helper, html, operator, parentNode, sibling, idProperty, id) {
-        var isHTML = typeof html === "string", isPrepend = operator === "prependChild", element = {};
-        if (isHTML) {
-            helper.innerHTML = html;
-            element = helper.children[0];
-            element && element.setAttribute(idProperty, id);
+        var isPrepend = operator === "prependChild", element = {};
+        if (html.nodeType === 11) {
+            element = html.children[0];
+            element.setAttribute(idProperty, id);
         } else {
-            if (html.nodeType === 11) {
-                element = html.children[0];
-                element.setAttribute(idProperty, id);
-            } else {
-                element = html;
-            }
+            element = html;
         }
         var renderingFunc = function() {
             if (isPrepend || operator === "insertAfter") {

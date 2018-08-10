@@ -671,22 +671,14 @@ Controller.prototype = {
 return Circular;
 
 function render(helper, html, operator, parentNode, sibling, idProperty, id) {
-	var isHTML = typeof html === 'string',
-		isPrepend = operator === 'prependChild',
+	var isPrepend = operator === 'prependChild',
 		element = {};
 
-	if (isHTML) {
-		// helper.insertAdjacentHTML('beforeend', html);
-		helper.innerHTML = html;
-		element = helper.children[0];
-		element && element.setAttribute(idProperty, id);
+	if (html.nodeType === 11) {
+		element = html.children[0];
+		element.setAttribute(idProperty, id);
 	} else {
-		if (html.nodeType === 11) {
-			element = html.children[0];
-			element.setAttribute(idProperty, id);
-		} else {
-			element = html;
-		}
+		element = html;
 	}
 
 	var renderingFunc = function() {
@@ -699,11 +691,7 @@ function render(helper, html, operator, parentNode, sibling, idProperty, id) {
 		(parentNode || element.parentElement)[operator](element, sibling);
 	};
 
-	// if (true) { // TODO: introduce asyncRendering
-		element && renderingFunc();
-	// } else {
-	// 	_animate(renderingFunc);
-	// }
+	element && renderingFunc();
 
 	return element;
 }
