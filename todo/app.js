@@ -57,7 +57,7 @@ function updateUI() {
   var uiViews = UI.model[0].views;
 
   renderFooter(uiViews, checked, all);
-  renderLeft(UI.templates.itemsLeft.partials.self,
+  renderLeft(UI.templates.itemsLeft.schnauzer.partials.self,
     uiViews.counter, all - checked);
   renderMarkAll(uiViews.toggle, all === checked);
 };
