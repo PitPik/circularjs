@@ -21,8 +21,7 @@ var Circular = function(name, options) {
 			elements: 'elements', // TODO: check usage
 			events: 'events',
 			views: 'views',
-			hash: '#',
-			debugger: true,
+			hash: '#'
 			// helpers: {}, // TODO
 			// decorators: {}, // TODO
 		};
@@ -113,11 +112,6 @@ Circular.prototype.component = function(name, parameters) {
 		mountSelector = parameters.mountSelector || attrSelector(options.mountAttribute),
 		template = parameters.template;
 
-	if (!options.debugger) {
-		data.element.removeAttribute(componentAttr);
-		data.element.removeAttribute(options.containerAttr);
-	}
-
 	this.data[name].extraModel = parameters.extraModel || options.extraModel;
 
 	pubsub[this.name] = pubsub[this.name] || {}; // prepare
@@ -133,7 +127,6 @@ Circular.prototype.component = function(name, parameters) {
 		eventAttribute: options.eventAttribute,
 		eventListeners: parameters.eventListeners,
 		instanceID: _this.id,
-		debugger: options.debugger,
 	});
 	_inst.collector = {};/////////////////////////
 	_inst.template = template && template.version ?
@@ -182,7 +175,6 @@ Circular.prototype.component = function(name, parameters) {
 				element: element,
 				container: $(mountSelector, element)
 			}, true);
-			!options.debugger && item.container && item.container.removeAttribute(mountSelector);
 			// collect events
 			this.reinforceProperty(item, options.events, {}, true);
 			_inst.controller && _inst.controller.getEventListeners(
@@ -638,7 +630,6 @@ Controller.prototype = {
 				continue;
 			}
 			eventParts = attribute.split(/\s*;+\s*/);
-			!this.options.debugger && elements[n].removeAttribute(eventAttribute);
 			for (var m = eventParts.length; m--; ) {
 				eventItem = eventParts[m].split(/\s*:+\s*/);
 				eventType = eventItem[0];
@@ -724,7 +715,6 @@ function getViews(options, views, element) {
 	elements = [element].concat([].slice.call(elements));
 	for (var n = elements.length; n--; ) { // reverse: stopPropagation
 		attribute = elements[n].getAttribute(options.viewAttr);
-		!options.debugger && elements[n].removeAttribute(options.viewAttr);
 		if (!attribute) {
 			continue;
 		}

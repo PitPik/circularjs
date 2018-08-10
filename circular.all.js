@@ -1456,8 +1456,7 @@
             elements: "elements",
             events: "events",
             views: "views",
-            hash: "#",
-            debugger: true
+            hash: "#"
         };
         initCircular(this, name, options);
     }, initCircular = function(_this, name, options) {
@@ -1502,10 +1501,6 @@
             container: data.container,
             templates: data.templates
         }, hasStorage = parameters.storage, storage = hasStorage || {}, storageHelper = Toolbox.storageHelper, storageData = hasStorage && storageHelper.fetch(storage.name) || {}, storageCategory = storage.category, storageListeners = storage.listeners || parameters.listeners, storageAll = storage.storeAll || storageListeners && storageListeners.indexOf("*") !== -1, mountSelector = parameters.mountSelector || attrSelector(options.mountAttribute), template = parameters.template;
-        if (!options.debugger) {
-            data.element.removeAttribute(componentAttr);
-            data.element.removeAttribute(options.containerAttr);
-        }
         this.data[name].extraModel = parameters.extraModel || options.extraModel;
         pubsub[this.name] = pubsub[this.name] || {};
         pubsub[this.name][name] = {};
@@ -1517,8 +1512,7 @@
             appElement: data.element,
             eventAttribute: options.eventAttribute,
             eventListeners: parameters.eventListeners,
-            instanceID: _this.id,
-            debugger: options.debugger
+            instanceID: _this.id
         });
         _inst.collector = {};
         _inst.template = template && template.version ? template : templateCache[name] ? templateCache[name] : data.template ? new Blick(template || data.template, {
@@ -1549,7 +1543,6 @@
                     element: element,
                     container: $(mountSelector, element)
                 }, true);
-                !options.debugger && item.container && item.container.removeAttribute(mountSelector);
                 this.reinforceProperty(item, options.events, {}, true);
                 _inst.controller && _inst.controller.getEventListeners(item[elmsTxt].element || component.element, item[options.events], component, idProperty);
                 this.reinforceProperty(item, options.views, {}, true);
@@ -1875,7 +1868,6 @@
                     continue;
                 }
                 eventParts = attribute.split(/\s*;+\s*/);
-                !this.options.debugger && elements[n].removeAttribute(eventAttribute);
                 for (var m = eventParts.length; m--; ) {
                     eventItem = eventParts[m].split(/\s*:+\s*/);
                     eventType = eventItem[0];
@@ -1939,7 +1931,6 @@
         elements = [ element ].concat([].slice.call(elements));
         for (var n = elements.length; n--; ) {
             attribute = elements[n].getAttribute(options.viewAttr);
-            !options.debugger && elements[n].removeAttribute(options.viewAttr);
             if (!attribute) {
                 continue;
             }
