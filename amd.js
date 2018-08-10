@@ -1,4 +1,5 @@
-!(function (root) {
+/**! @license amd v0.0.1; Copyright (C) 2018 by Peter Dematté */
+!(function (root, undefined) {
 	'use strict';
 	// TODO: whole thing is not done yet...
 	// TODO: anonymous modules don't know how to set .done correctly (resolves though)

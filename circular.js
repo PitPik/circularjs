@@ -1,3 +1,4 @@
+/**! @license CircularJS v0.1.0; Copyright (C) 2018 by Peter Dematté */
 (function (root, factory) {
 	if (typeof exports === 'object') {
 		module.exports = factory(root, require('toolbox'), require('blick'), require('VOM'));
@@ -5,7 +6,7 @@
 		define('circular', ['toolbox', 'blick', 'VOM'],
 			function (Toolbox, Blick, VOM) { return factory(root, Toolbox, Blick, VOM) });
 	} else root.Circular = factory(root, root.Toolbox, root.Blick, root.VOM);
-}(this, function(window, Toolbox, Blick, VOM) { 'use strict';
+}(this, function(window, Toolbox, Blick, VOM, undefined) { 'use strict';
 
 var Circular = function(name, options) {
 		this.options = {
@@ -21,6 +22,7 @@ var Circular = function(name, options) {
 			events: 'events',
 			views: 'views',
 			hash: '#',
+			debugger: true,
 			// helpers: {}, // TODO
 			// decorators: {}, // TODO
 		};
@@ -111,6 +113,11 @@ Circular.prototype.component = function(name, parameters) {
 		mountSelector = parameters.mountSelector || attrSelector(options.mountAttribute),
 		template = parameters.template;
 
+	if (!options.debugger) {
+		data.element.removeAttribute(componentAttr);
+		data.element.removeAttribute(options.containerAttr);
+	}
+
 	this.data[name].extraModel = parameters.extraModel || options.extraModel;
 
 	pubsub[this.name] = pubsub[this.name] || {}; // prepare
@@ -125,7 +132,8 @@ Circular.prototype.component = function(name, parameters) {
 		appElement: data.element,
 		eventAttribute: options.eventAttribute,
 		eventListeners: parameters.eventListeners,
-		instanceID: _this.id
+		instanceID: _this.id,
+		debugger: options.debugger,
 	});
 	_inst.collector = {};/////////////////////////
 	_inst.template = template && template.version ?
@@ -174,6 +182,7 @@ Circular.prototype.component = function(name, parameters) {
 				element: element,
 				container: $(mountSelector, element)
 			}, true);
+			!options.debugger && item.container && item.container.removeAttribute(mountSelector);
 			// collect events
 			this.reinforceProperty(item, options.events, {}, true);
 			_inst.controller && _inst.controller.getEventListeners(
@@ -242,16 +251,19 @@ Circular.prototype.component = function(name, parameters) {
 			var elm;
 			if (cItem) {
 				for (var n = cItem.length; n--; ) { // TODO: no loop
-					if (!_inst.controller.options.appElement.contains(cItem[n].item.elements.element)) {
+					if (_inst.controller && !_inst.controller.options.appElement
+							.contains(cItem[n].item.elements.element)) {
 						cItem.splice(n, 1); // cleanup
 						continue;
 					}
-					if (_inst.controller && cItem[n].item === item && value !== oldValue) {
-						elm = cItem[n].fn();
-						if (elm) for (var m = elm.length; m--; ) {
-							_inst.controller.getEventListeners(
-								elm[m], item[options.events], component, idProperty, true);
-						}
+					if (cItem[n].item === item && value !== oldValue) {
+						Toolbox.lazy(function beLazy(_item) {
+							elm = _item.fn();
+							if (_inst.controller && elm) for (var m = elm.length; m--; ) {
+								_inst.controller.getEventListeners(
+									elm[m], item[options.events], component, idProperty, true);
+							}
+						}, cItem[n], cItem[n]);
 					}
 				}
 			}
@@ -626,6 +638,7 @@ Controller.prototype = {
 				continue;
 			}
 			eventParts = attribute.split(/\s*;+\s*/);
+			!this.options.debugger && elements[n].removeAttribute(eventAttribute);
 			for (var m = eventParts.length; m--; ) {
 				eventItem = eventParts[m].split(/\s*:+\s*/);
 				eventType = eventItem[0];
@@ -706,6 +719,7 @@ function getViews(options, views, element) {
 	elements = [element].concat([].slice.call(elements));
 	for (var n = elements.length; n--; ) { // reverse: stopPropagation
 		attribute = elements[n].getAttribute(options.viewAttr);
+		!options.debugger && elements[n].removeAttribute(options.viewAttr);
 		if (!attribute) {
 			continue;
 		}

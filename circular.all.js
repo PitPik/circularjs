@@ -1,4 +1,4 @@
-!function(root) {
+!function(root, undefined) {
     "use strict";
     var _config = root.require || {}, _rand = root.Math.random, _documentFragment = null, _timer = 0, _foo = {}, _link = document.createElement("a"), extend = function(oldObj, newObj) {
         if (typeof newObj !== "object" || !newObj) return newObj;
@@ -245,9 +245,9 @@
                 localStorage.setItem(key, JSON.stringify(data));
             }
         },
-        lazy: function(fn, obj) {
+        lazy: function(fn, obj, pref) {
             clearTimeout(obj._timer);
-            obj._timer = setTimeout(fn, 0);
+            obj._timer = setTimeout(fn, 0, pref);
         },
         itemsSorter: function(a, b, type, asc) {
             var textA = a[type].toUpperCase();
@@ -982,7 +982,7 @@
     if (typeof exports === "object") module.exports = factory(root, require("schnauzer")); else if (typeof define === "function" && define.amd) define("blick", [ "schnauzer" ], function(Schnauzer) {
         return factory(root, Schnauzer);
     }); else root.Blick = factory(root, root.Schnauzer);
-})(this, function BlickFactory(root, Schnauzer) {
+})(this, function BlickFactory(root, Schnauzer, undefined) {
     "use strict";
     var Blick = function(template, options) {
         this.version = "0.0.1";
@@ -1194,7 +1194,7 @@
     } else {
         root.VOM = factory(root);
     }
-})(this, function(window) {
+})(this, function(window, undefined) {
     "use strict";
     var VOM = function(model, options) {
         this.options = {
@@ -1438,7 +1438,7 @@
             return factory(root, Toolbox, Blick, VOM);
         });
     } else root.Circular = factory(root, root.Toolbox, root.Blick, root.VOM);
-})(this, function(window, Toolbox, Blick, VOM) {
+})(this, function(window, Toolbox, Blick, VOM, undefined) {
     "use strict";
     var Circular = function(name, options) {
         this.options = {
@@ -1453,7 +1453,8 @@
             elements: "elements",
             events: "events",
             views: "views",
-            hash: "#"
+            hash: "#",
+            debugger: true
         };
         initCircular(this, name, options);
     }, initCircular = function(_this, name, options) {
@@ -1498,6 +1499,10 @@
             container: data.container,
             templates: data.templates
         }, hasStorage = parameters.storage, storage = hasStorage || {}, storageHelper = Toolbox.storageHelper, storageData = hasStorage && storageHelper.fetch(storage.name) || {}, storageCategory = storage.category, storageListeners = storage.listeners || parameters.listeners, storageAll = storage.storeAll || storageListeners && storageListeners.indexOf("*") !== -1, mountSelector = parameters.mountSelector || attrSelector(options.mountAttribute), template = parameters.template;
+        if (!options.debugger) {
+            data.element.removeAttribute(componentAttr);
+            data.element.removeAttribute(options.containerAttr);
+        }
         this.data[name].extraModel = parameters.extraModel || options.extraModel;
         pubsub[this.name] = pubsub[this.name] || {};
         pubsub[this.name][name] = {};
@@ -1509,7 +1514,8 @@
             appElement: data.element,
             eventAttribute: options.eventAttribute,
             eventListeners: parameters.eventListeners,
-            instanceID: _this.id
+            instanceID: _this.id,
+            debugger: options.debugger
         });
         _inst.collector = {};
         _inst.template = template && template.version ? template : templateCache[name] ? templateCache[name] : data.template ? new Blick(template || data.template, {
@@ -1540,6 +1546,7 @@
                     element: element,
                     container: $(mountSelector, element)
                 }, true);
+                !options.debugger && item.container && item.container.removeAttribute(mountSelector);
                 this.reinforceProperty(item, options.events, {}, true);
                 _inst.controller && _inst.controller.getEventListeners(item[elmsTxt].element || component.element, item[options.events], component, idProperty);
                 this.reinforceProperty(item, options.views, {}, true);
@@ -1580,15 +1587,17 @@
                 var elm;
                 if (cItem) {
                     for (var n = cItem.length; n--; ) {
-                        if (!_inst.controller.options.appElement.contains(cItem[n].item.elements.element)) {
+                        if (_inst.controller && !_inst.controller.options.appElement.contains(cItem[n].item.elements.element)) {
                             cItem.splice(n, 1);
                             continue;
                         }
-                        if (_inst.controller && cItem[n].item === item && value !== oldValue) {
-                            elm = cItem[n].fn();
-                            if (elm) for (var m = elm.length; m--; ) {
-                                _inst.controller.getEventListeners(elm[m], item[options.events], component, idProperty, true);
-                            }
+                        if (cItem[n].item === item && value !== oldValue) {
+                            Toolbox.lazy(function beLazy(_item) {
+                                elm = _item.fn();
+                                if (_inst.controller && elm) for (var m = elm.length; m--; ) {
+                                    _inst.controller.getEventListeners(elm[m], item[options.events], component, idProperty, true);
+                                }
+                            }, cItem[n], cItem[n]);
                         }
                     }
                 }
@@ -1863,6 +1872,7 @@
                     continue;
                 }
                 eventParts = attribute.split(/\s*;+\s*/);
+                !this.options.debugger && elements[n].removeAttribute(eventAttribute);
                 for (var m = eventParts.length; m--; ) {
                     eventItem = eventParts[m].split(/\s*:+\s*/);
                     eventType = eventItem[0];
@@ -1921,6 +1931,7 @@
         elements = [ element ].concat([].slice.call(elements));
         for (var n = elements.length; n--; ) {
             attribute = elements[n].getAttribute(options.viewAttr);
+            !options.debugger && elements[n].removeAttribute(options.viewAttr);
             if (!attribute) {
                 continue;
             }

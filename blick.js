@@ -4,7 +4,7 @@
   else if (typeof define === 'function' && define.amd) define('blick', ['schnauzer'],
     function (Schnauzer) { return factory(root, Schnauzer); });
   else root.Blick = factory(root, root.Schnauzer);
-}(this, function BlickFactory(root, Schnauzer) { 'use strict';
+}(this, function BlickFactory(root, Schnauzer, undefined) { 'use strict';
 
 var Blick = function(template, options) {
     this.version = '0.0.1';

@@ -27,7 +27,7 @@
 		// closest: Element.prototype.closest ? function(element, selector, root) {
   //           return element.closest(selector)
   //       } : (function(element, selector, root) {
-  //           Element.prototype.matches = Element.prototype.msMatchesSelector || 
+  //           Element.prototype.matches = Element.prototype.msMatchesSelector ||
   //               Element.prototype.webkitMatchesSelector;
   //           Element.prototype.closest = function(s) {
   //               var el = this;
@@ -35,7 +35,7 @@
   //               do {
   //                   if (el.matches(s)) return el;
   //                   el = el.parentElement || el.parentNode;
-  //               } while (el !== null && el.nodeType === 1); 
+  //               } while (el !== null && el.nodeType === 1);
   //               return null;
   //           };
 
@@ -144,9 +144,9 @@
 				localStorage.setItem(key, JSON.stringify(data));
 			}
 		},
-		lazy: function(fn, obj) {
+		lazy: function(fn, obj, pref) {
 			clearTimeout(obj._timer);
-			obj._timer = setTimeout(fn, 0);
+			obj._timer = setTimeout(fn, 0, pref);
 		},
 
 		itemsSorter: function(a, b, type, asc) {

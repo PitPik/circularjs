@@ -1,3 +1,4 @@
+/**! @license VOM v0.1.1; Copyright (C) 2017-2018 by Peter Dematté */
 (function (root, factory) {
 	if (typeof exports === 'object') {
 		module.exports = factory(root);
@@ -8,7 +9,7 @@
 	} else {
 		root.VOM = factory(root);
 	}
-}(this, function(window) {
+}(this, function(window, undefined) {
 	'use strict';
 
 	var VOM = function(model, options) {

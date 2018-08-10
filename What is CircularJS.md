@@ -1,7 +1,7 @@
 ## What is CircularJS
 
 **CircularJS** is a tiny, progressive **MV* like framework** with its goal to help building **web-pages** and/or **single-page-web-apps** in a **model-oriented** easy way with the help of powerful built-in tools.
-**CircularJS** is also (truely) very easy to learn as 70% - 80% of the functionality used within the framework like pubsub, ajax, handlebars, amd, promise and even routers and methods like "appendChild", "removeChild" etc. is already known by most developers. If you are familiar with frameworks like Angular(JS) of Ember then you will probably recognise even more known patterns and immediately know how to use them.
+**CircularJS** is also (truely) very easy to learn as 70% - 80% of the functionality used within the framework like pubsub, ajax, handlebars, amd, promise and even routers and methods like "appendChild", "removeChild" etc. is already known by most developers. If you are familiar with frameworks like Angular(JS) or Ember then you will probably recognise even more known patterns and immediately know how to use them.
 
 ## The components of **CircularJS**
 
