@@ -165,7 +165,7 @@ Circular.prototype.component = function(name, parameters) {
 			var idProperty = this.options.idProperty,
 				id = item[idProperty], // container, data, extra
 				fragment = _inst.template && _inst.template.schnauzer.partials.self &&
-					_inst.template.render(item, _this.data[name].extraModel),
+					_inst.template.renderHTML(item, _this.data[name].extraModel),
 				replaceElement = type === 'replaceChild' &&
 					siblingOrParent[elmsTxt].element,
 				container = item.parentNode[elmsTxt] &&
@@ -217,7 +217,7 @@ Circular.prototype.component = function(name, parameters) {
 			} else if (this[property]) { // has method
 				if (item === sibling) { // replaceChild by itself
 					element = render(_inst.helper,
-						_inst.template.render(item, _this.data[name].extraModel),
+						_inst.template.renderHTML(item, _this.data[name].extraModel),
 						property, parentElement, sibling[elmsTxt].element,
 						idProperty, item[idProperty]);
 					item[elmsTxt].element = element;
@@ -690,7 +690,12 @@ function render(helper, html, operator, parentNode, sibling, idProperty, id) {
 		element = helper.children[0];
 		element && element.setAttribute(idProperty, id);
 	} else {
-		element = html.nodeType === 11 ? html.children[0] : html;
+		if (html.nodeType === 11) {
+			element = html.children[0];
+			element.setAttribute(idProperty, id);
+		} else {
+			element = html;
+		}
 	}
 
 	var renderingFunc = function() {

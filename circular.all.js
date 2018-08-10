@@ -1025,6 +1025,9 @@
     };
     Blick.prototype = {
         render: function(data, extra) {
+            return this.schnauzer.render(data, extra);
+        },
+        renderHTML: function(data, extra) {
             var fragment = document.createDocumentFragment();
             var html = this.schnauzer.render(data, extra);
             return resolveReferences(this, dump, html, null, fragment);
@@ -1541,7 +1544,7 @@
         _inst.vom = new VOM(component.model, {
             idProperty: _this.options.idProperty || "cr-id",
             preRecursionCallback: function(item, type, siblingOrParent) {
-                var idProperty = this.options.idProperty, id = item[idProperty], fragment = _inst.template && _inst.template.schnauzer.partials.self && _inst.template.render(item, _this.data[name].extraModel), replaceElement = type === "replaceChild" && siblingOrParent[elmsTxt].element, container = item.parentNode[elmsTxt] && item.parentNode[elmsTxt].container, parentNode = fragment && siblingElement || container || component.container, siblingElement = parentNode ? replaceElement || undefined : siblingOrParent && siblingOrParent[elmsTxt].element, element = fragment && render(_inst.helper, fragment, type || "appendChild", parentNode, siblingElement, idProperty, id) || component.element;
+                var idProperty = this.options.idProperty, id = item[idProperty], fragment = _inst.template && _inst.template.schnauzer.partials.self && _inst.template.renderHTML(item, _this.data[name].extraModel), replaceElement = type === "replaceChild" && siblingOrParent[elmsTxt].element, container = item.parentNode[elmsTxt] && item.parentNode[elmsTxt].container, parentNode = fragment && siblingElement || container || component.container, siblingElement = parentNode ? replaceElement || undefined : siblingOrParent && siblingOrParent[elmsTxt].element, element = fragment && render(_inst.helper, fragment, type || "appendChild", parentNode, siblingElement, idProperty, id) || component.element;
                 this.reinforceProperty(item, elmsTxt, {
                     element: element,
                     container: $(mountSelector, element)
@@ -1563,7 +1566,7 @@
                     render(_inst.helper, element, "appendChild", parentElement);
                 } else if (this[property]) {
                     if (item === sibling) {
-                        element = render(_inst.helper, _inst.template.render(item, _this.data[name].extraModel), property, parentElement, sibling[elmsTxt].element, idProperty, item[idProperty]);
+                        element = render(_inst.helper, _inst.template.renderHTML(item, _this.data[name].extraModel), property, parentElement, sibling[elmsTxt].element, idProperty, item[idProperty]);
                         item[elmsTxt].element = element;
                         item[elmsTxt].container = $(mountSelector, element);
                         item[options.events] = {};
@@ -1914,7 +1917,12 @@
             element = helper.children[0];
             element && element.setAttribute(idProperty, id);
         } else {
-            element = html.nodeType === 11 ? html.children[0] : html;
+            if (html.nodeType === 11) {
+                element = html.children[0];
+                element.setAttribute(idProperty, id);
+            } else {
+                element = html;
+            }
         }
         var renderingFunc = function() {
             if (isPrepend || operator === "insertAfter") {

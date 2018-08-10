@@ -53,6 +53,9 @@ var Blick = function(template, options) {
 
 Blick.prototype = {
   render: function(data, extra) {
+    return this.schnauzer.render(data, extra);
+  },
+  renderHTML: function(data, extra) {
     var fragment = document.createDocumentFragment();
     var html = this.schnauzer.render(data, extra);
 
