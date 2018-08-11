@@ -40,7 +40,7 @@ var Blick = function(template, options) {
   dump = [],
   dummy = function(){},
   disableAttribute = function(element, name, value) {
-    if (value === true || value === 'true') {
+    if (value === true || value === 'true' || (!value && value !== false)) {
       element.setAttribute(name, '');
     } else {
       element.removeAttribute(name);

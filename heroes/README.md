@@ -26,13 +26,15 @@ The following explanations show the relevant HTML parts while describing the JS 
 ### app.js
 
 ```HTML
-<body cr-component="app">
-    <h1 cr-view="title"></h1>
-    <nav class="app-nav">
-        <a href="#/dashboard">Dashboard</a>
-        <a href="#/heroes">Heroes</a>
-    </nav>
-    <div cr-view="app-modules"></div>
+<body cr-component="app" cr-container>
+    <section cr-template-for="app" class="app-{{%currentApp}}">
+        <h1>{{title}}{{#%currentApp}} - {{.}}{{/%currentApp}}</h1>
+        <nav class="app-nav">
+            <a href="#/dashboard" class="dashboard">Dashboard</a>
+            <a href="#/heroes" class="heroes">Heroes</a>
+        </nav>
+        <div cr-view="app-modules"></div>
+    </section>
 </body>
 ```
 
@@ -49,13 +51,11 @@ The router is triggered by the links in the HTML page and just re-defines the "a
 
 ```HTML
 <div class="grid grid-pad clearfix" cr-component="heroes-dashboard" cr-container>
-    <script type="text/template" cr-template-for="heroes-dashboard">
-    <a class="col-1-4" href="#/detail/{{id}}">
+    <a cr-template-for="heroes-dashboard" class="col-1-4" href="#/detail/{{id}}">
         <div class="module hero">
             <h4>{{name}}</h4>
         </div>
     </a>
-    </script>
 </div>
 ```
 
@@ -71,9 +71,7 @@ The rest of the module is defined in the HTML file dashboard/index.html.
     <h4>Hero Search</h4>
     <input id="search-box" cr-view="search" cr-event="keyup: search" />
     <ul class="search-result" cr-component="heroes-search-list" cr-event="click: select" cr-container>
-        <script type="text/template" cr-template-for="heroes-search-list">
-        <li><a href="#/detail/{{id}}">{{name}}</a></li>
-        </script>
+        <li cr-template-for="heroes-search-list"><a href="#/detail/{{id}}">{{name}}</a></li>
     </ul>
 </div>
 ```
@@ -123,14 +121,12 @@ The router's callback gets according to 'detail/id' the hero model and then repl
         <button type="submit">add</button>
     </form>
     <ul class="heroes" cr-component="heroes-list" cr-container>
-        <script type="text/template" cr-template-for="heroes-list">
-        <li cr-id={{cr-id}}>
+        <li cr-template-for="heroes-list">
             <a href="#/detail/{{id}}">
               <span class="badge">{{id}}</span> {{name}}
             </a>
             <button class="delete" title="delete hero" cr-event="click: deleteHero">x</button>
         </li>
-        </script>
     </ul>
 </div>
 ```

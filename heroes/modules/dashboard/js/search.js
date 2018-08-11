@@ -10,9 +10,9 @@ function(Circular, heroService) {
         eventListeners: {
             search: function(e, element, item) {
                 clearTimeout(this.debounce);
-                this.debounce = setTimeout(function() {
-                    search(element.value);
-                }, 300);
+                this.debounce = setTimeout(function(value) {
+                    search(value);
+                }, 300, element.value);
             }
         }
     });

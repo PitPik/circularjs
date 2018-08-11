@@ -4,6 +4,7 @@ function(Circular, heroService) {
 
     var circular = new Circular();
     var heroDetail = circular.component('hero-detail', {
+            listeners: ['name'],
             model: [{}],
             eventListeners: {
                 updateName: updateName,
@@ -13,7 +14,7 @@ function(Circular, heroService) {
         });
 
     function updateName(e, element, item) {
-        item.name = item.views.name.textContent = element.value.trim();
+        item.name = element.value.trim();
     }
 
     function updateHero(e, element, item) {

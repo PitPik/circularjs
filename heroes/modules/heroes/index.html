@@ -19,21 +19,19 @@
 			</label>
 			<button type="submit">add</button>
 		</form>
-		<ul class="heroes" cr-component="heroes-list" cr-container>
-			<script type="text/template" cr-template-for="heroes-list">
-			<li cr-id={{cr-id}}>
+		<ul cr-component="heroes-list" cr-container>
+			<li cr-template-for="heroes-list">
 				<a href="#/detail/{{id}}">
 				  <span class="badge">{{id}}</span> {{name}}
 				</a>
 				<button class="delete" title="delete hero" cr-event="click: deleteHero">x</button>
 			</li>
-			</script>
 		</ul>
 	</div>
 	<script type="text/javascript" src="../../shared-modules/data-provider.js"></script>
 	<script type="text/javascript" src="js/heroes.js"></script>
 	<script cr-dev type="text/javascript">
-		// for standalone development
+		// cr-dev: for standalone development
 		require.config({ baseUrl: './' });
 		require(['app-heroes'], function(initFn) {
 			initFn();

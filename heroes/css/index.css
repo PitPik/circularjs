@@ -27,8 +27,8 @@ h2, h3 {
   padding-top: 1em;
   border-top: 1px solid #ddd;
 }
-[cr-view="app-modules-preload"] {
-  display: none;
+[cr-view="app-modules-preload"], [cr-template-for] {
+  display: none!important;
 }
 
 .app-nav a {
@@ -38,4 +38,8 @@ h2, h3 {
   display: inline-block;
   background-color: #eee;
   border-radius: 4px;
+}
+
+.app-dashboard .dashboard, .app-heroes .heroes {
+  background-color: #ccc;
 }

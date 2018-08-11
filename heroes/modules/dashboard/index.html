@@ -15,21 +15,17 @@
 	<div class="module">
 		<h2>Top Heroes</h2>
 		<div class="grid grid-pad clearfix" cr-component="heroes-dashboard" cr-container>
-			<script type="text/template" cr-template-for="heroes-dashboard">
-			<a class="col-1-4" href="#/detail/{{id}}">
+			<a cr-template-for="heroes-dashboard" class="col-1-4" href="#/detail/{{id}}">
 				<div class="module hero">
 					<h4>{{name}}</h4>
 				</div>
 			</a>
-			</script>
 		</div>
 		<div cr-component="heroes-search">
 			<h4>Hero Search</h4>
 			<input id="search-box" cr-view="search" cr-event="keyup: search" />
 			<ul class="search-result" cr-component="heroes-search-list" cr-event="click: select" cr-container>
-				<script type="text/template" cr-template-for="heroes-search-list">
-				<li><a href="#/detail/{{id}}">{{name}}</a></li>
-				</script>
+				<li cr-template-for="heroes-search-list"><a href="#/detail/{{id}}">{{name}}</a></li>
 			</ul>
 		</div>
 	</div>

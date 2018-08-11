@@ -19,8 +19,7 @@ define('app', ['circular'], function(Circular) {
         listeners: ['currentApp'],
         subscribe: renderModule,
         onInit: function(component) {
-            appModel.views.title.textContent = appModel.title;
-            appModel.currentApp = appModel.currentApp;
+            appModel.currentApp = appModel.currentApp; // init
             preload(['dashboard', 'heroes'], appModel);
         }
     });
