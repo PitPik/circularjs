@@ -5,8 +5,7 @@ function(Circular, heroService) {
     var circular = new Circular();
 
     return function init(data, path) {
-        heroService.getHeroes()
-        .then(function(model) {
+        heroService.getHeroes().then(function(model) {
             circular.component('heroes-dashboard', {
                 model: model.splice(0, 4)
             });
