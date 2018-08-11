@@ -39,10 +39,10 @@ The following explanations show the relevant HTML parts while describing the JS 
 ```
 
 The component "app" `cr-component="app"` is created to keep track of the app's state. The according model holds `title` (won't change) and `currentApp`.
-The component listens to the changes to `currentApp` and will then call `renderModule()` to append the module inside the set container `cr-view="app-modules"`.
+The component listens to the changes to `currentApp` and will then call `renderModule()` to append the module inside the set container `cr-view="app-modules"`. This change automatically re-renders the items in the template that use `%currentApp` as a dynamic palceholder.
 `renderModule()` also gets the `previousName`, the previous module that it then will hide from the view. There is also `require`, the js-module that will be loaded and executed to start the new module.
 
-`onInit` gets executed once to render the headline which view is defined in the template by `cr-view="title"`.
+`onInit` gets executed once to retrigger rendering for the headline and preloading the other apps.
 
 The router is triggered by the links in the HTML page and just re-defines the "app" component's `currentApp`.
 
@@ -86,25 +86,23 @@ The list also listens to click (triggers `select()`) so it can reset the view to
 
 ```HTML
 <div cr-component="hero-detail" cr-container>
-    <script type="text/template" cr-template-for="hero-detail">
-    <div>
-        <h2><span cr-view="name">{{name}}</span> Details</h2>
-        <div><span>id: </span>{{id}}{{^id}}--{{/id}}</div>
+    <div cr-template-for="hero-detail">
+        <h2><span cr-view="name">{{%name}}</span> Details</h2>
+        <div><span>id: </span>{{#if id}}{{id}}{{else}}--{{/if}}</div>
         <label>name:
             <input cr-event="keyup: updateName" placeholder="name" value="{{name}}" />
         </label>
         <button cr-event="click: goBack">go back</button>
-        <button cr-event="click: save">save</button>
+        <button cr-event="click: save" disabled="{{%name}}">save</button>
     </div>
-    </script>
 </div>
 ```
 
 Component "hero-detail", rendered by passing the model of the hero, is the component that listenes to mouse events of three different HTML-Elements: the input field for renaming the current hero triggereing `updateName()`, the 'save' button and the 'go back' button and referring to the according functions `goBack()` and `save()`.
 
-`updateName()` adds `name` to the model and updates the view `name` on key up, which is the headline.
+`updateName()` adds `name` to the model and updates the view `name` on key up, which is the headline, using the dynamic variable `{{%name}}`.
 
-`updateHero()` is called when the form is submitted and then adds a new hero or updates a hero via `heroService.updateHero()`.
+`updateHero()` is called when the form is submitted and then adds a new hero or updates a hero via `heroService.updateHero()`. The save button has a dynamic disabled attribute driven by the variable `{{%name}}`.
 
 The router's callback gets according to 'detail/id' the hero model and then replaces the model of "hero-detail" so it can re-render automatically.
 
