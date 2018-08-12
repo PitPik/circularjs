@@ -1016,8 +1016,13 @@
     }, dump = [], dummy = function() {}, disableAttribute = function(element, name, value) {
         if (value === true || value === "true" || !value && value !== false) {
             element.setAttribute(name, "");
+            element[name] = true;
         } else {
             element.removeAttribute(name);
+            element[name] = false;
+            if (value === "focus") {
+                element.focus();
+            }
         }
     }, updateValue = function(element, name, value) {
         element.setAttribute("value", value);
@@ -1538,7 +1543,7 @@
         _inst.vom = new VOM(component.model, {
             idProperty: _this.options.idProperty || "cr-id",
             preRecursionCallback: function(item, type, siblingOrParent) {
-                var idProperty = this.options.idProperty, id = item[idProperty], fragment = _inst.template && _inst.template.schnauzer.partials.self && _inst.template.renderHTML(item, _this.data[name].extraModel), replaceElement = type === "replaceChild" && siblingOrParent[elmsTxt].element, container = item.parentNode[elmsTxt] && item.parentNode[elmsTxt].container, parentNode = fragment && siblingElement || container || component.container, siblingElement = parentNode ? replaceElement || undefined : siblingOrParent && siblingOrParent[elmsTxt].element, element = fragment && render(_inst.helper, fragment, type || "appendChild", parentNode, siblingElement, idProperty, id) || component.element;
+                var idProperty = this.options.idProperty, id = item[idProperty], fragment = _inst.template && _inst.template.schnauzer.partials.self && _inst.template.renderHTML(item, _this.data[name].extraModel), replaceElement = type === "replaceChild" && siblingOrParent[elmsTxt].element, container = item.parentNode[elmsTxt] && item.parentNode[elmsTxt].container, parentNode = fragment && siblingElement || container || component.container, siblingElement = parentNode ? replaceElement || undefined : siblingOrParent && siblingOrParent[elmsTxt].element, element = fragment && render(_inst.helper, fragment, type || data.type || "appendChild", parentNode, siblingElement, idProperty, id) || component.element;
                 this.reinforceProperty(item, elmsTxt, {
                     element: element,
                     container: $(mountSelector, element)
@@ -1975,7 +1980,7 @@
         return template.innerHTML;
     }
     function getDomData(options, parameters, component, name) {
-        var searchContainer = component || document.body, containerAttr = options.containerAttr, container = component.hasAttribute(containerAttr) ? component : $(attrSelector(containerAttr, name), component) || $(attrSelector(containerAttr), component), _template, template = $(attrSelector(options.templateAttr, name), searchContainer), _templates = $$(attrSelector(options.templatesAttr, name), searchContainer) || [], templates = {};
+        var searchContainer = component || document.body, containerAttr = options.containerAttr, container = component.hasAttribute(containerAttr) ? component : $(attrSelector(containerAttr, name), component) || $(attrSelector(containerAttr), component), _template, type = container && container.getAttribute(options.containerAttr), template = $(attrSelector(options.templateAttr, name), searchContainer), _templates = $$(attrSelector(options.templatesAttr, name), searchContainer) || [], templates = {};
         for (var n = _templates.length; n--; ) {
             _template = processTemplate(_templates[n], options);
             templates[_templates[n].id || _templates[n].getAttribute("name")] = new Blick(_template, {
@@ -1987,7 +1992,8 @@
             element: component,
             template: template ? processTemplate(template, options) : template,
             templates: templates,
-            container: container
+            container: container,
+            type: type ? type + "Child" : ""
         };
     }
     function attrSelector(attr, value) {

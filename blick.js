@@ -42,8 +42,13 @@ var Blick = function(template, options) {
   disableAttribute = function(element, name, value) {
     if (value === true || value === 'true' || (!value && value !== false)) {
       element.setAttribute(name, '');
+      element[name] = true;
     } else {
       element.removeAttribute(name);
+      element[name] = false;
+      if (value === 'focus') {
+        element.focus();
+      }
     }
   },
   updateValue = function(element, name, value) {

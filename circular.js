@@ -167,7 +167,7 @@ Circular.prototype.component = function(name, parameters) {
 					container || component.container,
 				siblingElement = parentNode ? replaceElement || undefined :
 					siblingOrParent && siblingOrParent[elmsTxt].element,
-				element = fragment && render(_inst.helper, fragment, type || 'appendChild',
+				element = fragment && render(_inst.helper, fragment, type || data.type || 'appendChild',
 					parentNode, siblingElement, idProperty, id) || component.element;
 
 			// collect elements
@@ -773,6 +773,7 @@ function getDomData(options, parameters, component, name) {
 			$(attrSelector(containerAttr, name), component) ||
 			$(attrSelector(containerAttr), component),
 		_template,
+		type = container && container.getAttribute(options.containerAttr),
 		template = $(attrSelector(options.templateAttr, name),
 			searchContainer),
 		_templates = ($$(attrSelector(options.templatesAttr, name),
@@ -792,6 +793,7 @@ function getDomData(options, parameters, component, name) {
 		template: template ? processTemplate(template, options) : template, // TODO && container??
 		templates: templates, // TODO && container??
 		container: container,
+		type: type ? type + 'Child' : '',
 		// appendMode: container && // ??????????? never used
 		// 	container.getAttribute([containerAttr]) || 'append' // replace
 	}
