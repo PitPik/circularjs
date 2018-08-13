@@ -1,5 +1,5 @@
 // Full spec-compliant TodoMVC with localStorage persistence
-// and hash-based routing in ~68 effective lines of JavaScript.
+// and hash-based routing in ~69 effective lines of JavaScript.
 require(['circular'], Circular => { 'use strict';
 
 const ENTER_KEY = 13;
@@ -12,7 +12,7 @@ const storage = Circular.Toolbox.storageHelper;
 
 const list = circular.component('list', {
   model: storage.fetch(STORAGE_KEY),
-  listeners: ['text', 'done', 'editable'],
+  listeners: ['*'],
   subscribe: (property, item, value, oldValue, type) => {
     property === 'text' ? (item.editable = '') : lazy(updateUI, list);
     storage.saveLazy(list.model, STORAGE_KEY);
@@ -41,11 +41,12 @@ const updateUI = () => {
   appModel.plural = all - checked !== 1;
   appModel.all = all !== 0 && all === checked;
   appModel.none = checked === 0;
+  appModel.hide = all === 0;
 };
 
 circular.component('app', {
-  model: [{ filter: 'all', done: 0, plural: false, all: false, none: false }],
-  listeners: ['done', 'plural', 'all', 'none'],
+  model: [{ filter: 'all', done: 0, plural: false, all: false, none: false, hide: true }],
+  listeners: ['*'],
   eventListeners: {
     addItem: (e, elm, item) => {
       const text = elm.value.trim();
