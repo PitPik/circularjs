@@ -6,12 +6,6 @@
 		<link rel="stylesheet" href="index.css">
 		<link rel="stylesheet" href="todo.css">
 
-		<!-- <script type="text/javascript" src="../amd.js"></script>
-		<script type="text/javascript" src="../toolbox.js"></script>
-		<script type="text/javascript" src="../VOM.js"></script>
-		<script type="text/javascript" src="../schnauzer.js"></script>
-		<script type="text/javascript" src="../blick.js"></script>
-		<script type="text/javascript" src="../circular.js"></script> -->
 		<script type="text/javascript" src="../circular.min.js"></script>
 	</head>
 	<body cr-component="app" cr-container="prepend">
@@ -21,7 +15,7 @@
 				<input class="new-todo" cr-event="keypress: addItem" placeholder="What needs to be done?" autofocus>
 			</header>
 			<section class="main {{%filter}}" cr-view="main">
-				<input cr-event="click: toggleAll" class="toggle-all" id="toggle-all" type="checkbox" checked="{{%allCheckd}}">
+				<input cr-event="click: toggleAll" class="toggle-all" id="toggle-all" type="checkbox" checked="{{%all}}">
 				<label for="toggle-all">Mark all as complete</label>
 				<ul class="todo-list" cr-component="list" cr-container>
 					<li cr-template-for="list" class="todo-list-item{{#%done}} completed{{/%done}}">
@@ -34,14 +28,14 @@
 			</section>
 			<footer class="footer">
 				<span class="todo-count">
-					<strong>{{%completed}}</strong> <span>item{{#if %plural}}s{{/if}} left</span>
+					<strong>{{%done}}</strong> <span>item{{#if %plural}}s{{/if}} left</span>
 				</span>
 				<ul class="filters {{%filter}}">
 					<li><a href="#" class="all">All</a></li>
 					<li><a href="#/active" class="active">Active</a></li>
 					<li><a href="#/completed" class="completed">Completed</a></li>
 				</ul>
-				<button class="clear-completed" cr-event="click: deleteDone" disabled="{{%noneChecked}}">Clear completed</button>
+				<button class="clear-completed" cr-event="click: deleteDone" disabled="{{%none}}">Clear completed</button>
 			</footer>
 		</section>
 		<footer class="info">
