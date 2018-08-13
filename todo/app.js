@@ -1,107 +1,80 @@
 // Full spec-compliant TodoMVC with localStorage persistence
-// and hash-based routing in ~94 effective lines of JavaScript.
-require(['circular'], function(Circular) { 'use strict';
+// and hash-based routing in ~68 effective lines of JavaScript.
+require(['circular'], Circular => { 'use strict';
 
-var ENTER_KEY = 13;
-var ESCAPE_KEY = 27;
-var STORAGE_KEY = 'todos-circularjs-0.1';
+const ENTER_KEY = 13;
+const ESCAPE_KEY = 27;
+const STORAGE_KEY = 'todos-circularjs-0.1';
 
-var circular = new Circular();
-var storage = Circular.Toolbox.storageHelper;
+const circular = new Circular();
+const lazy = Circular.Toolbox.lazy;
+const storage = Circular.Toolbox.storageHelper;
 
-var list = circular.component('list', {
+const list = circular.component('list', {
   model: storage.fetch(STORAGE_KEY),
   listeners: ['text', 'done', 'editable'],
-  subscribe: function(property, item, value, oldValue, type) {
-    listCallbacks[listCallbacks[property] ?
-      property : 'updateUI'](item, item.views, value);
-    storage.saveLazy(this.model, STORAGE_KEY);
+  subscribe: (property, item, value, oldValue, type) => {
+    property === 'text' ? (item.editable = '') : lazy(updateUI, list);
+    storage.saveLazy(list.model, STORAGE_KEY);
   },
   eventListeners: {
-    toggle: function (e, element, item) {
-      item.done = element.checked;
-    },
-    delete: function (e, element, item) {
-      this.removeChild(item);
-    },
-    save: function (e, element, item) {
-      item.text = element.value;
-    },
-    edit: function (e, element, item) {
-      item.editable = 'focus';
-    },
-    blurItem: function (e, element, item) {
-      item.editable = '';
-    },
-    escape: function (e, element, item) {
+    toggle: (e, elm, item) => item.done = elm.checked,
+    delete: (e, elm, item) => list.removeChild(item),
+    save: (e, elm, item) => item.text = elm.value,
+    edit: (e, elm, item) => item.editable = 'focus',
+    blurItem: (e, elm, item) => item.editable = '',
+    escape: (e, elm, item) => {
       if ((e.which || e.keyCode) === ESCAPE_KEY) {
-        element.value = item.text;
+        elm.value = item.text;
         item.editable = '';
       }
-    }
+    },
   }
 });
 
-var listCallbacks = {
-  text: function (item, views, value) {
-    item.editable = '';
-  },
-  updateUI: function (item, views, value) {
-    Circular.Toolbox.lazy(updateUI, list);
-  }
+const updateUI = () => {
+  const all = list.getElementsByProperty().length;
+  const checked = list.getElementsByProperty('done', true).length;
+  const appModel = circular.components['app'].model[0];
+
+  appModel.done = all - checked;
+  appModel.plural = all - checked !== 1;
+  appModel.all = all !== 0 && all === checked;
+  appModel.none = checked === 0;
 };
 
 circular.component('app', {
-  model: [{
-    filter: 'all',
-    completed: 0,
-    plural: false,
-    allCheckd: false,
-    noneChecked: false,
-  }],
-  listeners: ['completed', 'plural', 'allCheckd', 'noneChecked'],
+  model: [{ filter: 'all', done: 0, plural: false, all: false, none: false }],
+  listeners: ['done', 'plural', 'all', 'none'],
   eventListeners: {
-    addItem: function (e, element, item) {
-      var text = element.value.trim();
+    addItem: (e, elm, item) => {
+      const text = elm.value.trim();
 
       if ((e.which || e.keyCode) === ENTER_KEY && text) {
         list.appendChild({ text: text, done: false, editable: '' });
-        element.value = '';
+        elm.value = '';
       }
     },
-    deleteDone: function (e, element, item) {
-      var items = list.getElementsByProperty('done', true);
+    deleteDone: (e, elm, item) => {
+      const items = list.getElementsByProperty('done', true);
 
-      for (var n = items.length; n--; ) list.removeChild(items[n]);
+      for (let n = items.length; n--; ) list.removeChild(items[n]);
     },
-    toggleAll: function (e, element, item) {
-      var checked = e.target.checked;
-      var items = list.getElementsByProperty('done', !checked);
+    toggleAll: (e, elm, item) => {
+      const checked = e.target.checked;
+      const items = list.getElementsByProperty('done', !checked);
 
-      for (var n = items.length; n--; ) items[n].done = checked;
+      for (let n = items.length; n--; ) items[n].done = checked;
     }
   },
-  onInit: function(component) {
+  onInit: self => {
     circular.addRoute({
       path: '(/)(:filter)',
-      callback: function(data) {
-        component.model[0].filter = data.parameters.filter || 'all';
-      }
+      callback: data => self.model[0].filter = data.parameters.filter || 'all',
     }, true);
     updateUI();
-    component.model[0].views.main.appendChild(list.container);
+    self.model[0].views.main.appendChild(list.container);
   }
 });
-
-function updateUI() {
-  var all = list.getElementsByProperty().length;
-  var checked = list.getElementsByProperty('done', true).length;
-  var UIModel = circular.components['app'].model[0];
-
-  UIModel.completed = all - checked;
-  UIModel.plural = checked !== 1;
-  UIModel.allCheckd = all !== 0 && all === checked;
-  UIModel.noneChecked = checked === 0;
-};
 
 });
