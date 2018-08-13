@@ -136,8 +136,11 @@ Circular.prototype.component = function(name, parameters) {
 			helpers: parameters.helpers || options.helpers || {}, // TODO
 			/////////////////////////////////////////////////
 			registerProperty: function(name, fn, data) {
-				_inst.collector[name] = _inst.collector[name] || [];
-				_inst.collector[name].push({
+				var item = _inst.collector[data['cr-id']] =
+						_inst.collector[data['cr-id']] || {};
+
+				item[name] = item[name] || [];
+				item[name].push({
 					item: data,
 					fn: fn,
 				});
@@ -201,8 +204,8 @@ Circular.prototype.component = function(name, parameters) {
 						item.parentNode[elmsTxt].element : component.container);
 
 			if (property === 'removeChild') {
-				render(_inst.helper, element, property,
-					element.parentElement);
+				render(_inst.helper, element, property, element.parentElement);
+				delete _inst.collector[id];
 			} else if (property === 'sortChildren') {
 				// speed up sorting... TODO: check
 				render(_inst.helper, element, 'appendChild', parentElement);
@@ -239,23 +242,16 @@ Circular.prototype.component = function(name, parameters) {
 						storageData : storageData[storageCategory], storage.name, this);
 			}
 			/////////////////////////
-			var cItem = _inst.collector[property];
-			var elm;
+			var cItem = _inst.collector[id] && _inst.collector[id][property];
+
 			if (cItem) {
-				for (var n = cItem.length; n--; ) { // TODO: no loop
-					if (_inst.controller && !_inst.controller.options.appElement
-							.contains(cItem[n].item.elements.element)) {
-						cItem.splice(n, 1); // cleanup
-						continue;
-					}
-					if (cItem[n].item === item && value !== oldValue) {
-						Toolbox.lazy(function beLazy(_item) {
-							elm = _item.fn();
-							if (_inst.controller && elm) for (var m = elm.length; m--; ) {
-								_inst.controller.getEventListeners(
-									elm[m], item[options.events], component, idProperty, true);
-							}
-						}, cItem[n], cItem[n]);
+				for (var n = cItem.length, elm; n--; ) {
+					if (value !== oldValue) {
+						elm = cItem[n].fn();
+						if (_inst.controller && elm) for (var m = elm.length; m--; ) {
+							_inst.controller.getEventListeners(elm[m], item[options.events],
+								component, idProperty, true);
+						}
 					}
 				}
 			}
@@ -803,6 +799,10 @@ function attrSelector(attr, value) {
 	return '[' + attr + (value ? '="' + value + '"]' : ']');
 }
 
+function isConnected(elm, contect) {
+	return elm.isConnected !== undefined ?
+		elm.isConnected : _this.options.appElement.contains(eventElement);
+}
 // -------- for Controller --------- //
 // --------------------------------- //
 function eventDistributor(e, idProperty, component, _this) {
@@ -823,7 +823,7 @@ function eventDistributor(e, idProperty, component, _this) {
 		if (!eventListener) continue;
 		for (var n = eventElements[key].length; n--; ) {
 			eventElement = eventElements[key][n];
-			if (!_this.options.appElement.contains(eventElement)) {
+			if (!isConnected(eventElement, _this.options.appElement)) {
 				eventElements[key].splice(n, 1); // cleanup
 				continue;
 			}

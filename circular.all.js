@@ -1524,8 +1524,9 @@
             doEscape: false,
             helpers: parameters.helpers || options.helpers || {},
             registerProperty: function(name, fn, data) {
-                _inst.collector[name] = _inst.collector[name] || [];
-                _inst.collector[name].push({
+                var item = _inst.collector[data["cr-id"]] = _inst.collector[data["cr-id"]] || {};
+                item[name] = item[name] || [];
+                item[name].push({
                     item: data,
                     fn: fn
                 });
@@ -1560,6 +1561,7 @@
                 var idProperty = this.options.idProperty, id = item[idProperty], element = item[elmsTxt] && item[elmsTxt].element, parentElement = item.parentNode && item.parentNode[elmsTxt] ? item.parentNode[elmsTxt].container || item.parentNode[elmsTxt].element : component.container;
                 if (property === "removeChild") {
                     render(_inst.helper, element, property, element.parentElement);
+                    delete _inst.collector[id];
                 } else if (property === "sortChildren") {
                     render(_inst.helper, element, "appendChild", parentElement);
                 } else if (this[property]) {
@@ -1584,21 +1586,14 @@
                     }
                     storageHelper[storage.saveLazy === false ? "save" : "saveLazy"](storageCategory ? storageData : storageData[storageCategory], storage.name, this);
                 }
-                var cItem = _inst.collector[property];
-                var elm;
+                var cItem = _inst.collector[id] && _inst.collector[id][property];
                 if (cItem) {
-                    for (var n = cItem.length; n--; ) {
-                        if (_inst.controller && !_inst.controller.options.appElement.contains(cItem[n].item.elements.element)) {
-                            cItem.splice(n, 1);
-                            continue;
-                        }
-                        if (cItem[n].item === item && value !== oldValue) {
-                            Toolbox.lazy(function beLazy(_item) {
-                                elm = _item.fn();
-                                if (_inst.controller && elm) for (var m = elm.length; m--; ) {
-                                    _inst.controller.getEventListeners(elm[m], item[options.events], component, idProperty, true);
-                                }
-                            }, cItem[n], cItem[n]);
+                    for (var n = cItem.length, elm; n--; ) {
+                        if (value !== oldValue) {
+                            elm = cItem[n].fn();
+                            if (_inst.controller && elm) for (var m = elm.length; m--; ) {
+                                _inst.controller.getEventListeners(elm[m], item[options.events], component, idProperty, true);
+                            }
                         }
                     }
                 }
@@ -1999,6 +1994,9 @@
     function attrSelector(attr, value) {
         return "[" + attr + (value ? '="' + value + '"]' : "]");
     }
+    function isConnected(elm, contect) {
+        return elm.isConnected !== undefined ? elm.isConnected : _this.options.appElement.contains(eventElement);
+    }
     function eventDistributor(e, idProperty, component, _this) {
         var element = Toolbox.closest(e.target, attrSelector(idProperty)) || component.element, id = element.getAttribute(idProperty), elms = "elements.element", item = component.getElementById(id) || component.getElementsByProperty(elms, component.element)[0] || component.getElementsByProperty(elms, e.target)[0] || component.model[0], eventElements = item && item.events[e.type], eventElement = {}, stopPropagation = false, eventListener;
         for (var key in eventElements) {
@@ -2006,7 +2004,7 @@
             if (!eventListener) continue;
             for (var n = eventElements[key].length; n--; ) {
                 eventElement = eventElements[key][n];
-                if (!_this.options.appElement.contains(eventElement)) {
+                if (!isConnected(eventElement, _this.options.appElement)) {
                     eventElements[key].splice(n, 1);
                     continue;
                 }
