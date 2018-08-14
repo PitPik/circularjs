@@ -11,9 +11,9 @@
 	position: absolute;
 	left: -100%;
 }
-.filters.all li a.all,
-.filters.active li a.active,
-.filters.completed li a.completed {
+.list-all .filter-all,
+.list-active .filter-active,
+.list-completed .filter-completed {
 	border-color: rgba(175, 47, 47, 0.1);
 }
 .todo-list li .edit {
