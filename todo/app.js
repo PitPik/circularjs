@@ -13,7 +13,7 @@ const storage = Circular.Toolbox.storageHelper;
 const list = circular.component('list', {
   model: storage.fetch(STORAGE_KEY),
   listeners: ['*'],
-  subscribe: (property, item, value, oldValue, type) => {
+  subscribe: (property, item) => {
     property === 'text' ? (item.editable = '') : lazy(updateUI, list);
     storage.saveLazy(list.model, STORAGE_KEY);
   },
