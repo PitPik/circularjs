@@ -63,9 +63,9 @@ circular.component('app', {
     },
     toggleAll: (e, elm, item) => {
       const checked = e.target.checked;
-      const left = list.getElementsByProperty('done', !checked);
+      const items = list.getElementsByProperty('done', !checked);
 
-      for (let n = left.length; n--; ) left[n].done = checked;
+      for (let n = items.length; n--; ) items[n].done = checked;
     }
   },
   onInit: self => {
