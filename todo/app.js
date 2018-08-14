@@ -34,18 +34,18 @@ const list = circular.component('list', {
 
 const updateUI = () => {
   const all = list.getElementsByProperty().length;
-  const checked = list.getElementsByProperty('done', true).length;
+  const done = list.getElementsByProperty('done', true).length;
   const appModel = circular.components['app'].model[0];
 
-  appModel.done = all - checked;
-  appModel.plural = all - checked !== 1;
-  appModel.all = all !== 0 && all === checked;
-  appModel.none = checked === 0;
+  appModel.all = all !== 0 && all === done;
   appModel.hide = all === 0;
+  appModel.left = all - done;
+  appModel.plural = all - done !== 1;
+  appModel.none = done === 0;
 };
 
 circular.component('app', {
-  model: [{ filter: 'all', done: 0, plural: false, all: false, none: false, hide: true }],
+  model: [{ filter: 'all', left: 0, plural: false, all: false, none: false, hide: true }],
   listeners: ['*'],
   eventListeners: {
     addItem: (e, elm, item) => {
@@ -57,15 +57,15 @@ circular.component('app', {
       }
     },
     deleteDone: (e, elm, item) => {
-      const items = list.getElementsByProperty('done', true);
+      const done = list.getElementsByProperty('done', true);
 
-      for (let n = items.length; n--; ) list.removeChild(items[n]);
+      for (let n = done.length; n--; ) list.removeChild(done[n]);
     },
     toggleAll: (e, elm, item) => {
       const checked = e.target.checked;
-      const items = list.getElementsByProperty('done', !checked);
+      const left = list.getElementsByProperty('done', !checked);
 
-      for (let n = items.length; n--; ) items[n].done = checked;
+      for (let n = left.length; n--; ) left[n].done = checked;
     }
   },
   onInit: self => {
