@@ -28,12 +28,12 @@
       </section>
       <footer class="footer{{#if %hide}} hidden{{/if}}">
         <span class="todo-count">
-          <strong>{{%left}}</strong> <span>item{{#if %plural}}s{{/if}} left</span>
+          <strong>{{%left}}</strong> item{{#if %plural}}s{{/if}} left
         </span>
-        <ul class="filters {{%filter}}">
-          <li><a href="#" class="all">All</a></li>
-          <li><a href="#/active" class="active">Active</a></li>
-          <li><a href="#/completed" class="completed">Completed</a></li>
+        <ul class="filters list-{{%filter}}">
+          <li><a href="#" class="filter-all">All</a></li>
+          <li><a href="#/active" class="filter-active">Active</a></li>
+          <li><a href="#/completed" class="filter-completed">Completed</a></li>
         </ul>
         <button class="clear-completed" cr-event="click: deleteDone" disabled="{{%none}}">Clear completed</button>
       </footer>
