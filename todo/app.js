@@ -8,37 +8,12 @@ require(['circular'], Circular => { 'use strict';
   const circular = new Circular();
   const storage = Circular.Toolbox.storageHelper;
 
-<<<<<<< HEAD
   const list = circular.component('list', {
     model: storage.fetch(STORAGE_KEY),
     listeners: ['*'],
     subscribe: (property, item) => {
       property === 'text' ? (item.editable = '') : Circular.Toolbox.lazy(updateUI, list);
       property !== 'editable' && storage.saveLazy(list.model, STORAGE_KEY);
-=======
-const circular = new Circular();
-const lazy = Circular.Toolbox.lazy;
-const storage = Circular.Toolbox.storageHelper;
-
-const list = circular.component('list', {
-  model: storage.fetch(STORAGE_KEY),
-  listeners: ['*'],
-  subscribe: (property, item) => {
-    property === 'text' ? (item.editable = '') : lazy(updateUI, list);
-    property !== 'editable' && storage.saveLazy(list.model, STORAGE_KEY);
-  },
-  eventListeners: {
-    toggle: (e, elm, item) => item.done = elm.checked,
-    delete: (e, elm, item) => list.removeChild(item),
-    save: (e, elm, item) => item.text = elm.value,
-    edit: (e, elm, item) => item.editable = 'focus',
-    blurItem: (e, elm, item) => item.editable = '',
-    escape: (e, elm, item) => {
-      if ((e.which || e.keyCode) === ESCAPE_KEY) {
-        elm.value = item.text;
-        item.editable = '';
-      }
->>>>>>> f8ffde5b45ee6ef3cc6c6bdfdf27c692179c4fae
     },
     eventListeners: {
       toggle: (e, elm, item) => item.done = elm.checked,
