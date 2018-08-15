@@ -15,7 +15,7 @@ const list = circular.component('list', {
   listeners: ['*'],
   subscribe: (property, item) => {
     property === 'text' ? (item.editable = '') : lazy(updateUI, list);
-    storage.saveLazy(list.model, STORAGE_KEY);
+    property !== 'editable' && storage.saveLazy(list.model, STORAGE_KEY);
   },
   eventListeners: {
     toggle: (e, elm, item) => item.done = elm.checked,
