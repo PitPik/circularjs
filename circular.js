@@ -135,7 +135,7 @@ Circular.prototype.component = function(name, parameters) {
 			doEscape: false,
 			helpers: parameters.helpers || options.helpers || {}, // TODO
 			/////////////////////////////////////////////////
-			registerProperty: function(name, fn, data) {
+			registerProperty: function(name, fn, data, active) {
 				var item = _inst.collector[data['cr-id']] =
 						_inst.collector[data['cr-id']] || {};
 
@@ -143,6 +143,7 @@ Circular.prototype.component = function(name, parameters) {
 				item[name].push({
 					item: data,
 					fn: fn,
+					forceUpdate: active === 2,
 				});
 			}
 		}) : null;
@@ -246,7 +247,7 @@ Circular.prototype.component = function(name, parameters) {
 
 			if (cItem) {
 				for (var n = cItem.length, elm; n--; ) {
-					if (value !== oldValue) {
+					if (cItem[n].forceUpdate || value !== oldValue) {
 						elm = cItem[n].fn();
 						if (_inst.controller && elm) for (var m = elm.length; m--; ) {
 							_inst.controller.getEventListeners(elm[m], item[options.events],

@@ -702,11 +702,11 @@
         var keys = [];
         var path = [];
         var strict = false;
-        var active = value.charAt(0) === "%";
+        var active = value.charAt(1) === "%" ? 2 : value.charAt(0) === "%" ? 1 : 0;
         if (isString) {
             value = value.replace(/(?:^['"]|['"]$)/g, "");
         } else {
-            value = active ? value.substr(1) : value;
+            value = active ? value.substr(active) : value;
             path = value.split("../");
             if (path.length > 1) {
                 value = (path[0] === "@" && "@" || "") + path.pop();
@@ -1137,7 +1137,7 @@
                         }
                     };
                 }(foundNode, foundNode.ownerElement, foundNode.name, search, foundNode.textContent, part);
-                registerProperty(part.name, part.replacer, part.data.path[0], foundNode);
+                registerProperty(part.name, part.replacer, part.data.path[0], part.isActive, foundNode);
                 openSections = checkSectionChild(foundNode.ownerElement.previousSibling, part, openSections, options);
                 part.replacer();
             } else if (!checkSection(part, foundNode)) {
@@ -1148,7 +1148,7 @@
                     };
                 }(foundNode, part);
                 foundNode.textContent = part.value;
-                registerProperty(part.name, part.replacer, part.data.path[0], foundNode);
+                registerProperty(part.name, part.replacer, part.data.path[0], part.isActive, foundNode);
                 openSections = checkSectionChild(foundNode, part, openSections, options);
             } else {
                 openSections = checkSectionChild(foundNode, part, openSections, options);
@@ -1182,7 +1182,7 @@
                         return collector;
                     };
                 }(foundNode, part);
-                registerProperty(part.name, part.replacer, part.data.path[0], foundNode);
+                registerProperty(part.name, part.replacer, part.data.path[0], part.isActive, foundNode);
             }
         }
         out = render(container, helperContainer, fragment);
@@ -1523,12 +1523,13 @@
         _inst.template = template && template.version ? template : templateCache[name] ? templateCache[name] : data.template ? new Blick(template || data.template, {
             doEscape: false,
             helpers: parameters.helpers || options.helpers || {},
-            registerProperty: function(name, fn, data) {
+            registerProperty: function(name, fn, data, active) {
                 var item = _inst.collector[data["cr-id"]] = _inst.collector[data["cr-id"]] || {};
                 item[name] = item[name] || [];
                 item[name].push({
                     item: data,
-                    fn: fn
+                    fn: fn,
+                    forceUpdate: active === 2
                 });
             }
         }) : null;
@@ -1589,7 +1590,7 @@
                 var cItem = _inst.collector[id] && _inst.collector[id][property];
                 if (cItem) {
                     for (var n = cItem.length, elm; n--; ) {
-                        if (value !== oldValue) {
+                        if (cItem[n].forceUpdate || value !== oldValue) {
                             elm = cItem[n].fn();
                             if (_inst.controller && elm) for (var m = elm.length; m--; ) {
                                 _inst.controller.getEventListeners(elm[m], item[options.events], component, idProperty, true);

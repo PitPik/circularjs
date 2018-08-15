@@ -179,7 +179,7 @@ function resolveReferences(_this, memory, html, container, fragment) {
           }
         }
       })(foundNode, foundNode.ownerElement, foundNode.name, search, foundNode.textContent, part);
-      registerProperty(part.name, part.replacer, part.data.path[0], foundNode);
+      registerProperty(part.name, part.replacer, part.data.path[0], part.isActive, foundNode);
       openSections = checkSectionChild(foundNode.ownerElement.previousSibling,
           part, openSections, options);
       part.replacer();
@@ -191,7 +191,7 @@ function resolveReferences(_this, memory, html, container, fragment) {
         }
       })(foundNode, part);
       foundNode.textContent = part.value;
-      registerProperty(part.name, part.replacer, part.data.path[0], foundNode);
+      registerProperty(part.name, part.replacer, part.data.path[0], part.isActive, foundNode);
       openSections = checkSectionChild(foundNode, part, openSections, options);
     } else { // section
       openSections = checkSectionChild(foundNode, part, openSections, options);
@@ -223,7 +223,7 @@ function resolveReferences(_this, memory, html, container, fragment) {
           return collector;
         }
       })(foundNode, part);
-      registerProperty(part.name, part.replacer, part.data.path[0], foundNode);
+      registerProperty(part.name, part.replacer, part.data.path[0], part.isActive, foundNode);
     }
   }
 
