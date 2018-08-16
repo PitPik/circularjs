@@ -53,7 +53,7 @@ require(['circular'], Circular => {
     }],
     listeners: ['*'],
     eventListeners: {
-      addItem: (e, elm, item) => {
+      addItem: (e, elm) => {
         const text = elm.value.trim();
 
         if (e.keyCode === ENTER_KEY && text) {
@@ -65,9 +65,9 @@ require(['circular'], Circular => {
           elm.value = '';
         }
       },
-      deleteDone: (e, elm, item) => list[get]('done', true)
+      deleteDone: e => list[get]('done', true)
         .forEach(unit => list.removeChild(unit)),
-      toggleAll: (e, elm, item) => list[get]('done', !e.target.checked)
+      toggleAll: e => list[get]('done', !e.target.checked)
         .forEach(unit => unit.done = e.target.checked),
     },
     onInit: self => {
