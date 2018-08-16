@@ -96,3 +96,12 @@ This way we can append the list-component back to the ```cr-view="main"``` of th
 The ```cr-container="prepend"``` is because the fact that we choose to use ```<body>``` as a component which is also the container, a regular ```append``` would put our view on the end of the container and the ```<footer class="info">``` would then be above.
 
 This seems all a bit hacky, but it's for the reason to not have to rebuild the TodoMVC's template too much and/or not to have to do a third component that would take care of the bottom part of the UI. This happens on init only anyhow and is therefore also not really expensive.
+
+
+### Old version
+
+You can also see index_original.html and its script app_original.js. This was done before blick.js was born, does the same thing just renders a lot of views within some function and not with the dynamic variables.
+This seems to be less efficient but it is therefore way faster as blick has to find elements in the dom and create hundrets of functions for possible update-rendering, whereas in the old version there is only one function for all the same ```cr-view``` which get collected anyhow.
+So, in your applications you might want to consider using a mix of both ways to serve your purposes best and keep rendering blasting fast.
+
+But all in all, you can see that CircularJS is quite straight forward and yet very efficient if it comes to SPAs. In other demos you can also learn how to build reusable modules and some more APIs.
