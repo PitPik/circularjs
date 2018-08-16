@@ -1,4 +1,4 @@
-# MVC-Todo app complying to the TodoMVC specs on http://todomvc.com/
+# MVC-Todo app complying to the TodoMVC specs on todomvc.com
 
 ## How it works (in the scope of newcomers to CircularJS)
 
