@@ -96,3 +96,21 @@ This way we can append the list-component back to the ```cr-view="main"``` of th
 The ```cr-container="prepend"``` is because the fact that we choose to use ```<body>``` as a component which is also the container, a regular ```append``` would put our view on the end of the container and the ```<footer class="info">``` would then be above.
 
 This seems all a bit hacky, but it's for the reason to not have to rebuild the TodoMVC's template too much and/or not to have to do a third component that would take care of the bottom part of the UI. This happens on init only anyhow and is therefore also not really expensive.
+
+## Conclusion
+
+As you can see, making SPAs or just dynamic Web-pages is quite straight forward. The JavaScript you need mostly just takes care of the state model to be up-to-date and the dynamic template takes care of the rest - the rendering. And there is no difference in how to think about the template rendering the first time and later on when the model changes as it is the same logic, it just differs by adding the "%" to the dynamic variables.
+
+CircularJS has a lot more powerful tools not shown in this fairly easy app that are as easy to understand and use.
+
+## Comparison to other frameworks
+
+CircularJS is closer to real JavaScript than other frameworks and less oppinionated, that's why you don't have to learn that much about framework dependent features that are in my oppinion most of the times restrictions to your ideas. You're more flexible in how to solve problems and don't have to work around oppinionated restrictions.
+
+To make something like AngularJS's features, directives or services you can always create your JavaScript components using ```define``` and ```require``` to create reusable components, but then JavaScript components, that might even be used in plain javaScript projects or other frameworks. CircularJS doesn't limit you in how to think about components and also doesn't want to remind you to componentise. This is up to you. This will stay your responsibility.
+
+One reason why I choose Schnauzer (Handlebars implementation) to be used as the rendering engine for CircularJS is as follows:
+In my previous project there was always a struggle between Server-Side-Rendering (SSR) and Client-Side-Rendering. Most of the time you want to rely on the tools you can control, so the Server, as you never know what the client is using...
+If it comes to multy-lingual apps, there is a lot of client-side solutions for translateing, ... but it is always a bit client side heavy solution, or even rebundling if you think of the Angular solution. I also think that language related things should never ever be reflected inside javaScript files,... only in templates.
+With CircularJS using the HTML files as templates you can actually all you UI-components, forms, everything ... being translated by the backend or just served a pre-translated templates instead.
+With JS-template based frameworks, this is also not that trivial. Getting translated templates is no efford at all.
