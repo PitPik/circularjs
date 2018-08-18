@@ -1,4 +1,4 @@
-require = window.require || {
+require.config({
 	lookaheadMap: {
 		'app-dashboard': ['circular', 'data-provider', 'app-search'],
 		'app-search': ['circular', 'data-provider'],
@@ -13,4 +13,4 @@ require = window.require || {
 		'app-heroes': 'modules/heroes/js/heroes',
 		'app-detail': 'modules/detail/js/detail'
 	}
-};
+});
