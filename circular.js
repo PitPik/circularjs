@@ -134,6 +134,8 @@ Circular.prototype.component = function(name, parameters) {
 		data.template ? new Blick(template || data.template, {
 			doEscape: false,
 			helpers: parameters.helpers || options.helpers || {}, // TODO
+			decorators: parameters.decorators || options.decorators || {}, // TODO
+			attributes: parameters.attributes || options.attributes || {}, // TODO
 			/////////////////////////////////////////////////
 			registerProperty: function(name, fn, data, active) {
 				var item = _inst.collector[data['cr-id']] =

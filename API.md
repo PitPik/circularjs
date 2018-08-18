@@ -86,8 +86,9 @@ new Circular({
     hash: '#', // default delimiter for Router
 
     extraModel: {} || [], // Schnauzer templates will use this model(s) for lookup
-    Template: Schnauzer, // Templating engine to be used in Circular
     helpers: {}, // Schnauzer helpers -> functions
+    decorators: {}, // Schnauzer decorators -> functions
+    attributes: {}, // Blick attributes -> functions called on defined attributes
 
     enrichModelCallback: () => {},
     listeners: Array [String 'modelItem', '*', ...], // component's subscribe gets called if defined vars are changed
@@ -107,16 +108,18 @@ Circular.component(name: 'String', parameters: Object {
     componentElement: Object DOMElement, // in case there is no cr-component
     componentWrapper: Object DOMElement, // in case there is no cr-component and we know it's wrapped
     mountSelector: Object DOMElement, // selector of containers where children will be rendered into
-    
+
     onBeforeInit: function(component), // one time callback on before first init of component
     onInit: function(component), // one time callback on first init of component
 
     template: Object SchnauzerTemplate || String 'name',
     helpers: Object {String 'name': function()}, // Schnauzer helpers -> functions
+    decorators: {}, // Schnauzer decorators -> functions
+    attributes: {}, // Blick attributes -> functions called on defined attributes
 
     preRecursionCallback: function()
     enrichModelCallback: function(),
-    
+
     storage: {
         name: '', // name of storage
         category: '', // optional to structure storage model
@@ -379,10 +382,10 @@ This way you can develop widget like modules and easily append it to the main ap
 ```
 renderModule({
     data: Data getting sent to the required module (aside with path)
-    name: 
-    previousName: 
+    name:
+    previousName:
     path: String: path to the modules's HTML file
-    container: 
+    container:
     require: String:  module name
     init: Boolean: auto-start required module (also if undefined)
 })

@@ -1523,6 +1523,8 @@
         _inst.template = template && template.version ? template : templateCache[name] ? templateCache[name] : data.template ? new Blick(template || data.template, {
             doEscape: false,
             helpers: parameters.helpers || options.helpers || {},
+            decorators: parameters.decorators || options.decorators || {},
+            attributes: parameters.attributes || options.attributes || {},
             registerProperty: function(name, fn, data, active) {
                 var item = _inst.collector[data["cr-id"]] = _inst.collector[data["cr-id"]] || {};
                 item[name] = item[name] || [];
