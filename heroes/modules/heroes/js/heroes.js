@@ -21,16 +21,6 @@ function(Circular, heroService) {
         });
     }
 
-    function init(data, path) {
-        heroService.getHeroes()
-        .then(function(model) {
-            heroList = circular.component('heroes-list', {
-                model: model,
-                eventListeners: { deleteHero: deleteHero }
-            });
-        });
-    }
-
     function deleteHero(e, element, item) {
         heroService.deleteHero(item.id)
         .then(function() {
@@ -38,5 +28,13 @@ function(Circular, heroService) {
         });
     }
 
-    return init;
+    return function init(data, path) {
+        heroService.getHeroes()
+        .then(function(model) {
+            heroList = circular.component('heroes-list', {
+                model: model,
+                eventListeners: { deleteHero: deleteHero }
+            });
+        });
+    };
 });
