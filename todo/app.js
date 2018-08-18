@@ -12,10 +12,10 @@ require(['circular'], Circular => {
   const list = circular.component('list', {
     model: storage.fetch(STORAGE_KEY),
     listeners: ['*'],
-    subscribe: (property, item) => {
-      property === 'text' ? item.editable = '' :
+    subscribe: (propertyName, item) => {
+      propertyName === 'text' ? item.editable = '' :
         Circular.Toolbox.lazy(updateUI, list, app.model[0]);
-      if (property !== 'editable')
+      if (propertyName !== 'editable')
         storage.saveLazy(list.model, STORAGE_KEY);
     },
     eventListeners: {
