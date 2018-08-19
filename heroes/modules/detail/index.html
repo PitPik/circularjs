@@ -18,7 +18,7 @@
 				<h2><span cr-view="name">{{%name}}</span> Details</h2>
 				<div><span>id: </span>{{#if id}}{{id}}{{else}}--{{/if}}</div>
 				<label>name:
-			    	<input cr-event="keyup: updateName" placeholder="name" value="{{name}}" />
+			    	<input cr-event="input: updateName" placeholder="name" value="{{name}}" />
 			    </label>
 				<button cr-event="click: goBack">go back</button>
 	  			<button cr-event="click: save" disabled="{{%name}}">save</button>
