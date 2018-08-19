@@ -1,0 +1,16 @@
+td {
+	padding: 8px;
+	text-align: center;
+	border: 1px solid #aaa;
+}
+
+label {
+	display: block;
+}
+.label {
+	display: inline-block;
+	width: 70px;
+}
+input {
+	width: 300px;
+}

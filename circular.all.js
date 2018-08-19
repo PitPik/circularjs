@@ -778,6 +778,7 @@
             fn: fn,
             text: text,
             value: value,
+            parent: part.parent,
             type: part.isInline && _this.decorators[name] && "decorator" || part.partial && _this.partials[name] && "partial" || _this.helpers[name] && "helper" || type || ""
         }, data, part, fn) : text + value;
     }
@@ -847,11 +848,11 @@
             return splitter;
         }).split(splitter);
         extType = getVar(extType).name;
-        return function fastReplace(data) {
-            return replace(_this, data, text, sections, extType, parts);
+        return function fastReplace(data, parent) {
+            return replace(_this, data, text, sections, extType, parts, parent);
         };
     }
-    function replace(_this, data, text, sections, extType, parts) {
+    function replace(_this, data, text, sections, extType, parts, parent) {
         var out = "";
         var _out = "";
         var _fn = null;
@@ -890,6 +891,7 @@
                 newData.extra = [ data.extra[0] ];
                 _out = part.partial(newData);
             } else {
+                part.parent = parent;
                 _fn = _replace(_this, part);
                 _out = _fn(data);
             }
@@ -898,8 +900,8 @@
         return out;
     }
     function _replace(_this, part) {
-        return function(data) {
-            var out = findData(data, part.name, part.keys, part.depth);
+        return function(data, alternative) {
+            var out = findData(data, part.name, alternative || part.keys, part.depth);
             var fn = !part.strict && _this.helpers[part.name] || isFunction(out) && out;
             out = fn ? apply(_this, fn, part.name, part.vars, data, part) : out && (part.isUnescaped ? out : escapeHtml(out, _this));
             return out;
@@ -945,7 +947,7 @@
             for (var n = 0, l = _data.length; n < l; n++) {
                 data.path[0] = _isArray ? _data[n] : objData[_data[n]];
                 data.helpers[0] = createHelper(data.path[0], _isArray ? n : _data[n], vars.helpers, l, n);
-                out = out + fn[0](data);
+                out = out + fn[0](data, name.name + "." + n);
             }
             data.path.shift();
             data.helpers.shift();
@@ -1044,7 +1046,7 @@
     }
     function renderHook(data) {
         var index = dump.length;
-        if (!data.fn || !data.name || !data.isActive || data.partial || data.type === "decorator" || data.type === "helper" || data.name.charAt(0) === "@" || data.name === "." || data.name === "this") {
+        if (!data.fn || !data.name || !data.isActive || data.partial || data.type === "decorator" || data.type === "helper" || data.name.charAt(0) === "@") {
             return data.text + data.value;
         }
         data.isSection = checkSection(data);
@@ -1126,8 +1128,8 @@
                 window.console && console.warn("There might be an error in the SCHNAUZER template");
             } else if (foundNode.ownerElement) {
                 part.replacer = function(elm, ownerElement, name, search, orig, item) {
-                    return function updateAttribute() {
-                        var value = item.fn(item.data);
+                    return function updateAttribute(parent) {
+                        var value = item.fn(item.data, parent);
                         if (value === undefined) value = "";
                         if (options.attributes[name]) {
                             elm = null;
@@ -1137,18 +1139,18 @@
                         }
                     };
                 }(foundNode, foundNode.ownerElement, foundNode.name, search, foundNode.textContent, part);
-                registerProperty(part.name, part.replacer, part.data.path[0], part.isActive, foundNode);
+                registerProperty(part.name, part.replacer, part.data.path[0], part.isActive, part.parent, foundNode);
                 openSections = checkSectionChild(foundNode.ownerElement.previousSibling, part, openSections, options);
                 part.replacer();
             } else if (!checkSection(part, foundNode)) {
                 foundNode = textNodeSplitter(foundNode, first, last);
                 part.replacer = function(elm, item) {
-                    return function updateTextNode() {
-                        elm.textContent = item.fn(item.data);
+                    return function updateTextNode(parent) {
+                        elm.textContent = item.fn(item.data, parent);
                     };
                 }(foundNode, part);
                 foundNode.textContent = part.value;
-                registerProperty(part.name, part.replacer, part.data.path[0], part.isActive, foundNode);
+                registerProperty(part.name, part.replacer, part.data.path[0], part.isActive, part.parent, foundNode);
                 openSections = checkSectionChild(foundNode, part, openSections, options);
             } else {
                 openSections = checkSectionChild(foundNode, part, openSections, options);
@@ -1162,7 +1164,7 @@
                 foundNode = foundNode.splitText(foundNode.textContent.indexOf(first));
                 foundNode.textContent = foundNode.textContent.replace(first, "");
                 part.replacer = function(elm, item) {
-                    return function updateSection() {
+                    return function updateSection(parent) {
                         while (item.lastNode.previousSibling && item.lastNode.previousSibling !== elm) {
                             elm.parentNode.removeChild(item.lastNode.previousSibling);
                         }
@@ -1170,7 +1172,7 @@
                             item.children[n].unregister();
                         }
                         elm.textContent = "";
-                        newMemory = resolveReferences(_this, dump, item.fn(item.data), elm, fragment);
+                        newMemory = resolveReferences(_this, dump, item.fn(item.data, parent), elm, fragment);
                         item.children = clearMemory(newMemory);
                         var collector = [];
                         var node = item.lastNode;
@@ -1182,7 +1184,7 @@
                         return collector;
                     };
                 }(foundNode, part);
-                registerProperty(part.name, part.replacer, part.data.path[0], part.isActive, foundNode);
+                registerProperty(part.name, part.replacer, part.data.path[0], part.isActive, part.parent, foundNode);
             }
         }
         out = render(container, helperContainer, fragment);
@@ -1525,13 +1527,15 @@
             helpers: parameters.helpers || options.helpers || {},
             decorators: parameters.decorators || options.decorators || {},
             attributes: parameters.attributes || options.attributes || {},
-            registerProperty: function(name, fn, data, active) {
+            registerProperty: function(name, fn, data, active, parent) {
                 var item = _inst.collector[data["cr-id"]] = _inst.collector[data["cr-id"]] || {};
-                item[name] = item[name] || [];
-                item[name].push({
+                var _name = parent || name;
+                item[_name] = item[_name] || [];
+                item[_name].push({
                     item: data,
                     fn: fn,
-                    forceUpdate: active === 2
+                    forceUpdate: active === 2,
+                    parent: parent && parent.split(".")
                 });
             }
         }) : null;
@@ -1593,7 +1597,7 @@
                 if (cItem) {
                     for (var n = cItem.length, elm; n--; ) {
                         if (cItem[n].forceUpdate || value !== oldValue) {
-                            elm = cItem[n].fn();
+                            elm = cItem[n].fn(cItem[n].parent);
                             if (_inst.controller && elm) for (var m = elm.length; m--; ) {
                                 _inst.controller.getEventListeners(elm[m], item[options.events], component, idProperty, true);
                             }

@@ -257,6 +257,7 @@ function render(_this, part, data, fn, text, value, type) {
     fn: fn,
     text: text,
     value: value,
+    parent: part.parent,
     // keys: part,
     type: (part.isInline && _this.decorators[name] && 'decorator') ||
       (part.partial && _this.partials[name] && 'partial') ||
@@ -339,12 +340,12 @@ function inline(_this, text, sections, extType) {
   }).split(splitter);
   extType = getVar(extType).name; // remove %
 
-  return function fastReplace(data) {
-    return replace(_this, data, text, sections, extType, parts);
+  return function fastReplace(data, parent) {
+    return replace(_this, data, text, sections, extType, parts, parent);
   };
 }
 
-function replace(_this, data, text, sections, extType, parts) {
+function replace(_this, data, text, sections, extType, parts, parent) {
   var out = '';
   var _out = '';
   var _fn = null;
@@ -386,6 +387,7 @@ function replace(_this, data, text, sections, extType, parts) {
       newData.extra = [data.extra[0]];
       _out = part.partial(newData);
     } else { // helpers and regular stuff
+      part.parent = parent;
       _fn = _replace(_this, part);
       _out = _fn(data);
     }
@@ -396,8 +398,8 @@ function replace(_this, data, text, sections, extType, parts) {
 }
 
 function _replace(_this, part) {
-  return function(data) {
-    var out = findData(data, part.name, part.keys, part.depth);
+  return function(data, alternative) {
+    var out = findData(data, part.name, alternative || part.keys, part.depth);
     var fn = !part.strict && _this.helpers[part.name] || isFunction(out) && out;
 
     out = fn ? apply(_this, fn, part.name, part.vars, data, part) :
@@ -451,7 +453,7 @@ function loop(_this, data, fn, name, vars, isNot, type) {
     for (var n = 0, l = _data.length; n < l; n++) {
       data.path[0] = _isArray ? _data[n] : objData[_data[n]];
       data.helpers[0] = createHelper(data.path[0], _isArray ? n : _data[n], vars.helpers, l, n);
-      out = out + fn[0](data);
+      out = out + fn[0](data, name.name + '.' + n);
     }
     data.path.shift(); // jump back out of scope-level
     data.helpers.shift();

@@ -82,7 +82,7 @@ function renderHook(data) {
 
   if (!data.fn || !data.name || !data.isActive || data.partial ||
       data.type === 'decorator' || data.type === 'helper' ||
-      data.name.charAt(0) === '@' || data.name === '.' || data.name === 'this') {
+      data.name.charAt(0) === '@') {
     return data.text + data.value;
   }
   data.isSection = checkSection(data);
@@ -168,8 +168,8 @@ function resolveReferences(_this, memory, html, container, fragment) {
       window.console && console.warn('There might be an error in the SCHNAUZER template');
     } else if (foundNode.ownerElement) { // attribute
       part.replacer = (function(elm, ownerElement, name, search, orig, item) { // TODO: no part.replacer...
-        return function updateAttribute() { // TODO: respect attributes' behaviours
-          var value = item.fn(item.data);
+        return function updateAttribute(parent) { // TODO: respect attributes' behaviours
+          var value = item.fn(item.data, parent);
           if (value === undefined) value = '';
           if (options.attributes[name]) {
             elm = null;
@@ -179,19 +179,19 @@ function resolveReferences(_this, memory, html, container, fragment) {
           }
         }
       })(foundNode, foundNode.ownerElement, foundNode.name, search, foundNode.textContent, part);
-      registerProperty(part.name, part.replacer, part.data.path[0], part.isActive, foundNode);
+      registerProperty(part.name, part.replacer, part.data.path[0], part.isActive, part.parent, foundNode);
       openSections = checkSectionChild(foundNode.ownerElement.previousSibling,
           part, openSections, options);
       part.replacer();
     } else if (!checkSection(part, foundNode)) { // inline var - inline section
       foundNode = textNodeSplitter(foundNode, first, last);
       part.replacer = (function(elm, item) {
-        return function updateTextNode() {
-          elm.textContent = item.fn(item.data);
+        return function updateTextNode(parent) {
+          elm.textContent = item.fn(item.data, parent);
         }
       })(foundNode, part);
       foundNode.textContent = part.value;
-      registerProperty(part.name, part.replacer, part.data.path[0], part.isActive, foundNode);
+      registerProperty(part.name, part.replacer, part.data.path[0], part.isActive, part.parent, foundNode);
       openSections = checkSectionChild(foundNode, part, openSections, options);
     } else { // section
       openSections = checkSectionChild(foundNode, part, openSections, options);
@@ -202,7 +202,7 @@ function resolveReferences(_this, memory, html, container, fragment) {
       foundNode = foundNode.splitText(foundNode.textContent.indexOf(first));
       foundNode.textContent = foundNode.textContent.replace(first, '');
       part.replacer = (function(elm, item) {
-        return function updateSection() {
+        return function updateSection(parent) {
           while (item.lastNode.previousSibling && item.lastNode.previousSibling !== elm) {
             elm.parentNode.removeChild(item.lastNode.previousSibling);
           }
@@ -210,7 +210,7 @@ function resolveReferences(_this, memory, html, container, fragment) {
             item.children[n].unregister();
           }
           elm.textContent = '';
-          newMemory = resolveReferences(_this, dump, item.fn(item.data), elm, fragment);
+          newMemory = resolveReferences(_this, dump, item.fn(item.data, parent), elm, fragment);
           item.children = clearMemory(newMemory); // possible new children to be deleted...
 
           var collector = [];
@@ -223,7 +223,7 @@ function resolveReferences(_this, memory, html, container, fragment) {
           return collector;
         }
       })(foundNode, part);
-      registerProperty(part.name, part.replacer, part.data.path[0], part.isActive, foundNode);
+      registerProperty(part.name, part.replacer, part.data.path[0], part.isActive, part.parent, foundNode);
     }
   }
 

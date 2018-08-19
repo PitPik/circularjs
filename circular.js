@@ -137,15 +137,17 @@ Circular.prototype.component = function(name, parameters) {
 			decorators: parameters.decorators || options.decorators || {}, // TODO
 			attributes: parameters.attributes || options.attributes || {}, // TODO
 			/////////////////////////////////////////////////
-			registerProperty: function(name, fn, data, active) {
+			registerProperty: function(name, fn, data, active, parent) {
 				var item = _inst.collector[data['cr-id']] =
 						_inst.collector[data['cr-id']] || {};
+				var _name = parent || name;
 
-				item[name] = item[name] || [];
-				item[name].push({
+				item[_name] = item[_name] || [];
+				item[_name].push({
 					item: data,
 					fn: fn,
 					forceUpdate: active === 2,
+					parent: parent && parent.split('.'),
 				});
 			}
 		}) : null;
@@ -250,7 +252,7 @@ Circular.prototype.component = function(name, parameters) {
 			if (cItem) {
 				for (var n = cItem.length, elm; n--; ) {
 					if (cItem[n].forceUpdate || value !== oldValue) {
-						elm = cItem[n].fn();
+						elm = cItem[n].fn(cItem[n].parent);
 						if (_inst.controller && elm) for (var m = elm.length; m--; ) {
 							_inst.controller.getEventListeners(elm[m], item[options.events],
 								component, idProperty, true);
