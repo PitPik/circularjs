@@ -5,38 +5,35 @@ require(['circular'], function(Circular) {
     listeners: ['items.*']
   });
 
-  var raster = circular.component('raster-slider', {
-    model: [{ level: 10 }],
+  var sliders = circular.component('sliders', {
+    model: [{ levelSpeed: 10, levelRaster: 10 }],
     listeners: ['*'],
     subscribe: function(propName, item, value) {
-      app.reset(initModel(value, []));
-      item.views.display.textContent =
-        value + ' x ' + value + ' = ' + (value * value) + ' items';
-    },
-    eventListeners: {
-      change: function(e, elm, item) {
-        item.level = elm.value;
-      },
-    },
-  });
-
-  var speed = circular.component('speed-slider', {
-    model: [{ level: 800 }],
-    listeners: ['*'],
-    subscribe: function(propName, item, value) {
+      if (propName === 'levelRaster') {
+        app.reset(initModel(value, []));
+        item.views.displayRaster.textContent =
+          value + ' x ' + value + ' = ' + (value * value) + ' items';
+        item.levelSpeed = item.levelSpeed;
+      } else {
+        item.views.displayRefresh.textContent =
+          value + 'ms (' + (Math.round(1000 / value * 100) / 100) + '/s): ' +
+          (Math.round(item.levelRaster * item.levelRaster *
+          (1000 / value)) + '').replace(/(\d+)(\d{3})$/g, "$1.$2") + ' updates/s';
+      }
       update(item);
-      item.views.display.textContent =
-        value + 'ms (' + (Math.round(1000 / value * 100) / 100) + '/s)';
     },
     eventListeners: {
-      change: function(e, elm, item) {
-        item.level = elm.value;
+      changeRaster: function(e, elm, item) {
+        item.levelRaster = elm.value;
+      },
+      changeSpeed: function(e, elm, item) {
+        item.levelSpeed = elm.value;
       },
     },
     onInit: function(self) {
-      update(self.model[0]);
-      raster.model[0].level = raster.model[0].level;
-      self.model[0].level = self.model[0].level;
+      // update(self.model[0]);
+      self.model[0].levelRaster = 10;
+      self.model[0].levelSpeed = 400;
     }
   });
 
@@ -53,14 +50,14 @@ require(['circular'], function(Circular) {
   function update(model) {
     clearTimeout(model._timeout);
     model._timeout = setTimeout(function render() {
-      window.requestAnimationFrame(function() {
+      // window.requestAnimationFrame(function() {
         for (var n = 0, m = app.model.length; n < m; n++) {
           for (var x = 0, y = app.model[n].items.length; x < y; x++) {
             app.model[n].items[x] = Math.round(Math.random() * 98);
           }
         }
         update(model);
-      })
-    }, model.level);
+      // })
+    }, model.levelSpeed);
   }
 });

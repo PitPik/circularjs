@@ -2,6 +2,10 @@ td {
 	padding: 8px;
 	text-align: center;
 	border: 1px solid #aaa;
+	cursor: default;
+}
+td:hover {
+	background: #ccc;
 }
 
 label {
