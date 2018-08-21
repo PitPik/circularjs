@@ -1,0 +1,56 @@
+html {
+   width: 100%;
+   height: 100%;
+   overflow: hidden;
+}
+body {
+  background: #fff;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+  margin: 0;
+  padding: 30px;
+}
+
+a {
+  color: #4183c4;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+h1 {
+  border-bottom: 1px solid #ddd;
+  font-size: 2.0em;
+  font-weight: bold;
+  margin: 0 0 15px;
+  padding: 0;
+}
+
+button {
+  font-weight: bold;
+  line-height: 2;
+}
+
+[cr-template-for] {
+  display: none;
+}
+
+[cr-component="sierpinski"] {
+  position: absolute;
+  transform-origin: 0 0;
+  left: 50%;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  background: #eee;
+  transform: scaleX(0.476190476190476) scaleY(0.7) translateZ(0.1px);
+}
+.dot {
+  position: absolute;
+  font: normal 15px sans-serif;
+  text-align: center;
+  cursor: pointer;
+}

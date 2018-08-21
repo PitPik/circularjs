@@ -659,7 +659,7 @@ Controller.prototype = {
 			if (this.installed[key]) continue;
 			Toolbox.addEvent(this.options.appElement, key, function(e) {
 				eventDistributor(e, idProperty, component, that);
-			}, /(?:focus|blur)/.test(key) ? true : false,
+			}, /(?:focus|blur|mouseenter|mouseleave)/.test(key) ? true : false,
 				this.options.instanceID + '_' + component.name);
 			this.installed[key] = true;
 		}

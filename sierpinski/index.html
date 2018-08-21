@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>CircularJS Perf Demo</title>
+  <link rel="stylesheet" type="text/css" href="index.css">
+
+  <script type="text/javascript" src="../circular.min.js"></script>
+</head>
+
+<body>
+  <h1>CircularJS Perf Demo</h1>
+  <p>sierpinski triangle: 1821 elements (60fps)</p>
+
+  <div  cr-component="sierpinski" cr-container>
+    <div cr-template-for="sierpinski" style="{{%style}}">
+      <div cr-component="dots" cr-container>
+        <div cr-template-for="dots">
+          <div cr-mount class="dot" cr-event="mouseenter: mouseenter; mouseleave: mouseleave" style="{{style}}">{{%text}}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="text/javascript" src="app.js"></script>
+</body>
+
+</html>
