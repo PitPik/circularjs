@@ -14,7 +14,7 @@
   <p>sierpinski triangle: 1821 elements (60fps)</p>
 
   <div  cr-component="sierpinski" cr-container>
-    <div cr-template-for="sierpinski" style="{{%style}}">
+    <div cr-template-for="sierpinski" class="root-triangle" style="{{%style}}">
       <div cr-component="dots" cr-container>
         <div cr-template-for="dots">
           <div cr-mount class="dot" cr-event="mouseenter: mouseenter; mouseleave: mouseleave" style="{{style}}">{{%text}}</div>
