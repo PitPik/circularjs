@@ -681,6 +681,7 @@
             value = check(_data[key], crawlObjectUp(_data, keys));
         }
         if (value !== undefined) {
+            if (value && typeof value === "object" && !isArray(value)) return value[key];
             return value;
         }
         for (var n = data.extra.length; n--; ) {
@@ -778,7 +779,7 @@
             fn: fn,
             text: text,
             value: value,
-            parent: part.parent && part.parent + (part.name !== "this" && part.name !== "." ? "." + part.name : ""),
+            parent: part.parent,
             type: part.isInline && _this.decorators[name] && "decorator" || part.partial && _this.partials[name] && "partial" || _this.helpers[name] && "helper" || type || ""
         }, data, part, fn) : text + value;
     }

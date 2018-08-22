@@ -153,6 +153,7 @@ function findData(data, key, keys, pathDepth) {
     value = check(_data[key], crawlObjectUp(_data, keys));
   }
   if (value !== undefined) {
+    if (value && typeof value === 'object' && !isArray(value)) return value[key];
     return value;
   }
   for (var n = data.extra.length; n--; ) {
@@ -257,8 +258,8 @@ function render(_this, part, data, fn, text, value, type) {
     fn: fn,
     text: text,
     value: value,
-    parent: part.parent && part.parent +
-      (part.name !== 'this' && part.name !== '.' ? '.' + part.name : ''),
+    parent: part.parent, // && part.parent +
+      // (part.name !== 'this' && part.name !== '.' ? '.' + part.name : ''),
     // keys: part,
     type: (part.isInline && _this.decorators[name] && 'decorator') ||
       (part.partial && _this.partials[name] && 'partial') ||
