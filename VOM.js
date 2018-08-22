@@ -40,7 +40,9 @@
 			}
 			while (item = _this.options.listeners.shift()) {
 				item = item.split('.');
-				_this.options.listeners[item[0]] = item;
+				_this.options.listeners[item[0]] =
+					_this.options.listeners[item[0]] || [];
+				_this.options.listeners[item[0]].push(item);
 			}
 			rootItem[_this.options.childNodes] = _this.model;
 			reinforceProperty(_this.model, 'root', rootItem);
@@ -230,7 +232,7 @@
 		return model;
 	}
 
-	function enhanceModel(_this, model, ownProperty) {
+	function enhanceModel(_this, model, ownProperty) { // TODO: cleanup
 		var internalProperty = false,
 			listeners = _this.options.listeners,
 
@@ -245,20 +247,24 @@
 			pathArray = [];
 
 		for (var item in model) {
-			lastMapIdx = listeners[item] && listeners[item].length - 1;
+			lastMapIdx = listeners[item] && listeners[item][0] && listeners[item][0].length - 1;
 			if (lastMapIdx) { // loop inside deep
-				wildcardPos = listeners[item].indexOf('*');
-				_model = crawlObject(model, listeners[item],
-					wildcardPos > -1 ? lastMapIdx - wildcardPos + 1 : 1);
-				longItem = listeners[item].join('.');
-				path = longItem.split('*')[1] || '';
-				pathArray = path.split('.').splice(1);
+				for (var n = listeners[item].length, listener; n--; ) {
+					listener = listeners[item][n];
 
-				for (var _item in _model) {
-					__model = !path ? _model : crawlObject(_model[_item], pathArray, 1);
-					_path = longItem.replace('*', _item);
-					__item = pathArray[pathArray.length - 1] || _item;
-					_this.addProperty(__item, [__model, model], _path);
+					wildcardPos = listener.indexOf('*');
+					_model = crawlObject(model, listener,
+						wildcardPos > -1 ? lastMapIdx - wildcardPos + 1 : 1);
+					longItem = listener.join('.');
+					path = longItem.split('*')[1] || '';
+					pathArray = path.split('.').splice(1);
+
+					for (var _item in _model) {
+						__model = !path ? _model : crawlObject(_model[_item], pathArray, 1);
+						_path = longItem.replace('*', _item);
+						__item = pathArray[pathArray.length - 1] || _item;
+						_this.addProperty(__item, [__model, model], _path);
+					}
 				}
 				continue;
 			}

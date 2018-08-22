@@ -257,7 +257,8 @@ function render(_this, part, data, fn, text, value, type) {
     fn: fn,
     text: text,
     value: value,
-    parent: part.parent,
+    parent: part.parent && part.parent +
+      (part.name !== 'this' && part.name !== '.' ? '.' + part.name : ''),
     // keys: part,
     type: (part.isInline && _this.decorators[name] && 'decorator') ||
       (part.partial && _this.partials[name] && 'partial') ||
