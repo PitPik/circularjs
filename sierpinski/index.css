@@ -46,7 +46,6 @@ button {
   width: 10px;
   height: 10px;
   background: #eee;
-  transform: scaleX(0.476190476190476) scaleY(0.7) translateZ(0.1px);
 }
 .dot {
   position: absolute;
