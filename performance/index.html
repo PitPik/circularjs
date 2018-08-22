@@ -29,7 +29,7 @@
     <table cr-container="">
       <script type="text/template" cr-template-for="app">
       <tr>
-        {{#each items}}<td>{{%this}}</td>{{/each}}
+        {{#each items}}<td title="initial value: {{.}}">{{%this}}</td>{{/each}}
       </tr>
       </script>
     </table>
