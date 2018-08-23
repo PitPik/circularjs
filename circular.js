@@ -138,16 +138,22 @@ Circular.prototype.component = function(name, parameters) {
 			attributes: parameters.attributes || options.attributes || {}, // TODO
 			/////////////////////////////////////////////////
 			registerProperty: function(name, fn, data, active, parent) {
+				var noGetter = parent && data[parent[0]] &&
+					!Object.getOwnPropertyDescriptor(data[parent[0]], '0').get;
+				var _parent = parent ? parent.slice(0) : parent;
+				parent && noGetter &&  _parent.push(name);
+
 				var item = _inst.collector[data['cr-id']] =
 						_inst.collector[data['cr-id']] || {};
-				var _name = parent || name;
+				var _name = _parent && _parent.join('.') || name;
 
 				item[_name] = item[_name] || [];
 				item[_name].push({
 					item: data,
 					fn: fn,
 					forceUpdate: active === 2,
-					parent: parent && parent.split('.'),
+					parent: parent && (name !== 'this' && name !== '.' ?
+						parent.concat(name) : parent), // TODO: no concat
 				});
 			}
 		}) : null;
@@ -252,7 +258,7 @@ Circular.prototype.component = function(name, parameters) {
 			if (cItem) {
 				for (var n = cItem.length, elm; n--; ) {
 					if (cItem[n].forceUpdate || value !== oldValue) {
-						elm = cItem[n].fn(cItem[n].parent);
+						elm = cItem[n].fn(cItem[n].parent); // TODO: pass to fn()?
 						if (_inst.controller && elm) for (var m = elm.length; m--; ) {
 							_inst.controller.getEventListeners(elm[m], item[options.events],
 								component, idProperty, true);

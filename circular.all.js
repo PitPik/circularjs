@@ -681,7 +681,6 @@
             value = check(_data[key], crawlObjectUp(_data, keys));
         }
         if (value !== undefined) {
-            if (value && typeof value === "object" && !isArray(value)) return value[key];
             return value;
         }
         for (var n = data.extra.length; n--; ) {
@@ -813,11 +812,12 @@
             helpers: helpers
         };
     }
-    function createHelper(value, name, helperData, len, n) {
+    function createHelper(value, name, parent, helperData, len, n) {
         var helpers = len ? {
             "@index": n,
             "@last": n === len - 1,
-            "@first": n === 0
+            "@first": n === 0,
+            _parent: parent && [ parent.name, n ]
         } : {};
         helpers["@key"] = name;
         helpers["."] = helpers["this"] = value;
@@ -849,11 +849,11 @@
             return splitter;
         }).split(splitter);
         extType = getVar(extType).name;
-        return function fastReplace(data, parent) {
-            return replace(_this, data, text, sections, extType, parts, parent);
+        return function fastReplace(data) {
+            return replace(_this, data, text, sections, extType, parts);
         };
     }
-    function replace(_this, data, text, sections, extType, parts, parent) {
+    function replace(_this, data, text, sections, extType, parts) {
         var out = "";
         var _out = "";
         var _fn = null;
@@ -892,7 +892,7 @@
                 newData.extra = [ data.extra[0] ];
                 _out = part.partial(newData);
             } else {
-                part.parent = parent;
+                part.parent = crawlObjectUp(data.helpers, [ 0, "_parent" ]);
                 _fn = _replace(_this, part);
                 _out = _fn(data);
             }
@@ -901,8 +901,8 @@
         return out;
     }
     function _replace(_this, part) {
-        return function(data, alternative) {
-            var out = findData(data, part.name, alternative || part.keys, part.depth);
+        return function(data, keys) {
+            var out = findData(data, part.name, keys || part.keys, part.depth);
             var fn = !part.strict && _this.helpers[part.name] || isFunction(out) && out;
             out = fn ? apply(_this, fn, part.name, part.vars, data, part) : out && (part.isUnescaped ? out : escapeHtml(out, _this));
             return out;
@@ -924,7 +924,7 @@
         var objData = type === "each" && !_isArray && typeof _data === "object" && _data;
         var out = "";
         if (helper) {
-            data.helpers[0] = createHelper(helperOut, name.name, vars.helpers);
+            data.helpers[0] = createHelper(helperOut, name.name, undefined, vars.helpers);
             if (type === "if") {
                 return helperOut ? fn[0](data) : fn[1] && fn[1](data);
             } else if (type === "unless") {
@@ -947,15 +947,15 @@
             data.helpers.unshift({});
             for (var n = 0, l = _data.length; n < l; n++) {
                 data.path[0] = _isArray ? _data[n] : objData[_data[n]];
-                data.helpers[0] = createHelper(data.path[0], _isArray ? n : _data[n], vars.helpers, l, n);
-                out = out + fn[0](data, name.name + "." + n);
+                data.helpers[0] = createHelper(data.path[0], _isArray ? n : _data[n], name, vars.helpers, l, n);
+                out = out + fn[0](data);
             }
             data.path.shift();
             data.helpers.shift();
             return out;
         }
         if (isNot && !_data || !isNot && _data) {
-            return helper && typeof _data === "string" ? _data : fn[0](type === "unless" || type === "if" ? data : getSource(data, undefined, _data, createHelper(_data, name.name, vars.helpers)));
+            return helper && typeof _data === "string" ? _data : fn[0](type === "unless" || type === "if" ? data : getSource(data, undefined, _data, createHelper(_data, name.name, undefined, vars.helpers)));
         }
         return fn[1] && fn[1](data);
     }
@@ -1014,6 +1014,10 @@
                 _this.options[option] = options[option];
             }
         }
+        var registerProperty = _this.options.registerProperty;
+        _this.options.registerProperty = function(part, foundNode) {
+            registerProperty(part.name, part.replacer, part.data.path[0], part.isActive, part.parent, foundNode);
+        };
         options.render = renderHook;
         _this.schnauzer = new Schnauzer(template, options);
     }, dump = [], dummy = function() {}, disableAttribute = function(element, name, value) {
@@ -1129,8 +1133,8 @@
                 window.console && console.warn("There might be an error in the SCHNAUZER template");
             } else if (foundNode.ownerElement) {
                 part.replacer = function(elm, ownerElement, name, search, orig, item) {
-                    return function updateAttribute(parent) {
-                        var value = item.fn(item.data, parent);
+                    return function updateAttribute(keys, _value) {
+                        var value = _value || item.fn(item.data, keys);
                         if (value === undefined) value = "";
                         if (options.attributes[name]) {
                             elm = null;
@@ -1140,18 +1144,18 @@
                         }
                     };
                 }(foundNode, foundNode.ownerElement, foundNode.name, search, foundNode.textContent, part);
-                registerProperty(part.name, part.replacer, part.data.path[0], part.isActive, part.parent, foundNode);
+                registerProperty(part, foundNode);
                 openSections = checkSectionChild(foundNode.ownerElement.previousSibling, part, openSections, options);
-                part.replacer();
+                part.replacer(null, part.value);
             } else if (!checkSection(part, foundNode)) {
                 foundNode = textNodeSplitter(foundNode, first, last);
                 part.replacer = function(elm, item) {
-                    return function updateTextNode(parent) {
-                        elm.textContent = item.fn(item.data, parent);
+                    return function updateTextNode(keys) {
+                        elm.textContent = item.fn(item.data, keys);
                     };
                 }(foundNode, part);
                 foundNode.textContent = part.value;
-                registerProperty(part.name, part.replacer, part.data.path[0], part.isActive, part.parent, foundNode);
+                registerProperty(part, foundNode);
                 openSections = checkSectionChild(foundNode, part, openSections, options);
             } else {
                 openSections = checkSectionChild(foundNode, part, openSections, options);
@@ -1165,7 +1169,7 @@
                 foundNode = foundNode.splitText(foundNode.textContent.indexOf(first));
                 foundNode.textContent = foundNode.textContent.replace(first, "");
                 part.replacer = function(elm, item) {
-                    return function updateSection(parent) {
+                    return function updateSection(keys) {
                         while (item.lastNode.previousSibling && item.lastNode.previousSibling !== elm) {
                             elm.parentNode.removeChild(item.lastNode.previousSibling);
                         }
@@ -1173,7 +1177,7 @@
                             item.children[n].unregister();
                         }
                         elm.textContent = "";
-                        newMemory = resolveReferences(_this, dump, item.fn(item.data, parent), elm, fragment);
+                        newMemory = resolveReferences(_this, dump, item.fn(item.data, keys), elm, fragment);
                         item.children = clearMemory(newMemory);
                         var collector = [];
                         var node = item.lastNode;
@@ -1185,7 +1189,7 @@
                         return collector;
                     };
                 }(foundNode, part);
-                registerProperty(part.name, part.replacer, part.data.path[0], part.isActive, part.parent, foundNode);
+                registerProperty(part, foundNode);
             }
         }
         out = render(container, helperContainer, fragment);
@@ -1533,14 +1537,17 @@
             decorators: parameters.decorators || options.decorators || {},
             attributes: parameters.attributes || options.attributes || {},
             registerProperty: function(name, fn, data, active, parent) {
+                var noGetter = parent && data[parent[0]] && !Object.getOwnPropertyDescriptor(data[parent[0]], "0").get;
+                var _parent = parent ? parent.slice(0) : parent;
+                parent && noGetter && _parent.push(name);
                 var item = _inst.collector[data["cr-id"]] = _inst.collector[data["cr-id"]] || {};
-                var _name = parent || name;
+                var _name = _parent && _parent.join(".") || name;
                 item[_name] = item[_name] || [];
                 item[_name].push({
                     item: data,
                     fn: fn,
                     forceUpdate: active === 2,
-                    parent: parent && parent.split(".")
+                    parent: parent && (name !== "this" && name !== "." ? parent.concat(name) : parent)
                 });
             }
         }) : null;

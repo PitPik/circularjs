@@ -153,7 +153,6 @@ function findData(data, key, keys, pathDepth) {
     value = check(_data[key], crawlObjectUp(_data, keys));
   }
   if (value !== undefined) {
-    if (value && typeof value === 'object' && !isArray(value)) return value[key];
     return value;
   }
   for (var n = data.extra.length; n--; ) {
@@ -258,9 +257,7 @@ function render(_this, part, data, fn, text, value, type) {
     fn: fn,
     text: text,
     value: value,
-    parent: part.parent, // && part.parent +
-      // (part.name !== 'this' && part.name !== '.' ? '.' + part.name : ''),
-    // keys: part,
+    parent: part.parent,
     type: (part.isInline && _this.decorators[name] && 'decorator') ||
       (part.partial && _this.partials[name] && 'partial') ||
       (_this.helpers[name] && 'helper') || type || '',
@@ -300,11 +297,12 @@ function splitVars(_this, vars, _data, unEscaped, char0) {
   };
 }
 
-function createHelper(value, name, helperData, len, n) {
+function createHelper(value, name, parent, helperData, len, n) {
   var helpers = len ? {
     '@index': n,
     '@last': n === len - 1,
     '@first': n === 0,
+    '_parent': parent && [parent.name, n],
   } : {};
 
   helpers['@key'] = name;
@@ -342,12 +340,12 @@ function inline(_this, text, sections, extType) {
   }).split(splitter);
   extType = getVar(extType).name; // remove %
 
-  return function fastReplace(data, parent) {
-    return replace(_this, data, text, sections, extType, parts, parent);
+  return function fastReplace(data) {
+    return replace(_this, data, text, sections, extType, parts);
   };
 }
 
-function replace(_this, data, text, sections, extType, parts, parent) {
+function replace(_this, data, text, sections, extType, parts) {
   var out = '';
   var _out = '';
   var _fn = null;
@@ -389,7 +387,7 @@ function replace(_this, data, text, sections, extType, parts, parent) {
       newData.extra = [data.extra[0]];
       _out = part.partial(newData);
     } else { // helpers and regular stuff
-      part.parent = parent;
+      part.parent = crawlObjectUp(data.helpers, [0, '_parent']);
       _fn = _replace(_this, part);
       _out = _fn(data);
     }
@@ -400,8 +398,8 @@ function replace(_this, data, text, sections, extType, parts, parent) {
 }
 
 function _replace(_this, part) {
-  return function(data, alternative) {
-    var out = findData(data, part.name, alternative || part.keys, part.depth);
+  return function(data, keys) {
+    var out = findData(data, part.name, keys || part.keys, part.depth);
     var fn = !part.strict && _this.helpers[part.name] || isFunction(out) && out;
 
     out = fn ? apply(_this, fn, part.name, part.vars, data, part) :
@@ -431,7 +429,7 @@ function loop(_this, data, fn, name, vars, isNot, type) {
   var out = '';
 
   if (helper) { // helpers or inline functions
-    data.helpers[0] = createHelper(helperOut, name.name, vars.helpers);
+    data.helpers[0] = createHelper(helperOut, name.name, undefined, vars.helpers);
     if (type === 'if') {
       return helperOut ? fn[0](data) : fn[1] && fn[1](data);
     } else if (type === 'unless') {
@@ -454,8 +452,8 @@ function loop(_this, data, fn, name, vars, isNot, type) {
     data.helpers.unshift({});
     for (var n = 0, l = _data.length; n < l; n++) {
       data.path[0] = _isArray ? _data[n] : objData[_data[n]];
-      data.helpers[0] = createHelper(data.path[0], _isArray ? n : _data[n], vars.helpers, l, n);
-      out = out + fn[0](data, name.name + '.' + n);
+      data.helpers[0] = createHelper(data.path[0], _isArray ? n : _data[n], name, vars.helpers, l, n);
+      out = out + fn[0](data);
     }
     data.path.shift(); // jump back out of scope-level
     data.helpers.shift();
@@ -464,7 +462,7 @@ function loop(_this, data, fn, name, vars, isNot, type) {
   if (isNot && !_data || !isNot && _data) { // regular replace
     return helper && typeof _data === 'string' ? _data : // comes from helper
       fn[0](type === 'unless' || type === 'if' ? data :
-        getSource(data, undefined, _data, createHelper(_data, name.name, vars.helpers)));
+        getSource(data, undefined, _data, createHelper(_data, name.name, undefined, vars.helpers)));
   }
 
   return fn[1] && fn[1](data); // else
