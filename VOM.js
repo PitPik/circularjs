@@ -30,21 +30,22 @@
 		},
 		init = function(_this, options) {
 			var item = '',
-				rootItem = {};
+				rootItem = {},
+				listeners = [],
+				_options = _this.options;
 
 			NODES.push({}); // new access map for current instance
 			reinforceProperty(_this, 'id', NODES.length - 1);
 
 			for (var option in options) { // extend options
-				_this.options[option] = options[option];
+				_options[option] = options[option];
 			}
-			while (item = _this.options.listeners.shift()) {
+			listeners = _options.listeners;
+			while (item = listeners.shift()) {
 				item = item.split('.');
-				_this.options.listeners[item[0]] =
-					_this.options.listeners[item[0]] || [];
-				_this.options.listeners[item[0]].push(item);
+				(listeners[item[0]] = listeners[item[0]] || []).push(item);
 			}
-			rootItem[_this.options.childNodes] = _this.model;
+			rootItem[_options.childNodes] = _this.model;
 			reinforceProperty(_this.model, 'root', rootItem);
 			enrichModel(_this.model, _this);
 		},
@@ -76,27 +77,29 @@
 					crawlObject(NODES[this.id][id], (keys[0] ?
 						keys : (keys = hasProperty && property.split('.'))));
 				if ((hasValue && propValue === value) ||
-					(!hasValue && undefined !== propValue) ||
-					(!hasValue && !hasProperty)) {
-						result.push(NODES[this.id][id]);
+  					(!hasValue && undefined !== propValue) ||
+  					(!hasValue && !hasProperty)) {
+					result.push(NODES[this.id][id]);
 				}
 			}
 			return result;
 		},
 		appendChild: function(item, parent) {
 			parent = parent || this.model.root;
-			return moveItem(this, item, parent,
-				getChildNodes(parent, this.options.childNodes).length, 'appendChild', parent);
+			return moveItem(this, item, parent, getChildNodes(parent,
+        this.options.childNodes).length, 'appendChild', parent);
 		},
 		prependChild: function(item, parent) {
 			parent = parent || this.model.root;
 			return moveItem(this, item, parent, 0, 'prependChild', parent);
 		},
 		insertBefore: function(item, sibling) {
-			return moveItem(this, item, sibling.parentNode, sibling.index, 'insertBefore', sibling);
+			return moveItem(this, item, sibling.parentNode, sibling.index,
+        'insertBefore', sibling);
 		},
 		insertAfter: function(item, sibling) {
-			return moveItem(this, item, sibling.parentNode, sibling.index + 1, 'insertAfter', sibling);
+			return moveItem(this, item, sibling.parentNode, sibling.index + 1,
+        'insertAfter', sibling);
 		},
 		replaceChild: function(newItem, item) {
 			var index = item.index,
@@ -108,7 +111,7 @@
 		},
 		removeChild: function(item) {
 			removeChild(this, item);
-			this.options.subscribe.call(this, 'removeChild', item); // order of arguments
+			this.options.subscribe.call(this, 'removeChild', item); // order of args
 			return item;
 		},
 		sortChildren: function(callback, model, children) {
@@ -155,7 +158,7 @@
 			_this.options.childNodes) : _this.model).indexOf(item);
 	};
 
-	function getChildNodes(item, childNodes) { // adds array if necessary (appendChild)
+	function getChildNodes(item, childNodes) { // adds array if necessary
 		item[childNodes] = item[childNodes] || [];
 		return item[childNodes];
 	};
@@ -165,7 +168,7 @@
 		if (!item.parentNode) { // for convenience: append un-enhenced new items
 			enrichModel([item], _this, parent, type, sibling);
 		} else if (_this.options.parentCheck) {
-			parentCheck(_this, item, parent);
+			parentCheck(item, parent, _this.options);
 		} // TODO: add more checks if allowed...
 
 		_this.type = type;
@@ -187,15 +190,15 @@
 			.splice(item.index, 1)[0] || item; // if new
 	}
 
-	function parentCheck(_this, item, parent) {
+	function parentCheck(item, parent, options) {
 		var check = parent;
 
 		if (item === parent) {
-			error('ERROR: can\'t move element inside itself', _this.options);
+			error('ERROR: can\'t move element inside itself', options);
 		}
 		while (check = check.parentNode) {
 			if (check === item) {
-				error('ERROR: can\'t move parent inside it\'s own child', _this.options);
+				error('ERROR: can\'t move parent inside it\'s own child', options);
 			}
 		}
 	};
@@ -204,7 +207,7 @@
 		var options = _this.options,
 			isNew = false,
 			hasOwnId = true,
-			idProperty = _this.options.idProperty;
+			idProperty = options.idProperty;
 
 		for (var item = {}, n = 0, l = model.length; n < l; n++) {
 			item = model[n];
@@ -222,11 +225,10 @@
 				item = enhanceModel(_this, item, hasOwnId);
 			}
 
-			_this.options.preRecursionCallback.call(_this, item, type, sibling);
-			// recursion
-			item[_this.options.childNodes] &&
-				enrichModel(item[_this.options.childNodes], _this, item); // , type, sibling
-			_this.options.enrichModelCallback.call(_this, item, type, sibling);
+			options.preRecursionCallback.call(_this, item, type, sibling);
+			item[options.childNodes] && // recursion
+				enrichModel(item[options.childNodes], _this, item);
+			options.enrichModelCallback.call(_this, item, type, sibling);
 		}
 
 		return model;
@@ -247,7 +249,7 @@
 			pathArray = [];
 
 		for (var item in model) {
-			lastMapIdx = listeners[item] && listeners[item][0] && listeners[item][0].length - 1;
+			lastMapIdx = (crawlObject(listeners, [item, 0, 'length']) || 1) - 1;
 			if (lastMapIdx) { // loop inside deep
 				for (var n = listeners[item].length, listener; n--; ) {
 					listener = listeners[item][n];
@@ -279,38 +281,38 @@
 		return model;
 	}
 
-	function reinforceProperty(model, item, value, writeable, enumarable) {
+	function reinforceProperty(model, item, value, writeable, enumable) {
 		delete model[item]; // in case it is set already...
 		return Object.defineProperty(model, item, {
-			enumerable: !!enumarable,
+			enumerable: !!enumable,
 			configurable: false,
 			writable: !!writeable,
 			value: value
 		});
 	}
 
-	function defineProperty(property, object, cache, _this, strIndex, enumerable, longItem) {
-		return Object.defineProperty((object[0] || object), property, {
+	function defineProperty(prop, obj, cache, _this, strIndex, enumable, long) {
+		return Object.defineProperty((obj[0] || obj), prop, {
 			get: function() {
-				return property === strIndex ?
-					indexOf(_this, (object[0] || object)) : cache[longItem || property];
+				return prop === strIndex ?
+					indexOf(_this, (obj[0] || obj)) : cache[long || prop];
 			},
 			set: function(value) {
-				var  oldValue = cache[longItem || property];
+				var  oldValue = cache[long || prop];
 
-				cache[longItem || property] = value;
-				validate(longItem || property, object, value, oldValue, cache, _this, strIndex);
+				cache[long || prop] = value;
+				validate(long || prop, obj, value, oldValue, cache, _this, strIndex);
 			},
-			enumerable: enumerable
+			enumerable: enumable
 		});
 	}
 
-	function validate(property, object, value, oldValue, cache, _this, strIndex) {
-		if (property === _this.options.idProperty || property === strIndex ||
+	function validate(prop, obj, value, oldValue, cache, _this, strIndex) {
+		if (prop === _this.options.idProperty || prop === strIndex ||
 			_this.options.subscribe.call(_this, _this.type ||
-					property, (object[1] || object), value, oldValue, _this.sibling)) {
-				cache[property] = oldValue; // return value if not allowed
-				error('ERROR: Cannot set property \'' + property + '\' to \'' +
+					prop, (obj[1] || obj), value, oldValue, _this.sibling)) {
+				cache[prop] = oldValue; // return value if not allowed
+				error('ERROR: Cannot set property \'' + prop + '\' to \'' +
 					value + '\'', _this.options);
 		}
 		delete _this.type;
@@ -318,7 +320,7 @@
 	}
 
 	function error(txt, options) {
-		if (!options.throwErrors && typeof window !== 'undefined' && window.console) {
+		if (!options.throwErrors && window !== undefined && window.console) {
 			return console.warn ? console.warn(txt) : console.log(txt);
 		}
 
