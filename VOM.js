@@ -47,7 +47,7 @@
 			}
 			rootItem[_options.childNodes] = _this.model;
 			reinforceProperty(_this.model, 'root', rootItem);
-			enrichModel(_this.model, _this);
+			enrichModel(_this, _this.model);
 		},
 		NODES = [], // node maps for fast access
 		idCounter = 0, // item id counter (if items have no own id)
@@ -154,8 +154,9 @@
 	};
 
 	function indexOf(_this, item) {
-		return (item.parentNode ? getChildNodes(item.parentNode,
-			_this.options.childNodes) : _this.model).indexOf(item);
+		return (item.parentNode ?
+      getChildNodes(item.parentNode, _this.options.childNodes) : _this.model)
+    .indexOf(item);
 	};
 
 	function getChildNodes(item, childNodes) { // adds array if necessary
@@ -164,11 +165,13 @@
 	};
 
 	function moveItem(_this, item, parent, index, type, sibling) {
-		_this.options.moveCallback.call(_this, item, type, sibling);
+    var options = _this.options;
+
+		options.moveCallback.call(_this, item, type, sibling);
 		if (!item.parentNode) { // for convenience: append un-enhenced new items
-			enrichModel([item], _this, parent, type, sibling);
-		} else if (_this.options.parentCheck) {
-			parentCheck(item, parent, _this.options);
+			enrichModel(_this, [item], parent, type, sibling);
+		} else if (options.parentCheck) {
+			parentCheck(item, parent, options);
 		} // TODO: add more checks if allowed...
 
 		_this.type = type;
@@ -179,7 +182,7 @@
 		}
 		item = item.index !== -1 && item.parentNode &&
 			removeChild(_this, item, true) || item;
-		getChildNodes(parent, _this.options.childNodes).splice(index || 0, 0, item);
+		getChildNodes(parent, options.childNodes).splice(index || 0, 0, item);
 		item.parentNode = parent;
 		return item;
 	};
@@ -203,7 +206,7 @@
 		}
 	};
 
-	function enrichModel(model, _this, parent, type, sibling) {
+	function enrichModel(_this, model, parent, type, sibling) {
 		var options = _this.options,
 			isNew = false,
 			hasOwnId = true,
@@ -227,7 +230,7 @@
 
 			options.preRecursionCallback.call(_this, item, type, sibling);
 			item[options.childNodes] && // recursion
-				enrichModel(item[options.childNodes], _this, item);
+				enrichModel(_this, item[options.childNodes], item);
 			options.enrichModelCallback.call(_this, item, type, sibling);
 		}
 
@@ -294,8 +297,8 @@
 	function defineProperty(prop, obj, cache, _this, strIndex, enumable, long) {
 		return Object.defineProperty((obj[0] || obj), prop, {
 			get: function() {
-				return prop === strIndex ?
-					indexOf(_this, (obj[0] || obj)) : cache[long || prop];
+				return prop === strIndex ? indexOf(_this, (obj[0] || obj)) :
+          cache[long || prop];
 			},
 			set: function(value) {
 				var  oldValue = cache[long || prop];
