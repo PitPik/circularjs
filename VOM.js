@@ -1,4 +1,4 @@
-/**! @license VOM v0.1.1; Copyright (C) 2017-2018 by Peter Dematté */
+/**! @license VOM v0.2.0; Copyright (C) 2017-2018 by Peter Dematté */
 (function (root, factory) {
 	if (typeof exports === 'object') { module.exports = factory(root) }
   else if (typeof define === 'function' && define.amd) {
@@ -44,15 +44,7 @@ var VOM = function(model, options) {
 		enrichModel(_this, _this.model);
 	},
 	NODES = [], // node maps for fast access
-	idCounter = 0, // item id counter (if items have no own id)
-	strIndex = 'index',
-	crawlObject = function(data, keys, min) { // faster than while
-		for (var n = 0, m = keys.length - (min || 0); n < m; n++) {
-			data = data && data[keys[n]];
-		}
-		return data;
-	};
-
+	idCounter = 0; // item id counter (if items have no own id)
 
 VOM.prototype = {
 	getElementById: function(id) {
@@ -121,7 +113,7 @@ VOM.prototype = {
 	addProperty: function(property, item, path, readonly) {
 		var cache = {};
 		cache[path || property] = (item[0] || item)[property];
-		defineProperty(property, item, cache, this, strIndex, !readonly, path);
+		defineProperty(property, item, cache, this, !readonly, path);
 	},
 	getProperty: function(property, item) {
 		return crawlObject(item, property.split('.'));
@@ -135,6 +127,13 @@ VOM.prototype = {
 };
 
 return VOM;
+
+function crawlObject(data, keys, min) { // faster than while
+  for (var n = 0, m = keys.length - (min || 0); n < m; n++) {
+    data = data && data[keys[n]];
+  }
+  return data;
+}
 
 function destroy(_this, items) { // only cleans up NODES
 	for (var n = items.length; n--; ) {
@@ -267,7 +266,7 @@ function enhanceModel(_this, model, ownProperty) { // TODO: cleanup
 			}
 			continue;
 		}
-		internalProperty = item === 'parentNode' || item === strIndex;
+		internalProperty = item === 'parentNode' || item === 'index';
 		if (item === _this.options.idProperty) {
 			reinforceProperty(model, item, model[item], ownProperty);
 		} else if (listeners[item] || listeners['*'] || internalProperty) {
@@ -288,24 +287,24 @@ function reinforceProperty(model, item, value, writeable, enumable) {
 	});
 }
 
-function defineProperty(prop, obj, cache, _this, strIndex, enumable, long) {
+function defineProperty(prop, obj, cache, _this, enumable, path) {
 	return Object.defineProperty((obj[0] || obj), prop, {
 		get: function() {
-			return prop === strIndex ? indexOf(_this, (obj[0] || obj)) :
-        cache[long || prop];
+			return prop === 'index' ? indexOf(_this, (obj[0] || obj)) :
+        cache[path || prop];
 		},
 		set: function(value) {
-			var  oldValue = cache[long || prop];
+			var  oldValue = cache[path || prop];
 
-			cache[long || prop] = value;
-			validate(long || prop, obj, value, oldValue, cache, _this, strIndex);
+			cache[path || prop] = value;
+			validate(path || prop, obj, value, oldValue, cache, _this);
 		},
 		enumerable: enumable
 	});
 }
 
-function validate(prop, obj, value, oldValue, cache, _this, strIndex) {
-	if (prop === _this.options.idProperty || prop === strIndex ||
+function validate(prop, obj, value, oldValue, cache, _this) {
+	if (prop === _this.options.idProperty || prop === 'index' ||
 		_this.options.subscribe.call(_this, _this.type ||
 				prop, (obj[1] || obj), value, oldValue, _this.sibling)) {
 			cache[prop] = oldValue; // return value if not allowed
