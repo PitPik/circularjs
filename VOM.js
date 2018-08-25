@@ -23,9 +23,10 @@ var VOM = function(model, options) {
 		init(this, options || {});
 	},
 	init = function(_this, options) {
-		var item = '',
-			rootItem = {},
+		var rootItem = {},
 			listeners = [],
+      listener = '',
+      parts = [],
 			_options = _this.options;
 
 		NODES.push({}); // new access map for current instance
@@ -35,9 +36,9 @@ var VOM = function(model, options) {
 			_options[option] = options[option];
 		}
 		listeners = _options.listeners;
-		while (item = listeners.shift()) {
-			item = item.split('.');
-			(listeners[item[0]] = listeners[item[0]] || []).push(item);
+		while (listener = listeners.shift()) {
+			parts = listener.split(/\.|\//);
+			(listeners[parts[0]] = listeners[parts[0]] || []).push(parts);
 		}
 		rootItem[_options.childNodes] = _this.model;
 		reinforceProperty(_this.model, 'root', rootItem);
