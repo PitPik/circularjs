@@ -1416,7 +1416,7 @@
                     for (var m = deepModel.length; m--; ) {
                         if (lastIsWildcard) {
                             addProperty(_this, m, {
-                                current: deepModel[m],
+                                current: deepModel,
                                 main: model
                             }, path.replace("*", m));
                         } else {

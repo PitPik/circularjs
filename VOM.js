@@ -267,7 +267,7 @@ function enhanceModel(_this, model, listeners) {
       } else if (isArray) {
         for (var m = deepModel.length; m--; ) {
           if (lastIsWildcard) {
-            addProperty(_this, m, { current: deepModel[m], main: model },
+            addProperty(_this, m, { current: deepModel, main: model },
               path.replace('*', m));
           } else {
             deepListener = listener.slice(wildcardPos + 1);
