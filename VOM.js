@@ -111,7 +111,7 @@ VOM.prototype = {
       }
     }
   },
-  addProperty(property, item, readonly) {
+  addProperty: function(property, item, readonly) {
     return addProperty(_this, property.split(pathSplit)[0],
       { current: item, main: item }, property, readonly);
   },

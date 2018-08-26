@@ -1226,26 +1226,21 @@
         this.model = model || [];
         init(this, options || {});
     }, init = function(_this, options) {
-        var item = "", rootItem = {};
+        var rootItem = {}, listeners = [], listener = "", parts = [], _options = _this.options;
         NODES.push({});
         reinforceProperty(_this, "id", NODES.length - 1);
         for (var option in options) {
-            _this.options[option] = options[option];
+            _options[option] = options[option];
         }
-        while (item = _this.options.listeners.shift()) {
-            item = item.split(".");
-            _this.options.listeners[item[0]] = _this.options.listeners[item[0]] || [];
-            _this.options.listeners[item[0]].push(item);
+        listeners = _options.listeners;
+        while (listener = listeners.shift()) {
+            parts = listener.split(pathSplit);
+            (listeners[parts[0]] = listeners[parts[0]] || []).push(parts);
         }
-        rootItem[_this.options.childNodes] = _this.model;
+        rootItem[_options.childNodes] = _this.model;
         reinforceProperty(_this.model, "root", rootItem);
-        enrichModel(_this.model, _this);
-    }, NODES = [], idCounter = 0, strIndex = "index", crawlObject = function(data, keys, min) {
-        for (var n = 0, m = keys.length - (min || 0); n < m; n++) {
-            data = data && data[keys[n]];
-        }
-        return data;
-    };
+        enrichModel(_this, _this.model);
+    }, pathSplit = /\.|\//, NODES = [], idCounter = 0;
     VOM.prototype = {
         getElementById: function(id) {
             return NODES[this.id][id];
@@ -1253,7 +1248,7 @@
         getElementsByProperty: function(property, value) {
             var result = [], hasValue = undefined !== value, hasProperty = undefined !== property, keys = [], propValue = null;
             for (var id in NODES[this.id]) {
-                propValue = undefined !== NODES[this.id][id][property] ? NODES[this.id][id][property] : crawlObject(NODES[this.id][id], keys[0] ? keys : keys = hasProperty && property.split("."));
+                propValue = undefined !== NODES[this.id][id][property] ? NODES[this.id][id][property] : crawlObject(NODES[this.id][id], keys[0] ? keys : keys = hasProperty && property.split(pathSplit));
                 if (hasValue && propValue === value || !hasValue && undefined !== propValue || !hasValue && !hasProperty) {
                     result.push(NODES[this.id][id]);
                 }
@@ -1294,14 +1289,15 @@
                 }
             }
         },
-        reinforceProperty: reinforceProperty,
-        addProperty: function(property, item, path, readonly) {
-            var cache = {};
-            cache[path || property] = (item[0] || item)[property];
-            defineProperty(property, item, cache, this, strIndex, !readonly, path);
+        addProperty: function(property, item, readonly) {
+            return addProperty(_this, property.split(pathSplit)[0], {
+                current: item,
+                main: item
+            }, property, readonly);
         },
+        reinforceProperty: reinforceProperty,
         getProperty: function(property, item) {
-            return crawlObject(item, property.split("."));
+            return crawlObject(item, property.split(pathSplit));
         },
         getCleanModel: function(item) {
             return JSON.parse(JSON.stringify(item || this.model));
@@ -1311,6 +1307,13 @@
         }
     };
     return VOM;
+    function crawlObject(data, keys) {
+        for (var n = 0, m = keys.length; n < m; n++) {
+            if (keys[n] === "*") return data;
+            data = data && data[keys[n]];
+        }
+        return data;
+    }
     function destroy(_this, items) {
         for (var n = items.length; n--; ) {
             if (items[n][_this.options.childNodes]) {
@@ -1329,11 +1332,12 @@
         return item[childNodes];
     }
     function moveItem(_this, item, parent, index, type, sibling) {
-        _this.options.moveCallback.call(_this, item, type, sibling);
+        var options = _this.options;
+        options.moveCallback.call(_this, item, type, sibling);
         if (!item.parentNode) {
-            enrichModel([ item ], _this, parent, type, sibling);
-        } else if (_this.options.parentCheck) {
-            parentCheck(_this, item, parent);
+            enrichModel(_this, [ item ], parent, type, sibling);
+        } else if (options.parentCheck) {
+            parentCheck(item, parent, options);
         }
         _this.type = type;
         _this.sibling = sibling;
@@ -1341,7 +1345,7 @@
             index--;
         }
         item = item.index !== -1 && item.parentNode && removeChild(_this, item, true) || item;
-        getChildNodes(parent, _this.options.childNodes).splice(index || 0, 0, item);
+        getChildNodes(parent, options.childNodes).splice(index || 0, 0, item);
         item.parentNode = parent;
         return item;
     }
@@ -1349,100 +1353,128 @@
         !preserve && destroy(_this, [ item ]);
         return getChildNodes(item.parentNode, _this.options.childNodes).splice(item.index, 1)[0] || item;
     }
-    function parentCheck(_this, item, parent) {
+    function parentCheck(item, parent, options) {
         var check = parent;
         if (item === parent) {
-            error("ERROR: can't move element inside itself", _this.options);
+            error("ERROR: can't move element inside itself", options);
         }
         while (check = check.parentNode) {
             if (check === item) {
-                error("ERROR: can't move parent inside it's own child", _this.options);
+                error("ERROR: can't move parent inside it's own child", options);
             }
         }
     }
-    function enrichModel(model, _this, parent, type, sibling) {
-        var options = _this.options, isNew = false, hasOwnId = true, idProperty = _this.options.idProperty;
-        for (var item = {}, n = 0, l = model.length; n < l; n++) {
+    function enrichModel(_this, model, parent, type, sibling) {
+        var options = _this.options, isNew = false, hasOwnId = true, idProperty = options.idProperty, item = {};
+        for (var n = 0, l = model.length; n < l; n++) {
             item = model[n];
-            isNew = !item.parentNode;
             if (!item[idProperty]) {
                 item[idProperty] = "vom_" + idCounter++;
                 hasOwnId = false;
             }
             NODES[_this.id][item[idProperty]] = item;
+            isNew = !item.parentNode;
             item.parentNode = parent || _this.model.root;
             item.index = 0;
             if (isNew) {
-                item = enhanceModel(_this, item, hasOwnId);
+                reinforceProperty(item, idProperty, item[idProperty], hasOwnId);
+                addProperty(_this, "index", {
+                    current: item
+                }, null, true);
+                addProperty(_this, "parentNode", {
+                    current: item
+                }, null, true);
+                enhanceModel(_this, item, _this.options.listeners);
             }
-            _this.options.preRecursionCallback.call(_this, item, type, sibling);
-            item[_this.options.childNodes] && enrichModel(item[_this.options.childNodes], _this, item);
-            _this.options.enrichModelCallback.call(_this, item, type, sibling);
+            options.preRecursionCallback.call(_this, item, type, sibling);
+            item[options.childNodes] && enrichModel(_this, item[options.childNodes], item);
+            options.enrichModelCallback.call(_this, item, type, sibling);
         }
         return model;
     }
-    function enhanceModel(_this, model, ownProperty) {
-        var internalProperty = false, listeners = _this.options.listeners, lastMapIdx = 0, wildcardPos = 0, path = "", _path = "", __item = "", longItem = "", _model = {}, __model = {}, pathArray = [];
-        for (var item in model) {
-            lastMapIdx = listeners[item] && listeners[item][0] && listeners[item][0].length - 1;
-            if (lastMapIdx) {
-                for (var n = listeners[item].length, listener; n--; ) {
-                    listener = listeners[item][n];
-                    wildcardPos = listener.indexOf("*");
-                    _model = crawlObject(model, listener, wildcardPos > -1 ? lastMapIdx - wildcardPos + 1 : 1);
-                    longItem = listener.join(".");
-                    path = longItem.split("*")[1] || "";
-                    pathArray = path.split(".").splice(1);
-                    for (var _item in _model) {
-                        __model = !path ? _model : crawlObject(_model[_item], pathArray, 1);
-                        _path = longItem.replace("*", _item);
-                        __item = pathArray[pathArray.length - 1] || _item;
-                        _this.addProperty(__item, [ __model, model ], _path);
+    function addProperty(_this, property, item, path, readonly) {
+        var cache = {};
+        cache[property] = item.current[property];
+        return defineProperty(_this, property, item, cache, !readonly, path);
+    }
+    function enhanceModel(_this, model, listeners) {
+        var listener = [], wildcardPos = 0, lastIsWildcard = false, rootOnlyWildcard = false, path = "", deepListener = [], deepModel = {}, isArray = false;
+        for (var key in listeners) {
+            for (var n = listeners[key].length; n--; ) {
+                listener = listeners[key][n];
+                wildcardPos = listener.indexOf("*");
+                rootOnlyWildcard = wildcardPos === 0 && listener.length === 1;
+                lastIsWildcard = wildcardPos === listener.length - 1;
+                path = listener.join(".");
+                deepModel = !rootOnlyWildcard && crawlObject(model, listener);
+                isArray = deepModel && deepModel.constructor === Array;
+                if (rootOnlyWildcard) {
+                    for (var item in model) addProperty(_this, item, {
+                        current: model
+                    });
+                } else if (isArray) {
+                    for (var m = deepModel.length; m--; ) {
+                        if (lastIsWildcard) {
+                            addProperty(_this, m, {
+                                current: deepModel[m],
+                                main: model
+                            }, path.replace("*", m));
+                        } else {
+                            deepListener = listener.slice(wildcardPos + 1);
+                            addProperty(_this, deepListener[deepListener.length - 1], {
+                                current: deepModel[m],
+                                main: model
+                            }, path.replace("*", m));
+                        }
                     }
+                } else if (lastIsWildcard) {
+                    for (var item in deepModel) {
+                        addProperty(_this, item, {
+                            current: deepModel,
+                            main: model
+                        }, path.replace("*", item));
+                    }
+                } else {
+                    addProperty(_this, listener[listener.length - 1], {
+                        current: model
+                    }, path);
                 }
-                continue;
-            }
-            internalProperty = item === "parentNode" || item === strIndex;
-            if (item === _this.options.idProperty) {
-                reinforceProperty(model, item, model[item], ownProperty);
-            } else if (listeners[item] || listeners["*"] || internalProperty) {
-                _this.addProperty(item, model, null, internalProperty);
             }
         }
         return model;
     }
-    function reinforceProperty(model, item, value, writeable, enumarable) {
+    function reinforceProperty(model, item, value, writeable, enumable) {
         delete model[item];
         return Object.defineProperty(model, item, {
-            enumerable: !!enumarable,
+            enumerable: !!enumable,
             configurable: false,
             writable: !!writeable,
             value: value
         });
     }
-    function defineProperty(property, object, cache, _this, strIndex, enumerable, longItem) {
-        return Object.defineProperty(object[0] || object, property, {
+    function defineProperty(_this, prop, obj, cache, enumable, path) {
+        return Object.defineProperty(obj.current, prop, {
             get: function() {
-                return property === strIndex ? indexOf(_this, object[0] || object) : cache[longItem || property];
+                return prop === "index" ? indexOf(_this, obj.current) : cache[prop];
             },
             set: function(value) {
-                var oldValue = cache[longItem || property];
-                cache[longItem || property] = value;
-                validate(longItem || property, object, value, oldValue, cache, _this, strIndex);
+                var oldValue = cache[prop];
+                cache[prop] = value;
+                validate(path || prop, obj, value, oldValue, cache, _this);
             },
-            enumerable: enumerable
+            enumerable: enumable
         });
     }
-    function validate(property, object, value, oldValue, cache, _this, strIndex) {
-        if (property === _this.options.idProperty || property === strIndex || _this.options.subscribe.call(_this, _this.type || property, object[1] || object, value, oldValue, _this.sibling)) {
-            cache[property] = oldValue;
-            error("ERROR: Cannot set property '" + property + "' to '" + value + "'", _this.options);
+    function validate(prop, obj, value, oldValue, cache, _this) {
+        if (prop === _this.options.idProperty || prop === "index" || _this.options.subscribe.call(_this, _this.type || prop, obj.main || obj.current, value, oldValue, _this.sibling)) {
+            cache[prop] = oldValue;
+            error("ERROR: Cannot set property '" + prop + "' to '" + value + "'", _this.options);
         }
         delete _this.type;
         delete _this.sibling;
     }
     function error(txt, options) {
-        if (!options.throwErrors && typeof window !== "undefined" && window.console) {
+        if (!options.throwErrors && window !== undefined && window.console) {
             return console.warn ? console.warn(txt) : console.log(txt);
         }
         throw txt;
