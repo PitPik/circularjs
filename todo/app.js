@@ -21,8 +21,8 @@ require(['circular'], Circular => {
     eventListeners: {
       toggle: (e, elm, item) => item.done = elm.checked,
       delete: (e, elm, item) => list.removeChild(item),
-      save: (e, elm, item) => elm.value ?
-        item.text = elm.value : list.removeChild(item),
+      save: (e, elm, item) => elm.value.trim() ?
+        item.text = elm.value.trim() : list.removeChild(item),
       focus: (e, elm, item) => item.editable = 'focus',
       blur: (e, elm, item) => item.editable = '',
       keyup: (e, elm, item) => {
