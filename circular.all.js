@@ -1398,7 +1398,7 @@
         return defineProperty(_this, property, item, cache, !readonly, path);
     }
     function enhanceModel(_this, model, listeners) {
-        var listener = [], wildcardPos = 0, lastIsWildcard = false, rootOnlyWildcard = false, path = "", deepListener = [], deepModel = {};
+        var listener = [], wildcardPos = 0, lastIsWildcard = false, rootOnlyWildcard = false, path = "", deepListener = [], deeperListener = [], deepModel = {}, depperModel = {};
         for (var key in listeners) {
             for (var n = listeners[key].length; n--; ) {
                 listener = listeners[key][n];
@@ -1420,8 +1420,10 @@
                             }, path.replace("*", m));
                         } else {
                             deepListener = listener.slice(wildcardPos + 1);
+                            deeperListener = deepListener.slice(0, deepListener.length - 1);
+                            depperModel = crawlObject(deepModel[m], deeperListener);
                             addProperty(_this, deepListener[deepListener.length - 1], {
-                                current: deepModel[m],
+                                current: depperModel,
                                 root: model
                             }, path.replace("*", m));
                         }
@@ -1430,6 +1432,16 @@
                     for (var item in deepModel) {
                         addProperty(_this, item, {
                             current: deepModel,
+                            root: model
+                        }, path.replace("*", item));
+                    }
+                } else if (wildcardPos > 0 && listener.length > 1) {
+                    for (var item in deepModel) {
+                        deepListener = listener.slice(wildcardPos + 1);
+                        deeperListener = deepListener.slice(0, deepListener.length - 1);
+                        depperModel = crawlObject(deepModel[item], deeperListener);
+                        addProperty(_this, deepListener[deepListener.length - 1], {
+                            current: depperModel,
                             root: model
                         }, path.replace("*", item));
                     }
