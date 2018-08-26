@@ -12,6 +12,10 @@ td {
 	border: 1px solid #aaa;
 	cursor: default;
 }
+.max {
+	background-color: #CC0000;
+	color: #eee;
+}
 td:hover {
 	background: #ccc;
 	position: relative;

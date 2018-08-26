@@ -2,7 +2,7 @@ require(['circular'], function(Circular) {
   var circular = new Circular();
 
   var app = circular.component('app', {
-    listeners: ['items.*']
+    listeners: ['items.*'], // 'items.*.value', 'items.*.max'
   });
 
   var sliders = circular.component('sliders', {
@@ -12,13 +12,13 @@ require(['circular'], function(Circular) {
       if (propName === 'levelRaster') {
         app.reset(initModel(value, []));
         item.views.displayRaster.textContent =
-          value + ' x ' + value + ' = ' + (value * value) + ' items';
+          value + ' x ' + value + ' = ' + (value * value) + ' x 2 items';
         item.levelSpeed = item.levelSpeed;
       } else {
         item.views.displayRefresh.textContent =
           value + 'ms (' + (Math.round(1000 / value * 100) / 100) + '/s): ' +
           (Math.round(item.levelRaster * item.levelRaster *
-          (1000 / value)) + '').replace(/(\d+)(\d{3})$/g, "$1.$2") + ' updates/s';
+          (1000 / value) * 2) + '').replace(/(\d+)(\d{3})$/g, "$1.$2") + ' updates/s';
       }
       update(item);
     },
@@ -31,17 +31,17 @@ require(['circular'], function(Circular) {
       },
     },
     onInit: function(self) {
-      // update(self.model[0]);
       self.model[0].levelRaster = 10;
       self.model[0].levelSpeed = 400;
     }
   });
-
+console.log(app.model)
   function initModel(raster, data) {
-    for (var n = raster; n--; ) {
+    for (var n = raster, newData = 0; n--; ) {
       data[n] = { items : [] };
       for (var m = raster; m--; ) {
-        data[n].items.push(Math.round(Math.random() * 98));
+        newData = Math.round(Math.random() * 98);
+        data[n].items.push({ value: newData, max: newData > 90 ? 'max' : '' });
       }
     }
     return data;
@@ -51,9 +51,12 @@ require(['circular'], function(Circular) {
     clearTimeout(model._timeout);
     model._timeout = setTimeout(function render() {
       // window.requestAnimationFrame(function() {
-        for (var n = 0, m = app.model.length; n < m; n++) {
+        for (var n = 0, m = app.model.length, newData = 0; n < m; n++) {
           for (var x = 0, y = app.model[n].items.length; x < y; x++) {
-            app.model[n].items[x] = Math.round(Math.random() * 98);
+            newData = Math.round(Math.random() * 98);
+            app.model[n].items[x] = { value: newData, max: newData > 90 ? 'max' : '' };
+            // app.model[n].items[x].value = newData;
+            // app.model[n].items[x].max = newData > 90 ? 'max' : '';
           }
         }
         update(model);

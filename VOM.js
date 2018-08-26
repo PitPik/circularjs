@@ -113,7 +113,7 @@ VOM.prototype = {
   },
   addProperty: function(property, item, readonly) {
     return addProperty(_this, property.split(pathSplit)[0],
-      { current: item, main: item }, property, readonly);
+      { current: item, root: item }, property, readonly);
   },
   reinforceProperty: reinforceProperty,
   getProperty: function(property, item) {
@@ -267,17 +267,17 @@ function enhanceModel(_this, model, listeners) {
       } else if (isArray) {
         for (var m = deepModel.length; m--; ) {
           if (lastIsWildcard) {
-            addProperty(_this, m, { current: deepModel, main: model },
+            addProperty(_this, m, { current: deepModel, root: model },
               path.replace('*', m));
           } else {
             deepListener = listener.slice(wildcardPos + 1);
             addProperty(_this, deepListener[deepListener.length - 1],
-              { current: deepModel[m], main: model }, path.replace('*', m));
+              { current: deepModel[m], root: model }, path.replace('*', m));
           }
         }
       } else if (lastIsWildcard) {
         for (var item in deepModel) {
-          addProperty(_this, item, { current: deepModel, main: model },
+          addProperty(_this, item, { current: deepModel, root: model },
             path.replace('*', item));
         }
       } else {
@@ -317,7 +317,7 @@ function defineProperty(_this, prop, obj, cache, enumable, path) {
 function validate(prop, obj, value, oldValue, cache, _this) {
   if (prop === _this.options.idProperty || prop === 'index' ||
     _this.options.subscribe.call(_this, _this.type ||
-        prop, obj.main || obj.current, value, oldValue, _this.sibling)) {
+        prop, obj.root || obj.current, value, oldValue, _this.sibling)) {
       cache[prop] = oldValue; // return value if not allowed
       error('ERROR: Cannot set property \'' + prop + '\' to \'' +
         value + '\'', _this.options);

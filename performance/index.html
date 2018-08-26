@@ -5,12 +5,6 @@
     <title>Circular.js • performance</title>
     <link rel="stylesheet" href="index.css">
 
-    <!-- <script type="text/javascript" src="../amd.js"></script>
-    <script type="text/javascript" src="../toolbox.js"></script>
-    <script type="text/javascript" src="../VOM.js"></script>
-    <script type="text/javascript" src="../schnauzer.js"></script>
-    <script type="text/javascript" src="../blick.js"></script>
-    <script type="text/javascript" src="../circular.js"></script> -->
     <script type="text/javascript" src="../circular.min.js"></script>
   </head>
   <body cr-component="app">
@@ -29,7 +23,7 @@
     <table cr-container="">
       <script type="text/template" cr-template-for="app">
       <tr>
-        {{#each items}}<td title="initial value: {{.}}">{{%this}}</td>{{/each}}
+        {{#each items}}<td class="{{%this.max}}" title="initial value: {{this.value}}">{{%this.value}}</td>{{/each}}
       </tr>
       </script>
     </table>
