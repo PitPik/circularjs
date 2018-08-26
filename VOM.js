@@ -264,31 +264,23 @@ function enhanceModel(_this, model, listeners) {
 
       if (rootOnlyWildcard) {
         for (var item in model) addProperty(_this, item, { current: model });
-      } else if (deepModel && deepModel.constructor === Array) {
-        for (var m = deepModel.length; m--; ) {
-          if (lastIsWildcard) {
-            addProperty(_this, m, { current: deepModel, root: model },
-              path.replace('*', m));
-          } else {
-            deepListener = listener.slice(wildcardPos + 1);
-            deeperListener = deepListener.slice(0, deepListener.length - 1);
-            depperModel = crawlObject(deepModel[m], deeperListener);
-            addProperty(_this, deepListener[deepListener.length - 1],
-              { current: depperModel, root: model }, path.replace('*', m));
-          }
-        }
       } else if (lastIsWildcard) {
         for (var item in deepModel) {
           addProperty(_this, item, { current: deepModel, root: model },
             path.replace('*', item));
         }
       } else if (wildcardPos > 0 && listener.length > 1) {
-        for (var item in deepModel) { // TODO: repetitive code
-          deepListener = listener.slice(wildcardPos + 1);
-          deeperListener = deepListener.slice(0, deepListener.length - 1);
-          depperModel = crawlObject(deepModel[item], deeperListener);
-          addProperty(_this, deepListener[deepListener.length - 1],
-            { current: depperModel, root: model }, path.replace('*', item));
+        for (var item in deepModel) {
+          if (lastIsWildcard) {
+            addProperty(_this, item, { current: deepModel, root: model },
+              path.replace('*', item));
+          } else {
+            deepListener = listener.slice(wildcardPos + 1);
+            deeperListener = deepListener.slice(0, deepListener.length - 1);
+            depperModel = crawlObject(deepModel[item], deeperListener);
+            addProperty(_this, deepListener[deepListener.length - 1],
+              { current: depperModel, root: model }, path.replace('*', item));
+          }
         }
       } else {
         addProperty(_this, listener[listener.length - 1],
