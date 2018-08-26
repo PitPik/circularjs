@@ -1398,7 +1398,7 @@
         return defineProperty(_this, property, item, cache, !readonly, path);
     }
     function enhanceModel(_this, model, listeners) {
-        var listener = [], wildcardPos = 0, lastIsWildcard = false, rootOnlyWildcard = false, path = "", deepListener = [], deepModel = {}, isArray = false;
+        var listener = [], wildcardPos = 0, lastIsWildcard = false, rootOnlyWildcard = false, path = "", deepListener = [], deepModel = {};
         for (var key in listeners) {
             for (var n = listeners[key].length; n--; ) {
                 listener = listeners[key][n];
@@ -1407,12 +1407,11 @@
                 lastIsWildcard = wildcardPos === listener.length - 1;
                 path = listener.join(".");
                 deepModel = !rootOnlyWildcard && crawlObject(model, listener);
-                isArray = deepModel && deepModel.constructor === Array;
                 if (rootOnlyWildcard) {
                     for (var item in model) addProperty(_this, item, {
                         current: model
                     });
-                } else if (isArray) {
+                } else if (deepModel && deepModel.constructor === Array) {
                     for (var m = deepModel.length; m--; ) {
                         if (lastIsWildcard) {
                             addProperty(_this, m, {
