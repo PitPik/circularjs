@@ -1590,7 +1590,7 @@
                     item: data,
                     fn: fn,
                     forceUpdate: active === 2,
-                    parent: parent && (name !== "this" && name !== "." ? parent.concat(name) : parent)
+                    parent: parent && (name !== "this" && name !== "." ? parent.concat(name.split(".")) : parent)
                 });
             }
         }) : null;

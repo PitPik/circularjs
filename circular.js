@@ -153,7 +153,7 @@ Circular.prototype.component = function(name, parameters) {
 					fn: fn,
 					forceUpdate: active === 2,
 					parent: parent && (name !== 'this' && name !== '.' ?
-						parent.concat(name) : parent), // TODO: no concat
+						parent.concat(name.split('.')) : parent), // TODO: no concat
 				});
 			}
 		}) : null;
