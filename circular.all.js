@@ -1395,8 +1395,8 @@
         return model;
     }
     function addProperty(_this, property, item, path, readonly) {
-        if (!_this.options.forceEnhance && item.current[property] === undefined) return;
         var cache = {};
+        if (!_this.options.forceEnhance && item.current[property] === undefined) return;
         cache[property] = item.current[property];
         return defineProperty(_this, property, item, cache, !readonly, path);
     }
