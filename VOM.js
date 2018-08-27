@@ -246,7 +246,6 @@ function enhanceModel(_this, model, listeners) {
   var listener = [],
     wildcardPos = 0,
     lastIsWildcard = false,
-    rootOnlyWildcard = false,
     path = '',
     deepListener = [],
     deeperListener = [],
@@ -257,14 +256,11 @@ function enhanceModel(_this, model, listeners) {
     for (var n = listeners[key].length; n--; ) {
       listener = listeners[key][n]; // array of strings
       wildcardPos = listener.indexOf('*');
-      rootOnlyWildcard = wildcardPos === 0 && listener.length === 1;
       lastIsWildcard = wildcardPos === listener.length - 1;
       path = listener.join('.');
-      deepModel = !rootOnlyWildcard && crawlObject(model, listener);
+      deepModel = crawlObject(model, listener);
 
-      if (rootOnlyWildcard) {
-        for (var item in model) addProperty(_this, item, { current: model });
-      } else if (wildcardPos > 0 && listener.length > 1 || lastIsWildcard) {
+      if (lastIsWildcard || wildcardPos > 0 && listener.length > 1) {
         for (var item in deepModel) {
           if (lastIsWildcard) {
             addProperty(_this, item, { current: deepModel, root: model },

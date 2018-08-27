@@ -1399,20 +1399,15 @@
         return defineProperty(_this, property, item, cache, !readonly, path);
     }
     function enhanceModel(_this, model, listeners) {
-        var listener = [], wildcardPos = 0, lastIsWildcard = false, rootOnlyWildcard = false, path = "", deepListener = [], deeperListener = [], deepModel = {}, depperModel = {};
+        var listener = [], wildcardPos = 0, lastIsWildcard = false, path = "", deepListener = [], deeperListener = [], deepModel = {}, depperModel = {};
         for (var key in listeners) {
             for (var n = listeners[key].length; n--; ) {
                 listener = listeners[key][n];
                 wildcardPos = listener.indexOf("*");
-                rootOnlyWildcard = wildcardPos === 0 && listener.length === 1;
                 lastIsWildcard = wildcardPos === listener.length - 1;
                 path = listener.join(".");
-                deepModel = !rootOnlyWildcard && crawlObject(model, listener);
-                if (rootOnlyWildcard) {
-                    for (var item in model) addProperty(_this, item, {
-                        current: model
-                    });
-                } else if (wildcardPos > 0 && listener.length > 1 || lastIsWildcard) {
+                deepModel = crawlObject(model, listener);
+                if (lastIsWildcard || wildcardPos > 0 && listener.length > 1) {
                     for (var item in deepModel) {
                         if (lastIsWildcard) {
                             addProperty(_this, item, {
