@@ -24,9 +24,6 @@ var VOM = function(model, options) {
   },
   init = function(_this, options) {
     var rootItem = {},
-      listeners = [],
-      listener = '',
-      parts = [],
       _options = _this.options;
 
     NODES.push({}); // new access map for current instance
@@ -35,10 +32,10 @@ var VOM = function(model, options) {
     for (var option in options) { // extend options
       _options[option] = options[option];
     }
-    listeners = _options.listeners;
-    while (listener = listeners.shift()) {
-      parts = listener.split(pathSplit);
-      (listeners[parts[0]] = listeners[parts[0]] || []).push(parts);
+    _options.listeners = [];
+    for (var n = options.listeners.length; n--; ) {
+      if (!options.listeners[n]) continue;
+      _options.listeners[n] = options.listeners[n].split(pathSplit);
     }
     rootItem[_options.childNodes] = _this.model;
     reinforceProperty(_this.model, 'root', rootItem);
@@ -237,46 +234,43 @@ function enrichModel(_this, model, parent, type, sibling) {
 }
 
 function addProperty(_this, property, item, path, readonly) {
+  if (item.current[property] === undefined) return;
   var cache = {};
   cache[property] = item.current[property];
   return defineProperty(_this, property, item, cache, !readonly, path);
 }
 
-function enhanceModel(_this, model, listeners) {
+function enhanceModel(_this, model, listeners, recursivePath, recursiveModel) {
   var listener = [],
     wildcardPos = 0,
     lastIsWildcard = false,
     path = '',
-    deepListener = [],
-    deeperListener = [],
     deepModel = {},
+    deepListener = [],
     depperModel = {};
 
-  for (var key in listeners) {
-    for (var n = listeners[key].length; n--; ) {
-      listener = listeners[key][n]; // array of strings
-      wildcardPos = listener.indexOf('*');
-      lastIsWildcard = wildcardPos === listener.length - 1;
-      path = listener.join('.');
-      deepModel = crawlObject(model, listener);
-
-      if (lastIsWildcard || wildcardPos > 0 && listener.length > 1) {
-        for (var item in deepModel) {
-          if (lastIsWildcard) {
-            addProperty(_this, item, { current: deepModel, root: model },
-              path.replace('*', item));
-          } else {
-            deepListener = listener.slice(wildcardPos + 1);
-            deeperListener = deepListener.slice(0, deepListener.length - 1);
-            depperModel = crawlObject(deepModel[item], deeperListener);
-            addProperty(_this, deepListener[deepListener.length - 1],
-              { current: depperModel, root: model }, path.replace('*', item));
-          }
+  for (var n = listeners.length; n--; ) {
+    listener = listeners[n]; // array of strings
+    wildcardPos = listener.indexOf('*');
+    lastIsWildcard = wildcardPos === listener.length - 1;
+    path = (recursivePath || '') + listener.join('.');
+    deepModel = recursiveModel || crawlObject(model, listener);
+    if (lastIsWildcard || wildcardPos > 0 && listener.length > 1) {
+      for (var item in deepModel) {
+        if (lastIsWildcard) {
+          addProperty(_this, item, { current: deepModel, root: model },
+            path.replace('*', item));
+        } else {
+          deepListener = listener.slice(wildcardPos + 1);
+          depperModel = crawlObject(deepModel[item],
+            deepListener.slice(0, deepListener.length - 1));
+          enhanceModel(_this, model, [listener.slice(wildcardPos + 1)],
+            path.split('*')[0] + item + '.', depperModel);
         }
-      } else {
-        addProperty(_this, listener[listener.length - 1],
-          { current: model }, path);
       }
+    } else {
+      addProperty(_this, listener[listener.length - 1],
+        { current: recursiveModel ? deepModel : model, root: model }, path);
     }
   }
   return model;
