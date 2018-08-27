@@ -131,6 +131,7 @@ function getSource(data, extra, newData, helpers) {
 
 function crawlObjectUp(data, keys) { // faster than while
   for (var n = 0, m = keys.length; n < m; n++) {
+    if (keys[n] === './') continue; // TODO: check if deeper
     data = data && data[keys[n]];
   }
   return data;
