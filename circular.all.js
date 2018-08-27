@@ -663,6 +663,7 @@
     }
     function crawlObjectUp(data, keys) {
         for (var n = 0, m = keys.length; n < m; n++) {
+            if (keys[n] === "./") continue;
             data = data && data[keys[n]];
         }
         return data;
