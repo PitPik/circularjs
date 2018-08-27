@@ -678,8 +678,8 @@
         var _data = data.path[pathDepth] || {};
         var helpers = data.helpers[pathDepth] || {};
         var value = check(helpers[key], crawlObjectUp(helpers, keys));
-        if (value === undefined || keys[0] === "./") {
-            value = check(_data[key], crawlObjectUp(_data, keys));
+        if (value === undefined) {
+            value = crawlObjectUp(_data, keys);
         }
         if (value !== undefined) {
             return value;
