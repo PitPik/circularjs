@@ -15,6 +15,7 @@ var VOM = function(model, options) {
       preRecursionCallback: function() {},
       moveCallback: function() {},
       listeners: [],
+      forceEnhance: false,
       childNodes: 'childNodes',
       throwErrors: false
     };
@@ -234,7 +235,8 @@ function enrichModel(_this, model, parent, type, sibling) {
 }
 
 function addProperty(_this, property, item, path, readonly) {
-  if (item.current[property] === undefined) return;
+  if (!_this.options.forceEnhance &&
+    item.current[property] === undefined) return;
   var cache = {};
   cache[property] = item.current[property];
   return defineProperty(_this, property, item, cache, !readonly, path);
@@ -255,6 +257,7 @@ function enhanceModel(_this, model, listeners, recursivePath, recursiveModel) {
     lastIsWildcard = wildcardPos === listener.length - 1;
     path = (recursivePath || '') + listener.join('.');
     deepModel = recursiveModel || crawlObject(model, listener);
+
     if (lastIsWildcard || wildcardPos > 0 && listener.length > 1) {
       for (var item in deepModel) {
         if (lastIsWildcard) {

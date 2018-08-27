@@ -1221,6 +1221,7 @@
             preRecursionCallback: function() {},
             moveCallback: function() {},
             listeners: [],
+            forceEnhance: false,
             childNodes: "childNodes",
             throwErrors: false
         };
@@ -1394,7 +1395,7 @@
         return model;
     }
     function addProperty(_this, property, item, path, readonly) {
-        if (item.current[property] === undefined) return;
+        if (!_this.options.forceEnhance && item.current[property] === undefined) return;
         var cache = {};
         cache[property] = item.current[property];
         return defineProperty(_this, property, item, cache, !readonly, path);
