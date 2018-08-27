@@ -1412,7 +1412,7 @@
                     for (var item in model) addProperty(_this, item, {
                         current: model
                     });
-                } else if (wildcardPos > 0 && listener.length > 1) {
+                } else if (wildcardPos > 0 && listener.length > 1 || lastIsWildcard) {
                     for (var item in deepModel) {
                         if (lastIsWildcard) {
                             addProperty(_this, item, {
@@ -1428,13 +1428,6 @@
                                 root: model
                             }, path.replace("*", item));
                         }
-                    }
-                } else if (lastIsWildcard) {
-                    for (var item in deepModel) {
-                        addProperty(_this, item, {
-                            current: deepModel,
-                            root: model
-                        }, path.replace("*", item));
                     }
                 } else {
                     addProperty(_this, listener[listener.length - 1], {
