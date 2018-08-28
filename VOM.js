@@ -246,7 +246,7 @@ function addProperty(_this, property, item, path, readonly) {
 function enhanceModel(_this, model, listeners, recPath, recModel) {
   var listener = [],
     wildcardPos = 0,
-    lastIsWildcard = false,
+    restPos = 0,
     path = '',
     deepModel = {},
     deepListener = [],
@@ -255,20 +255,21 @@ function enhanceModel(_this, model, listeners, recPath, recModel) {
   for (var n = listeners.length; n--; ) {
     listener = listeners[n]; // array of strings
     wildcardPos = listener.indexOf('*');
-    lastIsWildcard = wildcardPos === listener.length - 1;
     path = (recPath || '') + listener.join('.');
     deepModel = recModel || crawlObject(model, listener);
 
-    if (lastIsWildcard || wildcardPos > 0 && listener.length > 1) {
+    if (wildcardPos !== -1) {
+      restPos = wildcardPos + 1;
+
       for (var item in deepModel) {
-        if (lastIsWildcard) {
+        if (restPos === listener.length) {
           addProperty(_this, item, { current: deepModel, root: model },
             path.replace('*', item));
         } else {
-          deepListener = listener.slice(wildcardPos + 1);
+          deepListener = listener.slice(restPos);
           depperModel = crawlObject(deepModel[item],
             deepListener.slice(0, deepListener.length - 1));
-          enhanceModel(_this, model, [listener.slice(wildcardPos + 1)],
+          enhanceModel(_this, model, [listener.slice(restPos)],
             path.split('*')[0] + item + '.', depperModel);
         }
       }
