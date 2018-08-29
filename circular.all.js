@@ -1401,7 +1401,7 @@
         return defineProperty(_this, property, item, cache, !readonly, path);
     }
     function enhanceModel(_this, model, listeners, recPath, recModel) {
-        var listener = [], wildcardPos = 0, restPos = 0, path = "", deepModel = {}, deepListener = [], depperModel = {};
+        var listener = [], wildcardPos = 0, restPos = 0, path = "", deepModel = {}, deepListener = [];
         for (var n = listeners.length; n--; ) {
             listener = listeners[n];
             wildcardPos = listener.indexOf("*");
@@ -1417,8 +1417,7 @@
                         }, path.replace("*", item));
                     } else {
                         deepListener = listener.slice(restPos);
-                        depperModel = crawlObject(deepModel[item], deepListener.slice(0, deepListener.length - 1));
-                        enhanceModel(_this, model, [ listener.slice(restPos) ], path.split("*")[0] + item + ".", depperModel);
+                        enhanceModel(_this, model, [ listener.slice(restPos) ], path.split("*")[0] + item + ".", crawlObject(deepModel[item], deepListener.slice(0, deepListener.length - 1)));
                     }
                 }
             } else {

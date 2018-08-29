@@ -249,8 +249,7 @@ function enhanceModel(_this, model, listeners, recPath, recModel) {
     restPos = 0,
     path = '',
     deepModel = {},
-    deepListener = [],
-    depperModel = {};
+    deepListener = [];
 
   for (var n = listeners.length; n--; ) {
     listener = listeners[n]; // array of strings
@@ -267,10 +266,9 @@ function enhanceModel(_this, model, listeners, recPath, recModel) {
             path.replace('*', item));
         } else {
           deepListener = listener.slice(restPos);
-          depperModel = crawlObject(deepModel[item],
-            deepListener.slice(0, deepListener.length - 1));
           enhanceModel(_this, model, [listener.slice(restPos)],
-            path.split('*')[0] + item + '.', depperModel);
+            path.split('*')[0] + item + '.', crawlObject(deepModel[item],
+              deepListener.slice(0, deepListener.length - 1)));
         }
       }
     } else {
