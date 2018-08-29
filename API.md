@@ -119,6 +119,7 @@ Circular.component(name: 'String', parameters: Object {
 
     preRecursionCallback: function()
     enrichModelCallback: function(),
+    moveCallback: function(),
 
     storage: {
         name: '', // name of storage
