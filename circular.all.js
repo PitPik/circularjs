@@ -1396,7 +1396,7 @@
     }
     function addProperty(_this, property, item, path, readonly) {
         var cache = {};
-        if (!_this.options.forceEnhance && item.current[property] === undefined) return;
+        if (!_this.options.forceEnhance && !item.current.hasOwnProperty(property)) return;
         cache[property] = item.current[property];
         return defineProperty(_this, property, item, cache, !readonly, path);
     }
