@@ -304,18 +304,6 @@ Circular.prototype.component = function(name, parameters) {
   return component;
 };
 
-// Circular.prototype.destroyComponent = function(name) {
-//  var component = typeof name === 'string' ? this.components[name] : name;
-//  var _inst = instanceList[this.id][component.name];
-
-//  if (component && _inst) {
-//    _inst.controller && _inst.controller.destroy(component);
-//    _inst.vom.destroy();
-//    _inst.template = null;
-//    component.container && (component.container.innerHTML = '');
-//  }
-// }
-
 Circular.prototype.destroy = function(name) { // TODO: review -> use reset
   var _instList = instanceList[this.id];
   var _instance = {};
@@ -799,8 +787,6 @@ function getDomData(options, parameters, component, name) {
     templates: templates, // TODO && container??
     container: container,
     type: type ? type + 'Child' : '',
-    // appendMode: container && // ??????????? never used
-    //  container.getAttribute([containerAttr]) || 'append' // replace
   }
 }
 
