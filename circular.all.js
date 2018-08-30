@@ -156,12 +156,22 @@
     "use strict";
     var resourceCache = null, _link = document.createElement("a"), Toolbox = {
         closest: function(element, selector, root) {
-            while (element !== root && element.parentNode) {
-                if (element.matches(selector)) {
-                    return element;
-                }
-                element = element.parentNode;
+            if (element.closest) {
+                Toolbox.closest = function(element, selector) {
+                    return element.closest(selector);
+                };
+            } else {
+                var matches = element.msMatchesSelector || element.webkitMatchesSelector || element.matches;
+                Toolbox.closest = function(element, selector) {
+                    if (!(root || document.documentElement).contains(element)) return null;
+                    do {
+                        if (matches.call(element, selector)) return element;
+                        element = element.parentElement || element.parentNode;
+                    } while (element !== null && element.nodeType === 1);
+                    return null;
+                };
             }
+            return Toolbox.closest(element, selector, root);
         },
         $: function(selector, root) {
             return (root || document.body).querySelector(selector);

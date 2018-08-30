@@ -15,35 +15,25 @@
     _link = document.createElement('a'),
     Toolbox = {
     closest: function(element, selector, root) {
-      // return element && element.closest(selector);
-
-      while(element !== root && element.parentNode) { // can be faster (root...)
-        if (element.matches(selector)) { // matches(element, selector)) {
-          return element;
+      if (element.closest) {
+        Toolbox.closest = function(element, selector) {
+          return element.closest(selector);
         }
-        element = element.parentNode;
+      } else {
+        var matches = (element.msMatchesSelector ||
+          element.webkitMatchesSelector || element.matches);
+
+        Toolbox.closest = function(element, selector) {
+          if (!(root || document.documentElement).contains(element)) return null;
+          do {
+              if (matches.call(element, selector)) return element;
+              element = element.parentElement || element.parentNode;
+          } while (element !== null && element.nodeType === 1);
+          return null;
+        };
       }
+      return Toolbox.closest(element, selector, root);
     },
-    // closest: Element.prototype.closest ? function(element, selector, root) {
-  //           return element.closest(selector)
-  //       } : (function(element, selector, root) {
-  //           Element.prototype.matches = Element.prototype.msMatchesSelector ||
-  //               Element.prototype.webkitMatchesSelector;
-  //           Element.prototype.closest = function(s) {
-  //               var el = this;
-  //               if (!document.documentElement.contains(el)) return null;
-  //               do {
-  //                   if (el.matches(s)) return el;
-  //                   el = el.parentElement || el.parentNode;
-  //               } while (el !== null && el.nodeType === 1);
-  //               return null;
-  //           };
-
-  //           return function(element, selector, root) {
-  //               return element.closest(selector)
-  //           }
-  //       })(),
-
     $: function(selector, root) {
       return (root || document.body).querySelector(selector);
     },
