@@ -1617,7 +1617,7 @@
                         _inst.controller && _inst.controller.getEventListeners(item[elmsTxt].element || component.element, item[options.events], component, this.options.idProperty);
                         item[options.views] = {};
                         getViews(options, item[options.views], item[elmsTxt].element || component.element);
-                    } else if (property !== "replaceChild") {
+                    } else if (property !== "replaceChild" && value !== oldValue) {
                         render(_inst.helper, element, property, parentElement, sibling[elmsTxt] && sibling[elmsTxt].element);
                     }
                 } else if (hasStorage && (storageAll || storageListeners.indexOf(property) !== -1)) {

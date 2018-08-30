@@ -236,7 +236,7 @@ Circular.prototype.component = function(name, parameters) {
           item[options.views] = {};
           getViews(options, item[options.views],
             item[elmsTxt].element || component.element);
-        } else if (property !== 'replaceChild') {
+        } else if (property !== 'replaceChild' && value !== oldValue) {
           render(_inst.helper, element, property, parentElement,
               sibling[elmsTxt] && sibling[elmsTxt].element);
         }
