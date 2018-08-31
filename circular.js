@@ -236,7 +236,7 @@ Circular.prototype.component = function(name, parameters) {
           item[options.views] = {};
           getViews(options, item[options.views],
             item[elmsTxt].element || component.element);
-        } else if (property !== 'replaceChild' && !item.__isNew) {
+        } else if (property !== 'replaceChild' && !this.__isNew) {
           render(_inst.helper, element, property, parentElement,
               sibling[elmsTxt] && sibling[elmsTxt].element);
         }
@@ -292,11 +292,11 @@ Circular.prototype.component = function(name, parameters) {
     }
     _inst.vom.destroy();
     this.container && (this.container.innerHTML = '');
+    _inst.vom.__isNew = true; // TODO
     for (var n = 0, m = data.length; n < m; n++) {
-      data[n].__isNew = true;
       this.appendChild(data[n]);
-      delete data[n].__isNew;
     } // onInit here ??
+    delete _inst.vom.__isNew; // TODO
     return component;
   }
   component.__proto__ = proto;
