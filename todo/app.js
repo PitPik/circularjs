@@ -14,7 +14,7 @@ require(['circular'], Circular => {
     listeners: ['*'],
     subscribe: (propName, item) => {
       propName === 'text' ? item.editable = '' :
-        Circular.Toolbox.lazy(updateUI, list);
+        Circular.Toolbox.lazy(app.updateUI, list);
       if (propName !== 'editable')
         storage.saveLazy(list.model, STORAGE_KEY);
     },
@@ -34,19 +34,7 @@ require(['circular'], Circular => {
     },
   });
 
-  const updateUI = () => {
-    const all = list.model.length;
-    const done = list[get]('done', true).length;
-    const appModel = circular.components['app'].model[0];
-
-    appModel.all = all !== 0 && all === done;
-    appModel.hide = all === 0;
-    appModel.left = all - done;
-    appModel.plural = all - done !== 1;
-    appModel.none = done === 0;
-  };
-
-  circular.component('app', {
+  const app = circular.component('app', {
     model: [{
       filter: 'all',
       left: 0,
@@ -75,13 +63,25 @@ require(['circular'], Circular => {
         .forEach(unit => unit.done = e.target.checked),
     },
     onInit: self => {
+      const model = self.model[0];
+
       circular.addRoute({
         path: '(/)(:filter)',
-        callback: data => self.model[0].filter =
+        callback: data => model.filter =
           data.parameters.filter || 'all',
       }, true);
-      updateUI();
-      self.model[0].views.main.appendChild(list.container);
+      self.updateUI = () => {
+        const all = list.model.length;
+        const done = list[get]('done', true).length;
+
+        model.all = all !== 0 && all === done;
+        model.hide = all === 0;
+        model.left = all - done;
+        model.plural = all - done !== 1;
+        model.none = done === 0;
+      };
+      self.updateUI();
+      model.views.main.appendChild(list.container);
     },
   });
 });
