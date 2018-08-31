@@ -1617,7 +1617,7 @@
                         _inst.controller && _inst.controller.getEventListeners(item[elmsTxt].element || component.element, item[options.events], component, this.options.idProperty);
                         item[options.views] = {};
                         getViews(options, item[options.views], item[elmsTxt].element || component.element);
-                    } else if (property !== "replaceChild" && value !== oldValue) {
+                    } else if (property !== "replaceChild" && !item.__isNew) {
                         render(_inst.helper, element, property, parentElement, sibling[elmsTxt] && sibling[elmsTxt].element);
                     }
                 } else if (hasStorage && (storageAll || storageListeners.indexOf(property) !== -1)) {
@@ -1663,7 +1663,9 @@
             _inst.vom.destroy();
             this.container && (this.container.innerHTML = "");
             for (var n = 0, m = data.length; n < m; n++) {
+                data[n].__isNew = true;
                 this.appendChild(data[n]);
+                delete data[n].__isNew;
             }
             return component;
         };
