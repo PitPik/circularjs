@@ -20,7 +20,7 @@ var Blick = function(template, options) {
         readonly: disableAttribute,
         required: disableAttribute,
         selected: disableAttribute, // and many more
-      }
+      },
     };
     init(this, options || {}, template);
   },
@@ -40,6 +40,8 @@ var Blick = function(template, options) {
         part.isActive, part.parent, foundNode);
     };
     options.render = renderHook;
+    _this.helperContainer = document.createElement('tbody');
+    _this.search = new RegExp('{{#\\d+}}[\\S\\s]*{{/\\d+}}');
     _this.schnauzer = new Schnauzer(template, options);
   },
   dump = [],
@@ -117,9 +119,12 @@ function clearMemory(array) { // TODO: check for better
 }
 
 function render(container, helperContainer, fragment) {
-  while (helperContainer.childNodes.length) {
-    fragment.appendChild(helperContainer.childNodes[0]);
+  for (var n = helperContainer.childNodes.length; n--; ) {
+    fragment.appendChild(helperContainer.childNodes[n]);
   }
+  // while (helperContainer.childNodes.length) {
+  //   fragment.appendChild(helperContainer.childNodes[0]);
+  // }
   if (container) { // internal only
     container.parentNode.insertBefore(fragment, container.nextSibling);
   } else {
@@ -147,8 +152,8 @@ function checkSectionChild(node, child, sections, options) {
 }
 
 function resolveReferences(_this, memory, html, container, fragment) {
-  var search = new RegExp('{{#\\d+}}[\\S\\s]*{{/\\d+}}');
-  var helperContainer = document.createElement('tbody');
+  var search = _this.search;
+  var helperContainer = _this.helperContainer;
   var first = '';
   var last = '';
   var part = {};
@@ -162,6 +167,7 @@ function resolveReferences(_this, memory, html, container, fragment) {
   var out;
 
   helperContainer.innerHTML = html || '';
+  // helperContainer.insertAdjacentHTML('afterbegin', html || '');
 
   for (var n = memory.length; n--; ) { // must revers
     first = '{{#' + n + '}}';

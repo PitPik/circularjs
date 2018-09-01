@@ -1030,6 +1030,8 @@
             registerProperty(part.name, part.replacer, part.data.path[0], part.isActive, part.parent, foundNode);
         };
         options.render = renderHook;
+        _this.helperContainer = document.createElement("tbody");
+        _this.search = new RegExp("{{#\\d+}}[\\S\\s]*{{/\\d+}}");
         _this.schnauzer = new Schnauzer(template, options);
     }, dump = [], dummy = function() {}, disableAttribute = function(element, name, value) {
         if (value === true || value === "true" || !value && value !== false) {
@@ -1093,8 +1095,8 @@
         return null;
     }
     function render(container, helperContainer, fragment) {
-        while (helperContainer.childNodes.length) {
-            fragment.appendChild(helperContainer.childNodes[0]);
+        for (var n = helperContainer.childNodes.length; n--; ) {
+            fragment.appendChild(helperContainer.childNodes[n]);
         }
         if (container) {
             container.parentNode.insertBefore(fragment, container.nextSibling);
@@ -1121,8 +1123,8 @@
         return sections;
     }
     function resolveReferences(_this, memory, html, container, fragment) {
-        var search = new RegExp("{{#\\d+}}[\\S\\s]*{{/\\d+}}");
-        var helperContainer = document.createElement("tbody");
+        var search = _this.search;
+        var helperContainer = _this.helperContainer;
         var first = "";
         var last = "";
         var part = {};
