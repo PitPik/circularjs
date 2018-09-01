@@ -118,7 +118,7 @@ Circular.prototype.component = function(name, parameters) {
   pubsub[this.name][name] = {}; // prepare
   instanceList[this.id] = instanceList[this.id] || {};
   _inst = instanceList[this.id][name] = {};
-  _inst.helper = document.createElement('tbody');
+  // _inst.helper = document.createElement('tbody');
 
   parameters.onBeforeInit && parameters.onBeforeInit(component);
 
@@ -180,7 +180,7 @@ Circular.prototype.component = function(name, parameters) {
           container || component.container,
         siblingElement = parentNode ? replaceElement || undefined :
           siblingOrParent && siblingOrParent[elmsTxt].element,
-        element = fragment && render(_inst.helper, fragment, type || data.type || 'appendChild',
+        element = fragment && render(fragment, type || data.type || 'appendChild',
           parentNode, siblingElement, idProperty, id) || component.element;
 
       // collect elements
@@ -215,15 +215,14 @@ Circular.prototype.component = function(name, parameters) {
         blickItem = [];
 
       if (property === 'removeChild') {
-        render(_inst.helper, element, property, element.parentElement);
+        render(element, property, element.parentElement);
         delete _inst.collector[id];
       } else if (property === 'sortChildren') {
         // speed up sorting... TODO: check
-        render(_inst.helper, element, 'appendChild', parentElement);
+        render(element, 'appendChild', parentElement);
       } else if (this[property]) { // has method
         if (item === sibling) { // replaceChild by itself
-          element = render(_inst.helper,
-            _inst.template.renderHTML(item, _this.data[name].extraModel),
+          element = render(_inst.template.renderHTML(item, _this.data[name].extraModel),
             property, parentElement, sibling[elmsTxt].element,
             idProperty, item[idProperty]);
           item[elmsTxt].element = element;
@@ -237,7 +236,7 @@ Circular.prototype.component = function(name, parameters) {
           getViews(options, item[options.views],
             item[elmsTxt].element || component.element);
         } else if (property !== 'replaceChild' && !this.__isNew) {
-          render(_inst.helper, element, property, parentElement,
+          render(element, property, parentElement,
               sibling[elmsTxt] && sibling[elmsTxt].element);
         }
       } else if (hasStorage && (storageAll || storageListeners.indexOf(property) !== -1)) {
@@ -665,7 +664,7 @@ Controller.prototype = {
 
 return Circular;
 
-function render(helper, html, operator, parentNode, sibling, idProperty, id) {
+function render(html, operator, parentNode, sibling, idProperty, id) {
   var isPrepend = operator === 'prependChild',
     element = {};
 

@@ -1548,7 +1548,6 @@
         pubsub[this.name][name] = {};
         instanceList[this.id] = instanceList[this.id] || {};
         _inst = instanceList[this.id][name] = {};
-        _inst.helper = document.createElement("tbody");
         parameters.onBeforeInit && parameters.onBeforeInit(component);
         _inst.controller = parameters.eventListeners && new Controller({
             appElement: data.element,
@@ -1588,7 +1587,7 @@
         _inst.vom = new VOM(component.model, {
             idProperty: _this.options.idProperty || "cr-id",
             preRecursionCallback: function(item, type, siblingOrParent) {
-                var idProperty = this.options.idProperty, id = item[idProperty], fragment = _inst.template && _inst.template.schnauzer.partials.self && _inst.template.renderHTML(item, _this.data[name].extraModel), replaceElement = type === "replaceChild" && siblingOrParent[elmsTxt].element, container = item.parentNode[elmsTxt] && item.parentNode[elmsTxt].container, parentNode = fragment && siblingElement || container || component.container, siblingElement = parentNode ? replaceElement || undefined : siblingOrParent && siblingOrParent[elmsTxt].element, element = fragment && render(_inst.helper, fragment, type || data.type || "appendChild", parentNode, siblingElement, idProperty, id) || component.element;
+                var idProperty = this.options.idProperty, id = item[idProperty], fragment = _inst.template && _inst.template.schnauzer.partials.self && _inst.template.renderHTML(item, _this.data[name].extraModel), replaceElement = type === "replaceChild" && siblingOrParent[elmsTxt].element, container = item.parentNode[elmsTxt] && item.parentNode[elmsTxt].container, parentNode = fragment && siblingElement || container || component.container, siblingElement = parentNode ? replaceElement || undefined : siblingOrParent && siblingOrParent[elmsTxt].element, element = fragment && render(fragment, type || data.type || "appendChild", parentNode, siblingElement, idProperty, id) || component.element;
                 this.reinforceProperty(item, elmsTxt, {
                     element: element,
                     container: $(mountSelector, element)
@@ -1604,13 +1603,13 @@
             subscribe: function(property, item, value, oldValue, sibling) {
                 var idProperty = this.options.idProperty, id = item[idProperty], element = item[elmsTxt] && item[elmsTxt].element, parentElement = item.parentNode && item.parentNode[elmsTxt] ? item.parentNode[elmsTxt].container || item.parentNode[elmsTxt].element : component.container, blickItem = [];
                 if (property === "removeChild") {
-                    render(_inst.helper, element, property, element.parentElement);
+                    render(element, property, element.parentElement);
                     delete _inst.collector[id];
                 } else if (property === "sortChildren") {
-                    render(_inst.helper, element, "appendChild", parentElement);
+                    render(element, "appendChild", parentElement);
                 } else if (this[property]) {
                     if (item === sibling) {
-                        element = render(_inst.helper, _inst.template.renderHTML(item, _this.data[name].extraModel), property, parentElement, sibling[elmsTxt].element, idProperty, item[idProperty]);
+                        element = render(_inst.template.renderHTML(item, _this.data[name].extraModel), property, parentElement, sibling[elmsTxt].element, idProperty, item[idProperty]);
                         item[elmsTxt].element = element;
                         item[elmsTxt].container = $(mountSelector, element);
                         item[options.events] = {};
@@ -1618,7 +1617,7 @@
                         item[options.views] = {};
                         getViews(options, item[options.views], item[elmsTxt].element || component.element);
                     } else if (property !== "replaceChild" && !this.__isNew) {
-                        render(_inst.helper, element, property, parentElement, sibling[elmsTxt] && sibling[elmsTxt].element);
+                        render(element, property, parentElement, sibling[elmsTxt] && sibling[elmsTxt].element);
                     }
                 } else if (hasStorage && (storageAll || storageListeners.indexOf(property) !== -1)) {
                     storageData = storageHelper.fetch(storage.name) || {};
@@ -1947,7 +1946,7 @@
         }
     };
     return Circular;
-    function render(helper, html, operator, parentNode, sibling, idProperty, id) {
+    function render(html, operator, parentNode, sibling, idProperty, id) {
         var isPrepend = operator === "prependChild", element = {};
         if (html.nodeType === 11) {
             element = html.children[0];
