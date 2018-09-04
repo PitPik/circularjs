@@ -118,7 +118,6 @@ Circular.prototype.component = function(name, parameters) {
   pubsub[this.name][name] = {}; // prepare
   instanceList[this.id] = instanceList[this.id] || {};
   _inst = instanceList[this.id][name] = {};
-  // _inst.helper = document.createElement('tbody');
 
   parameters.onBeforeInit && parameters.onBeforeInit(component);
 
@@ -182,7 +181,6 @@ Circular.prototype.component = function(name, parameters) {
           siblingOrParent && siblingOrParent[elmsTxt].element,
         element = fragment && render(fragment, type || data.type || 'appendChild',
           parentNode, siblingElement, idProperty, id) || component.element;
-
       // collect elements
       this.reinforceProperty(item, elmsTxt, {
         element: element,
@@ -751,7 +749,7 @@ function processTemplate(template, options) {
 
   if (!isScript) {
     template.removeAttribute(options.templateAttr);
-    html = template.outerHTML;
+    html = template.outerHTML.replace(/{{&gt;/g, '{{>'); // TODO:...
     template.parentNode.removeChild(template);
     return html;
   }

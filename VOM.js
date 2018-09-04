@@ -146,10 +146,10 @@ function destroy(_this, items) { // only cleans up NODES
   return items;
 };
 
-function indexOf(_this, item) {
-  return (item.parentNode ?
-    getChildNodes(item.parentNode, _this.options.childNodes) : _this.model)
-  .indexOf(item);
+function indexOf(_this, item) { // TODO: fix appendChild -> index
+  return item.__index !== undefined ? item.__index :
+  (item.parentNode ? getChildNodes(item.parentNode,
+    _this.options.childNodes) : _this.model).indexOf(item);
 };
 
 function getChildNodes(item, childNodes) { // adds array if necessary
@@ -162,6 +162,7 @@ function moveItem(_this, item, parent, index, type, sibling) {
 
   options.moveCallback.call(_this, item, type, sibling);
   if (!item.parentNode) { // for convenience: append un-enhenced new items
+    item.__index = index;
     enrichModel(_this, [item], parent, type, sibling);
   } else if (options.parentCheck) {
     parentCheck(item, parent, options);
@@ -217,7 +218,7 @@ function enrichModel(_this, model, parent, type, sibling) {
     NODES[_this.id][item[idProperty]] = item; // push to flat index model
     isNew = !item.parentNode;
     item.parentNode = parent || _this.model.root;
-    item.index = 0; // will be reset on get()
+    item.index = item.index || 0; // will be reset on get()
     if (isNew) {
       reinforceProperty(item, idProperty, item[idProperty], hasOwnId);
       addProperty(_this, 'index', { current: item }, null, true);
@@ -229,6 +230,7 @@ function enrichModel(_this, model, parent, type, sibling) {
     item[options.childNodes] && // recursion
       enrichModel(_this, item[options.childNodes], item);
     options.enrichModelCallback.call(_this, item, type, sibling);
+    delete item.__index;
   }
 
   return model;

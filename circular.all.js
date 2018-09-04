@@ -998,6 +998,26 @@
     }); else root.Blick = factory(root, root.Schnauzer);
 })(this, function BlickFactory(root, Schnauzer, undefined) {
     "use strict";
+    function parseHtml(tags, search) {
+        for (var tag in tags) tags[tag] = document.createElement(tags[tag]);
+        parseHtml = function(html) {
+            var tag = (html.match(search) || [])[1];
+            var helper = tags[tag] || tags["_default"];
+            helper.innerHTML = html || "";
+            return helper;
+        };
+    }
+    parseHtml({
+        option: "select",
+        legend: "fieldset",
+        area: "map",
+        param: "object",
+        thead: "table",
+        tr: "tbody",
+        col: "colgroup",
+        td: "td",
+        _default: "div"
+    }, /<\s*(\w*)\s*[\s\S]*?>/);
     var Blick = function(template, options) {
         this.version = "0.0.1";
         this.options = {
@@ -1030,7 +1050,6 @@
             registerProperty(part.name, part.replacer, part.data.path[0], part.isActive, part.parent, foundNode);
         };
         options.render = renderHook;
-        _this.helperContainer = document.createElement("tbody");
         _this.search = new RegExp("{{#\\d+}}[\\S\\s]*{{/\\d+}}");
         _this.schnauzer = new Schnauzer(template, options);
     }, dump = [], dummy = function() {}, disableAttribute = function(element, name, value) {
@@ -1095,8 +1114,8 @@
         return null;
     }
     function render(container, helperContainer, fragment) {
-        for (var n = helperContainer.childNodes.length; n--; ) {
-            fragment.appendChild(helperContainer.childNodes[n]);
+        while (helperContainer.childNodes.length) {
+            fragment.appendChild(helperContainer.childNodes[0]);
         }
         if (container) {
             container.parentNode.insertBefore(fragment, container.nextSibling);
@@ -1124,7 +1143,7 @@
     }
     function resolveReferences(_this, memory, html, container, fragment) {
         var search = _this.search;
-        var helperContainer = _this.helperContainer;
+        var helperContainer = parseHtml(html);
         var first = "";
         var last = "";
         var part = {};
@@ -1136,7 +1155,6 @@
         var newMemory = [];
         var openSections = [];
         var out;
-        helperContainer.innerHTML = html || "";
         for (var n = memory.length; n--; ) {
             first = "{{#" + n + "}}";
             last = "{{/" + n + "}}";
@@ -1339,7 +1357,7 @@
         return items;
     }
     function indexOf(_this, item) {
-        return (item.parentNode ? getChildNodes(item.parentNode, _this.options.childNodes) : _this.model).indexOf(item);
+        return item.__index !== undefined ? item.__index : (item.parentNode ? getChildNodes(item.parentNode, _this.options.childNodes) : _this.model).indexOf(item);
     }
     function getChildNodes(item, childNodes) {
         item[childNodes] = item[childNodes] || [];
@@ -1349,6 +1367,7 @@
         var options = _this.options;
         options.moveCallback.call(_this, item, type, sibling);
         if (!item.parentNode) {
+            item.__index = index;
             enrichModel(_this, [ item ], parent, type, sibling);
         } else if (options.parentCheck) {
             parentCheck(item, parent, options);
@@ -1389,7 +1408,7 @@
             NODES[_this.id][item[idProperty]] = item;
             isNew = !item.parentNode;
             item.parentNode = parent || _this.model.root;
-            item.index = 0;
+            item.index = item.index || 0;
             if (isNew) {
                 reinforceProperty(item, idProperty, item[idProperty], hasOwnId);
                 addProperty(_this, "index", {
@@ -1403,6 +1422,7 @@
             options.preRecursionCallback.call(_this, item, type, sibling);
             item[options.childNodes] && enrichModel(_this, item[options.childNodes], item);
             options.enrichModelCallback.call(_this, item, type, sibling);
+            delete item.__index;
         }
         return model;
     }
@@ -2014,7 +2034,7 @@
         var html = "";
         if (!isScript) {
             template.removeAttribute(options.templateAttr);
-            html = template.outerHTML;
+            html = template.outerHTML.replace(/{{&gt;/g, "{{>");
             template.parentNode.removeChild(template);
             return html;
         }

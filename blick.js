@@ -6,6 +6,29 @@
   else root.Blick = factory(root, root.Schnauzer);
 }(this, function BlickFactory(root, Schnauzer, undefined) { 'use strict';
 
+function parseHtml(tags, search) {
+  for (var tag in tags) tags[tag] = document.createElement(tags[tag]);
+  parseHtml = function(html) {
+    var tag = (html.match(search) || [])[1];
+    var helper = (tags[tag] || tags['_default']);
+
+    helper.innerHTML = html || '';
+    return helper;
+  }
+}
+parseHtml({
+  option: 'select',
+  legend: 'fieldset',
+  area: 'map',
+  param: 'object',
+  thead: 'table',
+  tr: 'tbody',
+  col: 'colgroup',
+  td: 'td',
+  '_default': 'div',
+}, /<\s*(\w*)\s*[\s\S]*?>/);
+
+
 var Blick = function(template, options) {
     this.version = '0.0.1';
     this.options = {
@@ -40,7 +63,6 @@ var Blick = function(template, options) {
         part.isActive, part.parent, foundNode);
     };
     options.render = renderHook;
-    _this.helperContainer = document.createElement('tbody');
     _this.search = new RegExp('{{#\\d+}}[\\S\\s]*{{/\\d+}}');
     _this.schnauzer = new Schnauzer(template, options);
   },
@@ -119,12 +141,9 @@ function clearMemory(array) { // TODO: check for better
 }
 
 function render(container, helperContainer, fragment) {
-  for (var n = helperContainer.childNodes.length; n--; ) {
-    fragment.appendChild(helperContainer.childNodes[n]);
+  while (helperContainer.childNodes.length) {
+    fragment.appendChild(helperContainer.childNodes[0]);
   }
-  // while (helperContainer.childNodes.length) {
-  //   fragment.appendChild(helperContainer.childNodes[0]);
-  // }
   if (container) { // internal only
     container.parentNode.insertBefore(fragment, container.nextSibling);
   } else {
@@ -153,7 +172,7 @@ function checkSectionChild(node, child, sections, options) {
 
 function resolveReferences(_this, memory, html, container, fragment) {
   var search = _this.search;
-  var helperContainer = _this.helperContainer;
+  var helperContainer = parseHtml(html);
   var first = '';
   var last = '';
   var part = {};
@@ -165,9 +184,6 @@ function resolveReferences(_this, memory, html, container, fragment) {
   var newMemory = [];
   var openSections = [];
   var out;
-
-  helperContainer.innerHTML = html || '';
-  // helperContainer.insertAdjacentHTML('afterbegin', html || '');
 
   for (var n = memory.length; n--; ) { // must revers
     first = '{{#' + n + '}}';
