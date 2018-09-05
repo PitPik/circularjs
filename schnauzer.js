@@ -401,7 +401,8 @@ function replace(_this, data, text, sections, extType, parts) {
 function _replace(_this, part) {
   return function(data, keys) {
     var out = findData(data, part.name, keys || part.keys, part.depth);
-    var fn = !part.strict && _this.helpers[part.name] || isFunction(out) && out;
+    var fn = !part.strict && (_this.helpers[part.name] ||
+      _this.partials[part.name]) || isFunction(out) && out;
 
     out = fn ? apply(_this, fn, part.name, part.vars, data, part) :
       out && (part.isUnescaped ? out : escapeHtml(out, _this));
@@ -475,7 +476,7 @@ function sizzleTemplate(_this, text, sections) {
 
   while (_text !== text && (_text = text)) {
     text = text.replace(_this.sectionRegExp, function(all, start, type, name, vars, end, rest) {
-      if (type === '#*') { console.log(rest, text, sections)
+      if (type === '#*') {
         var partialName = vars.replace(/(?:^['"]|['"]$)/g, '');
         _this.partials[partialName] = _this.partials[partialName] ||
           sizzleTemplate(_this, rest, sections);
