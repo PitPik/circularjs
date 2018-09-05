@@ -84,7 +84,7 @@ Schnauzer.prototype = {
   },
   registerPartial: function(name, text) {
     return this.partials[name] =
-      (this.partials[name] || sizzleTemplate(this, text));
+      (this.partials[name] || sizzleTemplate(this, text, []));
   },
   unregisterPartial: function(name) {
     delete this.partials[name];
@@ -469,15 +469,16 @@ function loop(_this, data, fn, name, vars, isNot, type) {
   return fn[1] && fn[1](data); // else
 }
 
-function sizzleTemplate(_this, text) {
+function sizzleTemplate(_this, text, sections) {
   var _text = '';
-  var sections = [];
   var tags = _this.options.tags;
 
   while (_text !== text && (_text = text)) {
     text = text.replace(_this.sectionRegExp, function(all, start, type, name, vars, end, rest) {
-      if (type === '#*') {
-        _this.registerPartial(vars.replace(/(?:^['"]|['"]$)/g, ''), rest);
+      if (type === '#*') { console.log(rest, text, sections)
+        var partialName = vars.replace(/(?:^['"]|['"]$)/g, '');
+        _this.partials[partialName] = _this.partials[partialName] ||
+          sizzleTemplate(_this, rest, sections);
         return '';
       }
       rest = rest.split(_this.elseSplitter); // .replace(/[\n\r]\s*$/, '')
