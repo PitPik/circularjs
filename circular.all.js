@@ -813,7 +813,7 @@
             vars: vars,
             parts: parts,
             rawParts: rawParts,
-            partial: char0 === ">" && (_this.partials[_data.name] || _this.partials[_this.options.recursion]),
+            partial: char0 === ">",
             isInline: _data.isInline,
             isUnescaped: !_this.options.doEscape || char0 === "&" || unEscaped,
             isActive: _data.isActive,
@@ -869,7 +869,6 @@
         var _out = "";
         var _fn = null;
         var _data = {};
-        var newData = {};
         var part = {};
         for (var n = 0, l = text.length; n < l; n++) {
             part = parts[n];
@@ -890,18 +889,7 @@
                 continue;
             }
             if (part.partial) {
-                newData = {};
-                for (var item in data.path[0]) {
-                    newData[item] = data.path[0][item];
-                }
-                for (var key in part.parts) {
-                    _data = part.parts[key];
-                    newData[key] = _data.isString ? _data.value : findData(data, _data.value, _data.keys, _data.depth);
-                }
-                newData = getSource(newData);
-                newData.helpers = [ data.helpers[0] ];
-                newData.extra = [ data.extra[0] ];
-                _out = part.partial(newData);
+                _out = _this.partials[part.name](data);
             } else {
                 part.parent = crawlObjectUp(data.helpers, [ 0, "_parent" ]);
                 _fn = _replace(_this, part);
