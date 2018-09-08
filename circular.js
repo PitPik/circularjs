@@ -21,7 +21,8 @@ var Circular = function(name, options) {
       elements: 'elements', // TODO: check usage
       events: 'events',
       views: 'views',
-      hash: '#'
+      hash: '#',
+      partials: {},
       // helpers: {}, // TODO
       // decorators: {}, // TODO
     };
@@ -135,6 +136,7 @@ Circular.prototype.component = function(name, parameters) {
       helpers: parameters.helpers || options.helpers || {}, // TODO
       decorators: parameters.decorators || options.decorators || {}, // TODO
       attributes: parameters.attributes || options.attributes || {}, // TODO
+      partials: options.partials,
 
       registerProperty: function(name, fn, data, active, parent) {
         var noGetter = parent && data[parent[0]] &&
@@ -178,7 +180,7 @@ Circular.prototype.component = function(name, parameters) {
         parentNode = fragment && siblingElement ||
           container || component.container,
         siblingElement = parentNode ? replaceElement || undefined :
-          siblingOrParent && siblingOrParent[elmsTxt].element,
+          siblingOrParent && siblingOrParent[elmsTxt] && siblingOrParent[elmsTxt].element,
         element = fragment && render(fragment, type || data.type || 'appendChild',
           parentNode, siblingElement, idProperty, id) || component.element;
       // collect elements
@@ -321,7 +323,15 @@ Circular.prototype.model = function(model, options) {
 };
 
 Circular.prototype.template = function(template, options) {
-  return new Blick(template, options);
+  var engine = new Blick(template, options);
+  if (options && options.share) {
+    for (var partial in engine.schnauzer.partials) {
+      if (!this.options.partials[partial] && partial !== 'self') {
+        this.options.partials[partial] = engine.schnauzer.partials[partial];
+      }
+    }
+  }
+  return engine;
 };
 
 Circular.Toolbox = Toolbox;
@@ -749,7 +759,9 @@ function processTemplate(template, options) {
 
   if (!isScript) {
     template.removeAttribute(options.templateAttr);
-    html = template.outerHTML.replace(/{{&gt;/g, '{{>'); // TODO:...
+    html = template.outerHTML.replace(/(?:{{&gt;|cr-src=)/g, function($1) {
+      return $1.charAt(0) === '{' ? '{{>' : 'src=';
+    });
     template.parentNode.removeChild(template);
     return html;
   }

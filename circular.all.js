@@ -636,7 +636,7 @@
             delete this.decorators[name];
         },
         registerPartial: function(name, text) {
-            return this.partials[name] = this.partials[name] || sizzleTemplate(this, text, []);
+            return this.partials[name] = this.partials[name] || typeof text === "function" ? text : sizzleTemplate(this, text, []);
         },
         unregisterPartial: function(name) {
             delete this.partials[name];
@@ -1508,7 +1508,8 @@
             elements: "elements",
             events: "events",
             views: "views",
-            hash: "#"
+            hash: "#",
+            partials: {}
         };
         initCircular(this, name, options);
     }, initCircular = function(_this, name, options) {
@@ -1571,6 +1572,7 @@
             helpers: parameters.helpers || options.helpers || {},
             decorators: parameters.decorators || options.decorators || {},
             attributes: parameters.attributes || options.attributes || {},
+            partials: options.partials,
             registerProperty: function(name, fn, data, active, parent) {
                 var noGetter = parent && data[parent[0]] && !Object.getOwnPropertyDescriptor(data[parent[0]], "0").get;
                 var _parent = parent ? parent.slice(0) : parent;
@@ -1597,7 +1599,7 @@
         _inst.vom = new VOM(component.model, {
             idProperty: _this.options.idProperty || "cr-id",
             preRecursionCallback: function(item, type, siblingOrParent) {
-                var idProperty = this.options.idProperty, id = item[idProperty], fragment = _inst.template && _inst.template.schnauzer.partials.self && _inst.template.renderHTML(item, _this.data[name].extraModel), replaceElement = type === "replaceChild" && siblingOrParent[elmsTxt].element, container = item.parentNode[elmsTxt] && item.parentNode[elmsTxt].container, parentNode = fragment && siblingElement || container || component.container, siblingElement = parentNode ? replaceElement || undefined : siblingOrParent && siblingOrParent[elmsTxt].element, element = fragment && render(fragment, type || data.type || "appendChild", parentNode, siblingElement, idProperty, id) || component.element;
+                var idProperty = this.options.idProperty, id = item[idProperty], fragment = _inst.template && _inst.template.schnauzer.partials.self && _inst.template.renderHTML(item, _this.data[name].extraModel), replaceElement = type === "replaceChild" && siblingOrParent[elmsTxt].element, container = item.parentNode[elmsTxt] && item.parentNode[elmsTxt].container, parentNode = fragment && siblingElement || container || component.container, siblingElement = parentNode ? replaceElement || undefined : siblingOrParent && siblingOrParent[elmsTxt] && siblingOrParent[elmsTxt].element, element = fragment && render(fragment, type || data.type || "appendChild", parentNode, siblingElement, idProperty, id) || component.element;
                 this.reinforceProperty(item, elmsTxt, {
                     element: element,
                     container: $(mountSelector, element)
@@ -1697,7 +1699,15 @@
         return new VOM(model, options);
     };
     Circular.prototype.template = function(template, options) {
-        return new Blick(template, options);
+        var engine = new Blick(template, options);
+        if (options && options.share) {
+            for (var partial in engine.schnauzer.partials) {
+                if (!this.options.partials[partial] && partial !== "self") {
+                    this.options.partials[partial] = engine.schnauzer.partials[partial];
+                }
+            }
+        }
+        return engine;
     };
     Circular.Toolbox = Toolbox;
     Circular.prototype.subscribe = function(inst, comp, attr, callback, trigger) {
@@ -2022,7 +2032,9 @@
         var html = "";
         if (!isScript) {
             template.removeAttribute(options.templateAttr);
-            html = template.outerHTML.replace(/{{&gt;/g, "{{>");
+            html = template.outerHTML.replace(/(?:{{&gt;|cr-src=)/g, function($1) {
+                return $1.charAt(0) === "{" ? "{{>" : "src=";
+            });
             template.parentNode.removeChild(template);
             return html;
         }

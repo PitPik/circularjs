@@ -84,7 +84,8 @@ Schnauzer.prototype = {
   },
   registerPartial: function(name, text) {
     return this.partials[name] =
-      (this.partials[name] || sizzleTemplate(this, text, []));
+      (this.partials[name] || typeof text === 'function' ?
+        text : sizzleTemplate(this, text, []));
   },
   unregisterPartial: function(name) {
     delete this.partials[name];
