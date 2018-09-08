@@ -1545,7 +1545,7 @@
             return this.components[name].reset(parameters.model, parameters.extraModel);
         }
         this.data[name] = {};
-        var _this = this, _inst = {}, proto = {}, options = this.options, elmsTxt = options.elements, componentAttr = options.componentAttr, componentSelector = attrSelector(componentAttr, name), componentElement = parameters.componentElement || $(componentSelector, parameters.componentWrapper || document);
+        var _this = this, _inst = {}, proto = {}, options = this.options, elmsTxt = options.elements, componentAttr = options.componentAttr, componentSelector = attrSelector(componentAttr, name), componentElement = parameters.componentElement || $(componentSelector, parameters.componentWrapper || document) || $(name, parameters.componentWrapper || document);
         if (!componentElement) return;
         var nestingData = checkRestoreNesting(componentElement, componentAttr), altName = componentElement && componentElement.getAttribute("name"), data = getDomData(options, parameters, componentElement, altName || name), component = this.components[name] = {
             name: name,

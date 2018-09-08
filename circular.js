@@ -88,7 +88,8 @@ Circular.prototype.component = function(name, parameters) {
     componentAttr = options.componentAttr,
     componentSelector = attrSelector(componentAttr, name),
     componentElement = parameters.componentElement || // TODO: ... no wrapper
-      $(componentSelector, parameters.componentWrapper || document);
+      $(componentSelector, parameters.componentWrapper || document) ||
+      $(name, parameters.componentWrapper || document);
 
   if (!componentElement) return;
 
