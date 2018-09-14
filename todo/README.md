@@ -28,7 +28,7 @@ Dynamic variables usually don't trigger a view update if the model changes but t
 
 In the index.html you will now recognise 2 ```cr-component``` definitions, ```app``` and ```list```, their templates for rendering defined by ```cr-template-for``` and the definition of where the templates should be rendered into defined by ```cr-container``` (which can have a value ```prepend``` if you want to not append but prepend the rendering).
 
-In our case here, we have a very special edge-case situation: Not only the components are nested, which is a quite common case, but also the templates are nested, and this is the reason for the previously mentioned ```cr-container="prepend"``` and the last line of the code in ```app.js```, but I'll get back to this later on.
+In our case here, we have a very special edge-case situation: Not only the components are nested, which is a quite common case, but also the templates are nested, and this is the reason for the previously mentioned ```cr-container="prepend"```.
 
 ### The JS code (app.js)
 
@@ -81,22 +81,7 @@ The second function ```updateUI()``` was explained before, it just sets the UI t
 The ```true``` means that if there was a variable detected, even after the router was defined, it should already trigger its callback. Routers are based on PubSub that can do the same thing (look back on actual state). The argument ```self``` is actually the instance of the component itself.
 
 
-So, now to that edge-case I was mentioning in the beginning: What does ```self.model[0].views.main.appendChild(list.container);``` actually do, and why.
-
-Well, I chose to use ```<body>``` as my app-component because it includes all the UI components at once. But, actually the component is divided in two halves as there is the list-component inside. This would not be so much of a problem if there was not the other component even inside the app-component's template.
-
-As soon as a component renders a template, the DOM-elements defining the template are removed from the document and are then only used as innerHTML (or in this case even outerHTML) of itself. But, as long as the component is not initialised, the elements act just like regular dome elements.
-
-In our case, we initialised the list-components first, so it was embedded inside the outer template that was at this time still regular DOM stuff.
-
-When we initialised the list-component we also got references to the component's element its container and all the other cr-view references for free. As soon as we initialise the app-component, the the list-component gets thrown out (as its part of the other template), but we also get the reference to the outer component's ```cr-view="main"``` element.
-
-This way we can append the list-component back to the ```cr-view="main"``` of the outer component.
-
 The ```cr-container="prepend"``` is because the fact that we choose to use ```<body>``` as a component which is also the container, a regular ```append``` would put our view on the end of the container and the ```<footer class="info">``` would then be above.
-
-This seems all a bit hacky, but it's for the reason to not have to rebuild the TodoMVC's template too much and/or not to have to do a third component that would take care of the bottom part of the UI. This happens on init only anyhow and is therefore also not really expensive.
-
 
 ## Conclusion
 
