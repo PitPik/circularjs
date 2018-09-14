@@ -1,5 +1,5 @@
 // Full spec-compliant TodoMVC with localStorage persistence
-// and hash-based routing in ~73 effective lines of JavaScript.
+// and hash-based routing in ~72 effective lines of JavaScript.
 require(['circular'], Circular => {
   const ENTER_KEY = 13;
   const ESCAPE_KEY = 27;
@@ -76,7 +76,6 @@ require(['circular'], Circular => {
         model.none = done === 0;
       };
       self.updateUI();
-      model.views.main.appendChild(list.container);
     },
   });
 });
