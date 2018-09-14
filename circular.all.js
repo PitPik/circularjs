@@ -1544,7 +1544,6 @@
         if (this.components[name]) {
             return this.components[name].reset(parameters.model, parameters.extraModel);
         }
-        this.data[name] = {};
         var _this = this, _inst = {}, proto = {}, options = this.options, elmsTxt = options.elements, componentAttr = options.componentAttr, componentSelector = attrSelector(componentAttr, name), componentElement = parameters.componentElement || $(componentSelector, parameters.componentWrapper || document) || $(name, parameters.componentWrapper || document);
         if (!componentElement) return;
         var nestingData = checkRestoreNesting(componentElement, componentAttr), altName = componentElement && componentElement.getAttribute("name"), data = getDomData(options, parameters, componentElement, altName || name), component = this.components[name] = {
@@ -1554,11 +1553,14 @@
             container: data.container,
             templates: data.templates
         }, hasStorage = parameters.storage, storage = hasStorage || {}, storageHelper = Toolbox.storageHelper, storageData = hasStorage && storageHelper.fetch(storage.name) || {}, storageCategory = storage.category, storageListeners = storage.listeners || parameters.listeners, storageAll = storage.storeAll || storageListeners && storageListeners.indexOf("*") !== -1, mountSelector = parameters.mountSelector || attrSelector(options.mountAttribute), template = parameters.template;
-        this.data[name].extraModel = parameters.extraModel || options.extraModel;
+        _this.data[name] = {
+            extraModel: parameters.extraModel || options.extraModel
+        };
         pubsub[this.name] = pubsub[this.name] || {};
         pubsub[this.name][name] = {};
         instanceList[this.id] = instanceList[this.id] || {};
         _inst = instanceList[this.id][name] = {};
+        _inst.nestingData = nestingData;
         parameters.onBeforeInit && parameters.onBeforeInit(component);
         _inst.controller = parameters.eventListeners && new Controller({
             appElement: data.element,
@@ -1660,7 +1662,7 @@
                 });
             }
         });
-        checkRestoreNesting(null, null, nestingData);
+        checkRestoreNesting(componentElement, null, nestingData);
         proto = transferMethods(VOM, _inst.vom, component, this, proto);
         proto.uncloak = function(item) {
             var item = item && item.element || component.element;
@@ -1677,6 +1679,7 @@
             for (var n = 0, m = data.length; n < m; n++) {
                 this.appendChild(data[n]);
             }
+            _inst.nestingData.length && checkRestoreNesting(componentElement, null, _inst.nestingData);
             delete _inst.vom.__isNew;
             return component;
         };
@@ -1699,8 +1702,10 @@
         return new VOM(model, options);
     };
     Circular.prototype.template = function(template, options) {
+        options = options || {};
+        options.helpers = options.helpers || this.options.helpers || {};
         var engine = new Blick(template, options);
-        if (options && options.share) {
+        if (options.share) {
             for (var partial in engine.schnauzer.partials) {
                 if (!this.options.partials[partial] && partial !== "self") {
                     this.options.partials[partial] = engine.schnauzer.partials[partial];
@@ -2007,22 +2012,23 @@
         }
         return proto;
     }
-    function checkRestoreNesting(comp, attr, restore) {
-        var temp = [], tempContainer = checkRestoreNesting.tempContainer = checkRestoreNesting.tempContainer || document.createDocumentFragment(), restores = [], collect = {};
+    function checkRestoreNesting(comp, attr, restore, nodeList) {
+        var temp = [], restores = [];
         if (restore) {
-            for (var n = restore.length; n--; ) {
-                collect = restore[n];
-                collect[2][collect[1] ? "insertBefore" : "appendChild"](collect[0], collect[1]);
-                restore[n] = null;
+            temp = nodeList || $$("[cr-replace]", comp);
+            for (var idx = 0, n = temp.length; n--; ) {
+                idx = temp[n].getAttribute("cr-replace");
+                temp[n].parentNode.replaceChild(restore[idx], temp[n]);
             }
+            temp = temp.length !== restore.length && $$("[cr-replace]", comp);
+            if (temp.length) checkRestoreNesting(comp, attr, restore, temp);
         } else if (comp && attr) {
             temp = $$(attrSelector(attr), comp);
-            if (temp.length !== 0) {
-                for (var n = 0, m = temp.length; n < m; n++) {
-                    collect = temp[n];
-                    restores.push([ collect, collect.nextElementSibling, collect.parentNode ]);
-                    tempContainer.appendChild(collect);
-                }
+            for (var replacement = {}, n = 0, m = temp.length; n < m; n++) {
+                replacement = document.createElement(temp[n].tagName);
+                replacement.setAttribute("cr-replace", n);
+                temp[n].parentNode.replaceChild(replacement, temp[n]);
+                restores.push(temp[n]);
             }
             return restores;
         }

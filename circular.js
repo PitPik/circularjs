@@ -18,6 +18,7 @@ var Circular = function(name, options) {
       viewAttr: 'cr-view', // TODO...
       devAttribute: 'cr-dev',
       mountAttribute: 'cr-mount',
+      // modelAttribute: 'cr-model',
       elements: 'elements', // TODO: check usage
       events: 'events',
       views: 'views',
@@ -78,8 +79,6 @@ Circular.prototype.component = function(name, parameters) {
   if (this.components[name]) { // TODO: make this possible: name???
     return this.components[name].reset(parameters.model, parameters.extraModel);
   }
-  this.data[name] = {};
-
   var _this = this,
     _inst = {}, // current instance
     proto = {},
@@ -114,12 +113,14 @@ Circular.prototype.component = function(name, parameters) {
     mountSelector = parameters.mountSelector || attrSelector(options.mountAttribute),
     template = parameters.template;
 
-  this.data[name].extraModel = parameters.extraModel || options.extraModel;
-
+  _this.data[name] = {
+    extraModel: parameters.extraModel || options.extraModel,
+  };
   pubsub[this.name] = pubsub[this.name] || {}; // prepare
   pubsub[this.name][name] = {}; // prepare
   instanceList[this.id] = instanceList[this.id] || {};
   _inst = instanceList[this.id][name] = {};
+  _inst.nestingData = nestingData; //////////////////////
 
   parameters.onBeforeInit && parameters.onBeforeInit(component);
 
@@ -129,6 +130,7 @@ Circular.prototype.component = function(name, parameters) {
     eventListeners: parameters.eventListeners,
     instanceID: _this.id,
   });
+
   _inst.collector = {};
   _inst.template = template && template.version ?
     template : templateCache[name] ? templateCache[name] :
@@ -159,6 +161,7 @@ Circular.prototype.component = function(name, parameters) {
       },
     }) : null;
   _inst.template && (templateCache[name] = _inst.template);
+
   if (hasStorage) {
     var _data = storageData[storageCategory] || storageData;
     for (var key in component.model[0]) {
@@ -167,6 +170,7 @@ Circular.prototype.component = function(name, parameters) {
       }
     }
   }
+
   _inst.vom = new VOM(component.model, {
     idProperty: _this.options.idProperty || 'cr-id',
     preRecursionCallback: function(item, type, siblingOrParent) {
@@ -187,7 +191,7 @@ Circular.prototype.component = function(name, parameters) {
       // collect elements
       this.reinforceProperty(item, elmsTxt, {
         element: element,
-        container: $(mountSelector, element)
+        container: $(mountSelector, element),
       }, true);
       // collect events
       this.reinforceProperty(item, options.events, {}, true);
@@ -276,7 +280,7 @@ Circular.prototype.component = function(name, parameters) {
       });
     }
   });
-  checkRestoreNesting(null, null, nestingData);
+  checkRestoreNesting(componentElement, null, nestingData);
 
   // proto = transferMethods(Schnauzer, _inst.template, component, this, proto);
   proto = transferMethods(VOM, _inst.vom, component, this, proto);
@@ -296,6 +300,8 @@ Circular.prototype.component = function(name, parameters) {
     for (var n = 0, m = data.length; n < m; n++) {
       this.appendChild(data[n]);
     } // onInit here ??
+    _inst.nestingData.length &&
+      checkRestoreNesting(componentElement, null, _inst.nestingData);
     delete _inst.vom.__isNew; // TODO
     return component;
   }
@@ -324,8 +330,10 @@ Circular.prototype.model = function(model, options) {
 };
 
 Circular.prototype.template = function(template, options) {
+  options = options || {};
+  options.helpers = options.helpers || this.options.helpers || {};
   var engine = new Blick(template, options);
-  if (options && options.share) {
+  if (options.share) {
     for (var partial in engine.schnauzer.partials) {
       if (!this.options.partials[partial] && partial !== 'self') {
         this.options.partials[partial] = engine.schnauzer.partials[partial];
@@ -727,28 +735,25 @@ function transferMethods(fromClass, fromInstance, toInstance, _this, proto) {
   return proto;
 }
 
-function checkRestoreNesting(comp, attr, restore) {
+function checkRestoreNesting(comp, attr, restore, nodeList) {
   var temp = [],
-    tempContainer = checkRestoreNesting.tempContainer =
-      checkRestoreNesting.tempContainer || document.createDocumentFragment(),
-    restores = [],
-    collect = {};
+    restores = [];
 
   if (restore) {
-    for (var n = restore.length; n--; ) {
-      collect = restore[n];
-      collect[2][collect[1] ? 'insertBefore' : 'appendChild'](
-        collect[0], collect[1]);
-      restore[n] = null;
+    temp = nodeList || $$('[cr-replace]', comp); // slower approach but save
+    for (var idx = 0, n = temp.length; n--; ) {
+      idx = temp[n].getAttribute('cr-replace'); // re-rendered from template
+      temp[n].parentNode.replaceChild(restore[idx], temp[n]);
     }
+    temp = temp.length !== restore.length && $$('[cr-replace]', comp);
+    if (temp.length) checkRestoreNesting(comp, attr, restore, temp);
   } else if (comp && attr) {
     temp = $$(attrSelector(attr), comp);
-    if (temp.length !== 0) {
-      for (var n = 0, m = temp.length; n < m; n++) {
-        collect = temp[n];
-        restores.push([collect, collect.nextElementSibling, collect.parentNode]);
-        tempContainer.appendChild(collect);
-      }
+    for (var replacement = {}, n = 0, m = temp.length; n < m; n++) {
+      replacement = document.createElement(temp[n].tagName);
+      replacement.setAttribute('cr-replace', n);
+      temp[n].parentNode.replaceChild(replacement, temp[n]);
+      restores.push(temp[n]);
     }
     return restores;
   }
