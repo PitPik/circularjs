@@ -14,7 +14,7 @@
         <h1>todos</h1>
         <input class="new-todo" cr-event="keypress: addItem" placeholder="What needs to be done?" autofocus>
       </header>
-      <section class="main {{%filter}}" cr-view="main">
+      <section class="main {{%filter}}">
         <input cr-event="click: toggleAll" class="toggle-all" id="toggle-all" type="checkbox" checked="{{%all}}" disabled="{{%hide}}">
         <label for="toggle-all">Mark all as complete</label>
         <ul class="todo-list" cr-component="list" cr-container>
