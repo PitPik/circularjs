@@ -87,9 +87,9 @@ Circular.prototype.component = function(name, parameters) {
 
   if (!componentElement) return;
 
-  var nestingData = checkRestoreNesting(componentElement, componentAttr),
+  var nestingData = handleNesting(componentElement, componentAttr),
     altName = componentElement && componentElement.getAttribute('name'),
-    data = getDomData(options, parameters, componentElement, altName || name),
+    data = getDOMData(options, parameters, componentElement, altName || name),
     component = this.components[name] = {
       name: name,
       model: parameters.model || [],
@@ -275,9 +275,8 @@ Circular.prototype.component = function(name, parameters) {
       });
     }
   });
-  checkRestoreNesting(componentElement, null, nestingData);
+  handleNesting(componentElement, null, nestingData);
 
-  // proto = transferMethods(Schnauzer, _inst.template, component, this, proto);
   proto = transferMethods(VOM, _inst.vom, component, this, proto);
   proto.uncloak = function(item) {
     var item = item && item.element || component.element;
@@ -294,9 +293,9 @@ Circular.prototype.component = function(name, parameters) {
     _inst.vom.__isNew = true; // TODO
     for (var n = 0, m = data.length; n < m; n++) {
       this.appendChild(data[n]);
-    } // onInit here ??
+    }
     _inst.nestingData.length &&
-      checkRestoreNesting(componentElement, null, _inst.nestingData);
+      handleNesting(componentElement, null, _inst.nestingData);
     delete _inst.vom.__isNew; // TODO
     return component;
   };
@@ -564,7 +563,7 @@ Circular.prototype.renderModule = function(data) {
   var cache = null,
     temp = null,
     isInsideDoc = data.container,
-    modules = modulesList, // speeds up
+    modules = modulesList, // speeds up var search
     name = data.name;
 
   if (modules[data.previousName]) { // remove old app
@@ -731,18 +730,22 @@ function transferMethods(fromClass, fromInstance, toInstance, _this, proto) {
   return proto;
 }
 
-function checkRestoreNesting(comp, attr, restore, nodeList) {
+function handleNesting(comp, attr, restore, nodeList) {
   var temp = [],
-    restores = [];
+    restores = [],
+    cache = {};
 
   if (restore) {
     temp = nodeList || $$('[cr-replace]', comp); // slower approach but save
-    for (var idx = 0, n = temp.length; n--; ) {
+    cache = {};
+    for (var idx = 0, n = 0, l = temp.length; n < l; n++) {
       idx = temp[n].getAttribute('cr-replace'); // re-rendered from template
+      if (cache[idx]) continue; // only on first item
       temp[n].parentNode.replaceChild(restore[idx], temp[n]);
+      cache[idx] = true;
     }
     temp = temp.length !== restore.length && $$('[cr-replace]', comp);
-    if (temp.length) checkRestoreNesting(comp, attr, restore, temp);
+    if (temp.length) handleNesting(comp, attr, restore, temp);
   } else if (comp && attr) {
     temp = $$(attrSelector(attr), comp);
     for (var replacement = {}, n = 0, m = temp.length; n < m; n++) {
@@ -772,7 +775,7 @@ function processTemplate(template, options) {
 }
 
 // ----- get component data
-function getDomData(options, parameters, component, name) {
+function getDOMData(options, parameters, component, name) {
   var searchContainer = component || document.body,
     containerAttr = options.containerAttr,
     namedTplSelector = attrSelector(options.templateAttr, name),
