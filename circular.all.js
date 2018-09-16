@@ -1546,7 +1546,7 @@
         }
         var _this = this, _inst = {}, proto = {}, options = this.options, elmsTxt = options.elements, componentAttr = options.componentAttr, componentSelector = attrSelector(componentAttr, name), componentElement = parameters.componentElement || $(componentSelector, parameters.componentWrapper || document) || $(name, parameters.componentWrapper || document);
         if (!componentElement) return;
-        var nestingData = checkRestoreNesting(componentElement, componentAttr), altName = componentElement && componentElement.getAttribute("name"), data = getDomData(options, parameters, componentElement, altName || name), component = this.components[name] = {
+        var nestingData = handleNesting(componentElement, componentAttr), altName = componentElement && componentElement.getAttribute("name"), data = getDOMData(options, parameters, componentElement, altName || name), component = this.components[name] = {
             name: name,
             model: parameters.model || [],
             element: data.element,
@@ -1662,7 +1662,7 @@
                 });
             }
         });
-        checkRestoreNesting(componentElement, null, nestingData);
+        handleNesting(componentElement, null, nestingData);
         proto = transferMethods(VOM, _inst.vom, component, this, proto);
         proto.uncloak = function(item) {
             var item = item && item.element || component.element;
@@ -1679,7 +1679,7 @@
             for (var n = 0, m = data.length; n < m; n++) {
                 this.appendChild(data[n]);
             }
-            _inst.nestingData.length && checkRestoreNesting(componentElement, null, _inst.nestingData);
+            _inst.nestingData.length && handleNesting(componentElement, null, _inst.nestingData);
             delete _inst.vom.__isNew;
             return component;
         };
@@ -1876,9 +1876,9 @@
         });
     };
     function moveChildrenToCache(data) {
-        var children = [].slice.call(data.container.childNodes);
-        for (var n = 0, m = children.length; n < m; n++) {
-            modulesList[data.previousName].cache.appendChild(children[n]);
+        var children = data.container.childNodes;
+        while (children[0]) {
+            modulesList[data.previousName].cache.appendChild(children[0]);
         }
     }
     Circular.prototype.renderModule = function(data) {
@@ -1887,8 +1887,8 @@
             moveChildrenToCache(data);
         }
         if (name && modules[name]) {
-            data.container.appendChild(modules[name].cache);
             modules[name].init && data.init !== false && modules[name].init(data.data, modules[name].path);
+            data.container.appendChild(modules[name].cache);
             return new Toolbox.Promise(function(resolve) {
                 resolve(modules[name].init);
             });
@@ -2012,16 +2012,19 @@
         }
         return proto;
     }
-    function checkRestoreNesting(comp, attr, restore, nodeList) {
-        var temp = [], restores = [];
+    function handleNesting(comp, attr, restore, nodeList) {
+        var temp = [], restores = [], cache = {};
         if (restore) {
             temp = nodeList || $$("[cr-replace]", comp);
-            for (var idx = 0, n = temp.length; n--; ) {
+            cache = {};
+            for (var idx = 0, n = 0, l = temp.length; n < l; n++) {
                 idx = temp[n].getAttribute("cr-replace");
+                if (cache[idx]) continue;
                 temp[n].parentNode.replaceChild(restore[idx], temp[n]);
+                cache[idx] = true;
             }
             temp = temp.length !== restore.length && $$("[cr-replace]", comp);
-            if (temp.length) checkRestoreNesting(comp, attr, restore, temp);
+            if (temp.length) handleNesting(comp, attr, restore, temp);
         } else if (comp && attr) {
             temp = $$(attrSelector(attr), comp);
             for (var replacement = {}, n = 0, m = temp.length; n < m; n++) {
@@ -2046,7 +2049,7 @@
         }
         return template.innerHTML;
     }
-    function getDomData(options, parameters, component, name) {
+    function getDOMData(options, parameters, component, name) {
         var searchContainer = component || document.body, containerAttr = options.containerAttr, namedTplSelector = attrSelector(options.templateAttr, name), container = component.hasAttribute(containerAttr) ? component : $(attrSelector(containerAttr), component), _template, type = container && container.getAttribute(options.containerAttr), template = container && ($(namedTplSelector, searchContainer) || $(namedTplSelector, document.body)), _templates = $$(attrSelector(options.templatesAttr, name), searchContainer) || [], templates = {};
         for (var n = _templates.length; n--; ) {
             _template = processTemplate(_templates[n], options);

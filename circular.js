@@ -552,10 +552,10 @@ Circular.prototype.insertModule = function(fileName, container) {
 };
 
 function moveChildrenToCache(data) {
-  var children = [].slice.call(data.container.childNodes);
+  var children = data.container.childNodes;
 
-  for (var n = 0, m = children.length; n < m; n++) {
-    modulesList[data.previousName].cache.appendChild(children[n]);
+  while (children[0]) {
+    modulesList[data.previousName].cache.appendChild(children[0]);
   }
 }
 
@@ -570,9 +570,10 @@ Circular.prototype.renderModule = function(data) {
     moveChildrenToCache(data);
   }
   if (name && modules[name]) { // append current app and initialize
-    data.container.appendChild(modules[name].cache);
     modules[name].init && data.init !== false &&
       modules[name].init(data.data, modules[name].path);
+    data.container.appendChild(modules[name].cache);
+
     return new Toolbox.Promise(function(resolve) {
       resolve(modules[name].init);
     });
