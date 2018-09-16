@@ -530,33 +530,56 @@ Circular.prototype.loadResource = function(fileName, cache) {
 
 Circular.prototype.insertResources = function(container, data) {
   var body = $(attrSelector(this.options.devAttribute, 'container'),
-      data.body) || data.body;
+      data.body) || data.body,
+      hasAppend = data.append !== undefined;
 
   Toolbox.requireResources(data, 'styles', container);
-  while(body.childNodes[0]) {
-    container.appendChild(body.childNodes[0]);
-  }
+  data.append = function() {
+    while(body.childNodes[0]) {
+      container.appendChild(body.childNodes[0]);
+    }
+  };
+  if (!hasAppend) data.append();
   return Toolbox.requireResources(data, 'scripts', container);
 };
 
-Circular.prototype.insertModule = function(fileName, container) {
+Circular.prototype.insertModule = function(fileName, container, append) {
   var _this = this;
 
   return this.loadResource(fileName, true)
     .then(function(data) {
-      return _this.insertResources(container, data).
-        then(function(){
-          return data.path;
+      data.append = append;
+      return _this.insertResources(container, data)
+        .then(function() {
+          return { path: data.path, append: data.append };
         });
     });
 };
 
 function moveChildrenToCache(data) {
-  var children = data.container.childNodes;
+  var childNodes = data.container.childNodes;
 
-  while (children[0]) {
-    modulesList[data.previousName].cache.appendChild(children[0]);
+  while (childNodes[0]) {
+    modulesList[data.previousName].cache.appendChild(childNodes[0]);
   }
+}
+
+function transition(init, data, modules, moduleData) {
+  var remove = function() {
+      moveChildrenToCache(data);
+    },
+    append = function() {
+      moduleData ? moduleData.append() :
+        data.container.appendChild(modules[data.name].cache);
+    };
+
+  data.transition === true ? (remove(), append()) :
+    data.transition(remove, append, new Promise(function(resolve) {
+      (init.then ? init : data.data).then(function(_data) {
+        resolve(_data);
+        return _data;
+      });
+    }));
 }
 
 Circular.prototype.renderModule = function(data) {
@@ -564,18 +587,20 @@ Circular.prototype.renderModule = function(data) {
     temp = null,
     isInsideDoc = data.container,
     modules = modulesList, // speeds up var search
-    name = data.name;
+    name = data.name,
+    init = name && modules[name] && modules[name].init,
+    hasTransition = data.transition;
 
-  if (modules[data.previousName]) { // remove old app
+  if (modules[data.previousName] && !hasTransition) { // remove old app
     moveChildrenToCache(data);
   }
   if (name && modules[name]) { // append current app and initialize
-    modules[name].init && data.init !== false &&
-      modules[name].init(data.data, modules[name].path);
-    data.container.appendChild(modules[name].cache);
+    init = init && data.init !== false && init(data.data, modules[name].path);
+    hasTransition ? transition(init, data, modules) :
+      data.container.appendChild(modules[name].cache);
 
     return new Toolbox.Promise(function(resolve) {
-      resolve(modules[name].init);
+      resolve(init);
     });
   }
   // create new app and initialize
@@ -585,24 +610,26 @@ Circular.prototype.renderModule = function(data) {
     temp.style.display = 'none';
     document.body.appendChild(temp);
   }
-  return name ? this.insertModule(data.path, data.container || temp)
-    .then(function(path) {
+  return name ? this.insertModule(data.path, data.container || temp, hasTransition)
+    .then(function(moduleData) {
       return new Toolbox.Promise(function(resolve) {
         var moduleName = data.require === true ? name :
             data.require === false ? '' : data.require;
 
         modules[name] = {
-          path: path,
+          path: moduleData.path,
           cache: cache
         };
         if (moduleName) {
           require([moduleName], function(init) {
             modules[name].init = init;
-            data.init !== false && init(data.data, path);
+            data.init !== false && init(data.data, moduleData.path);
             if (!isInsideDoc) {
               data.container = temp;
               moveChildrenToCache(data);
               temp.parentElement.removeChild(temp);
+            } else if (hasTransition) {
+              transition(init, data, modules, moduleData);
             }
             resolve(init);
           });
