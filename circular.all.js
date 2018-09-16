@@ -1505,11 +1505,14 @@
             viewAttr: "cr-view",
             devAttribute: "cr-dev",
             mountAttribute: "cr-mount",
+            modelAttribute: "cr-model",
             elements: "elements",
             events: "events",
             views: "views",
             hash: "#",
-            partials: {}
+            partials: {},
+            helpers: {},
+            decorators: {}
         };
         initCircular(this, name, options);
     }, initCircular = function(_this, name, options) {
@@ -1528,8 +1531,7 @@
         _this.name = hasName ? name : _this.id;
     }, Controller = function(options) {
         this.options = {
-            appElement: document.body,
-            eventAttribute: "cr-event"
+            appElement: document.body
         };
         initController(this, options);
     }, initController = function(_this, options) {
@@ -1537,9 +1539,7 @@
             _this.options[option] = options[option];
         }
         _this.events = {};
-    }, _animate = window.requestAnimationFrame || window.webkitRequestAnimationFrame || function(cb) {
-        cb();
-    }, $ = Toolbox.$, $$ = Toolbox.$$, id = 0, instanceList = {}, templateCache = {}, resourceCache = null, DOC = null, pubsub = {}, routes = [], appComponents = {};
+    }, $ = Toolbox.$, $$ = Toolbox.$$, id = 0, instanceList = {}, modulesList = {}, templateCache = {}, DOC = null, pubsub = {};
     Circular.prototype.component = function(name, parameters) {
         if (this.components[name]) {
             return this.components[name].reset(parameters.model, parameters.extraModel);
@@ -1552,7 +1552,7 @@
             element: data.element,
             container: data.container,
             templates: data.templates
-        }, hasStorage = parameters.storage, storage = hasStorage || {}, storageHelper = Toolbox.storageHelper, storageData = hasStorage && storageHelper.fetch(storage.name) || {}, storageCategory = storage.category, storageListeners = storage.listeners || parameters.listeners, storageAll = storage.storeAll || storageListeners && storageListeners.indexOf("*") !== -1, mountSelector = parameters.mountSelector || attrSelector(options.mountAttribute), template = parameters.template;
+        }, mountSelector = parameters.mountSelector || attrSelector(options.mountAttribute), template = parameters.template, hasStorage = parameters.storage, storage = hasStorage || {}, storageHelper = Toolbox.storageHelper, storageData = hasStorage && storageHelper.fetch(storage.name) || {}, storageCategory = storage.category, storageListeners = storage.listeners || parameters.listeners, storageAll = storage.storeAll || storageListeners && storageListeners.indexOf("*") !== -1;
         _this.data[name] = {
             extraModel: parameters.extraModel || options.extraModel
         };
@@ -1571,8 +1571,8 @@
         _inst.collector = {};
         _inst.template = template && template.version ? template : templateCache[name] ? templateCache[name] : data.template ? new Blick(template || data.template, {
             doEscape: false,
-            helpers: parameters.helpers || options.helpers || {},
-            decorators: parameters.decorators || options.decorators || {},
+            helpers: parameters.helpers || options.helpers,
+            decorators: parameters.decorators || options.decorators,
             attributes: parameters.attributes || options.attributes || {},
             partials: options.partials,
             registerProperty: function(name, fn, data, active, parent) {
@@ -1703,7 +1703,7 @@
     };
     Circular.prototype.template = function(template, options) {
         options = options || {};
-        options.helpers = options.helpers || this.options.helpers || {};
+        options.helpers = options.helpers || this.options.helpers;
         var engine = new Blick(template, options);
         if (options.share) {
             for (var partial in engine.schnauzer.partials) {
@@ -1878,19 +1878,19 @@
     function moveChildrenToCache(data) {
         var children = [].slice.call(data.container.childNodes);
         for (var n = 0, m = children.length; n < m; n++) {
-            appComponents[data.previousName].cache.appendChild(children[n]);
+            modulesList[data.previousName].cache.appendChild(children[n]);
         }
     }
     Circular.prototype.renderModule = function(data) {
-        var cache = null, temp = null, isInsideDoc = data.container, components = appComponents, name = data.name;
-        if (components[data.previousName]) {
+        var cache = null, temp = null, isInsideDoc = data.container, modules = modulesList, name = data.name;
+        if (modules[data.previousName]) {
             moveChildrenToCache(data);
         }
-        if (name && components[name]) {
-            data.container.appendChild(components[name].cache);
-            components[name].init && data.init !== false && components[name].init(data.data, components[name].path);
+        if (name && modules[name]) {
+            data.container.appendChild(modules[name].cache);
+            modules[name].init && data.init !== false && modules[name].init(data.data, modules[name].path);
             return new Toolbox.Promise(function(resolve) {
-                resolve(components[name].init);
+                resolve(modules[name].init);
             });
         }
         cache = document.createDocumentFragment();
@@ -1902,13 +1902,13 @@
         return name ? this.insertModule(data.path, data.container || temp).then(function(path) {
             return new Toolbox.Promise(function(resolve) {
                 var moduleName = data.require === true ? name : data.require === false ? "" : data.require;
-                components[name] = {
+                modules[name] = {
                     path: path,
                     cache: cache
                 };
                 if (moduleName) {
                     require([ moduleName ], function(init) {
-                        components[name].init = init;
+                        modules[name].init = init;
                         data.init !== false && init(data.data, path);
                         if (!isInsideDoc) {
                             data.container = temp;
@@ -2047,12 +2047,12 @@
         return template.innerHTML;
     }
     function getDomData(options, parameters, component, name) {
-        var searchContainer = component || document.body, containerAttr = options.containerAttr, container = component.hasAttribute(containerAttr) ? component : $(attrSelector(containerAttr, name), component) || $(attrSelector(containerAttr), component), _template, type = container && container.getAttribute(options.containerAttr), template = $(attrSelector(options.templateAttr, name), searchContainer), _templates = $$(attrSelector(options.templatesAttr, name), searchContainer) || [], templates = {};
+        var searchContainer = component || document.body, containerAttr = options.containerAttr, namedTplSelector = attrSelector(options.templateAttr, name), container = component.hasAttribute(containerAttr) ? component : $(attrSelector(containerAttr), component), _template, type = container && container.getAttribute(options.containerAttr), template = container && ($(namedTplSelector, searchContainer) || $(namedTplSelector, document.body)), _templates = $$(attrSelector(options.templatesAttr, name), searchContainer) || [], templates = {};
         for (var n = _templates.length; n--; ) {
             _template = processTemplate(_templates[n], options);
             templates[_templates[n].id || _templates[n].getAttribute("name")] = new Blick(_template, {
                 doEscape: false,
-                helpers: parameters.helpers || options.helpers || {}
+                helpers: parameters.helpers || options.helpers
             });
         }
         return {

@@ -114,7 +114,7 @@ require(['circular'], function(Circular) {
       }, targetSize));
 
       self.model[0].allDots = dots.getElementsByProperty('text');
-      self.model[0].elements.element.appendChild(dots.element);
+      // self.model[0].elements.element.appendChild(dots.element);
 
       self.model[0].start = Date.now();
       nextFrame(self.model[0]);
