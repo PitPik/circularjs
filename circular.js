@@ -588,7 +588,8 @@ function transition(init, data, modules, moduleData) {
     };
 
   data.transition === true ? (remove(), append()) :
-    data.transition(data.container, remove, append, new Promise(function(resolve) {
+    data.transition(data.container, remove, append,
+      new Toolbox.Promise(function(resolve) {
       (init.then ? init : data.data).then(function(_data) { // TODO: after init
         resolve(_data);
         return _data;

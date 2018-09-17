@@ -1907,7 +1907,7 @@
                 data.container.appendChild(modules[data.name].cache);
             }
         };
-        data.transition === true ? (remove(), append()) : data.transition(data.container, remove, append, new Promise(function(resolve) {
+        data.transition === true ? (remove(), append()) : data.transition(data.container, remove, append, new Toolbox.Promise(function(resolve) {
             (init.then ? init : data.data).then(function(_data) {
                 resolve(_data);
                 return _data;
