@@ -71,6 +71,10 @@ var Circular = function(name, options) {
   pubsub = {}; // general data holder
 
 Circular.prototype.component = function(name, parameters) {
+  if (typeof name !== 'string') {
+    parameters = name;
+    name = parameters.name;
+  }
   if (this.components[name]) { // TODO: make this possible: name???
     return this.components[name].reset(parameters.model, parameters.extraModel);
   }
@@ -305,6 +309,12 @@ Circular.prototype.component = function(name, parameters) {
   parameters.onInit && parameters.onInit(component);
 
   return component;
+};
+
+Circular.prototype.getBaseModel = function(name) {
+  var component = this.components[name];
+
+  return component ? component.model[0] : null;
 };
 
 Circular.prototype.destroy = function(name) { // TODO: review -> use reset
@@ -569,13 +579,17 @@ function transition(init, data, modules, moduleData) {
       moveChildrenToCache(data);
     },
     append = function() {
-      moduleData ? moduleData.append() :
+      if (moduleData) {
+        moduleData.append();
+        data.init !== false && init(data.data, moduleData.path);
+      } else {
         data.container.appendChild(modules[data.name].cache);
+      }
     };
 
   data.transition === true ? (remove(), append()) :
-    data.transition(remove, append, new Promise(function(resolve) {
-      (init.then ? init : data.data).then(function(_data) {
+    data.transition(data.container, remove, append, new Promise(function(resolve) {
+      (init.then ? init : data.data).then(function(_data) { // TODO: after init
         resolve(_data);
         return _data;
       });
@@ -623,13 +637,16 @@ Circular.prototype.renderModule = function(data) {
         if (moduleName) {
           require([moduleName], function(init) {
             modules[name].init = init;
-            data.init !== false && init(data.data, moduleData.path);
+
             if (!isInsideDoc) {
+              data.init !== false && init(data.data, moduleData.path);
               data.container = temp;
               moveChildrenToCache(data);
               temp.parentElement.removeChild(temp);
             } else if (hasTransition) {
               transition(init, data, modules, moduleData);
+            } else {
+              data.init !== false && init(data.data, moduleData.path);
             }
             resolve(init);
           });

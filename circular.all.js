@@ -1541,6 +1541,10 @@
         _this.events = {};
     }, $ = Toolbox.$, $$ = Toolbox.$$, id = 0, instanceList = {}, modulesList = {}, templateCache = {}, DOC = null, pubsub = {};
     Circular.prototype.component = function(name, parameters) {
+        if (typeof name !== "string") {
+            parameters = name;
+            name = parameters.name;
+        }
         if (this.components[name]) {
             return this.components[name].reset(parameters.model, parameters.extraModel);
         }
@@ -1686,6 +1690,10 @@
         component.__proto__ = proto;
         parameters.onInit && parameters.onInit(component);
         return component;
+    };
+    Circular.prototype.getBaseModel = function(name) {
+        var component = this.components[name];
+        return component ? component.model[0] : null;
     };
     Circular.prototype.destroy = function(name) {
         var _instList = instanceList[this.id];
@@ -1892,9 +1900,14 @@
         var remove = function() {
             moveChildrenToCache(data);
         }, append = function() {
-            moduleData ? moduleData.append() : data.container.appendChild(modules[data.name].cache);
+            if (moduleData) {
+                moduleData.append();
+                data.init !== false && init(data.data, moduleData.path);
+            } else {
+                data.container.appendChild(modules[data.name].cache);
+            }
         };
-        data.transition === true ? (remove(), append()) : data.transition(remove, append, new Promise(function(resolve) {
+        data.transition === true ? (remove(), append()) : data.transition(data.container, remove, append, new Promise(function(resolve) {
             (init.then ? init : data.data).then(function(_data) {
                 resolve(_data);
                 return _data;
@@ -1929,13 +1942,15 @@
                 if (moduleName) {
                     require([ moduleName ], function(init) {
                         modules[name].init = init;
-                        data.init !== false && init(data.data, moduleData.path);
                         if (!isInsideDoc) {
+                            data.init !== false && init(data.data, moduleData.path);
                             data.container = temp;
                             moveChildrenToCache(data);
                             temp.parentElement.removeChild(temp);
                         } else if (hasTransition) {
                             transition(init, data, modules, moduleData);
+                        } else {
+                            data.init !== false && init(data.data, moduleData.path);
                         }
                         resolve(init);
                     });
