@@ -1915,14 +1915,14 @@
         }));
     }
     Circular.prototype.renderModule = function(data) {
-        var cache = null, temp = null, isInsideDoc = data.container, modules = modulesList, name = data.name, init = name && modules[name] && modules[name].init, hasTransition = data.transition;
+        var cache = null, temp = null, isInsideDoc = data.container, modules = modulesList, name = data.name, init = name && modules[name] && modules[name].init, hasTransition = data.transition, Promise = Toolbox.Promise;
         if (modules[data.previousName] && !hasTransition) {
             moveChildrenToCache(data);
         }
         if (name && modules[name]) {
             init = init && data.init !== false && init(data.data, modules[name].path);
             hasTransition ? transition(init, data, modules) : data.container.appendChild(modules[name].cache);
-            return new Toolbox.Promise(function(resolve) {
+            return new Promise(function(resolve) {
                 resolve(init);
             });
         }
@@ -1933,7 +1933,7 @@
             document.body.appendChild(temp);
         }
         return name ? this.insertModule(data.path, data.container || temp, hasTransition).then(function(moduleData) {
-            return new Toolbox.Promise(function(resolve) {
+            return new Promise(function(resolve) {
                 var moduleName = data.require === true ? name : data.require === false ? "" : data.require;
                 modules[name] = {
                     path: moduleData.path,
@@ -1960,7 +1960,7 @@
                     resolve();
                 }
             });
-        }).catch() : new Toolbox.Promise(function(a) {
+        }).catch() : new Promise(function(a) {
             a();
         });
     };

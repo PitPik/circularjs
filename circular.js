@@ -604,7 +604,8 @@ Circular.prototype.renderModule = function(data) {
     modules = modulesList, // speeds up var search
     name = data.name,
     init = name && modules[name] && modules[name].init,
-    hasTransition = data.transition;
+    hasTransition = data.transition,
+    Promise = Toolbox.Promise;
 
   if (modules[data.previousName] && !hasTransition) { // remove old app
     moveChildrenToCache(data);
@@ -614,7 +615,7 @@ Circular.prototype.renderModule = function(data) {
     hasTransition ? transition(init, data, modules) :
       data.container.appendChild(modules[name].cache);
 
-    return new Toolbox.Promise(function(resolve) {
+    return new Promise(function(resolve) {
       resolve(init);
     });
   }
@@ -627,7 +628,7 @@ Circular.prototype.renderModule = function(data) {
   }
   return name ? this.insertModule(data.path, data.container || temp, hasTransition)
     .then(function(moduleData) {
-      return new Toolbox.Promise(function(resolve) {
+      return new Promise(function(resolve) {
         var moduleName = data.require === true ? name :
             data.require === false ? '' : data.require;
 
@@ -657,7 +658,7 @@ Circular.prototype.renderModule = function(data) {
           resolve();
         }
       })
-    }).catch() : new Toolbox.Promise(function(a){a()});
+    }).catch() : new Promise(function(a){a()});
 };
 
 /* --------------------  UI controller ------------------- */
