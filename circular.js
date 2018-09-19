@@ -19,6 +19,7 @@ var Circular = function(name, options) {
       devAttribute: 'cr-dev',
       mountAttribute: 'cr-mount',
       modelAttribute: 'cr-model',
+      wrapAttribute: 'cr-wrap',
 
       elements: 'elements',
       events: 'events',
@@ -567,11 +568,18 @@ Circular.prototype.insertModule = function(fileName, container, append) {
 };
 
 function moveChildrenToCache(data) {
-  var childNodes = data.container.childNodes;
+  var previousModule = modulesList[data.previousName];
 
-  while (childNodes[0]) {
-    modulesList[data.previousName].cache.appendChild(childNodes[0]);
+  if (data.wrap) {
+    previousModule.wrap &&
+      previousModule.cache.appendChild(previousModule.wrap);
+  } else {
+    wrap(data.container.childNodes, previousModule.cache);
   }
+}
+
+function wrap(childNodes, container) {
+  while (childNodes[0]) container.appendChild(childNodes[0]);
 }
 
 function transition(init, data, modules, moduleData) {
@@ -598,47 +606,54 @@ function transition(init, data, modules, moduleData) {
 }
 
 Circular.prototype.renderModule = function(data) {
-  var cache = null,
-    temp = null,
+  var temp = null,
     isInsideDoc = data.container,
     modules = modulesList, // speeds up var search
     name = data.name,
-    init = name && modules[name] && modules[name].init,
+    currentModule = modules[name],
+    init = name && currentModule && currentModule.init,
     hasTransition = data.transition,
-    Promise = Toolbox.Promise;
+    Promise = Toolbox.Promise,
+    container = data.container;
 
   if (modules[data.previousName] && !hasTransition) { // remove old app
     moveChildrenToCache(data);
   }
-  if (name && modules[name]) { // append current app and initialize
-    init = init && data.init !== false && init(data.data, modules[name].path);
+  if (name && currentModule) { // append current app and initialize
+    init = init && data.init !== false && init(data.data, currentModule.path);
     hasTransition ? transition(init, data, modules) :
-      data.container.appendChild(modules[name].cache);
+      data.container.appendChild(currentModule.cache);
 
     return new Promise(function(resolve) {
       resolve(init);
     });
   }
   // create new app and initialize
-  cache = document.createDocumentFragment();
+  currentModule = modules[name] = { cache: document.createDocumentFragment() };
   if (!isInsideDoc) { // TODO: find other solution
     temp = document.createElement('div');
     temp.style.display = 'none';
     document.body.appendChild(temp);
   }
-  return name ? this.insertModule(data.path, data.container || temp, hasTransition)
+  if (data.wrap) {
+    currentModule.wrap = document.createElement('div');
+    currentModule.wrap.setAttribute(this.options.wrapAttribute, data.wrap);
+  }
+  container = (data.container || temp);
+  return name ? this.insertModule(data.path, container, hasTransition)
     .then(function(moduleData) {
+      if (data.wrap) {
+        wrap(container.childNodes, currentModule.wrap);
+        container.appendChild(currentModule.wrap);
+      }
       return new Promise(function(resolve) {
         var moduleName = data.require === true ? name :
             data.require === false ? '' : data.require;
 
-        modules[name] = {
-          path: moduleData.path,
-          cache: cache
-        };
+        currentModule.path = moduleData.path;
         if (moduleName) {
           require([moduleName], function(init) {
-            modules[name].init = init;
+            currentModule.init = init;
 
             if (!isInsideDoc) {
               data.init !== false && init(data.data, moduleData.path);
