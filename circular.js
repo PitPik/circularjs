@@ -570,7 +570,12 @@ function transition(init, data, modules, moduleData) {
       previousModule.cache.appendChild(previousModule.wrap);
     },
     append = function() {
+      if (modules[name].dontWrap) {
+        modules[name].wrap = wrap = modules[name].wrap.children[0];
+        delete modules[name].dontWrap;
+      }
       container && container.appendChild(wrap);
+
       moduleData && data.init !== false && init(data.data, moduleData.path);
     };
 
@@ -611,7 +616,10 @@ Circular.prototype.renderModule = function(data) {
     return new Promise(function(resolve) { resolve(init) });
   }
   // create new app and initialize
-  modules[name] = module = { cache: document.createDocumentFragment() };
+  modules[name] = module = {
+    cache: document.createDocumentFragment(),
+    dontWrap: data.dontWrap
+  };
 
   if (!isInsideDoc) { // TODO: find other solution
     temp = document.createElement('div');

@@ -1877,6 +1877,10 @@
             if (!previousName || previousName === name) return;
             previousModule.cache.appendChild(previousModule.wrap);
         }, append = function() {
+            if (modules[name].dontWrap) {
+                modules[name].wrap = wrap = modules[name].wrap.children[0];
+                delete modules[name].dontWrap;
+            }
             container && container.appendChild(wrap);
             moduleData && data.init !== false && init(data.data, moduleData.path);
         };
@@ -1907,7 +1911,8 @@
             });
         }
         modules[name] = module = {
-            cache: document.createDocumentFragment()
+            cache: document.createDocumentFragment(),
+            dontWrap: data.dontWrap
         };
         if (!isInsideDoc) {
             temp = document.createElement("div");
