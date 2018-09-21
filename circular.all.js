@@ -1919,7 +1919,7 @@
             module.wrap.setAttribute("cr-wrap", name);
             if (temp) {
                 temp.appendChild(module.wrap);
-            } else {
+            } else if (data.preInit || !data.data) {
                 data.container.appendChild(module.wrap);
             }
         }

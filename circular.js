@@ -618,7 +618,7 @@ Circular.prototype.renderModule = function(data) {
     module.wrap.setAttribute('cr-wrap', name);
     if (temp) {
       temp.appendChild(module.wrap);
-    } else { // HTML must be in tree otherwhise they don't initialise
+    } else if (data.preInit || !data.data) {
       data.container.appendChild(module.wrap);
     }
   }
