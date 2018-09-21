@@ -9,7 +9,7 @@
 function parseHtml(tags, search) {
   for (var tag in tags) tags[tag] = document.createElement(tags[tag]);
   parseHtml = function(html) {
-    var tag = (html.match(search) || [])[1];
+    var tag = ((html || '').match(search) || [])[1];
     var helper = (tags[tag] || tags['_default']);
 
     helper.innerHTML = html || '';

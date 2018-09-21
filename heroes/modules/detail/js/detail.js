@@ -36,4 +36,6 @@ function(Circular, heroService) {
             });
         }
     }, true);
+
+    return function init(data, path) {};
 });

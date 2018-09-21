@@ -336,15 +336,12 @@
             var text = "";
             var isStyles = type === "styles";
             var attribute = isStyles ? "href" : "src";
-            var items = isStyles ? data.links.concat(data.styles) : data.scripts;
-            resourceCache = resourceCache || Toolbox.captureResources();
-            while (items.length) {
-                item = items.shift();
+            var items = isStyles ? data.styleSheets : data.scripts;
+            var cache = resourceCache = resourceCache || Toolbox.captureResources();
+            while (item = items.shift()) {
                 resourceName = item.getAttribute(attribute);
                 path = Toolbox.normalizePath(data.path ? data.path + "/" + resourceName : "" + resourceName);
-                if (resourceName && resourceCache[path]) {
-                    continue;
-                }
+                if (resourceName && cache[path]) continue;
                 if (!isStyles) {
                     text = item.text;
                     item = document.createElement("script");
@@ -353,35 +350,28 @@
                     if (!resourceName) {
                         item.text = text;
                     }
-                    promises.push(new Toolbox.Promise(function(resolve) {
-                        if (!resourceName) {
-                            container && container.appendChild(item);
-                            resolve(item);
-                        } else {
-                            item.onload = function() {
-                                resolve(this);
-                            };
-                        }
-                    }));
                 }
                 if (resourceName) {
                     item[attribute] = path;
                     document.head.appendChild(item);
-                    resourceCache[path] = item;
-                } else if (container && isStyles) {
-                    container.appendChild(item);
+                    cache[path] = item;
                 }
-            }
-            if (promises.length === 0) {
                 promises.push(new Toolbox.Promise(function(resolve) {
-                    resolve(function() {});
+                    if (resourceName && item.onload !== undefined) {
+                        item.onload = function() {
+                            resolve(this);
+                        };
+                    } else {
+                        !resourceName && (container || document.body).appendChild(item);
+                        resolve(item);
+                    }
                 }));
             }
             return Toolbox.Promise.all(promises);
         },
         captureResources: function() {
             var cache = {};
-            var resources = [].slice.call(Toolbox.$$("script", document)).concat([].slice.call(Toolbox.$$("link", document)));
+            var resources = [].slice.call(document.scripts).concat([].slice.call(Toolbox.$$("link", document)));
             var path = "";
             for (var n = resources.length; n--; ) {
                 path = resources[n].getAttribute("src") || resources[n].getAttribute("href");
@@ -989,7 +979,7 @@
     function parseHtml(tags, search) {
         for (var tag in tags) tags[tag] = document.createElement(tags[tag]);
         parseHtml = function(html) {
-            var tag = (html.match(search) || [])[1];
+            var tag = ((html || "").match(search) || [])[1];
             var helper = tags[tag] || tags["_default"];
             helper.innerHTML = html || "";
             return helper;
@@ -1846,46 +1836,32 @@
         return Toolbox.ajax(fileName, {
             cache: cache
         }).then(function(data) {
-            var scripts = [];
-            var path = fileName.split("/").slice(0, -1);
             DOC = DOC || document.implementation.createHTMLDocument("");
             DOC.documentElement.innerHTML = data;
-            scripts = [].slice.call($$("script", DOC) || []).filter(function(elm) {
-                if (elm.getAttribute("type") === "text/javascript") {
-                    elm.parentNode.removeChild(elm);
-                    return devFilter(elm);
-                }
-                return false;
-            });
             return {
-                links: [].slice.call($$("link", DOC) || []).filter(devFilter),
-                styles: [].slice.call($$("style", DOC) || []).filter(devFilter),
-                scripts: scripts,
-                body: $("body", DOC),
-                head: $("head", DOC),
-                path: path.join("/")
+                scripts: [].slice.call(DOC.scripts).filter(function(elm) {
+                    return elm.type === "text/javascript" && devFilter(elm.parentNode.removeChild(elm));
+                }),
+                styleSheets: [].slice.call($$("link", DOC) || []).filter(devFilter).concat([].slice.call($$("style", DOC) || []).filter(devFilter)),
+                body: DOC.body,
+                head: DOC.head,
+                path: fileName.split("/").slice(0, -1).join("/")
             };
         }).catch();
     };
     Circular.prototype.insertResources = function(container, data) {
-        var body = $(attrSelector(this.options.devAttribute, "container"), data.body) || data.body, hasAppend = data.append !== undefined;
+        var body = $(attrSelector(this.options.devAttribute, "container"), data.body) || data.body;
         Toolbox.requireResources(data, "styles", container);
-        data.append = function() {
-            while (body.childNodes[0]) {
-                container.appendChild(body.childNodes[0]);
-            }
-        };
-        if (!hasAppend) data.append();
+        while (body.childNodes[0]) container.appendChild(body.childNodes[0]);
         return Toolbox.requireResources(data, "scripts", container);
     };
-    Circular.prototype.insertModule = function(fileName, container, append) {
+    Circular.prototype.insertModule = function(fileName, container) {
         var _this = this;
         return this.loadResource(fileName, true).then(function(data) {
-            data.append = append;
             return _this.insertResources(container, data).then(function() {
                 return {
                     path: data.path,
-                    append: data.append
+                    container: container
                 };
             });
         });
@@ -1897,52 +1873,65 @@
         }
     }
     function transition(init, data, modules, moduleData) {
-        var remove = function() {
-            moveChildrenToCache(data);
+        var promise = init && init.then ? init : data.data, remove = function() {
+            if (!data.previousName || data.previousName === data.name) return;
+            modules[data.previousName].cache.appendChild(modules[data.previousName].wrap);
         }, append = function() {
-            if (moduleData) {
-                moduleData.append();
-                data.init !== false && init(data.data, moduleData.path);
-            } else {
-                data.container.appendChild(modules[data.name].cache);
-            }
+            data.container && data.container.appendChild(modules[data.name].wrap);
+            moduleData && data.init !== false && init(data.data, moduleData.path);
         };
-        data.transition === true ? (remove(), append()) : data.transition(data.container, remove, append, new Toolbox.Promise(function(resolve) {
-            (init.then ? init : data.data).then(function(_data) {
-                resolve(_data);
-                return _data;
-            });
-        }));
+        data.transition === true ? (remove(), append()) : data.transition({
+            container: data.container,
+            remove: remove,
+            append: append,
+            promise: new Toolbox.Promise(function(resolve) {
+                promise ? promise.then(function(_data) {
+                    resolve();
+                    return _data;
+                }) : resolve();
+            }),
+            component: modules[data.name].wrap,
+            previousComponent: (modules[data.previousName] || {}).wrap
+        });
     }
     Circular.prototype.renderModule = function(data) {
-        var cache = null, temp = null, isInsideDoc = data.container, modules = modulesList, name = data.name, init = name && modules[name] && modules[name].init, hasTransition = data.transition, Promise = Toolbox.Promise;
+        var temp = null, isInsideDoc = data.container, modules = modulesList, name = data.name, module = name && modules[name], init = module && module.init, hasTransition = data.transition, Promise = Toolbox.Promise;
         if (modules[data.previousName] && !hasTransition) {
             moveChildrenToCache(data);
         }
-        if (name && modules[name]) {
-            init = init && data.init !== false && init(data.data, modules[name].path);
-            hasTransition ? transition(init, data, modules) : data.container.appendChild(modules[name].cache);
+        if (name && module) {
+            init = init && init(data.data, module.path);
+            hasTransition ? transition(init, data, modules) : data.container.appendChild(module.cache);
             return new Promise(function(resolve) {
                 resolve(init);
             });
         }
-        cache = document.createDocumentFragment();
+        modules[name] = module = {
+            cache: document.createDocumentFragment()
+        };
         if (!isInsideDoc) {
             temp = document.createElement("div");
             temp.style.display = "none";
             document.body.appendChild(temp);
         }
-        return name ? this.insertModule(data.path, data.container || temp, hasTransition).then(function(moduleData) {
+        if (hasTransition) {
+            module.wrap = document.createElement("div");
+            module.wrap.setAttribute("cr-wrap", name);
+            if (temp) {
+                temp.appendChild(module.wrap);
+            } else {
+                data.container.appendChild(module.wrap);
+            }
+        }
+        var container = module.wrap || data.container || temp;
+        return name ? this.insertModule(data.path, container, hasTransition).then(function(moduleData) {
             return new Promise(function(resolve) {
                 var moduleName = data.require === true ? name : data.require === false ? "" : data.require;
-                modules[name] = {
-                    path: moduleData.path,
-                    cache: cache
-                };
+                module.path = moduleData.path;
                 if (moduleName) {
                     require([ moduleName ], function(init) {
-                        modules[name].init = init;
-                        if (!isInsideDoc) {
+                        module.init = init;
+                        if (!isInsideDoc && !hasTransition) {
                             data.init !== false && init(data.data, moduleData.path);
                             data.container = temp;
                             moveChildrenToCache(data);

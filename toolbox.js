@@ -233,52 +233,39 @@
       var text = '';
       var isStyles = type === 'styles';
       var attribute = isStyles ? 'href' : 'src';
-      var items = isStyles ? data.links.concat(data.styles) : data.scripts;
+      var items = isStyles ? data.styleSheets : data.scripts;
+      var cache = resourceCache = resourceCache || Toolbox.captureResources();
 
-      resourceCache = resourceCache || Toolbox.captureResources();
-
-      while (items.length) {
-        item = items.shift();
+      while (item = items.shift()) {
         resourceName = item.getAttribute(attribute);
         path = Toolbox.normalizePath(data.path ? data.path + '/' + resourceName :
           '' + resourceName);
 
-        if (resourceName && resourceCache[path]) {
-          continue;
-        }
-
-        if (!isStyles) {
+        if (resourceName && cache[path]) continue;
+        if (!isStyles) { // scripts
           text = item.text;
           item = document.createElement('script');
           item.setAttribute('type', 'text/javascript');
           item.async = true;
-          if (!resourceName) {
+          if (!resourceName) { // inline script
             item.text = text;
           }
-          promises.push(new Toolbox.Promise(function(resolve) {
-            if (!resourceName) {
-              container && container.appendChild(item);
-              resolve(item);
-            } else {
-              item.onload = function() {
-                resolve(this);
-              }
-
-            }
-          }));
         }
-
         if (resourceName) {
           item[attribute] = path;
           document.head.appendChild(item);
-          resourceCache[path] = item;
-        } else if (container && isStyles) { // TODO: check
-          container.appendChild(item);
+          cache[path] = item;
         }
-      }
-      if (promises.length === 0) {
+
         promises.push(new Toolbox.Promise(function(resolve) {
-          resolve(function(){});
+          if (resourceName && item.onload !== undefined) { // scripts and links
+            item.onload = function() {
+              resolve(this);
+            };
+          } else { // inline styles or scripts
+            !resourceName && (container || document.body).appendChild(item);
+            resolve(item);
+          }
         }));
       }
 
@@ -287,7 +274,7 @@
 
     captureResources: function() {
       var cache = {};
-      var resources = [].slice.call(Toolbox.$$('script', document))
+      var resources = [].slice.call(document.scripts)
           .concat([].slice.call(Toolbox.$$('link', document)));
       var path = '';
 
@@ -295,7 +282,7 @@
         path = resources[n].getAttribute('src') ||
           resources[n].getAttribute('href');
 
-        if (path) { // TODO: cr-dev or cr-mock
+        if (path) { // no inline scripts
           path = Toolbox.normalizePath(path);
           cache[path] = resources[n];
         }

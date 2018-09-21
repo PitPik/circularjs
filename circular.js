@@ -512,58 +512,42 @@ Circular.prototype.loadResource = function(fileName, cache) {
       return !elm.hasAttribute(_this.options.devAttribute);
     };
 
-  return Toolbox.ajax(fileName, {cache: cache}).then(function(data) {
-    var scripts = [];
-    var path = fileName.split('/').slice(0, -1);
-
+  return Toolbox.ajax(fileName, { cache: cache }).then(function(data) {
     DOC = DOC || document.implementation.createHTMLDocument('');
     DOC.documentElement.innerHTML = data;
-    scripts = [].slice.call($$('script', DOC) || [])
-      .filter(function(elm) {
-        if (elm.getAttribute('type') === 'text/javascript') {
-          elm.parentNode.removeChild(elm);
-          return devFilter(elm);
-        }
-        return false;
-      });
 
     return {
-      links: [].slice.call($$('link', DOC) || []).filter(devFilter),
-      styles: [].slice.call($$('style', DOC) || []).filter(devFilter),
-      scripts: scripts,
-      body: $('body', DOC),
-      head: $('head', DOC),
-      path: path.join('/')
+      scripts: [].slice.call(DOC.scripts).filter(function(elm) {
+        return elm.type === 'text/javascript' &&
+          devFilter(elm.parentNode.removeChild(elm));
+      }),
+      styleSheets: [].slice.call($$('link', DOC) || []).filter(devFilter)
+        .concat([].slice.call($$('style', DOC) || []).filter(devFilter)),
+      body: DOC.body,
+      head: DOC.head,
+      path: fileName.split('/').slice(0, -1).join('/'),
     };
   }).catch();
 };
 
 Circular.prototype.insertResources = function(container, data) {
   var body = $(attrSelector(this.options.devAttribute, 'container'),
-      data.body) || data.body,
-      hasAppend = data.append !== undefined;
+    data.body) || data.body;
 
   Toolbox.requireResources(data, 'styles', container);
-  data.append = function() {
-    while(body.childNodes[0]) {
-      container.appendChild(body.childNodes[0]);
-    }
-  };
-  if (!hasAppend) data.append();
+  while(body.childNodes[0]) container.appendChild(body.childNodes[0]);
+
   return Toolbox.requireResources(data, 'scripts', container);
 };
 
-Circular.prototype.insertModule = function(fileName, container, append) {
+Circular.prototype.insertModule = function(fileName, container) {
   var _this = this;
 
-  return this.loadResource(fileName, true)
-    .then(function(data) {
-      data.append = append;
-      return _this.insertResources(container, data)
-        .then(function() {
-          return { path: data.path, append: data.append };
-        });
+  return this.loadResource(fileName, true).then(function(data) {
+    return _this.insertResources(container, data).then(function() {
+      return { path: data.path, container: container };
     });
+  });
 };
 
 function moveChildrenToCache(data) {
@@ -575,72 +559,82 @@ function moveChildrenToCache(data) {
 }
 
 function transition(init, data, modules, moduleData) {
-  var remove = function() {
-      moveChildrenToCache(data);
+  var promise = (init && init.then ? init : data.data),
+    remove = function() {
+      if (!data.previousName || data.previousName === data.name) return;
+      modules[data.previousName].cache.appendChild(modules[data.previousName].wrap);
     },
     append = function() {
-      if (moduleData) {
-        moduleData.append();
-        data.init !== false && init(data.data, moduleData.path);
-      } else {
-        data.container.appendChild(modules[data.name].cache);
-      }
+      data.container && data.container.appendChild(modules[data.name].wrap);
+      moduleData && data.init !== false && init(data.data, moduleData.path);
     };
 
   data.transition === true ? (remove(), append()) :
-    data.transition(data.container, remove, append,
-      new Toolbox.Promise(function(resolve) {
-      (init.then ? init : data.data).then(function(_data) { // TODO: after init
-        resolve(_data);
-        return _data;
-      });
-    }));
+    data.transition({
+      container: data.container,
+      remove: remove,
+      append: append,
+      promise: new Toolbox.Promise(function(resolve) {
+        promise ? promise.then(function(_data) {
+          resolve();
+          return _data;
+        }) : resolve();
+      }),
+      component: modules[data.name].wrap, // TODO: test
+      previousComponent: (modules[data.previousName] || {}).wrap,
+    });
 }
 
 Circular.prototype.renderModule = function(data) {
-  var cache = null,
-    temp = null,
+  var temp = null,
     isInsideDoc = data.container,
     modules = modulesList, // speeds up var search
     name = data.name,
-    init = name && modules[name] && modules[name].init,
+    module = name && modules[name],
+    init = module && module.init,
     hasTransition = data.transition,
     Promise = Toolbox.Promise;
 
   if (modules[data.previousName] && !hasTransition) { // remove old app
     moveChildrenToCache(data);
   }
-  if (name && modules[name]) { // append current app and initialize
-    init = init && data.init !== false && init(data.data, modules[name].path);
+  if (name && module) { // append current app and initialize
+    init = init && init(data.data, module.path);
     hasTransition ? transition(init, data, modules) :
-      data.container.appendChild(modules[name].cache);
+      data.container.appendChild(module.cache);
 
-    return new Promise(function(resolve) {
-      resolve(init);
-    });
+    return new Promise(function(resolve) { resolve(init) });
   }
   // create new app and initialize
-  cache = document.createDocumentFragment();
+  modules[name] = module = { cache: document.createDocumentFragment() };
+
   if (!isInsideDoc) { // TODO: find other solution
     temp = document.createElement('div');
     temp.style.display = 'none';
     document.body.appendChild(temp);
   }
-  return name ? this.insertModule(data.path, data.container || temp, hasTransition)
+  if (hasTransition) {
+    module.wrap = document.createElement('div');
+    module.wrap.setAttribute('cr-wrap', name);
+    if (temp) {
+      temp.appendChild(module.wrap);
+    } else { // HTML must be in tree otherwhise they don't initialise
+      data.container.appendChild(module.wrap);
+    }
+  }
+  var container = module.wrap || data.container || temp;
+
+  return name ? this.insertModule(data.path, container, hasTransition)
     .then(function(moduleData) {
       return new Promise(function(resolve) {
         var moduleName = data.require === true ? name :
             data.require === false ? '' : data.require;
-
-        modules[name] = {
-          path: moduleData.path,
-          cache: cache
-        };
+        module.path = moduleData.path;
         if (moduleName) {
           require([moduleName], function(init) {
-            modules[name].init = init;
+            module.init = init;
 
-            if (!isInsideDoc) {
+            if (!isInsideDoc && !hasTransition) {
               data.init !== false && init(data.data, moduleData.path);
               data.container = temp;
               moveChildrenToCache(data);

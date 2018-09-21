@@ -32,7 +32,13 @@ define('app', ['circular'], function(Circular) {
             container: !!property && item.views['app-modules'],
             require: 'app-' + value,
             init: !!property,
-            preload: !property
+            preload: !property,
+            transition: function(data) {
+                data.promise.then(function() {
+                    data.remove();
+                    data.append();
+                });
+            }
         });
     }
 
