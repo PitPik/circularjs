@@ -1873,15 +1873,15 @@
         }
     }
     function transition(init, data, modules, moduleData) {
-        var promise = init && init.then ? init : data.data, remove = function() {
-            if (!data.previousName || data.previousName === data.name) return;
-            modules[data.previousName].cache.appendChild(modules[data.previousName].wrap);
+        var promise = init && init.then ? init : data.data, container = data.container, previousName = data.previousName, previousModule = modules[previousName], name = data.name, wrap = modules[name].wrap, remove = function() {
+            if (!previousName || previousName === name) return;
+            previousModule.cache.appendChild(previousModule.wrap);
         }, append = function() {
-            data.container && data.container.appendChild(modules[data.name].wrap);
+            container && container.appendChild(wrap);
             moduleData && data.init !== false && init(data.data, moduleData.path);
         };
         data.transition === true ? (remove(), append()) : data.transition({
-            container: data.container,
+            container: container,
             remove: remove,
             append: append,
             promise: new Toolbox.Promise(function(resolve) {
@@ -1890,8 +1890,8 @@
                     return _data;
                 }) : resolve();
             }),
-            component: modules[data.name].wrap,
-            previousComponent: (modules[data.previousName] || {}).wrap
+            component: wrap,
+            previousComponent: (previousModule || {}).wrap
         });
     }
     Circular.prototype.renderModule = function(data) {
