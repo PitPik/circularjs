@@ -595,7 +595,7 @@ Circular.prototype.renderModule = function(data) {
     hasTransition = data.transition,
     Promise = Toolbox.Promise;
 
-  if (modules[data.previousName] && !hasTransition) { // remove old app
+  if (modules[data.previousName] && (!hasTransition || !name)) { // remove old app
     moveChildrenToCache(data);
   }
   if (name && module) { // append current app and initialize
@@ -622,10 +622,9 @@ Circular.prototype.renderModule = function(data) {
       data.container.appendChild(module.wrap);
     }
   }
-  var container = module.wrap || data.container || temp;
 
-  return name ? this.insertModule(data.path, container, hasTransition)
-    .then(function(moduleData) {
+  return name ? this.insertModule(data.path, module.wrap ||
+    data.container || temp, hasTransition).then(function(moduleData) {
       return new Promise(function(resolve) {
         var moduleName = data.require === true ? name :
             data.require === false ? '' : data.require;
