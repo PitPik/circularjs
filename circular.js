@@ -558,7 +558,7 @@ function moveChildrenToCache(data) {
   }
 }
 
-function transition(init, data, modules, moduleData) {
+function transition(init, data, modules, modulePath) {
   var promise = (init && init.then ? init : data.data),
     container = data.container,
     previousName = data.previousName,
@@ -575,8 +575,7 @@ function transition(init, data, modules, moduleData) {
         delete modules[name].dontWrap;
       }
       container && container.appendChild(wrap);
-
-      moduleData && data.init !== false && init(data.data, moduleData.path);
+      modulePath && data.init !== false && init(data.data, modulePath);
     };
 
   data.transition === true ? (remove(), append()) :
@@ -637,8 +636,8 @@ Circular.prototype.renderModule = function(data) {
     }
   }
 
-  return name ? this.insertModule(data.path, module.wrap ||
-    data.container || temp, hasTransition).then(function(moduleData) {
+  return name ? this.insertModule(data.path, module.wrap || data.container || temp)
+    .then(function(moduleData) {
       return new Promise(function(resolve) {
         var moduleName = data.require === true ? name :
             data.require === false ? '' : data.require;
@@ -653,7 +652,7 @@ Circular.prototype.renderModule = function(data) {
               moveChildrenToCache(data);
               temp.parentElement.removeChild(temp);
             } else if (hasTransition) {
-              transition(init, data, modules, moduleData);
+              transition(init, data, modules, moduleData.path);
             } else {
               data.init !== false && init(data.data, moduleData.path);
             }

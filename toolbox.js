@@ -263,7 +263,7 @@
               resolve(this);
             };
           } else { // inline styles or scripts
-            !resourceName && (container || document.body).appendChild(item);
+            !resourceName && (isStyles ? container : document.body).appendChild(item);
             resolve(item);
           }
         }));
