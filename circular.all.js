@@ -860,6 +860,8 @@
         var _fn = null;
         var _data = {};
         var part = {};
+        var helper = {};
+        var atom;
         for (var n = 0, l = text.length; n < l; n++) {
             part = parts[n];
             if (part === undefined) {
@@ -879,7 +881,15 @@
                 continue;
             }
             if (part.partial) {
+                helper = {};
+                atom = undefined;
+                for (var key in part.parts) {
+                    atom = part.parts[key];
+                    helper[key] = atom.keys.length && findData(data, atom.name, atom.keys, atom.depth) || atom.value || atom.name;
+                }
+                atom && data.helpers.push(helper);
                 _out = _this.partials[part.name](data);
+                atom && data.helpers.shift();
             } else {
                 part.parent = crawlObjectUp(data.helpers, [ 0, "_parent" ]);
                 _fn = _replace(_this, part);
