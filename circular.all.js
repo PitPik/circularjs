@@ -885,7 +885,7 @@
                 atom = undefined;
                 for (var key in part.parts) {
                     atom = part.parts[key];
-                    helper[key] = atom.keys.length && findData(data, atom.name, atom.keys, atom.depth) || atom.value || atom.name;
+                    helper[key] = atom.keys.length && findData(data, atom.name, atom.keys, atom.depth) || atom.isString && (atom.value || atom.name);
                 }
                 atom && data.helpers.push(helper);
                 _out = _this.partials[part.name](data);

@@ -380,7 +380,7 @@ function replace(_this, data, text, sections, extType, parts) {
       for (var key in part.parts) { // TODO: find better approach
         atom = part.parts[key];
         helper[key] = atom.keys.length && findData(data, atom.name, atom.keys, atom.depth) ||
-          atom.value || atom.name;
+          atom.isString && (atom.value || atom.name);
       }
       atom && data.helpers.push(helper);
       _out = _this.partials[part.name](data);
