@@ -1441,8 +1441,9 @@
                     }
                 }
             } else {
+                deepModel = listener.length !== 1 ? crawlObject(recModel || model, listener.slice(0, -1)) : model;
                 addProperty(_this, listener[listener.length - 1], {
-                    current: recModel ? deepModel : model,
+                    current: recModel ? recModel : deepModel,
                     root: model
                 }, path);
             }
