@@ -110,7 +110,7 @@ VOM.prototype = {
     }
   },
   addProperty: function(property, item, readonly) {
-    return addProperty(_this, property.split(pathSplit)[0],
+    return addProperty(this, property.split(pathSplit)[0],
       { current: item, root: item }, property, readonly);
   },
   reinforceProperty: reinforceProperty,

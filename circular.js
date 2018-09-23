@@ -203,7 +203,7 @@ Circular.prototype.component = function(name, parameters) {
         item[elmsTxt].element || component.element);
 
       parameters.preRecursionCallback &&
-        parameters.preRecursionCallback.call(this, item);
+        parameters.preRecursionCallback.call(this, item, element);
     },
     enrichModelCallback: this.options.enrichModelCallback ||
       parameters.enrichModelCallback || function() {},

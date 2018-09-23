@@ -1310,7 +1310,7 @@
             }
         },
         addProperty: function(property, item, readonly) {
-            return addProperty(_this, property.split(pathSplit)[0], {
+            return addProperty(this, property.split(pathSplit)[0], {
                 current: item,
                 root: item
             }, property, readonly);
@@ -1615,7 +1615,7 @@
                 _inst.controller && _inst.controller.getEventListeners(item[elmsTxt].element || component.element, item[options.events], component, idProperty);
                 this.reinforceProperty(item, options.views, {}, true);
                 getViews(options, item[options.views], item[elmsTxt].element || component.element);
-                parameters.preRecursionCallback && parameters.preRecursionCallback.call(this, item);
+                parameters.preRecursionCallback && parameters.preRecursionCallback.call(this, item, element);
             },
             enrichModelCallback: this.options.enrichModelCallback || parameters.enrichModelCallback || function() {},
             listeners: this.options.listeners || parameters.listeners || [],
