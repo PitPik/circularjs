@@ -384,7 +384,7 @@ function replace(_this, data, text, sections, extType, parts) {
       }
       atom && data.helpers.push(helper);
       _out = _this.partials[part.name](data);
-      atom && data.helpers.shift();
+      atom && data.helpers.shift(); // TODO: check if still needed for dynamic vars...
     } else { // helpers and regular stuff
       part.parent = crawlObjectUp(data.helpers, [0, '_parent']);
       _fn = _replace(_this, part);

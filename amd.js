@@ -48,8 +48,9 @@
       return (path.indexOf(_link.host) !== -1 ? _link.origin : '') +
         _link.pathname + _link.search;
     },
-    applyScript = function(module, sync) { // creates script tag
+    applyScript = function(module, sync, modules, name) { // creates script tag
       var script = root.document.createElement('script');
+      var _module = {};
 
       script.type = 'text/javascript';
       script.async = script.defer = !sync ? true : false;
@@ -58,11 +59,20 @@
         if (e.type === 'load' || (e.currentTarget || e.srcElement)
             .readyState === 'complete') {
           if (!module.factory) {
-            // if(_foo) {
-            //     module.factory = _foo.factory;
-            //     _foo = {};
-            // }
             markAsDone(module);
+          }
+          if (modules._last && !module.done) {
+            _module = modules[modules._last.name];
+            if (module.parentNames.indexOf(name) === -1) {
+              module.parentNames.push(name);
+            }
+            if (_module.done) {
+              module.factory = function() {
+                return _module.done;
+              };
+              markAsDone(module);
+            }
+            delete modules._last;
           }
           script.onload = script.onreadystatechange = null;
         }
@@ -129,12 +139,10 @@
   if (!root.define || !root.define.amd) {
     var define = root.define = function define(name, deps, factory, sync) {
         var parentNames = [];
-
-        if (typeof name !== 'string') { // UUUUAAAAAAHHHHHHH
+        if (typeof name !== 'string') {
           _foo = require(name, deps, factory); // shifting params
           return _foo;
         }
-
         if (modules[name]) {
           if (modules[name].done) {
             notifyCaller(modules[name]);
@@ -167,7 +175,7 @@
             if (modules[deps[n]].isFile) {
               require.getFile(modules[deps[n]], markAsDone);
             } else {
-              appendScript(applyScript(modules[deps[n]], sync));
+              appendScript(applyScript(modules[deps[n]], sync, modules, name));
               lookaheadForDeps(deps[n]);
             }
           } else if (getListIndex(parentNames, name) === -1) {
@@ -180,9 +188,13 @@
         return modules[name];
       },
       require = root.require = function require(deps, factory, sync) {
-        return deps.constructor === Array ? // deps is also optional
-          define('_mod' + (_rand() + _rand()), deps, factory, sync) :
-          define('_mod' + (_rand() + _rand()), [], deps, factory);
+        var rand = '_mod' + (_rand() + _rand());
+        var isDeps = deps.constructor === Array;
+        var _factory = isDeps ? factory : deps;
+
+        modules._last = _factory ? { factory: _factory, name: rand } : undefined;
+        return isDeps ?
+          define(rand, deps, factory, sync) : define(rand, [], deps, factory);
       },
       modules      = require.modules   = {},
       config       = require.config    = function(options) {

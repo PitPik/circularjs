@@ -27,8 +27,9 @@
     }, normalizePath = function(path) {
         _link.href = path;
         return (path.indexOf(_link.host) !== -1 ? _link.origin : "") + _link.pathname + _link.search;
-    }, applyScript = function(module, sync) {
+    }, applyScript = function(module, sync, modules, name) {
         var script = root.document.createElement("script");
+        var _module = {};
         script.type = "text/javascript";
         script.async = script.defer = !sync ? true : false;
         script.charset = "utf-8";
@@ -36,6 +37,19 @@
             if (e.type === "load" || (e.currentTarget || e.srcElement).readyState === "complete") {
                 if (!module.factory) {
                     markAsDone(module);
+                }
+                if (modules._last && !module.done) {
+                    _module = modules[modules._last.name];
+                    if (module.parentNames.indexOf(name) === -1) {
+                        module.parentNames.push(name);
+                    }
+                    if (_module.done) {
+                        module.factory = function() {
+                            return _module.done;
+                        };
+                        markAsDone(module);
+                    }
+                    delete modules._last;
                 }
                 script.onload = script.onreadystatechange = null;
             }
@@ -119,7 +133,7 @@
                     if (modules[deps[n]].isFile) {
                         require.getFile(modules[deps[n]], markAsDone);
                     } else {
-                        appendScript(applyScript(modules[deps[n]], sync));
+                        appendScript(applyScript(modules[deps[n]], sync, modules, name));
                         lookaheadForDeps(deps[n]);
                     }
                 } else if (getListIndex(parentNames, name) === -1) {
@@ -130,7 +144,14 @@
             checkIfModuleIsDone(modules[name]);
             return modules[name];
         }, require = root.require = function require(deps, factory, sync) {
-            return deps.constructor === Array ? define("_mod" + (_rand() + _rand()), deps, factory, sync) : define("_mod" + (_rand() + _rand()), [], deps, factory);
+            var rand = "_mod" + (_rand() + _rand());
+            var isDeps = deps.constructor === Array;
+            var _factory = isDeps ? factory : deps;
+            modules._last = _factory ? {
+                factory: _factory,
+                name: rand
+            } : undefined;
+            return isDeps ? define(rand, deps, factory, sync) : define(rand, [], deps, factory);
         }, modules = require.modules = {}, config = require.config = function(options) {
             applyConfiguration(_config = options);
         };
