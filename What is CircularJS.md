@@ -25,6 +25,6 @@ There is some more helper components provided by CircularJS that are most likely
 
 
 **CircularJS** combines all those tools to easily abstract app modules and build high performance SPAs or simple web pages.
-**CircularJS** is very small (~13KB gZip, 33KB) and blasting fast and therefore the best joyce for mobile apps.
+**CircularJS** is very small (~13.9KB gZip, 38.5KB) and blasting fast and therefore the best joyce for mobile apps.
 **CircularJS** can optimize apps when used with HTTP 2.0 as you can make your app load all resources at the same time by prefetching all the necessary resources.
 
