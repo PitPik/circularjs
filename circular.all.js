@@ -902,15 +902,13 @@
                 continue;
             }
             if (part.partial) {
-                helper = {};
+                helper = data.helpers[0] || (data.helpers[0] = {});
                 atom = undefined;
                 for (var key in part.parts) {
                     atom = part.parts[key];
                     helper[key] = atom.keys.length && findData(data, atom.name, atom.keys, atom.depth) || atom.isString && (atom.value || atom.name);
                 }
-                atom && data.helpers.push(helper);
                 _out = _this.partials[part.name](data);
-                atom && data.helpers.shift();
             } else {
                 part.parent = crawlObjectUp(data.helpers, [ 0, "_parent" ]);
                 _fn = _replace(_this, part);
