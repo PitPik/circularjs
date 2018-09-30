@@ -56,13 +56,16 @@
       script.async = script.defer = !sync ? true : false;
       script.charset = 'utf-8';
       script.onload = script.onreadystatechange = function(e) {
+        var last = modules._last;
+
+        delete modules._last;
         if (e.type === 'load' || (e.currentTarget || e.srcElement)
             .readyState === 'complete') {
           if (!module.factory) {
             markAsDone(module);
           }
-          if (modules._last && !module.done) {
-            _module = modules[modules._last.name];
+          if (last && !module.done) {
+            _module = modules[last.name];
             if (module.parentNames.indexOf(name) === -1) {
               module.parentNames.push(name);
             }
@@ -72,7 +75,6 @@
               };
               markAsDone(module);
             }
-            delete modules._last;
           }
           script.onload = script.onreadystatechange = null;
         }
@@ -190,7 +192,7 @@
       require = root.require = function require(deps, factory, sync) {
         var rand = '_mod' + (_rand() + _rand());
         var isDeps = deps.constructor === Array;
-        var _factory = isDeps ? factory : deps;
+        var _factory = isDeps ? factory : deps; // comes from define without name
 
         modules._last = _factory ? { factory: _factory, name: rand } : undefined;
         return isDeps ?
