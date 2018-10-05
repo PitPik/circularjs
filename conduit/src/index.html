@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<title>Conduit</title>
+		<!-- Import Ionicon icons & Google Fonts our Bootstrap theme relies on -->
+		<link href="//code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css" rel="stylesheet" type="text/css">
+		<link href="//fonts.googleapis.com/css?family=Titillium+Web:700|Source+Serif+Pro:400,700|Merriweather+Sans:400,700|Source+Sans+Pro:400,300,600,700,300italic,400italic,600italic,700italic" rel="stylesheet" type="text/css">
+		<!-- Import the custom Bootstrap 4 theme from our hosted CDN -->
+		<link rel="stylesheet" href="//demo.productionready.io/main.css">
+		<!-- <link rel="stylesheet" href="css/index.css"> -->
+		<style type="text/css">
+		@font-face { /* compensates wrong loading of font in ttf mode */
+			font-family: 'Ionicons';
+			font-display: auto;
+			src: url('//code.ionicframework.com/ionicons/2.0.1/fonts/ionicons.eot?v=2.0.1');
+			src: url('//code.ionicframework.com/ionicons/2.0.1/fonts/ionicons.eot?v=2.0.1') format('embedded-opentype'),
+					 url('//code.ionicframework.com/ionicons/2.0.1/fonts/ionicons.woff?v=2.0.1') format('woff'),
+					 url('//code.ionicframework.com/ionicons/2.0.1/fonts/ionicons.ttf?v=2.0.1') format('truetype'),
+					 url('//code.ionicframework.com/ionicons/2.0.1/fonts/ionicons.svg#Ionicons') format('svg');
+		}
+		[cr-view="app-modules"],
+		.article-list {
+			opacity: 1;
+			transition: opacity .2s;
+		}
+		.pending-app [cr-view="app-modules"],
+		.pending-sub-app .article-list {
+			opacity: 0;
+		}
+
+		[cr-template-for], .hidden  {
+			display: none;
+		}
+
+		[cr-cloak] {
+			visibility: hidden;
+		}
+
+		articles,
+		article-preview,
+		article-toggle {
+			display: block;
+		}
+
+		.articles .navbar-light .navbar-nav [href="#"],
+		.editor   .navbar-light .navbar-nav [href="#/editor"],
+		.settings .navbar-light .navbar-nav [href="#/settings"],
+		.login    .navbar-light .navbar-nav [href="#/login"],
+		.register .navbar-light .navbar-nav [href="#/login/register"] {
+			color: rgba(0,0,0,.8);
+		}
+
+		.nav-user,
+		.nav-new-post,
+		.nav-new-settings {
+			display: none;
+		}
+		.logged-in .nav-user,
+		.logged-in .nav-new-post,
+		.logged-in .nav-new-settings {
+			display: block;
+		}
+		.logged-in .nav-sign-in,
+		.logged-in .nav-sign-up {
+			display: none;
+		}
+		.logged-in .home-page > .banner {
+			display: none;
+		}
+
+		.article-preview .tag-list .tag-default:hover {
+			background-color: #818a91!important;
+			color: white!important;
+		}
+		.article-preview .preview-link ul {
+				text-align: right;
+		}
+		</style>
+	</head>
+	<body cr-component="app">
+
+		 <nav class="navbar navbar-light">
+			<div class="container">
+				<a class="navbar-brand" href="#">conduit</a>
+				<ul class="nav navbar-nav pull-xs-right hidden" cr-view="navbar">
+					<li class="nav-item">
+						<!-- Add "active" class when you're on that page" -->
+						<a class="nav-link" href="#">Home</a>
+					</li>
+					<li class="nav-item nav-new-post">
+						<a class="nav-link" href="#/editor">
+							<i class="ion-compose"></i>&nbsp;New Post
+						</a>
+					</li>
+					<li class="nav-item nav-new-settings">
+						<a class="nav-link" href="#/settings">
+							<i class="ion-gear-a"></i>&nbsp;Settings
+						</a>
+					</li>
+					<li class="nav-item nav-sign-in">
+						<a class="nav-link" href="#/login">Sign in</a>
+					</li>
+					<li class="nav-item nav-sign-up">
+						<a class="nav-link" href="#/login/register">Sign up</a>
+					</li>
+					<li class="nav-item nav-user">
+						<a class="nav-link" cr-view="user-link" href="#/profile/">
+							<img cr-view="user-image" class="user-pic" src="" />&nbsp;<span cr-view="user-name"></span>
+						</a>
+					</li>
+				</ul>
+			</div>
+		</nav>
+
+		<div cr-view="app-modules"></div>
+
+		<footer>
+			<div class="container">
+				<a href="/" class="logo-font">conduit</a>
+				<span class="attribution">
+					An interactive learning project from <a href="https://thinkster.io">Thinkster</a>. Code &amp; design licensed under MIT. Powered by <a href="https://github.com/PitPik/circularjs">CircularJS</a>
+				</span>
+			</div>
+		</footer>
+
+	<!-- <script src='js/vendor/circular.min.js'></script> -->
+	<!-- <script src='js/amd.cfg.js'></script> -->
+	<!-- <script src="js/app.js" type="text/javascript"></script> -->
+
+	<script src="js/built/app.all.min.js" type="text/javascript"></script>
+
+	</body>
+</html>

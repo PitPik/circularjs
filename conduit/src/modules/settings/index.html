@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="utf-8">
+  <title>Settings</title>
+  </head>
+  <body>
+
+<div class="settings-page">
+  <div class="container page">
+    <div class="row" cr-component="settings" cr-container>
+
+      <div class="col-md-6 offset-md-3 col-xs-12" cr-template-for="settings">
+        <h1 class="text-xs-center">Your Settings</h1>
+
+        <ul class="error-settings" cr-component="error-login" cr-container>
+          <li cr-template-for="error-login">{{message}}</li>
+        </ul>
+
+        <form cr-view="form">
+          <fieldset>
+              <fieldset class="form-group">
+                <input class="form-control" type="text" name="image" placeholder="URL of profile picture" value="{{image}}">
+              </fieldset>
+              <fieldset class="form-group">
+                <input class="form-control form-control-lg" name="username" type="text" placeholder="Your Name" value="{{username}}">
+              </fieldset>
+              <fieldset class="form-group">
+                <textarea class="form-control form-control-lg" name="bio" rows="8" placeholder="Short bio about you">{{bio}}</textarea>
+              </fieldset>
+              <fieldset class="form-group">
+                <input class="form-control form-control-lg" name="email" type="text" placeholder="Email" value="{{email}}">
+              </fieldset>
+              <fieldset class="form-group">
+                <input class="form-control form-control-lg" name="password" type="password" placeholder="Password">
+              </fieldset>
+              <button class="btn btn-lg btn-primary pull-xs-right" cr-event="click: submit">
+                Update Settings
+              </button>
+          </fieldset>
+        </form>
+        <hr>
+        <button class="btn btn-outline-danger" cr-event="click: logout">
+          Or click here to logout.
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- <script type="text/javascript" src="index.js"></script> -->
+
+  </body>
+</html>

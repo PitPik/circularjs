@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="utf-8">
+  <title>Profile</title>
+  </head>
+  <body>
+
+<div class="profile-page">
+
+  <div class="user-info">
+    <div class="container">
+      <div class="row" cr-component="profile" cr-container>
+
+        <div class="col-xs-12 col-md-10 offset-md-1" cr-template-for="profile">
+          {{> author-image image=author.image class="user-img"}}
+          <h4>{{author.username}}</h4>
+          {{#author.bio}}<p>{{this}}</p>{{/author.bio}}
+          {{> follow-button user=user username=author.username extra="action-btn"}}
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="row">
+
+      <div class="col-xs-12 col-md-10 offset-md-1">
+
+        <article-toggle cr-component class="articles-toggle" cr-cloak>
+          <ul class="nav nav-pills outline-active">
+            <li class="nav-item">
+              <a class="nav-link active" cr-event="click: prerender" cr-view="own-link" href="#/profile/user">My Articles</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" cr-event="click: prerender" cr-view="favorite-link" href="#/profile/user/0/favorites">Favorited Articles</a>
+            </li>
+          </ul>
+        </article-toggle>
+
+        <articles cr-component cr-container>
+          <div cr-template-for="articles" class="article-list">
+            {{> article-preview}}
+          </div>
+        </articles>
+
+        <div cr-component="profile-pagination" class="pagination col-md-9" cr-container>
+          <li cr-template-for="profile-pagination" class="page-item{{#if active}} active{{/if}}">
+            <a class="page-link" href="#/profile/{{author}}/{{index}}{{#if favorited}}/favorites{{/if}}">{{value}}</a>
+          </li>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- <script type="text/javascript" src="index.js"></script> -->
+
+  </body>
+</html>

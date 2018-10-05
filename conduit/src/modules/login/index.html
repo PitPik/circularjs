@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="utf-8">
+  <title>Login</title>
+  </head>
+  <body>
+
+<div class="auth-page">
+  <div class="container page">
+    <div class="row">
+
+      <div class="col-md-6 offset-md-3 col-xs-12" cr-component="login">
+        <div cr-view="register">
+          <h1 class="text-xs-center">Sign up</h1>
+          <p class="text-xs-center">
+            <a href="#/login">Have an account?</a>
+          </p>
+        </div>
+        <div cr-view="login">
+          <h1 class="text-xs-center">Sign in</h1>
+          <p class="text-xs-center">
+            <a href="#/login/register">Need an account?</a>
+          </p>
+        </div>
+
+        <ul class="error-messages" cr-component="error-login" cr-container>
+          <li cr-template-for="error-login">{{message}}</li>
+        </ul>
+
+        <form cr-view="form">
+          <fieldset class="form-group" cr-view="username">
+            <input class="form-control form-control-lg" name="username" type="text" placeholder="Your Name">
+          </fieldset>
+          <fieldset class="form-group">
+            <input class="form-control form-control-lg" name="email" type="email" placeholder="Email">
+          </fieldset>
+          <fieldset class="form-group">
+            <input class="form-control form-control-lg" name="password" type="password" placeholder="Password">
+          </fieldset>
+          <button cr-event="click: submit" class="btn btn-lg btn-primary pull-xs-right">
+            Sign in
+          </button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- <script type="text/javascript" src="index.js"></script> -->
+
+  </body>
+</html>

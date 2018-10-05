@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="utf-8">
+  <title>Article</title>
+  </head>
+  <body>
+
+<article cr-component class="article-page" cr-container>
+  <div cr-template-for="article">
+
+    <div class="banner">
+      <div class="container">
+
+        <h1>{{title}}</h1>
+        {{> article-meta isMine=isMine}}
+
+      </div>
+    </div>
+
+    <div class="container page">
+
+      <div class="row article-content">
+        <div class="col-md-12">
+          {{markdown body}}
+        </div>
+      </div>
+
+      {{#if tagList.0}}<ul class="tag-list">
+        {{#each tagList}}<li class="tag-default tag-pill tag-outline" cr-event="click: getTag"><a href="#/articles/0/{{this}}">{{this}}</a></li>{{/each}}
+      </ul>{{/if}}
+
+      <hr />
+
+      <div class="article-actions">
+        {{> article-meta isMine=isMine}}
+      </div>
+
+      <div class="row">
+
+        <div class="col-xs-12 col-md-8 offset-md-2">
+
+          <div cr-component="form" cr-container>
+            <div cr-template-for="form">
+              {{#if user.username}}
+              <form cr-view="form" class="card comment-form">
+                <div class="card-block">
+                  <textarea cr-view="textarea" class="form-control" placeholder="Write a comment..." rows="3"></textarea>
+                </div>
+                <div class="card-footer">
+                  {{> author-image class="comment-author-img"}}
+                  <button class="btn btn-sm btn-primary" cr-event="click: submit">
+                    Post Comment
+                  </button>
+                </div>
+              </form>
+              {{else}}
+              <p>
+                <a href="#/login">Sign in</a> or
+                <a href="#/login/register">sign up</a> to add comments on this article.
+              </p>
+              {{/if}}
+            </div>
+          </div>
+
+          <comments cr-component cr-view="comments" cr-container>
+            <div class="card" cr-template-for="comments">
+              <div class="card-block">
+                <p class="card-text">{{body}}</p>
+              </div>
+              <div class="card-footer">
+                {{> author-data}}
+                {{#my-comment username author.username}}
+                <span class="mod-options">
+                  <!-- <i class="ion-edit" cr-event="click: edit"></i> -->
+                  <i class="ion-trash-a" cr-event="click: delete"></i>
+                </span>
+                {{/my-comment}}
+              </div>
+            </div>
+          </comments>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</article>
+
+<!-- <script type="text/javascript" src="index.js"></script> -->
+
+  </body>
+</html>
