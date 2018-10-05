@@ -1976,7 +1976,13 @@
                         } else {
                             data.init !== false && init(data.data, moduleData.path);
                         }
-                        resolve(init);
+                        if (data.data && data.data.then) {
+                            data.data.then(function() {
+                                resolve(init);
+                            });
+                        } else {
+                            resolve(init);
+                        }
                     });
                 } else if (temp) {
                     moveChildrenToCache(data);
