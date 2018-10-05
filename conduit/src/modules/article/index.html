@@ -70,12 +70,12 @@
               </div>
               <div class="card-footer">
                 {{> author-data}}
+                <span class="mod-options" cr-event="click: delete">
                 {{#my-comment username author.username}}
-                <span class="mod-options">
                   <!-- <i class="ion-edit" cr-event="click: edit"></i> -->
-                  <i class="ion-trash-a" cr-event="click: delete"></i>
-                </span>
+                  <i class="ion-trash-a"></i>
                 {{/my-comment}}
+                </span>
               </div>
             </div>
           </comments>
