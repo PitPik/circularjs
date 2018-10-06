@@ -183,8 +183,8 @@ define('app-data.srv', ['toolbox'], function(Toolbox) {
     }),
     'userSignup': data => put(`${rootURL}users`, null, data).then(normalizeUserData),
     'putSettings': data => put(`${rootURL}user`, 'PUT', data.user),
-    'postArticle': data => !data.slug ? put(`${rootURL}articles`, 'POST', data.article) :
-       put(`${rootURL}articles/${data.slug}`, 'PUT', data.article),
+    'postArticle': data => !data.slug ? put(`${rootURL}articles`, 'POST', data) :
+       put(`${rootURL}articles/${data.slug}`, 'PUT', data),
     'deleteArticle': data => put(`${rootURL}articles/${data.slug}`, 'DELETE'),
     'postComment': data => put(`${rootURL}articles/${data.slug}/comments`, 'POST', data.comment),
     'deleteComment': data => put(`${rootURL}articles/${data.slug}/comments/${data.id}`, 'DELETE'),
