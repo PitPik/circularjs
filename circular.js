@@ -612,7 +612,7 @@ Circular.prototype.renderModule = function(data) {
     hasTransition ? transition(init, data, modules) :
       data.container.appendChild(module.cache);
 
-    return new Promise(function(resolve) { resolve(init) });
+    return new Promise(function(resolve) { resolve(data.returnData ? data.data : init) });
   }
   // create new app and initialize
   modules[name] = module = {
@@ -658,10 +658,10 @@ Circular.prototype.renderModule = function(data) {
             }
             if (data.data && data.data.then) {
               data.data.then(function() {
-                resolve(init);
+                resolve(data.returnData ? data.data : init);
               });
             } else {
-              resolve(init);
+              resolve(data.returnData ? data.data : init);
             }
           });
         } else if (temp) {

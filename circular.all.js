@@ -1938,7 +1938,7 @@
             init = init && init(data.data, module.path);
             hasTransition ? transition(init, data, modules) : data.container.appendChild(module.cache);
             return new Promise(function(resolve) {
-                resolve(init);
+                resolve(data.returnData ? data.data : init);
             });
         }
         modules[name] = module = {
@@ -1978,10 +1978,10 @@
                         }
                         if (data.data && data.data.then) {
                             data.data.then(function() {
-                                resolve(init);
+                                resolve(data.returnData ? data.data : init);
                             });
                         } else {
-                            resolve(init);
+                            resolve(data.returnData ? data.data : init);
                         }
                     });
                 } else if (temp) {
