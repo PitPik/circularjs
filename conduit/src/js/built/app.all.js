@@ -440,7 +440,12 @@ promise => promise.then(data => {
 /* ------------------------- */
 require(['circular', 'app-data.srv', '!ui-components', 'template-helpers', 'marked'],
 function(Circular, dataService, uiComponents, helpers, md) {
+  const toolbox = Circular.Toolbox;
+  const removeClass = toolbox.removeClass;
+  const addClass = toolbox.addClass;
+  const toggleClass = toolbox.toggleClass;
   const circular = new Circular({ helpers: helpers({ markdown: md }) });
+
   const app = circular.component('app', {
     model: [{
       currentApp: '',
@@ -464,7 +469,7 @@ function(Circular, dataService, uiComponents, helpers, md) {
       dataService['user']({}).then(data => {
         model.user = data;
         renderMenu(model, model.currentApp, null, true);
-        Circular.Toolbox.removeClass(model.views['navbar'], 'hidden');
+        removeClass(model.views['navbar'], 'hidden');
       });
 
       md.setOptions({ sanitize: true });
@@ -512,6 +517,7 @@ function(Circular, dataService, uiComponents, helpers, md) {
         cr: circular,
         limit: value === 'articles' ? 10 : 5,
         isSameApp: value === oldValue,
+        // data from model
         author: item.author,
         offset: item.offset,
         article: item.slug,
@@ -520,6 +526,7 @@ function(Circular, dataService, uiComponents, helpers, md) {
         favorited: item.favorited,
         isSameAuthor: item.isSameAuthor,
         isRegister: item.isRegister,
+        // ...
         user: item.user,
       }),
       name: value,
@@ -534,24 +541,22 @@ function(Circular, dataService, uiComponents, helpers, md) {
           data.append();
         });
       },
-    }).then(data => {
-      app.element.classList.remove('pending-app');
-      app.element.classList.remove('pending-sub-app');
+    }).then(() => {
+      removeClass(app.element, 'pending-app');
+      removeClass(app.element, 'pending-sub-app');
     });
   }
 
   function setAppClasses(item, value, oldValue) {
-    const toolbox = Circular.Toolbox;
     const element = item.elements.element;
 
     if (value !== oldValue) {
-      toolbox.addClass(element, 'pending-app');
+      addClass(element, 'pending-app');
     }
-    toolbox.addClass(element, 'pending-sub-app');
+    addClass(element, 'pending-sub-app');
   }
 
   function renderMenu(item, value, oldValue) {
-    const toolbox = Circular.Toolbox;
     const views = item.views;
     const element = item.elements.element;
     const userName = item.user && item.user.username;
@@ -559,7 +564,7 @@ function(Circular, dataService, uiComponents, helpers, md) {
     value = value === 'login' && item.isRegister ? 'register' : value;
     oldValue = item.wasRegister ? 'register' : oldValue;
 
-    toolbox.toggleClass(element, 'logged-in', !!userName);
+    toggleClass(element, 'logged-in', !!userName);
     toolbox.toggleClasses(element, element, oldValue, value);
     if (!userName || value === oldValue) return;
 
@@ -567,7 +572,7 @@ function(Circular, dataService, uiComponents, helpers, md) {
     views['user-link'].href = '#/profile/' + userName;
     views['user-image'].src = item.user.image;
 
-    toolbox.toggleClass(views['user-link'], 'active',
+    toggleClass(views['user-link'], 'active',
       item.currentApp === 'profile' && item.author === userName);
   }
 });
