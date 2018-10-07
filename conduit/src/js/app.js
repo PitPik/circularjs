@@ -31,8 +31,6 @@ function(Circular, dataService, uiComponents, helpers, md) {
         renderMenu(model, model.currentApp, null, true);
         removeClass(model.views['navbar'], 'hidden');
       });
-      model.title = toolbox.$('title', document.head);
-
       md.setOptions({ sanitize: true });
       circular.template(uiComponents, { share: true }); // collect template-partials
 
@@ -108,8 +106,7 @@ function(Circular, dataService, uiComponents, helpers, md) {
         value === 'article' ? data.article.article.title :
         value.charAt(0).toUpperCase() + value.substr(1);
 
-      item.title.textContent = item.title.textContent
-        .replace(/.*?- /, title + ' - ');
+      document.title = document.title.replace(/.*?- /, title + ' - ');
       removeClass(app.element, 'pending-app');
       removeClass(app.element, 'pending-sub-app');
     });
