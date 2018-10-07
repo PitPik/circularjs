@@ -37,7 +37,6 @@ define('app-data.srv', ['toolbox'], function(Toolbox) {
   const dummyPromise = new Promise(resolve => resolve());
   const getPaginaionModel = (data, count) => Array.apply(null,
       { length: Math.ceil((count < data.limit + 1 ? 0 : count) / data.limit) })
-    .map(Number.call, Object)
     .map((v, i) => ({
       value: i + 1 + '',
       active: data.offset !== undefined && data.offset == i,
