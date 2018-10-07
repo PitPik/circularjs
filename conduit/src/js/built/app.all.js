@@ -68,7 +68,7 @@ define('form-helper', [], () => {
 });
 /* ------------------------- */
 define('app-data.srv', ['toolbox'], function(Toolbox) {
-  const Promise = window.Promise || Toolbox.Promise;
+  const Promise = Toolbox.Promise;
   const rootURL = 'https://conduit.productionready.io/api/';
   const tokenName = 'jwtToken';
   const getToken = () => localStorage.getItem(tokenName);
