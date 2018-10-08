@@ -46,14 +46,14 @@
               <p>Popular Tags</p>
 
               <tag-list cr-component class="tag-list" cr-container>
-                <a cr-template-for="tag-list" href="#/articles/0/{{tag}}" class="tag-pill tag-default">{{tag}}</a>
+                <a cr-template-for="tag-list" title="tag: {{tag}}" href="#/articles/0/{{tag}}" class="tag-pill tag-default">{{tag}}</a>
               </tag-list>
             </div>
           </div>
 
           <ul cr-component="pagination" class="pagination col-md-9" cr-container>
             <li cr-template-for="pagination" class="page-item{{#if active}} active{{/if}}">
-              <a class="page-link" href="#/articles/{{index}}{{#if tag}}/{{tag}}{{/if}}{{#if ownFeed}}/my-feed{{/if}}">{{value}}</a>
+              <a class="page-link" title="page {{index}}" href="#/articles/{{index}}{{#if tag}}/{{tag}}{{/if}}{{#if ownFeed}}/my-feed{{/if}}">{{value}}</a>
             </li>
           </ul>
 

@@ -1,14 +1,14 @@
 {{#* inline "author-image"}}
-    <img{{#image}} src="{{.}}"{{/image}} class="{{#if id}}comment-author-img {{/if}}{{class}}" />
+    <img{{#image}} src="{{.}}"{{/image}} class="{{#if id}}comment-author-img {{/if}}{{class}}" alt="" />
 {{/inline}}
 
 
 {{#* inline "author-data"}}
-  <a href="#/profile/{{author.username}}" class="{{#if id}}comment-author{{/if}}">
+  <a href="#/profile/{{author.username}}" title="Profile data {{author.username}}" class="{{#if id}}comment-author{{/if}}">
     {{> author-image image=author.image}}
   </a>
   {{#unless id}}<div class="info">{{else}}&nbsp;{{/unless}}
-    <a href="#/profile/{{author.username}}" class="{{#if id}}comment-{{/if}}author">{{author.username}}</a>
+    <a href="#/profile/{{author.username}}" title="Profile data {{author.username}}" class="{{#if id}}comment-{{/if}}author">{{author.username}}</a>
     <span class="date{{#if id}}-posted{{/if}}">{{simple-date createdAt}}</span>
   {{#unless id}}</div>{{/unless}}
 {{/inline}}
@@ -68,7 +68,7 @@
         <i class="ion-heart"></i> {{%favoritesCount}}
       </button>
     </div>
-    <a href="#/article/{{slug}}" class="preview-link">
+    <a href="#/article/{{slug}}" title="Read more" class="preview-link">
       <h1>{{title}}</h1>
       <p>{{description}}</p>
       <span>Read more...</span>
