@@ -12,7 +12,7 @@
   <!-- the demo root element -->
   <ul cr-component="tree" cr-container>
     <li class="item" cr-event="click: toggle; dblclick: addChildren" cr-template-for="tree"><div class="{{#if %childNodes.0}}bold{{/if}}">{{name}}{{#if childNodes.0}}{{#if %open}} [-]{{else}} [+]{{/if}}{{/if}}</div>
-      <ul cr-mount class="{{#if %open}}open{{else}}closed{{/if}}"></ul>
+      {{#if childNodes.0}}<ul cr-mount class="{{#if %open}}open{{else}}closed{{/if}}"></ul>{{/if}}
     </li>
   </ul>
 
