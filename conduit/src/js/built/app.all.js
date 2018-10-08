@@ -1,9 +1,11 @@
 // Comparison to AngularJS implementation on //demo.realworld.io
-//                 | AngularJS | CircularJS
-// Source code loc |      1340 |        584
-// Download        |     514KB |      188KB
-// Impl. + vendor  |     317KB |       25KB
-// Performance     |     1.85s |     0.733s
+// and Angular 6 implementation on //angular.realworld.io
+//
+//                   | AngularJS | Angular 6 | CircularJS
+// Source code loc   |      1340 |      1810 |        584
+// Download          |     514KB |     332KB |      188KB
+// JS Impl. + vendor |     317KB |     136KB |       25KB
+// Performance       |     1.85s |      1.6s |     0.733s
 
 define('template-helpers', [], function() {
   return (options) => ({
