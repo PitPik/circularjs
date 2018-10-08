@@ -73,7 +73,7 @@ var Circular = function(name, options) {
 Circular.prototype.component = function(name, parameters) {
   if (typeof name !== 'string') {
     parameters = name;
-    name = parameters.name;
+    name = parameters.name || 'component_' + id++;
   }
   if (this.components[name]) { // TODO: make this possible: name???
     return this.components[name].reset(parameters.model, parameters.extraModel);
