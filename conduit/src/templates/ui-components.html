@@ -53,6 +53,13 @@
 {{/inline}}
 
 
+{{#* inline "tag-list"}}
+  <ul class="tag-list">
+    {{#each tagList}}<li class="tag-default tag-pill tag-outline" cr-event="click: getTag">{{#if ../renderLink}}<a href="#/articles/0/{{this}}">{{this}}</a>{{else}}{{this}}{{/if}}</li>{{/each}}
+  </ul>
+{{/inline}}
+
+
 {{#* inline "article-preview"}}
   <div class="article-preview">
     <div class="article-meta">
@@ -65,9 +72,7 @@
       <h1>{{title}}</h1>
       <p>{{description}}</p>
       <span>Read more...</span>
-      {{#if tagList.0}}<ul class="tag-list">
-        {{#tagList}}<li class="tag-default tag-pill tag-outline" cr-event="click: getTag">{{.}}</li>{{/tagList}}
-      </ul>{{/if}}
+      {{> tag-list}}
     </a>
   </div>
 {{/inline}}

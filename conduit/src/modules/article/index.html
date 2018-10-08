@@ -26,9 +26,7 @@
         </div>
       </div>
 
-      {{#if tagList.0}}<ul class="tag-list">
-        {{#each tagList}}<li class="tag-default tag-pill tag-outline" cr-event="click: getTag"><a href="#/articles/0/{{this}}">{{this}}</a></li>{{/each}}
-      </ul>{{/if}}
+      {{> tag-list renderLink="true"}}
 
       <hr />
 
