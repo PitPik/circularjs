@@ -51,11 +51,11 @@
             </div>
           </div>
 
-          <pagination cr-component class="pagination col-md-9" cr-container>
+          <ul cr-component="pagination" class="pagination col-md-9" cr-container>
             <li cr-template-for="pagination" class="page-item{{#if active}} active{{/if}}">
               <a class="page-link" href="#/articles/{{index}}{{#if tag}}/{{tag}}{{/if}}{{#if ownFeed}}/my-feed{{/if}}">{{value}}</a>
             </li>
-          </pagination>
+          </ul>
 
         </div>
       </div>

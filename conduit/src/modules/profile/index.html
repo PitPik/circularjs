@@ -45,11 +45,11 @@
           </div>
         </articles>
 
-        <div cr-component="profile-pagination" class="pagination col-md-9" cr-container>
+        <ul cr-component="profile-pagination" class="pagination col-md-9" cr-container>
           <li cr-template-for="profile-pagination" class="page-item{{#if active}} active{{/if}}">
             <a class="page-link" href="#/profile/{{author}}/{{index}}{{#if favorited}}/favorites{{/if}}">{{value}}</a>
           </li>
-        </div>
+        </ul>
 
       </div>
 

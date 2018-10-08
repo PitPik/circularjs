@@ -5,7 +5,7 @@
 // Source code loc   |      1340 |      1810 |        584
 // Download          |     514KB |     332KB |      188KB
 // JS Impl. + vendor |     317KB |     136KB |       25KB
-// Performance       |     1.85s |      1.6s |     0.733s
+// Performance       |     1.85s |     1.60s |      0.73s
 
 define('template-helpers', [], function() {
   return (options) => ({
