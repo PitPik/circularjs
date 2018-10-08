@@ -46,7 +46,7 @@
                   <textarea cr-view="textarea" class="form-control" placeholder="Write a comment..." rows="3"></textarea>
                 </div>
                 <div class="card-footer">
-                  {{> author-image class="comment-author-img"}}
+                  {{> author-image image=user.image class="comment-author-img"}}
                   <button class="btn btn-sm btn-primary" cr-event="click: submit">
                     Post Comment
                   </button>
