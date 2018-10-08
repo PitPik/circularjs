@@ -1,3 +1,10 @@
+// Comparison to AngularJS implementation on //demo.realworld.io
+//                 | AngularJS | CircularJS
+// Source code loc |      1340 |        584
+// Download        |     514KB |      188KB
+// Impl. + vendor  |     317KB |       25KB
+// Performance     |     1.85s |     0.733s
+
 define('template-helpers', [], function() {
   return (options) => ({
     // ----- block helpers... ----- //
@@ -9,16 +16,6 @@ define('template-helpers', [], function() {
       return this.getData($1) === this.getData($2) ? this.getBody() : '';
     },
     // ----- inline helpers... ----- //
-    // 'simple-date': function($1, $2) { // too slow
-    //   const options = {
-    //     year: 'numeric',
-    //     month: 'long',
-    //     day: $2 === 'short' ? undefined : 'numeric',
-    //   };
-
-    //   return  new Date(this.getData($1))
-    //     .toLocaleDateString(undefined, options);
-    // },
     'simple-date': function($1, $2) {
       const date = new Date(this.getData($1));
       const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
