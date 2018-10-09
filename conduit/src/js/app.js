@@ -55,7 +55,7 @@ function(Circular, dataService, uiComponents, helpers, md) {
     } else if (pAppName === 'articles') {
       model.ownFeed = var1 === 'my-feed';
       model.tag = model.ownFeed ? '' : var1;
-      model.offset = var0;
+      model.offset = var0 || '0';
     } else if (pAppName === 'profile') {
       model.isSameAuthor = var0 === model.author;
       model.author = var0;
@@ -99,6 +99,8 @@ function(Circular, dataService, uiComponents, helpers, md) {
         data.promise.then(() => {
           data.remove();
           data.append();
+          removeClass(app.element, 'pending-app');
+          removeClass(app.element, 'pending-sub-app');
         });
       },
     }).then(data => {
@@ -107,8 +109,6 @@ function(Circular, dataService, uiComponents, helpers, md) {
         value.charAt(0).toUpperCase() + value.substr(1);
 
       document.title = document.title.replace(/.*?- /, title + ' - ');
-      removeClass(app.element, 'pending-app');
-      removeClass(app.element, 'pending-sub-app');
     });
   }
 
