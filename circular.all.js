@@ -1651,6 +1651,9 @@
                         element = render(_inst.template.renderHTML(item, _this.data[name].extraModel), property, parentElement, sibling[elmsTxt].element, idProperty, item[idProperty]);
                         item[elmsTxt].element = element;
                         item[elmsTxt].container = $(mountSelector, element);
+                        for (var n = item.childNodes.length; n--; ) {
+                            item[elmsTxt].container.appendChild(item.childNodes[n].elements.element);
+                        }
                         item[options.events] = {};
                         _inst.controller && _inst.controller.getEventListeners(item[elmsTxt].element || component.element, item[options.events], component, this.options.idProperty);
                         item[options.views] = {};
