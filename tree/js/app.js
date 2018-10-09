@@ -48,7 +48,7 @@ require(['circular'],  Circular => {
         if (!item.childNodes && item.name !== '+') {
           this.appendChild({ name: 'new stuff' }, item);
           item.open = true;
-          this.replaceChild(this.getCleanModel(item), item);
+          this.replaceChild(item, item);
         }
       }
     }
