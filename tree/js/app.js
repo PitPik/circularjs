@@ -1,5 +1,5 @@
 require(['circular'],  Circular => {
-  const data = [{
+  const data = {
     name: 'My Tree',
     childNodes: [
       { name: 'hello' },
@@ -26,10 +26,10 @@ require(['circular'],  Circular => {
         ]
       }
     ]
-  }, { name: '+' }];
+  };
 
   new Circular().component('tree', {
-    model: data,
+    model: [data, { name: '+' }],
     listeners: ['open'],
     preRecursionCallback: function(item) {
       item.open = item.open || false;
