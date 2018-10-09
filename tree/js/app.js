@@ -1,5 +1,5 @@
-require(['circular'],  Circular => {
-  const data = {
+require(['circular'], function(Circular) {
+  var data = {
     name: 'My Tree',
     childNodes: [
       { name: 'hello' },
@@ -47,8 +47,8 @@ require(['circular'],  Circular => {
       addChildren: function(e, elm, item) {
         if (!item.childNodes && item.name !== '+') {
           this.appendChild({ name: 'new stuff' }, item);
-          item.open = true;
           this.replaceChild(item, item);
+          item.open = true;
         }
       }
     }
