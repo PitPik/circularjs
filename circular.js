@@ -231,7 +231,7 @@ Circular.prototype.component = function(name, parameters) {
             idProperty, item[idProperty]);
           item[elmsTxt].element = element;
           item[elmsTxt].container = $(mountSelector, element);
-          for (var n = item.childNodes.length; n--; ) {
+          for (var n = (item.childNodes || []).length; n--; ) {
             item[elmsTxt].container.appendChild(item.childNodes[n].elements.element);
           }
           item[options.events] = {};
