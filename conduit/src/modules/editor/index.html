@@ -24,11 +24,18 @@
                 <input type="text" name="description" value="{{description}}" class="form-control" placeholder="What's this article about?">
             </fieldset>
             <fieldset class="form-group">
-                <textarea class="form-control" name="body" rows="8" placeholder="Write your article (in markdown)">{{body}}</textarea>
+
+                  <div cr-view="preview" class="form-control{{#unless %isPreviewing}} hidden{{/unless}}">{{#if %isPreviewing}}{{markdown body}}{{/if}}</div>
+
+                <textarea cr-view="editor" class="form-control{{#if %isPreviewing}} hidden{{/if}}" cr-event="input: input" name="body" rows="8" placeholder="Write your article (in markdown)">{{body}}</textarea>
+              {{/if}}
             </fieldset>
             <fieldset class="form-group">
                 <input type="text" name="tagList" value="{{#tagList}}{{.}}{{#unless @last}}, {{/unless}}{{/tagList}}" class="form-control" placeholder="Enter tags"><div class="tag-list"></div>
             </fieldset>
+            {{#if %textLength}}<button class="btn btn-lg pull-xs btn-outline-secondary" cr-event="click: preview" type="button">
+                {{#if %isPreviewing}}Edit Article{{else}}Preview Article{{/if}}
+            </button>{{/if}}
             <button class="btn btn-lg pull-xs-right btn-primary" cr-event="click: submit" type="button">
                 Publish Article
             </button>
