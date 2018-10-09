@@ -21,7 +21,7 @@ CircularJS is a tiny, progressive **MV\* like framework** with its goal to help 
 
 ## Quick Start
 
-To quickly get started try the ["Tour of Heroes" tutorial](heroes), see the [TODO list demo](http://dematte.at/circularjs/todo/) and read [ARCHITECTURE.md](ARCHITECTURE.md) and [API.md](API.md) for a better overview.
+To quickly get started try the ["Tour of Heroes" tutorial](heroes), see the [TODO list demo](https://pitpik.github.io/circularjs/todo/) and read [ARCHITECTURE.md](ARCHITECTURE.md) and [API.md](API.md) for a better overview.
 
 ## Why CircularJS
 
@@ -47,7 +47,7 @@ See [API.md](API.md) for more information.
 
 For now you can see some demos (also delivered by this repository) to explore how **CircularJS** works.
 
-* ["Tour of Heroes" tutorial](http://dematte.at/circularjs/heroes)
-* [Simple button demo](http://dematte.at/circularjs/)
-* [TODO list demo](http://dematte.at/circularjs/todo/)
-* [Nested tree demo](http://dematte.at/circularjs/tree/)
+* ["Tour of Heroes" tutorial](https://pitpik.github.io/circularjs/heroes)
+* [Simple button demo](https://pitpik.github.io/circularjs/)
+* [TODO list demo](https://pitpik.github.io/circularjs/todo/)
+* [Nested tree demo](https://pitpik.github.io/circularjs/tree/)
