@@ -5,7 +5,7 @@ promise =>  promise.then(data => {
       textLength: data.article.article.body.length > 3,
       isPreviewing: false,
     }) : { textLength: 0, isPreviewing: false }],
-    listeners: ['textLength', 'isPreviewing', 'body'],
+    listeners: ['textLength', 'isPreviewing'],
     eventListeners: {
       submit: (e, elm, item) => {
        const formElements = [].slice.call(item.elements.element.elements); // TODO
@@ -20,11 +20,9 @@ promise =>  promise.then(data => {
           formHelper.error(error, errorComponent, formElements);
         });
       },
-      input: (e, elm, item) => {
-        item.body = elm.value;
-        item.textLength = elm.value.length > 3;
-      },
+      input: (e, elm, item) => item.textLength = elm.value.length > 3,
       preview: (e, elm, item) => {
+        item.body = item.views.editor.value;
         item.views.preview.style.height = item.views.editor.offsetHeight + 'px';
         item.isPreviewing = !item.isPreviewing;
       },
