@@ -55,7 +55,7 @@ function(Circular, dataService, uiComponents, helpers, md) {
     } else if (pAppName === 'articles') {
       model.ownFeed = var1 === 'my-feed';
       model.tag = model.ownFeed ? '' : var1;
-      model.offset = var0 || '0';
+      model.offset = var0 || 0;
     } else if (pAppName === 'profile') {
       model.isSameAuthor = var0 === model.author;
       model.author = var0;

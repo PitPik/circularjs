@@ -8,6 +8,11 @@
 // Performance       |     1.85s |     1.60s |      0.73s
 
 define('template-helpers', [], function() {
+  const dateCache = {
+    short: {},
+    numeric: {},
+  };
+
   return (options) => ({
     // ----- block helpers... ----- //
     'itsme' : function($1, $2) {
@@ -18,16 +23,20 @@ define('template-helpers', [], function() {
       return this.getData($1) === this.getData($2) ? this.getBody() : '';
     },
     // ----- inline helpers... ----- //
-    'simple-date': function($1, $2) {
-      const date = new Date(this.getData($1));
-      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'];
+    'simple-date': function($1, $2) { // too slow, so we cache
+      const date = this.getData($1);
+      const options = {
+        year: 'numeric',
+        month: 'long',
+        day: $2 === 'short' ? undefined : 'numeric',
+      };
+      const type = options.day || 'short';
+      const key = date.substr(0, 10);
 
-      const day = date.getDate();
-      const monthIndex = date.getMonth();
-      const year = date.getFullYear();
+      dateCache[type][key] = dateCache[type][key] || new Date(date)
+        .toLocaleDateString(undefined, options);
 
-      return `${monthNames[monthIndex]} ${day}, ${year}`;
+      return dateCache[type][key];
     },
     'markdown': function($1) {
       return options.markdown(this.getData($1).trim());
