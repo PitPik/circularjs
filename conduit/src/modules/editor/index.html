@@ -33,7 +33,7 @@
             <fieldset class="form-group">
                 <input type="text" name="tagList" value="{{#tagList}}{{.}}{{#unless @last}}, {{/unless}}{{/tagList}}" class="form-control" placeholder="Enter tags"><div class="tag-list"></div>
             </fieldset>
-            {{#if %textLength}}<button class="btn btn-lg pull-xs btn-outline-secondary" cr-event="click: preview" type="button">
+            {{#if %textLength}}<button class="btn btn-lg pull-xs-left btn-outline-secondary" cr-event="click: preview" type="button">
                 {{#if %isPreviewing}}Edit Article{{else}}Preview Article{{/if}}
             </button>{{/if}}
             <button class="btn btn-lg pull-xs-right btn-primary" cr-event="click: submit" type="button">
