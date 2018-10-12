@@ -34,7 +34,7 @@ define('template-helpers', [], function() {
       const key = date.substr(0, 10);
 
       dateCache[type][key] = dateCache[type][key] || new Date(date)
-        .toLocaleDateString(undefined, options);
+        .toLocaleDateString(undefined, options); // this is really slow...
 
       return dateCache[type][key];
     },
@@ -214,14 +214,14 @@ define('app-data.srv', ['toolbox'], function(Toolbox) {
   return dataService;
 });
 /* ------------------------- */
-define('article-preview', ['app-data.srv'], dataService => (circular, articles, name, loggedIn) => {
+define('article-preview', ['app-data.srv'], dataSrv => (circular, articles, name, loggedIn) => {
   circular.component({
     name: name || 'article-preview',
     listeners: ['favoritesCount', 'favorited'],
     model: articles,
     eventListeners: {
       like: (e, elm, item) => loggedIn() ?
-        dataService.postLike(item).then(response => {
+        dataSrv.postLike(item).then(response => {
           item.favoritesCount += item.favorited ? -1 : 1;
           item.favorited = !item.favorited;
         }) : window.location.href = '#/login',
@@ -233,7 +233,7 @@ define('article-preview', ['app-data.srv'], dataService => (circular, articles, 
   });
 });
 /* ------------------------- */
-define('app-article', ['app-data.srv'], dataService => promise => promise.then(data => {
+define('app-article', ['app-data.srv'], dataSrv => promise => promise.then(data => {
   const comments = data.cr.component('comments', {
     model: data.comments.comments.map(item => {
       item.slug = data.article.article.slug;
@@ -242,7 +242,7 @@ define('app-article', ['app-data.srv'], dataService => promise => promise.then(d
     extraModel: data.user,
     eventListeners: {
       delete: function(e, elm, item) {
-        dataService.deleteComment({ id: item.id, slug: item.slug })
+        dataSrv.deleteComment({ id: item.id, slug: item.slug })
           .then(response => this.removeChild(item));
       },
     },
@@ -250,13 +250,13 @@ define('app-article', ['app-data.srv'], dataService => promise => promise.then(d
 
   data.cr.component('form', {
     model: [{ user: data.user || {}, slug: data.article.article.slug }],
-    extraModel: { author: data.article.article.author, slug: data.article.article.slug },
+    extraModel: { author: data.article.article.author },
     eventListeners: {
       submit: function(e, elm, item) {
         const text = item.views.textarea.value.trim();
 
         e.preventDefault();
-        text && dataService.postComment({
+        text && dataSrv.postComment({
           comment: { comment: { body: text } },
           slug: item.slug,
         }).then(response => {
@@ -276,14 +276,14 @@ define('app-article', ['app-data.srv'], dataService => promise => promise.then(d
       isMine: data.user && data.user.username === data.article.article.author.username
     },
     eventListeners: {
-      like: (e, elm, item) => data.loggedIn() ? dataService.postLike(item).then(response => {
+      like: (e, elm, item) => data.loggedIn() ? dataSrv.postLike(item).then(response => {
         item.favoritesCount += item.favorited ? -1 : 1;
         item.favorited = !item.favorited;
       }) : window.location.href = '#/login',
-      follow: (e, elm, item) => data.loggedIn() ? dataService.postFollow(item).then(response => {
+      follow: (e, elm, item) => data.loggedIn() ? dataSrv.postFollow(item).then(response => {
         item.author.following = !item.author.following;
       }) : window.location.href = '#/login',
-      delete: (e, elm, item) => dataService.deleteArticle(item).then(response => {
+      delete: (e, elm, item) => dataSrv.deleteArticle(item).then(response => {
         window.location.href = `#/profile/${data.user.username}`;
       }),
     },
@@ -305,12 +305,13 @@ promise => promise.then(data => {
     listeners: ['ownFeed'],
     subscribe: (prop, item, value, oldValue) => {
       const toggle = data.cr.Toolbox.toggleClass;
+      const views = item.views;
 
-      toggle(item.views['own'], 'hidden', !item.user);
-      toggle(item.views['own-link'], 'active', !item.tag && item.ownFeed);
-      toggle(item.views['global'], 'active', !item.tag && !item.ownFeed);
-      toggle(item.views['tags'], 'hidden', !item.tag);
-      item.views['tags-link'].textContent = item.tag ? `# ${item.tag}` : '';
+      toggle(views['own'], 'hidden', !item.user);
+      toggle(views['own-link'], 'active', !item.tag && item.ownFeed);
+      toggle(views['global'], 'active', !item.tag && !item.ownFeed);
+      toggle(views['tags'], 'hidden', !item.tag);
+      views['tags-link'].textContent = item.tag ? `# ${item.tag}` : '';
     },
     eventListeners: {
       prerender: (e, elm, item) => { // speed up ui-feedback
@@ -322,7 +323,7 @@ promise => promise.then(data => {
   });
 }));
 /* ------------------------- */
-define('app-editor', ['app-data.srv', 'form-helper'], (dataService, formHelper) =>
+define('app-editor', ['app-data.srv', 'form-helper'], (dataSrv, formHelper) =>
 promise =>  promise.then(data => {
   data.cr.component('editor', {
     model: [data.article ? Object.assign(data.article.article, {
@@ -337,7 +338,7 @@ promise =>  promise.then(data => {
 
         e.preventDefault();
 
-        dataService.postArticle({ article: formData, slug: item.slug }).then(response => {
+        dataSrv.postArticle({ article: formData, slug: item.slug }).then(response => {
           formHelper.enableForm(formElements);
           window.location.href = `#/article/${response.article.slug}`;
         }).catch(error => {
@@ -356,7 +357,7 @@ promise =>  promise.then(data => {
   const errorComponent = data.cr.component('error-messages', { model: [] })
 }));
 /* ------------------------- */
-define('app-login', ['app-data.srv', 'form-helper'], (dataService, formHelper) =>
+define('app-login', ['app-data.srv', 'form-helper'], (dataSrv, formHelper) =>
 promise =>  promise.then(data => {
   const login = data.cr.component('login', {
     model: [{ register: data.isRegister }],
@@ -368,7 +369,7 @@ promise =>  promise.then(data => {
 
         e.preventDefault();
 
-        dataService[service]({ user: formData }).then(response => {
+        dataSrv[service]({ user: formData }).then(response => {
           formHelper.enableForm(formElements, true);
           window.location.href = '#/articles/0/my-feed'
         }).catch(error => {
@@ -393,7 +394,7 @@ promise =>  promise.then(data => {
   toggleClass(views['login'], 'hidden', data.isRegister);
 }));
 /* ------------------------- */
-define('app-profile', ['article-preview', 'app-data.srv'], (articlePreview, dataService) =>
+define('app-profile', ['article-preview', 'app-data.srv'], (articlePreview, dataSrv) =>
 promise => promise.then(data => {
   articlePreview(data.cr, data.articles.articles, 'articles', data.loggedIn);
 
@@ -403,7 +404,7 @@ promise => promise.then(data => {
       extraModel: { user: data.user && data.user.username },
       listeners: ['author.following'],
       eventListeners: {
-        follow: (e, elm, item) => data.loggedIn() ? dataService.postFollow({
+        follow: (e, elm, item) => data.loggedIn() ? dataSrv.postFollow({
             author: item.author
         }).then(response => {
           item.author.following = response.profile.following;
@@ -443,18 +444,18 @@ promise => promise.then(data => {
   });
 }));
 /* ------------------------- */
-define('app-settings', ['app-data.srv', 'form-helper'], (dataService, formHelper) =>
+define('app-settings', ['app-data.srv', 'form-helper'], (dataSrv, formHelper) =>
 promise => promise.then(data => {
   data.cr.component('settings', {
     model: [data.user],
     eventListeners: {
-      logout: () => dataService.userLogout().then(() => window.location.href = '#/'),
+      logout: () => dataSrv.userLogout().then(() => window.location.href = '#/'),
       submit: (e, elm, item) => {
         const formElements = [].slice.call(item.views.form);
         const formData = formHelper.parse(formElements, []);
 
         e.preventDefault();
-        dataService.putSettings({ user: formData }).then(response => {
+        dataSrv.putSettings({ user: formData }).then(response => {
           formHelper.enableForm(formElements);
         }).catch(error => {
           formHelper.error(error, errorComponent, formElements);
@@ -467,7 +468,7 @@ promise => promise.then(data => {
 }));
 /* ------------------------- */
 require(['circular', 'app-data.srv', '!ui-components', 'template-helpers', 'marked'],
-function(Circular, dataService, uiComponents, helpers, md) {
+function(Circular, dataSrv, uiComponents, helpers, md) {
   const toolbox = Circular.Toolbox;
   const removeClass = toolbox.removeClass;
   const addClass = toolbox.addClass;
@@ -475,26 +476,25 @@ function(Circular, dataService, uiComponents, helpers, md) {
   const circular = new Circular({ helpers: helpers({ markdown: md }) });
 
   const app = circular.component('app', {
-    model: [{
-      currentApp: '',
-      data: '',
+    model: [{ // state model
+      currentApp: '', // only pro-active component
       offset: 0,
-      article: '',
       tag: '',
+      slug: '',
       ownFeed: false,
       favorited: false,
-
       author: '',
       isSameAuthor: false,
       isRegister: false,
+      wasRegister: false,
     }],
     listeners: ['currentApp'],
     subscribe: renderModule,
     onInit: self => {
       const model = self.model[0];
 
-      dataService.appData = model;
-      dataService['user']({}).then(data => {
+      dataSrv.appData = model;
+      dataSrv['user']({}).then(data => {
         model.user = data;
         renderMenu(model, model.currentApp, null, true);
         removeClass(model.views['navbar'], 'hidden');
@@ -540,7 +540,7 @@ function(Circular, dataService, uiComponents, helpers, md) {
     setAppClasses(item, value, oldValue);
     renderMenu(item, value, oldValue);
     circular.renderModule({
-      data: dataService[dataService[value] ? value : 'default']({
+      data: dataSrv[dataSrv[value] ? value : 'default']({
         cr: circular,
         limit: value === 'articles' ? 10 : 5,
         isSameApp: value === oldValue,
@@ -559,10 +559,10 @@ function(Circular, dataService, uiComponents, helpers, md) {
       name: value,
       previousName: oldValue,
       path: 'modules/' + value + '/index.html',
-      container: !!property && item.views['app-modules'],
+      container: item.views['app-modules'],
       require: 'app-' + value,
-      returnData: true,
-      dontWrap: true,
+      returnData: true, // returns data instead of require factory
+      dontWrap: true, // does not wrap modules with DIV
       transition: data => {
         data.promise.then(() => {
           data.remove();

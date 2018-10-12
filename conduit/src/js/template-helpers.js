@@ -25,7 +25,7 @@ define('template-helpers', [], function() {
       const key = date.substr(0, 10);
 
       dateCache[type][key] = dateCache[type][key] || new Date(date)
-        .toLocaleDateString(undefined, options);
+        .toLocaleDateString(undefined, options); // this is really slow...
 
       return dateCache[type][key];
     },

@@ -1,4 +1,4 @@
-define('app-editor', ['app-data.srv', 'form-helper'], (dataService, formHelper) =>
+define('app-editor', ['app-data.srv', 'form-helper'], (dataSrv, formHelper) =>
 promise =>  promise.then(data => {
   data.cr.component('editor', {
     model: [data.article ? Object.assign(data.article.article, {
@@ -13,7 +13,7 @@ promise =>  promise.then(data => {
 
         e.preventDefault();
 
-        dataService.postArticle({ article: formData, slug: item.slug }).then(response => {
+        dataSrv.postArticle({ article: formData, slug: item.slug }).then(response => {
           formHelper.enableForm(formElements);
           window.location.href = `#/article/${response.article.slug}`;
         }).catch(error => {

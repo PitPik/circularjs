@@ -1,6 +1,5 @@
-define('app-profile', ['article-preview', 'app-data.srv'], (articlePreview, dataService) =>
+define('app-profile', ['article-preview', 'app-data.srv'], (articlePreview, dataSrv) =>
 promise => promise.then(data => {
-
   articlePreview(data.cr, data.articles.articles, 'articles', data.loggedIn);
 
   if (data.profile) {
@@ -9,7 +8,7 @@ promise => promise.then(data => {
       extraModel: { user: data.user && data.user.username },
       listeners: ['author.following'],
       eventListeners: {
-        follow: (e, elm, item) => data.loggedIn() ? dataService.postFollow({
+        follow: (e, elm, item) => data.loggedIn() ? dataSrv.postFollow({
             author: item.author
         }).then(response => {
           item.author.following = response.profile.following;

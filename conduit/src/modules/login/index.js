@@ -1,4 +1,4 @@
-define('app-login', ['app-data.srv', 'form-helper'], (dataService, formHelper) =>
+define('app-login', ['app-data.srv', 'form-helper'], (dataSrv, formHelper) =>
 promise =>  promise.then(data => {
   const login = data.cr.component('login', {
     model: [{ register: data.isRegister }],
@@ -10,7 +10,7 @@ promise =>  promise.then(data => {
 
         e.preventDefault();
 
-        dataService[service]({ user: formData }).then(response => {
+        dataSrv[service]({ user: formData }).then(response => {
           formHelper.enableForm(formElements, true);
           window.location.href = '#/articles/0/my-feed'
         }).catch(error => {

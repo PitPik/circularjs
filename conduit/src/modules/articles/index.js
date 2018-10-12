@@ -13,12 +13,13 @@ promise => promise.then(data => {
     listeners: ['ownFeed'],
     subscribe: (prop, item, value, oldValue) => {
       const toggle = data.cr.Toolbox.toggleClass;
+      const views = item.views;
 
-      toggle(item.views['own'], 'hidden', !item.user);
-      toggle(item.views['own-link'], 'active', !item.tag && item.ownFeed);
-      toggle(item.views['global'], 'active', !item.tag && !item.ownFeed);
-      toggle(item.views['tags'], 'hidden', !item.tag);
-      item.views['tags-link'].textContent = item.tag ? `# ${item.tag}` : '';
+      toggle(views['own'], 'hidden', !item.user);
+      toggle(views['own-link'], 'active', !item.tag && item.ownFeed);
+      toggle(views['global'], 'active', !item.tag && !item.ownFeed);
+      toggle(views['tags'], 'hidden', !item.tag);
+      views['tags-link'].textContent = item.tag ? `# ${item.tag}` : '';
     },
     eventListeners: {
       prerender: (e, elm, item) => { // speed up ui-feedback

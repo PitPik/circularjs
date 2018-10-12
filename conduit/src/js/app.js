@@ -1,5 +1,5 @@
 require(['circular', 'app-data.srv', '!ui-components', 'template-helpers', 'marked'],
-function(Circular, dataService, uiComponents, helpers, md) {
+function(Circular, dataSrv, uiComponents, helpers, md) {
   const toolbox = Circular.Toolbox;
   const removeClass = toolbox.removeClass;
   const addClass = toolbox.addClass;
@@ -7,26 +7,25 @@ function(Circular, dataService, uiComponents, helpers, md) {
   const circular = new Circular({ helpers: helpers({ markdown: md }) });
 
   const app = circular.component('app', {
-    model: [{
-      currentApp: '',
-      data: '',
+    model: [{ // state model
+      currentApp: '', // only pro-active component
       offset: 0,
-      article: '',
       tag: '',
+      slug: '',
       ownFeed: false,
       favorited: false,
-
       author: '',
       isSameAuthor: false,
       isRegister: false,
+      wasRegister: false,
     }],
     listeners: ['currentApp'],
     subscribe: renderModule,
     onInit: self => {
       const model = self.model[0];
 
-      dataService.appData = model;
-      dataService['user']({}).then(data => {
+      dataSrv.appData = model;
+      dataSrv['user']({}).then(data => {
         model.user = data;
         renderMenu(model, model.currentApp, null, true);
         removeClass(model.views['navbar'], 'hidden');
@@ -72,7 +71,7 @@ function(Circular, dataService, uiComponents, helpers, md) {
     setAppClasses(item, value, oldValue);
     renderMenu(item, value, oldValue);
     circular.renderModule({
-      data: dataService[dataService[value] ? value : 'default']({
+      data: dataSrv[dataSrv[value] ? value : 'default']({
         cr: circular,
         limit: value === 'articles' ? 10 : 5,
         isSameApp: value === oldValue,
@@ -91,10 +90,10 @@ function(Circular, dataService, uiComponents, helpers, md) {
       name: value,
       previousName: oldValue,
       path: 'modules/' + value + '/index.html',
-      container: !!property && item.views['app-modules'],
+      container: item.views['app-modules'],
       require: 'app-' + value,
-      returnData: true,
-      dontWrap: true,
+      returnData: true, // returns data instead of require factory
+      dontWrap: true, // does not wrap modules with DIV
       transition: data => {
         data.promise.then(() => {
           data.remove();
