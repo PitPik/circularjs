@@ -47,8 +47,8 @@ In the folder ```js/built``` you can find the file ```app.all.js``` (~590 lines 
  - URL2State "Tags" + pagination
  - URL2State "My Articles" + pagination
  - URL2State "Favorited Articles" + pagination
- - "Preview Article", "Edit Article" toggle buttons to preview Article as rendered markdown
+ - "Preview Article", "Edit Article" toggle buttons to preview article as rendered markdown
  - Tags in article list and article view are clickable
- - Post dates are rendered in the browser's language format
+ - Post dates are rendered in the browser's language format (very slow though)
  - Soft transitions between data load / app re-render
 
