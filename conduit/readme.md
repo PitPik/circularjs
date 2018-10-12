@@ -52,4 +52,5 @@ If you want to run the app from there, just uncomment ```circular.min.js```and `
  - Tags in article list and article view are clickable
  - Post dates are rendered in the browser's language format (very slow though)
  - Soft transitions between data load / app re-render (to demo how transitions work in CircularJS)
+ - App icon and metadata to install app on an iPad as web-app (demonstrates CircularJS working perfectly for mobile)
 
