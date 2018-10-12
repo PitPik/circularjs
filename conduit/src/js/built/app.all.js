@@ -605,13 +605,13 @@ function(Circular, dataSrv, uiComponents, helpers, md) {
     toggleClass(element, 'logged-in', !!userName);
     toolbox.toggleClasses(element, element, oldValue, value);
     views['home-link'].href = userName ? '#/articles/0/my-feed' : '#';
+    toggleClass(views['user-link'], 'active',
+      item.currentApp === 'profile' && item.author === userName);
     if (!userName || value === oldValue) return;
 
     views['user-name'].textContent = userName;
     views['user-link'].href = '#/profile/' + userName;
     views['user-image'].src = item.user.image;
 
-    toggleClass(views['user-link'], 'active',
-      item.currentApp === 'profile' && item.author === userName);
   }
 });

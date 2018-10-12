@@ -1,4 +1,4 @@
-@font-face { /* compensates wrong loading of fon in ttf mode */
+@font-face { /* compensates wrong loading of font in ttf mode */
   font-family: 'Ionicons';
   font-display: auto;
   src: url('//code.ionicframework.com/ionicons/2.0.1/fonts/ionicons.eot?v=2.0.1');
@@ -7,23 +7,18 @@
        url('//code.ionicframework.com/ionicons/2.0.1/fonts/ionicons.ttf?v=2.0.1') format('truetype'),
        url('//code.ionicframework.com/ionicons/2.0.1/fonts/ionicons.svg#Ionicons') format('svg');
 }
-[cr-view="app-modules"] {
+[cr-view="app-modules"],
+.article-list {
   opacity: 1;
   transition: opacity .2s;
 }
-.article-list {
-  opacity: 1;
-  transition: opacity .3s;
-}
-.pending-app [cr-view="app-modules"] {
-  opacity: 0;
-}
+.pending-app [cr-view="app-modules"],
 .pending-sub-app .article-list {
   opacity: 0;
 }
 
 [cr-template-for], .hidden  {
-	display: none;
+  display: none;
 }
 
 [cr-cloak] {
@@ -34,19 +29,19 @@ articles,
 article-preview,
 .articles-toggle,
 .feed-toggle {
-	display: block;
+  display: block;
 }
-
 [cr-view="preview"] {
   overflow: auto;
 }
-
-.articles .navbar-light .navbar-nav [href="#"],
+.articles .navbar-light .navbar-nav [cr-view="home-link"],
 .editor   .navbar-light .navbar-nav [href="#/editor"],
 .settings .navbar-light .navbar-nav [href="#/settings"],
 .login    .navbar-light .navbar-nav [href="#/login"],
+.profile  .navbar-light .navbar-nav .active,
 .register .navbar-light .navbar-nav [href="#/login/register"] {
   color: rgba(0,0,0,.8);
+  cursor: default;
 }
 
 .nav-user,
