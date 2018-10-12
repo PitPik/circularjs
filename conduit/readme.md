@@ -37,4 +37,18 @@ Until there is a building cli-tool for CircularJS you have to manually switch to
  - Open all ```index.html``` inside the modules and uncomment the script tags.
 
 
-In the folder ```js/built``` you can find the file ```app.all.js``` (~570 lines of code, 514 sloc) that contains all the javascript needed to run conduit in one single file.
+In the folder ```js/built``` you can find the file ```app.all.js``` (~590 lines of code, 544 sloc) that contains all the javascript needed to run conduit in one single file.
+
+
+# Some additions to the [original implementation](https://demo.realworld.io)
+
+ - URL2State "Your Feed" + pagination (browser BACK button gets you back to where you were)
+ - URL2State "Global Feed" + pagination
+ - URL2State "Tags" + pagination
+ - URL2State "My Articles" + pagination
+ - URL2State "Favorited Articles" + pagination
+ - "Preview Article", "Edit Article" toggle buttons to preview Article as rendered markdown
+ - Tags in article list and article view are clickable
+ - Post dates are rendered in the browser's language format
+ - Soft transitions between data load / app re-render
+
