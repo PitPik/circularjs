@@ -9,6 +9,7 @@ function(Circular, dataSrv, uiComponents, helpers, md) {
   const app = circular.component('app', {
     model: [{ // state model
       currentApp: '', // only pro-active component
+      path: undefined,
       offset: 0,
       tag: '',
       slug: '',
@@ -45,6 +46,10 @@ function(Circular, dataSrv, uiComponents, helpers, md) {
     const pAppName = params.appName || 'articles';
     const var0 = params.var0;
     const var1 = params.var1;
+    const path = data.path.join('/');
+
+    if (model.path === path) return;
+    model.path = path;
 
     model.ownFeed = undefined;
     model.isSameAuthor = undefined;
@@ -130,6 +135,7 @@ function(Circular, dataSrv, uiComponents, helpers, md) {
 
     toggleClass(element, 'logged-in', !!userName);
     toolbox.toggleClasses(element, element, oldValue, value);
+    views['home-link'].href = userName ? '#/articles/0/my-feed' : '#';
     if (!userName || value === oldValue) return;
 
     views['user-name'].textContent = userName;
