@@ -51,5 +51,5 @@ If you want to run the app from there, just uncomment ```circular.min.js```and `
  - "Preview Article", "Edit Article" toggle buttons to preview article as rendered markdown
  - Tags in article list and article view are clickable
  - Post dates are rendered in the browser's language format (very slow though)
- - Soft transitions between data load / app re-render
+ - Soft transitions between data load / app re-render (to demo how transitions work in CircularJS)
 
