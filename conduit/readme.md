@@ -38,6 +38,7 @@ Until there is a building cli-tool for CircularJS you have to manually switch to
 
 
 In the folder ```js/built``` you can find the file ```app.all.js``` (~590 lines of code, 544 sloc) that contains all the javascript needed to run conduit in one single file.
+If you want to run the app from there, just uncomment ```circular.min.js```and ```amd.cfg.js``` and rename the ```app.all.min.js``` to ```app.all.js``` in your script tags in ```index.html```.
 
 
 # Some additions to the [original implementation](https://demo.realworld.io)
