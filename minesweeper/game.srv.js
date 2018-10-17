@@ -23,7 +23,7 @@ define('game-service', [], function() { 'use strict';
       for (var col = _col - 1, colLen = _col + 1; col <= colLen; col++) {
         if (!board[row].childNodes[col] ||
           row === _row && col === _col) continue;
-        callback(row, col);
+        callback(row, col, board[row].childNodes[col]);
       }
     }
   }
@@ -46,11 +46,10 @@ define('game-service', [], function() { 'use strict';
     for (var row = 0; row < rowcol[0]; row++) {
       for (var col = 0; col < rowcol[1]; col++) {
         if (board[row].childNodes[col].isMine) {
-          lookAround(board, row, col, function(_row, _col) {
-            var count = board[_row].childNodes[_col].surroundingMines;
+          lookAround(board, row, col, function(_row, _col, foundItem) {
+            var count = foundItem.surroundingMines;
 
-            board[_row].childNodes[_col].surroundingMines =
-              isNaN(count) ? 1 : ++count;
+            foundItem.surroundingMines = isNaN(count) ? 1 : count + 1;
           });
         }
       }

@@ -2,9 +2,7 @@ define('game-controller', ['game-service'], function(gameSrv) {  'use strict';
 
   function lookAround(inst, item, checkAround, foundMarked) {
     gameSrv.lookAround(inst.model, item.parentNode.index, item.index,
-      function(row, col) {
-        var foundItem = inst.model[row].childNodes[col];
-
+      function(row, col, foundItem) {
         if (foundMarked !== undefined) {
           if (foundItem.mark === 'marked') foundMarked++;
         } else if (checkAround) {
