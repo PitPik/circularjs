@@ -1,11 +1,11 @@
 define('game-controller', ['game-service'], function(gameSrv) {  'use strict';
 
-  function lookAround(inst, item, checkAround, foundMarked) {
+  function lookAround(inst, item, foundMarked) {
     gameSrv.lookAround(inst.model, item.parentNode.index, item.index,
       function(row, col, foundItem) {
         if (foundMarked !== undefined) {
           if (foundItem.mark === 'marked') foundMarked++;
-        } else if (!foundItem.isMine && !foundItem.isProcessed || checkAround) {
+        } else if (!foundItem.isMine && !foundItem.isProcessed) {
           checkItem(inst, foundItem);
         }
       });
@@ -22,8 +22,8 @@ define('game-controller', ['game-service'], function(gameSrv) {  'use strict';
 
   function checkItem(inst, item, mark, checkAround) {
     if (checkAround) {
-      lookAround(inst, item, false, 0) === item.surroundingMines &&
-        lookAround(inst, item, true);
+      lookAround(inst, item, 0) === item.surroundingMines &&
+        lookAround(inst, item);
     } else if (mark && !item.isProcessed) {
       item.mark = item.mark === 'marked' ? 'open' :
         item.mark === 'open' ? '' : 'marked';
