@@ -1,0 +1,90 @@
+html, body {
+  height: 100%;
+  font: normal normal normal .90em/1.6em  "Trebuchet MS", Arial, Helvetica, sans-serif;
+  color: #333;
+  text-align: center;
+}
+
+[cr-template-for] {
+  display: none;
+}
+
+.game-board {
+  display: inline-block;
+  padding: 3px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+.header {
+  text-align: center;
+  padding: 12px;
+  margin: -3px;
+  margin-bottom: 3px;
+  border-bottom: 1px solid #ccc;
+}
+
+input[type="button"] {
+  padding: 6px 12px;
+  border: 1px solid #aaa;
+  border-radius: 3px;
+  font-size: inherit;
+  color: #666;
+}
+
+input[type="button"]:focus {
+  outline: none;
+}
+
+input.green {
+  background: green;
+  color: white;
+}
+
+.board td {
+  color: green;
+  font-weight: bold;
+  width: 24px;
+  height: 24px;
+  border: 1px #ccc dotted;
+  border-radius: 10%;
+  cursor: default;
+}
+
+.board .hidden {
+  background: #eee;
+}
+.board .hidden:hover {
+  background: #ccc;
+}
+
+.board .mine,
+.board .mine:hover {
+  background: sandybrown;
+}
+.board .mine:after {
+  content: "o"
+}
+.board .mine.last {
+  color: white;
+  background: red;
+}
+
+.board .marked,
+.board .marked:hover,
+.board .open,
+.board .open:hover {
+  background: deepskyblue;
+}
+
+.board .marked:after {
+  content: "!"
+}
+.board .open:after {
+  content: "?"
+}
+
+.board .color-1 { color: blue; }
+.board .color-2 { color: green; }
+.board .color-3 { color: red; }
+.board .color-4 { color: black; }
+.board .color-5 { color: sandybrown; }

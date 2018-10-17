@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en" data-framework="circularJS">
+  <head>
+    <meta charset="utf-8">
+    <title>Minesweeper</title>
+    <link rel="stylesheet" href="index.css">
+  </head>
+  <body>
+
+    <div class="game-board" cr-component="game">
+      <div class="header">
+        <input type="button" cr-view="button" cr-event="click: restart" value="New Game">
+      </div>
+      <table class="board">
+        <tbody cr-component="game-bord" cr-container>
+          <tr cr-mount="parent" cr-template-for="game-bord">
+            <td class="{{%mark}}{{#if %isProcessed}} color-{{surroundingMines}}{{else}} hidden{{/if}}" cr-event="click: reveal; contextmenu: reveal">{{#if %isProcessed}}{{surroundingMines}}{{/if}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- <script src="../amd.js"></script>
+    <script src="../toolbox.js"></script>
+    <script src="../VOM.js"></script>
+    <script src="../schnauzer.js"></script>
+    <script src="../blick.js"></script>
+    <script src="../circular.js"></script> -->
+    <script src="../circular.min.js"></script>
+    <script>
+      require.config({
+        paths: {
+          'game-controller': 'game.ctrl',
+          'game-service': 'game.srv',
+        },
+      });
+    </script>
+    <!-- <script src="game.srv.js"></script>
+    <script src="game.ctrl.js"></script> -->
+
+    <script src="app.js"></script>
+  </body>
+</html>
