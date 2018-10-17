@@ -149,7 +149,7 @@ Circular.prototype.component = function(name, parameters) {
         var blickItem = _inst.collector[data['cr-id']] =
             _inst.collector[data['cr-id']] || {};
         var _name = _parent && _parent.join('.') || name;
-
+// TODO: check if we can delete all if cr-mount="parent"
         blickItem[_name] = blickItem[_name] || [];
         blickItem[_name].push({
           fn: fn,
@@ -190,7 +190,7 @@ Circular.prototype.component = function(name, parameters) {
       // collect elements
       this.reinforceProperty(item, elmsTxt, {
         element: element,
-        container: $(mountSelector, element),
+        container: element.hasAttribute('cr-mount') ? element : $(mountSelector, element),
       }, true);
       // collect events
       this.reinforceProperty(item, options.events, {}, true);
@@ -729,6 +729,7 @@ Controller.prototype = {
         this.options.instanceID + '_' + component.name);
       this.installed[key] = true;
     }
+    if (!key) this.installed = false; // can happen with tables; TODO
   },
   destroy: function(component) {
     Toolbox.removeEvent(this.options.instanceID + '_' + component.name);
@@ -743,11 +744,17 @@ function render(html, operator, parentNode, sibling, idProperty, id) {
 
   if (html.nodeType === 11) {
     element = html.children[0];
+
+    if (parentNode.getAttribute('cr-mount') === 'parent') { // get from above
+      element = element.children[0];
+    } else if (element.hasAttribute('cr-mount')) { // get from above
+      element.removeChild(element.children[0]);
+    }
+
     element.setAttribute(idProperty, id);
   } else {
     element = html;
   }
-
   var renderingFunc = function() {
     if (isPrepend || operator === 'insertAfter') {
       sibling = sibling && sibling.nextSibling ||

@@ -936,7 +936,7 @@
         };
     }
     function loop(_this, data, fn, name, vars, isNot, type) {
-        var _data = findData(data, name.name, name.keys, name.depth);
+        var _data = findData(data, name.name, name.keys, name.depth) || isArray(data.path[0]) && data.path[0];
         var helper = !name.strict && (_this.helpers[name.name] || isFunction(_data) && _data);
         var helperOut = helper && apply(_this, helper, name.name, vars.vars, data, vars, fn[0], fn[1]);
         var _isArray = isArray(_data);
@@ -1058,7 +1058,8 @@
             registerProperty(part.name, part.replacer, part.data.path[0], part.isActive, part.parent, foundNode);
         };
         options.render = renderHook;
-        _this.search = new RegExp("{{#\\d+}}[\\S\\s]*{{/\\d+}}");
+        _this.search = /{{#\d+}}[\S\s]*{{\/\d+}}/;
+        _this.attrSplitter = /([^}{]*)({{#(\d+)}}[\s\S]*?{{\/\d+}})/g;
         _this.schnauzer = new Schnauzer(template, options);
     }, dump = [], dummy = function() {}, disableAttribute = function(element, name, value) {
         if (value === true || value === "true" || !value && value !== false) {
@@ -1171,7 +1172,19 @@
             if (!foundNode) {
                 window.console && console.warn("There might be an error in the SCHNAUZER template");
             } else if (foundNode.ownerElement) {
-                part.replacer = function(elm, ownerElement, name, search, orig, item) {
+                if (!foundNode.valueSplitter) {
+                    var valueSplitter = foundNode.valueSplitter = [];
+                    var valueCounter = 1;
+                    valueSplitter.valueTracker = {};
+                    foundNode.valueSplitter.push(foundNode.textContent.replace(_this.attrSplitter, function(_, $1, $2, $3) {
+                        valueSplitter.push($1);
+                        valueSplitter.push($2);
+                        valueSplitter.valueTracker[$3] = valueCounter;
+                        valueCounter += 2;
+                        return "";
+                    }));
+                }
+                part.replacer = function(elm, ownerElement, name, search, orig, item, _n) {
                     return function updateAttribute(keys, _value) {
                         var value = _value || item.fn(item.data, keys);
                         if (value === undefined) value = "";
@@ -1179,10 +1192,11 @@
                             elm = null;
                             options.attributes[name](ownerElement, name, value);
                         } else if (value !== undefined) {
-                            elm.textContent = orig.replace(search, value);
+                            elm.valueSplitter[elm.valueSplitter.valueTracker[_n]] = value;
+                            elm.textContent = elm.valueSplitter.join("");
                         }
                     };
-                }(foundNode, foundNode.ownerElement, foundNode.name, search, foundNode.textContent, part);
+                }(foundNode, foundNode.ownerElement, foundNode.name, search, foundNode.textContent, part, n);
                 registerProperty(part, foundNode);
                 openSections = checkSectionChild(foundNode.ownerElement.previousSibling, part, openSections, options);
                 part.replacer(null, part.value);
@@ -1629,7 +1643,7 @@
                 var idProperty = this.options.idProperty, id = item[idProperty], fragment = _inst.template && _inst.template.schnauzer.partials.self && _inst.template.renderHTML(item, _this.data[name].extraModel), replaceElement = type === "replaceChild" && siblingOrParent[elmsTxt].element, container = item.parentNode[elmsTxt] && item.parentNode[elmsTxt].container, parentNode = fragment && siblingElement || container || component.container, siblingElement = parentNode ? replaceElement || undefined : siblingOrParent && siblingOrParent[elmsTxt] && siblingOrParent[elmsTxt].element, element = fragment && render(fragment, type || data.type || "appendChild", parentNode, siblingElement, idProperty, id) || component.element;
                 this.reinforceProperty(item, elmsTxt, {
                     element: element,
-                    container: $(mountSelector, element)
+                    container: element.hasAttribute("cr-mount") ? element : $(mountSelector, element)
                 }, true);
                 this.reinforceProperty(item, options.events, {}, true);
                 _inst.controller && _inst.controller.getEventListeners(item[elmsTxt].element || component.element, item[options.events], component, idProperty);
@@ -2035,6 +2049,7 @@
                 }, /(?:focus|blur|mouseenter|mouseleave)/.test(key) ? true : false, this.options.instanceID + "_" + component.name);
                 this.installed[key] = true;
             }
+            if (!key) this.installed = false;
         },
         destroy: function(component) {
             Toolbox.removeEvent(this.options.instanceID + "_" + component.name);
@@ -2045,6 +2060,11 @@
         var isPrepend = operator === "prependChild", element = {};
         if (html.nodeType === 11) {
             element = html.children[0];
+            if (parentNode.getAttribute("cr-mount") === "parent") {
+                element = element.children[0];
+            } else if (element.hasAttribute("cr-mount")) {
+                element.removeChild(element.children[0]);
+            }
             element.setAttribute(idProperty, id);
         } else {
             element = html;

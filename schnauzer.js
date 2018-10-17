@@ -421,7 +421,7 @@ function section(_this, fn, name, vars, unEscaped, isNot) {
 }
 
 function loop(_this, data, fn, name, vars, isNot, type) {
-  var _data = findData(data, name.name, name.keys, name.depth);
+  var _data = findData(data, name.name, name.keys, name.depth) || isArray(data.path[0]) && data.path[0];
   var helper = !name.strict && (_this.helpers[name.name] || isFunction(_data) && _data);
   var helperOut = helper && apply(_this, helper, name.name, vars.vars, data, vars, fn[0], fn[1]);
   var _isArray = isArray(_data);

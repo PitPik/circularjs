@@ -63,7 +63,8 @@ var Blick = function(template, options) {
         part.isActive, part.parent, foundNode);
     };
     options.render = renderHook;
-    _this.search = new RegExp('{{#\\d+}}[\\S\\s]*{{/\\d+}}');
+    _this.search = /{{#\d+}}[\S\s]*{{\/\d+}}/;
+    _this.attrSplitter = /([^}{]*)({{#(\d+)}}[\s\S]*?{{\/\d+}})/g;
     _this.schnauzer = new Schnauzer(template, options);
   },
   dump = [],
@@ -194,18 +195,32 @@ function resolveReferences(_this, memory, html, container, fragment) {
     if (!foundNode) { // error
       window.console && console.warn('There might be an error in the SCHNAUZER template');
     } else if (foundNode.ownerElement) { // attribute
-      part.replacer = (function(elm, ownerElement, name, search, orig, item) { // TODO: no part.replacer...
-        return function updateAttribute(keys, _value) { // TODO: respect attributes' behaviours
+      if (!foundNode.valueSplitter) { // create array of text nodes
+        var valueSplitter = foundNode.valueSplitter = []; // TODO: clean up
+        var valueCounter = 1;
+        valueSplitter.valueTracker = {};
+        foundNode.valueSplitter.push(foundNode.textContent.replace(_this.attrSplitter,
+          function(_, $1, $2, $3) {
+            valueSplitter.push($1);
+            valueSplitter.push($2);
+            valueSplitter.valueTracker[$3] = valueCounter;
+            valueCounter += 2;
+            return '';
+          }));
+      }
+      part.replacer = (function(elm, ownerElement, name, search, orig, item, _n) { // TODO: no part.replacer...
+        return function updateAttribute(keys, _value) { // TODO: !!!! check again; respect attributes' behaviours
           var value = _value || item.fn(item.data, keys);
           if (value === undefined) value = '';
           if (options.attributes[name]) {
             elm = null;
             options.attributes[name](ownerElement, name, value);
           } else if (value !== undefined) {
-            elm.textContent = orig.replace(search, value);
+            elm.valueSplitter[elm.valueSplitter.valueTracker[_n]] = value;
+            elm.textContent = elm.valueSplitter.join('');
           }
         }
-      })(foundNode, foundNode.ownerElement, foundNode.name, search, foundNode.textContent, part);
+      })(foundNode, foundNode.ownerElement, foundNode.name, search, foundNode.textContent, part, n);
       registerProperty(part, foundNode);
       openSections = checkSectionChild(foundNode.ownerElement.previousSibling,
           part, openSections, options);
