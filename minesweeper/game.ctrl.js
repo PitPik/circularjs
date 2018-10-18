@@ -5,12 +5,8 @@ define('game-controller', ['game-service'], function(gameSrv) {  'use strict';
       function(row, col, foundItem) {
         if (foundMarked !== undefined) {
           if (foundItem.mark === 'marked') foundMarked++;
-        } else if (checkAround) {
+        } else if (checkAround || !foundItem.isMine && !foundItem.isProcessed) {
           checkItem(inst, foundItem);
-        } else if (!foundItem.isMine && !foundItem.isProcessed) {
-          foundItem.mark = '';
-          foundItem.isProcessed = true;
-          if (!foundItem.surroundingMines) lookAround(inst, foundItem);
         }
       });
 
