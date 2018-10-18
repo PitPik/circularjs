@@ -12,11 +12,11 @@ define('game-service', [], function() { 'use strict';
   }
 
   function createBoard(rowcol, mineCount) {
-    for (var board = Array(rowcol[0]), n = board.length; n--; ) {
-      board[n] = { childNodes: Array.apply(null, { length: rowcol[1] })
-        .map(function(v, i) {
-          return { mark: '', isProcessed: false, isMine: false };
-        })};
+    for (var board =[], n = rowcol[0]; n--; ) {
+      board[n] = { childNodes: [] };
+      for (var m = rowcol[1]; m--; ) {
+        board[n].childNodes[m] = { mark: '', isProcessed: false, isMine: false };
+      }
     }
 
     return createMines(board, rowcol, mineCount);
@@ -31,9 +31,8 @@ define('game-service', [], function() { 'use strict';
         board[row].childNodes[col].isMine = true;
         mineCount--;
         lookAround(board, row, col, function(_row, _col, item) {
-          var count = item.surroundingMines;
-
-          item.surroundingMines = isNaN(count) ? 1 : count + 1;
+          item.surroundingMines = isNaN(item.surroundingMines) ?
+            1 : item.surroundingMines + 1;
         });
       }
     }
