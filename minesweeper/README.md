@@ -1,6 +1,6 @@
 # Minesweeper
 
-a clasic game build with CircularJS as an example how to best seperate view from controller from services.
+[a clasic game build with CircularJS](https://pitpik.github.io/circularjs/minesweeper/) as an example how to best seperate view from controller from services.
 
 There is ```game.srv.js```, a service that builds the model and also provides a handy function that we can later also use in the controller for checking surrounding squares.
 
