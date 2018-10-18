@@ -15,7 +15,8 @@ define('game-service', [], function() { 'use strict';
     for (var board =[], n = rowcol[0]; n--; ) {
       board[n] = { childNodes: [] };
       for (var m = rowcol[1]; m--; ) {
-        board[n].childNodes[m] = { mark: '', isProcessed: false, isMine: false };
+        board[n].childNodes[m] =
+          { mark: '', isProcessed: false, isMine: false };
       }
     }
 
