@@ -1164,6 +1164,7 @@
         var newMemory = [];
         var openSections = [];
         var out;
+        var valueSplitter = {};
         for (var n = memory.length; n--; ) {
             first = "{{#" + n + "}}";
             last = "{{/" + n + "}}";
@@ -1173,14 +1174,12 @@
                 window.console && console.warn("There might be an error in the SCHNAUZER template");
             } else if (foundNode.ownerElement) {
                 if (!foundNode.valueSplitter) {
-                    var valueSplitter = foundNode.valueSplitter = [];
-                    var valueCounter = 1;
+                    valueSplitter = foundNode.valueSplitter = [];
                     valueSplitter.valueTracker = {};
-                    foundNode.valueSplitter.push(foundNode.textContent.replace(_this.attrSplitter, function(_, $1, $2, $3) {
+                    valueSplitter.push(foundNode.textContent.replace(_this.attrSplitter, function(_, $1, $2, $3) {
                         valueSplitter.push($1);
                         valueSplitter.push($2);
-                        valueSplitter.valueTracker[$3] = valueCounter;
-                        valueCounter += 2;
+                        valueSplitter.valueTracker[$3] = valueSplitter.length - 1;
                         return "";
                     }));
                 }
@@ -1193,7 +1192,7 @@
                             options.attributes[name](ownerElement, name, value);
                         } else if (value !== undefined) {
                             elm.valueSplitter[elm.valueSplitter.valueTracker[_n]] = value;
-                            elm.textContent = elm.valueSplitter.join("");
+                            elm.textContent = elm.valueSplitter.join("").trim();
                         }
                     };
                 }(foundNode, foundNode.ownerElement, foundNode.name, search, foundNode.textContent, part, n);
