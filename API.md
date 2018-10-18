@@ -1,5 +1,7 @@
 # CircularJS API
 
+> The documentation is far from complete and partly not even correct any more. As CircularJS is now quite feature complete, this will be the next I'll be working on. So, please stay tuned. You will get a rich documentation with examples as soon as I have time to.
+
 Work in progress. This is just a collection of thoughts taht will hopefully soon be finished.
 
 ## amd
