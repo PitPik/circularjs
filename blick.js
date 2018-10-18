@@ -185,6 +185,7 @@ function resolveReferences(_this, memory, html, container, fragment) {
   var newMemory = [];
   var openSections = [];
   var out;
+  var valueSplitter = {};
 
   for (var n = memory.length; n--; ) { // must revers
     first = '{{#' + n + '}}';
@@ -195,16 +196,14 @@ function resolveReferences(_this, memory, html, container, fragment) {
     if (!foundNode) { // error
       window.console && console.warn('There might be an error in the SCHNAUZER template');
     } else if (foundNode.ownerElement) { // attribute
-      if (!foundNode.valueSplitter) { // create array of text nodes
-        var valueSplitter = foundNode.valueSplitter = []; // TODO: clean up
-        var valueCounter = 1;
+      if (!foundNode.valueSplitter) { // create array of "text nodes"
+        valueSplitter = foundNode.valueSplitter = [];
         valueSplitter.valueTracker = {};
-        foundNode.valueSplitter.push(foundNode.textContent.replace(_this.attrSplitter,
+        valueSplitter.push(foundNode.textContent.replace(_this.attrSplitter,
           function(_, $1, $2, $3) {
             valueSplitter.push($1);
             valueSplitter.push($2);
-            valueSplitter.valueTracker[$3] = valueCounter;
-            valueCounter += 2;
+            valueSplitter.valueTracker[$3] = valueSplitter.length - 1;
             return '';
           }));
       }
@@ -217,7 +216,7 @@ function resolveReferences(_this, memory, html, container, fragment) {
             options.attributes[name](ownerElement, name, value);
           } else if (value !== undefined) {
             elm.valueSplitter[elm.valueSplitter.valueTracker[_n]] = value;
-            elm.textContent = elm.valueSplitter.join('');
+            elm.textContent = elm.valueSplitter.join('').trim();
           }
         }
       })(foundNode, foundNode.ownerElement, foundNode.name, search, foundNode.textContent, part, n);
