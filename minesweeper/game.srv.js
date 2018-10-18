@@ -1,22 +1,5 @@
 define('game-service', [], function() { 'use strict';
 
-  function createMines(rowcol, mineCount) {
-    var board = [];
-
-    for (var row = 0, col = 0, n = 0; n < mineCount; n++) {
-      row = Math.floor(Math.random() * rowcol[0]);
-      col = Math.floor(Math.random() * rowcol[1]);
-      if (board[row] && board[row][col]) {
-        n--;
-        continue;
-      }
-      board[row] = board[row] || [];
-      board[row][col] = true;
-    }
-
-    return board;
-  }
-
   function lookAround(board, _row, _col, callback) {
     for (var row = _row - 1, rowLen = _row + 1; row <= rowLen; row++) {
       if (!board[row]) continue;
@@ -29,29 +12,29 @@ define('game-service', [], function() { 'use strict';
   }
 
   function createBoard(rowcol, mineCount) {
-    var board = [];
-    var mines = createMines(rowcol, mineCount);
-
-    for (var row = 0; row < rowcol[0]; row++) {
-      board[row] = { childNodes: [] };
-      for (var col = 0; col < rowcol[1]; col++) {
-        board[row].childNodes[col] = {
-          isMine: mines[row] && !!mines[row][col],
-          mark: '', // 'marked' || 'open' || 'mine' || ''
-          isProcessed: false,
-        };
-      }
+    for (var board = Array(rowcol[0]), n = board.length; n--; ) {
+      board[n] = { childNodes: Array.apply(null, { length: rowcol[1] })
+        .map(function(v, i) {
+          return { mark: '', isProcessed: false, isMine: false };
+        })};
     }
 
-    for (var row = 0; row < rowcol[0]; row++) {
-      for (var col = 0; col < rowcol[1]; col++) {
-        if (board[row].childNodes[col].isMine) {
-          lookAround(board, row, col, function(_row, _col, foundItem) {
-            var count = foundItem.surroundingMines;
+    return createMines(board, rowcol, mineCount);
+  }
 
-            foundItem.surroundingMines = isNaN(count) ? 1 : count + 1;
-          });
-        }
+  function createMines(board, rowcol, mineCount) {
+    while (mineCount) {
+      var row = Math.floor(Math.random() * rowcol[0]);
+      var col = Math.floor(Math.random() * rowcol[1]);
+
+      if (!board[row].childNodes[col].isMine) {
+        board[row].childNodes[col].isMine = true;
+        mineCount--;
+        lookAround(board, row, col, function(_row, _col, item) {
+          var count = item.surroundingMines;
+
+          item.surroundingMines = isNaN(count) ? 1 : count + 1;
+        });
       }
     }
 
