@@ -10,6 +10,7 @@ And there is app.js that sets up the view. The following snippets show how littl
 
 ```javascript
 var gameBoard = circular.component('game-bord', {
+  model: gameSrv.createBoard(rowcol, mines),
   listeners: ['*'],
   eventListeners: {
     reveal: function(e, elm, item) {
