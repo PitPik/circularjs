@@ -20,8 +20,8 @@ define('game-controller', ['game-service'], function(gameSrv) {  'use strict';
     return true;
   }
 
-  function checkItem(inst, item, mark, checkAround) {
-    if (checkAround) {
+  function checkItem(inst, item, mark) {
+    if (item.isProcessed) {
       lookAround(inst, item, false, 0) === item.surroundingMines &&
         lookAround(inst, item, true);
     } else if (mark && !item.isProcessed) {

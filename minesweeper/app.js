@@ -13,8 +13,7 @@ function(Circular, gameCtrl, gameSrv) {
       reveal: function(e, elm, item) {
         e.preventDefault();
         if (uiModel.won !== undefined) return;
-        uiModel.won = gameCtrl.checkItem(this, item,
-          e.type === 'contextmenu', item.isProcessed);
+        uiModel.won = gameCtrl.checkItem(this, item, e.type === 'contextmenu');
       }
     }
   });

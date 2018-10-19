@@ -14,7 +14,7 @@ var gameBoard = circular.component('game-bord', {
   listeners: ['*'],
   eventListeners: {
     reveal: function(e, elm, item) {
-      gameCtrl.checkItem(this, item, e.type === 'contextmenu', item.isProcessed);
+      gameCtrl.checkItem(this, item, e.type === 'contextmenu');
     },
   },
 });
