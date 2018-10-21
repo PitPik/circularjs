@@ -54,4 +54,4 @@ For now you can see some demos (also delivered by this repository) to explore ho
 * [Nested tree demo](https://pitpik.github.io/circularjs/tree)
 * [Performance demo (sierpinski)](https://pitpik.github.io/circularjs/sierpinski)
 * [Performance test (table update)](https://pitpik.github.io/circularjs/performance)
-* [Minesweeper](https://pitpik.github.io/circularjs/moinesweeper)
+* [Minesweeper](https://pitpik.github.io/circularjs/minesweeper)
