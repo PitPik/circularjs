@@ -14,7 +14,7 @@ function(Circular, gameCtrl, gameSrv) { 'use strict';
   };
 
   var gameBoard = circular.component('game-bord', {
-    listeners: ['*'],
+    listeners: ['isProcessed', 'mark'],
     eventListeners: {
       reveal: function(e, elm, item) {
         e.preventDefault();
