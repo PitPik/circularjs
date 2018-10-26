@@ -1,3 +1,5 @@
+![CircularJS](circularjs-logo.png)
+
 # What is CircularJS
 
 CircularJS is a tiny, progressive **MV\* like framework** with its goal to help building **web-pages** and **single-page-web-apps** in a **model-oriented** easy way with the help of powerful tools:
