@@ -341,12 +341,12 @@ function inline(_this, text, sections, extType) {
   }).split(splitter);
   extType = getVar(extType).name; // remove %
 
-  return function fastReplace(data) {
-    return replace(_this, data, text, sections, extType, parts);
+  return function fastReplace(data, loopData) {
+    return replace(_this, data, text, sections, extType, parts, loopData);
   };
 }
 
-function replace(_this, data, text, sections, extType, parts) {
+function replace(_this, data, text, sections, extType, parts, loopData) {
   var out = '';
   var _out = '';
   var _fn = null;
@@ -363,7 +363,8 @@ function replace(_this, data, text, sections, extType, parts) {
     }
     out = out + text[n];
     if (part.section) { // from sizzleTemplate; -section-
-      out = render(_this, part, data, _fn = sections[part.section], out, _fn(data), extType);
+      part.parent = loopData && crawlObjectUp(data.helpers, [0, '_parent']);
+      out = render(_this, part, data, _fn = sections[part.section], out, _fn(data, loopData), extType);
       continue;
     }
     if (part.isInline) { // decorator
@@ -386,7 +387,7 @@ function replace(_this, data, text, sections, extType, parts) {
       _out = _this.partials[part.name](data);
       // atom && data.helpers.shift(); // TODO: check if still needed for dynamic vars...
     } else { // helpers and regular stuff
-      part.parent = crawlObjectUp(data.helpers, [0, '_parent']);
+      part.parent = loopData && crawlObjectUp(data.helpers, [0, '_parent']);
       _fn = _replace(_this, part);
       _out = _fn(data);
     }
@@ -415,18 +416,20 @@ function section(_this, fn, name, vars, unEscaped, isNot) {
     name === 'with' || name === 'unless') ? vars.shift() : name);
   vars = splitVars(_this, vars, getVar(name.name), unEscaped, '');
 
-  return function fastLoop(data) {
-    return loop(_this, data, fn, name, vars, isNot, type);
+  return function fastLoop(data, loopData) {
+    return loop(_this, data, fn, name, vars, isNot, type, loopData);
   };
 }
 
-function loop(_this, data, fn, name, vars, isNot, type) {
-  var _data = findData(data, name.name, name.keys, name.depth) || isArray(data.path[0]) && data.path[0];
+function loop(_this, data, fn, name, vars, isNot, type, loopData) {
+  var _data = findData(data, name.name, isArray(loopData) ? loopData : name.keys, name.depth);
   var helper = !name.strict && (_this.helpers[name.name] || isFunction(_data) && _data);
   var helperOut = helper && apply(_this, helper, name.name, vars.vars, data, vars, fn[0], fn[1]);
   var _isArray = isArray(_data);
   var objData = type === 'each' && !_isArray && typeof _data === 'object' && _data;
   var out = '';
+
+  _data = _data === undefined ? isArray(data.path[0]) && data.path[0] : _data;
 
   if (helper) { // helpers or inline functions
     data.helpers[0] = createHelper(helperOut, name.name, undefined, vars.helpers);
@@ -453,13 +456,15 @@ function loop(_this, data, fn, name, vars, isNot, type) {
     for (var n = 0, l = _data.length; n < l; n++) {
       data.path[0] = _isArray ? _data[n] : objData[_data[n]];
       data.helpers[0] = createHelper(data.path[0], _isArray ? n : _data[n], name, vars.helpers, l, n);
-      out = out + fn[0](data);
+      out = out + fn[0](data, _data[n]);
     }
     data.path.shift(); // jump back out of scope-level
     data.helpers.shift();
     return out;
   }
+
   if (isNot && !_data || !isNot && _data) { // regular replace
+
     return helper && typeof _data === 'string' ? _data : // comes from helper
       fn[0](type === 'unless' || type === 'if' ? data :
         getSource(data, undefined, _data, createHelper(_data, name.name, undefined, vars.helpers)));
