@@ -1,27 +1,20 @@
-require(['circular'], function(Circular) {
+define('app-tree', ['circular'], function(Circular) {
   var data = {
     name: 'My Tree',
     childNodes: [
       { name: 'hello' },
-      { name: 'wat' },
+      { name: 'some more' },
       {
         name: 'child folder',
         childNodes: [
           {
             name: 'child folder',
-            childNodes: [
-              { name: 'hello' },
-              { name: 'wat' }
-            ]
+            childNodes: [ { name: 'hello' } ]
           },
           { name: 'hello' },
-          { name: 'wat' },
           {
             name: 'child folder',
-            childNodes: [
-              { name: 'hello' },
-              { name: 'wat' }
-            ]
+            childNodes: [ { name: 'hello' } ]
           }
         ]
       }
@@ -31,7 +24,7 @@ require(['circular'], function(Circular) {
   new Circular().component('tree', {
     model: [data, { name: '+' }],
     listeners: ['open'],
-    preRecursionCallback: function(item) {
+    preRecursionCallback: function(item) { // enhance initial model
       item.open = item.open || false;
       this.addProperty('open', item);
       item.childNodes && item.childNodes.push({ name: '+' });
@@ -47,7 +40,8 @@ require(['circular'], function(Circular) {
       addChildren: function(e, elm, item) {
         if (!item.childNodes && item.name !== '+') {
           this.appendChild({ name: 'new stuff' }, item);
-          this.replaceChild(item, item);
+          this.replaceChild(item, item); // re-render to get &lt;UL>
+          this.appendChild({ name: '+' }, item);
           item.open = true;
         }
       }

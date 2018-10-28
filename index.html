@@ -4,143 +4,47 @@
   <meta charset="utf-8">
   <title>Circular.js • demo</title>
 
-  <link rel="stylesheet" type="text/css" href="index.css">
+  <link rel="stylesheet" type="text/css" href="demos/index.css">
 
-  <script type="text/javascript" src="amd.js"></script>
+  <!-- <script type="text/javascript" src="amd.js"></script>
   <script type="text/javascript" src="toolbox.js"></script>
   <script type="text/javascript" src="VOM.js"></script>
   <script type="text/javascript" src="schnauzer.js"></script>
   <script type="text/javascript" src="blick.js"></script>
-  <script type="text/javascript" src="circular.js"></script>
-  <!-- <script type="text/javascript" src="circular.min.js"></script> -->
+  <script type="text/javascript" src="circular.js"></script> -->
+  <script type="text/javascript" src="circular.min.js"></script>
 </head>
 <body>
+  <!-- CircularJS LOGO -->
   <div class="circularjs">
     <div class="circularjs-logo"></div>
     <div class="circularjs-text">
-      ircul<span class="span">a</span>r<em class="em">JS</em></div>
+      ircul<span class="span">a</span>r<em class="em">JS</em>
+    </div>
     <div class="circularjs-creator">
       by <em class="em">WeekendProductions<sup class="sup">©</sup></em>
     </div>
   </div>
 
+  <section>
+    <p><strong>CircularJS</strong>, the tiny but mighty and fast, progressive MV* like SPA creation tool for desktop and mobile.</p>
 
-  <section cr-component="counter" cr-container>
-    <span cr-template-for="counter" class="items" disabled="{{%plural}}">
-      Button counter: {{%items}} button{{#%plural}}s{{/%plural}} left{{#unless %plural}}; add{{/unless}}
-      <input type="text" cr-event="change: changer" name="" disabled="{{%plural}}" value="{{%items}}">
-      {{#unless %plural}}
-        <span>
-          <button value="{{%items}}" cr-event="click: changer">more item{{#%plural}}s{{/%plural}}</button>
-          to the list...
-        </span>
-      {{/unless}}
-    </span>
-  </section>
 
-  <section cr-component="buttons" cr-container>
-    <div
-      cr-template-for="buttons"
-      cr-event="click: clicker"
-      class="item{{#if %last}} last{{/if}}"
-    >
-      Clicks{{#maxClicks}} (max {{.}}){{/maxClicks}}: {{%clicks}} so far
+    <p>Below you can see a demo with component builder, routing and module/widget loader that again shows some demos that explain data-binding, dynamic model manipulation, ...</p>
+
+    <div class="demo" cr-component="demo-nav" cr-container="prepend">
+      <nav cr-template-for="demo-nav">
+        {{#each menu}}
+          <a class="{{#if %active}}active{{/if}}" href="#/{{action}}">{{title}}</a>
+          {{#unless @last}}|{{/unless}}
+        {{/each}}
+      </nav>
+      <div class="module-outlet"></div>
     </div>
+
   </section>
 
 </body>
-
-<script type="text/javascript">
-require(['circular'], function(Circular) {
-
-  var circular = window.circular = new Circular({ debugger: false });
-  var buttonsModel = [{
-        clicks: 0,
-        maxClicks: 4,
-        last: false,
-      }, {
-        clicks: 0,
-        maxClicks: 2,
-        last: false,
-      }, {
-        clicks: 0,
-        maxClicks: 1,
-        last: false,
-      }];
-
-  var more = [{
-        clicks: 0,
-        maxClicks: 5,
-        last: false,
-      }, {
-        clicks: 0
-      }];
-
-  // ---- component -buttons-
-  var buttons = circular.component('buttons', {
-        model: buttonsModel,
-        listeners: ['clicks', 'last'],
-        subscribe: function(property, item, value, oldValue) {
-          if (property === 'clicks') {
-            if (item.maxClicks && value > item.maxClicks) {
-              this.removeChild(item);
-            } else if (item.maxClicks) {
-              item.last = item.maxClicks - item.clicks === 0;
-            }
-          } else if (property !== 'last') { // removeChild | prependChild ...
-            updateCounter(item.parentNode.childNodes.length);
-          }
-        },
-        eventListeners: {
-          clicker: function(e, element, item) { item.clicks++; }
-        }
-      });
-
-  var updateCounter = function(itemsCount) {
-        // var counterComponent = circular.components.counter;
-        // var itemsCount = counterComponent.model.length;
-        counterModel.items = itemsCount;
-        counterModel.plural = itemsCount !== 1;
-      };
-
-  // ---- component -counter-
-  var itemsCount = buttons.getElementsByProperty().length;
-  var counterModel = {
-        items: itemsCount,
-        plural: itemsCount !== 1,
-        button: false,
-      };
-  var counter = circular.component('counter', {
-        model: [counterModel],
-        listeners: ['items', 'plural'],
-        subscribe: function(property, item, value, oldValue) {
-          if (property === 'items' && item.button) {
-            addChildren(value, item);
-          }
-        },
-        eventListeners: {
-          changer: function(e, element, item) {
-            item.button = true;
-            item.items = +element.value;
-          }
-        }
-      });
-  var addChildren = function(value, item) {
-        if (item.button) {
-          item.button = false;
-          for (n = value; n--; ) {
-            buttons.appendChild({ clicks: 0, maxClicks: 1, last: false });
-          }
-        }
-      };
-
-  // ---------- test for prependChild and resulting order ---------- //
-
-  for (var n = 0, l = more.length; n < l; n++) {
-    buttons.prependChild(more[n]);
-  }
-
-  console.log(circular);
-});
-</script>
+<script type="text/javascript" src="demos/amd.cfg.js"></script>
+<script type="text/javascript" src="demos/index.js"></script>
 </html>

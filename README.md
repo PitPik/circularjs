@@ -49,11 +49,10 @@ See [API.md](API.md) for more information.
 
 For now you can see some demos (also delivered by this repository) to explore how **CircularJS** works.
 
-* [Simple button demo](https://pitpik.github.io/circularjs)
+* [Simple demos](https://pitpik.github.io/circularjs)
 * ["Tour of Heroes" tutorial](https://pitpik.github.io/circularjs/heroes)
 * [TODO list demo (TodoMVC)](https://pitpik.github.io/circularjs/todo)
 * [RealWorld example (conduit)](https://pitpik.github.io/circularjs/conduit)
-* [Nested tree demo](https://pitpik.github.io/circularjs/tree)
 * [Performance demo (sierpinski)](https://pitpik.github.io/circularjs/sierpinski)
 * [Performance test (table update)](https://pitpik.github.io/circularjs/performance)
 * [Minesweeper](https://pitpik.github.io/circularjs/minesweeper)

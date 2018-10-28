@@ -1,7 +1,18 @@
-body{
-	font: normal normal normal .80em/1.6em "Trebuchet MS", Arial, Helvetica, sans-serif, Arial, Helvetica, sans-serif;
+body {
+	font: normal normal normal .95em/1.5em "Trebuchet MS", Arial, Helvetica, sans-serif, Arial, Helvetica, sans-serif;
 	color: #333;
+	max-width: 750px;
+  margin: 0 auto;
 }
+
+.module-outlet pre {
+	line-height: 12px;
+  font-size: 12px;
+}
+section {
+	padding: 1em;
+}
+
 [cr-template-for] {
 	display: none;
 }
@@ -24,12 +35,64 @@ body{
 	display: inline-block;
 	background-color: #e0e0ff;
 }
+
 .circularjs {
-	 margin: 40px 10px 50px;  /* only for demo on this page */
+	 margin: 10px;  /* only for demo on this page */
 }
-.last, [disabled] {
-	background-color: #ffe0e0;
+
+.demo {
+	border: 1px solid #aaa;
+	border-radius: 6px;
 }
+
+.demo nav {
+	border-bottom: 1px solid #aaa;
+	padding: 12px;
+}
+.demo nav a {
+	padding: 6px 9px;
+	text-decoration: none;
+}
+.demo nav a.active {
+	font-weight: bold;
+	background: #eee;
+}
+
+.module-outlet {
+	padding: 12px;
+}
+section.demo {
+	padding-top: 0;
+	border: 1px solid #aaa;
+	border-radius: 6px;
+}
+
+
+
+/*body {
+  font-family: Menlo, Consolas, monospace;
+  color: #444;
+}
+*/
+.tree {
+  padding: .5em 2em;
+}
+.tree .leaf {
+  cursor: pointer;
+}
+.tree .bold {
+  font-weight: bold;
+}
+.tree ul {
+  padding-left: 1em;
+  line-height: 1.5em;
+  list-style-type: dot;
+}
+.tree .closed {
+  display: none;
+}
+
+
 
 /* -------------------- LOGO ------------------- */
 

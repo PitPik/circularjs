@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en" data-framework="circularJS">
+<head>
+  <meta charset="utf-8">
+  <title>Circular.js • demo</title>
+
+  <script type="text/javascript" src="https://prismjs.com/prism.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://prismjs.com/themes/prism.css">
+
+  <script cr-dev type="text/javascript" src="../circular.min.js"></script>
+  <link cr-dev rel="stylesheet" type="text/css" href="index.css">
+</head>
+<body>
+  <h2>2-way data binding</h2>
+  <p>Focus the input field and type something: The paragraph before gets filled with the data from the input. Click on 'clear' to delete the value. Both, the paragraph and the input field get empty.</p>
+    <section class="demo" cr-component="input-test" cr-container>
+      <div cr-template-for="input-test">
+        <p>Text: {{%value}}</p>
+        <input placeholder="type some text" cr-event="input: input" value="{{%value}}">
+        <button cr-event="click: clear" disabled="{{%value}}">
+          {{#if %value}}Clear{{else}}Please write first{{/if}}
+        </button>
+      </div>
+    </section>
+  <pre><code class="language-javascript code">ss</code></pre>
+  The HTML:
+  <pre><code class="language-html html">ss</code></pre>
+</body>
+
+<script type="text/javascript" src="binding.js"></script>
+<script type="text/javascript">
+  require(['replacer', '!binding.js', '!binding.html'],
+  function(replacer, indexTxt, indexHTMLTxt) {
+    replacer('[cr-component="input-test"]', indexTxt, indexHTMLTxt);
+  });
+</script>
+
+</html>

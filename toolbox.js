@@ -229,6 +229,7 @@
       var promises = [];
       var item = null;
       var resourceName = '';
+      var absolute = false;
       var path = '';
       var text = '';
       var isStyles = type === 'styles';
@@ -238,9 +239,9 @@
 
       while (item = items.shift()) {
         resourceName = item.getAttribute(attribute);
-        path = Toolbox.normalizePath(data.path ? data.path + '/' + resourceName :
-          '' + resourceName);
-
+        absolute = resourceName && resourceName.indexOf('://') !== -1;
+        path = Toolbox.normalizePath(data.path && !absolute ?
+          data.path + '/' + resourceName : '' + resourceName);
         if (resourceName && cache[path]) continue;
         if (!isStyles) { // scripts
           text = item.text;
