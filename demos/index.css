@@ -5,6 +5,19 @@ body {
   margin: 0 auto;
 }
 
+[cr-component="git-test"] a {
+  text-decoration: none;
+  color: #f66;
+}
+[cr-component="git-test"] li {
+  line-height: 1.5em;
+  margin-bottom: 20px;
+}
+[cr-component="git-test"] .author, [cr-component="git-test"] .date {
+  font-weight: bold;
+}
+
+
 .module-outlet pre {
 	line-height: 12px;
   font-size: 12px;

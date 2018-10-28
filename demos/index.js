@@ -5,7 +5,8 @@ require(['circular'], function(Circular) {
     menu: [
       { title: 'Demo home', action: 'home', active: false },
       { title: 'Data binding', action: 'binding', active: false },
-      { title: 'Dynamic tree', action: 'tree', active: false }
+      { title: 'Dynamic tree', action: 'tree', active: false },
+      { title: 'GitHub Commits', action: 'git', active: false }
     ],
     state: '',
   };
