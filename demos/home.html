@@ -6,12 +6,9 @@
 
   <link cr-dev rel="stylesheet" type="text/css" href="index.css">
   <script cr-dev type="text/javascript" src="../circular.min.js"></script>
+  <script cr-dev type="text/javascript" src="amd.cfg.js"></script>
   <script cr-dev type="text/javascript">
-    require.config({
-      paths: {
-        '!index.html': '../index.html',
-      },
-    });
+    require.config({ baseUrl: '../' });
   </script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/prism.min.js"></script>
   <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/themes/prism.css">
