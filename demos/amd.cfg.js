@@ -13,5 +13,6 @@
       '!tree.html': 'demos/tree.html',
       '!git.html': 'demos/git.html',
       '!git.js': 'demos/git.js',
+      '!index.html': 'index.html',
     },
   });
