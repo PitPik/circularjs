@@ -1612,7 +1612,6 @@
         });
         _inst.collector = {};
         _inst.template = template && template.version ? template : templateCache[name] ? templateCache[name] : data.template ? new Blick(template || data.template, {
-            doEscape: false,
             helpers: parameters.helpers || options.helpers,
             decorators: parameters.decorators || options.decorators,
             attributes: parameters.attributes || options.attributes || {},
@@ -2147,7 +2146,6 @@
         for (var n = _templates.length; n--; ) {
             _template = processTemplate(_templates[n], options);
             templates[_templates[n].id || _templates[n].getAttribute("name")] = new Blick(_template, {
-                doEscape: false,
                 helpers: parameters.helpers || options.helpers
             });
         }

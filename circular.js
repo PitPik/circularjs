@@ -134,7 +134,7 @@ Circular.prototype.component = function(name, parameters) {
   _inst.template = template && template.version ?
     template : templateCache[name] ? templateCache[name] :
     data.template ? new Blick(template || data.template, {
-      doEscape: false,
+      // doEscape: false,
       helpers: parameters.helpers || options.helpers, // TODO
       decorators: parameters.decorators || options.decorators, // TODO
       attributes: parameters.attributes || options.attributes || {}, // TODO
@@ -862,7 +862,7 @@ function getDOMData(options, parameters, component, name) {
     _template = processTemplate(_templates[n], options);
     templates[_templates[n].id || _templates[n].getAttribute('name')] =
       new Blick(_template, {
-          doEscape: false,
+          // doEscape: false,
           helpers: parameters.helpers || options.helpers
         });
   }
