@@ -1,6 +1,6 @@
 # ![RealWorld Example App](logo.png)
 
-> ### CircularJS codebase containing real world examples (CRUD, auth, advanced patterns, etc) that adheres to the [RealWorld](https://github.com/gothinkster/realworld) spec and API.
+> ### [CircularJS](https://github.com/PitPik/circularjs) codebase containing real world examples (CRUD, auth, advanced patterns, etc) that adheres to the [RealWorld](https://github.com/gothinkster/realworld) spec and API.
 
 
 ### [Demo](https://pitpik.github.io/circularjs/conduit/src)&nbsp;&nbsp;&nbsp;&nbsp;[RealWorld](https://github.com/PitPik/circularjs)
@@ -16,7 +16,7 @@ For more information on how to this works with other frontends/backends, head ov
 # How it works
 
 
-CircularJS lets you write small and fast components and modules (widgets).
+[CircularJS](https://github.com/PitPik/circularjs) lets you write small and fast components and modules (widgets).
 ```app.js``` is the starting point where the first component 'app' is built with its state model and a router that switches the state. The change of the state causes the moduleLoader to fetches the modules (widgets) and renders them in the dedicated container.
 
 All the modules again use components to render the templates.
