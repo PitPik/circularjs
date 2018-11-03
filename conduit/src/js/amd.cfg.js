@@ -14,7 +14,7 @@ require.config({
     'app-data.srv': 'js/app-data.srv',
     'form-helper': 'js/form-helper',
     'article-preview': 'js/article-preview',
-    'marked': 'js/vendor/marked',
+    'marked': '../vendor/marked',
     'app-articles': 'modules/articles/index',
     'app-article': 'modules/article/index',
     'app-editor': 'modules/editor/index',

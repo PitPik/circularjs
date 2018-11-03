@@ -35,7 +35,7 @@ Until there is a building cli-tool for CircularJS you have to manually switch to
 
  - Open ```index.html```, go to the bottom and read there what to comment and uncomment.
 
- ```app.all.min.js``` includes CirculerJS, so no script tag for CirculerJS is needed if you choose that setting (as it is now). With this setting and when choosing the ```app.all.js``` flavour you also don't need ```js/amd.cfg.js``` as all files will be pre-registered inside the AMD-loader.
+ ```app.all.min.js``` includes CirculerJS, so no script tag for CirculerJS is needed if you choose that setting (as it is now). With this setting you also don't need ```js/amd.cfg.js``` as all files will be pre-registered inside the AMD-loader.
 
 
 # Some additions to the [original implementation](https://demo.realworld.io)
