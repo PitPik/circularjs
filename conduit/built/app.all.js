@@ -3,8 +3,8 @@
 //
 //                   | AngularJS | Angular 6 | CircularJS
 // Source code loc   |      1340 |      1810 |        584
-// Download          |     514KB |     332KB |      188KB
-// JS Impl. + vendor |     317KB |     136KB |       25KB
+// Download          |     514KB |     332KB |      190KB
+// JS Impl. + vendor |     317KB |     136KB |     25.5KB
 // Performance       |     1.85s |     1.60s |      0.73s
 
 define('template-helpers', [], function() {

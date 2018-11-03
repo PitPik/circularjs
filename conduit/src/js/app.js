@@ -1,3 +1,12 @@
+// Comparison to AngularJS implementation on //demo.realworld.io
+// and Angular 6 implementation on //angular.realworld.io
+//
+//                   | AngularJS | Angular 6 | CircularJS
+// Source code loc   |      1340 |      1810 |        584
+// Download          |     514KB |     332KB |      190KB
+// JS Impl. + vendor |     317KB |     136KB |     25.5KB
+// Performance       |     1.85s |     1.60s |      0.73s
+
 require(['circular', 'app-data.srv', '!ui-components', 'template-helpers', 'marked'],
 function(Circular, dataSrv, uiComponents, helpers, md) {
   const toolbox = Circular.Toolbox;
