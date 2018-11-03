@@ -27,18 +27,15 @@ Some components look a little clumsy as I chose not to use templating there (mai
 
 # Getting started
 
-Put folder inside your server environment and run it (no npm, no dependencies, plain old JS).
+Put ```src``` folder inside your server's documents root and run it (no npm, no dependencies, plain old JS).
 
 The current setup is meant for performance, not for development which can be changed as follows.
 
 Until there is a building cli-tool for CircularJS you have to manually switch to dev mode:
 
- - Open ```index.html```, go to the bottom and uncomment all script tags that are commented and comment the script tag that is uncommented. If you want to, you can do the same with the style/link tag in the head.
- - Open all ```index.html``` inside the modules and uncomment the script tags.
+ - Open ```index.html```, go to the bottom and read there what to comment and uncomment.
 
-
-In the folder ```js/built``` you can find the file ```app.all.js``` (~590 lines of code, 544 sloc) that contains all the javascript needed to run conduit in one single file.
-If you want to run the app from there, just uncomment ```circular.min.js```and ```amd.cfg.js``` and rename the ```app.all.min.js``` to ```app.all.js``` in your script tags in ```index.html```.
+ ```app.all.min.js``` includes CirculerJS, so no script tag for CirculerJS is needed if you choose that setting (as it is now). With this setting and when choosing the ```app.all.js``` flavour you also don't need ```js/amd.cfg.js``` as all files will be pre-registered inside the AMD-loader.
 
 
 # Some additions to the [original implementation](https://demo.realworld.io)

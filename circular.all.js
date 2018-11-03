@@ -12,13 +12,6 @@
         for (var n = parts.length; n--; ) {
             require[parts[n]] = extend(require[parts[n]], config[parts[n]]) || require[parts[n]] || "";
         }
-    }, getListIndex = function(list, item) {
-        for (var n = list.length; n--; ) {
-            if (list[n] === item) {
-                return n;
-            }
-        }
-        return -1;
     }, getPathFromName = function(name, _path, _postFix) {
         _postFix = /(?:^\!|^http[s]*:|.*\.js$)/.test(name) ? "" : ".js";
         name = (require.paths[name] || name).replace(/^\!/, "");
@@ -66,21 +59,23 @@
         }, 0);
     }, checkIfModuleIsDone = function(module) {
         for (var count = 0, n = module.resolvedDeps.length; n--; ) {
-            module.resolvedDeps[n] !== undefined && count++;
+            (module.resolvedDeps[n] || {}).done !== undefined && count++;
         }
         module.deps.length === count && markAsDone(module);
     }, notifyCaller = function(dep) {
         var module = null;
         for (var index = 0, n = 0, m = dep.parentNames.length; n < m; n++) {
             module = modules[dep.parentNames[n]];
-            index = getListIndex(module.deps, dep.name);
-            module.resolvedDeps[index] = dep.done;
+            index = module.deps.indexOf(dep.name);
+            module.resolvedDeps[index] = dep;
             !module.done && checkIfModuleIsDone(module);
         }
         dep.parentNames = [];
     }, markAsDone = function(module) {
         if (!module.done) {
-            module.done = (module.factory || function() {}).apply(null, module.resolvedDeps);
+            module.done = (module.factory || function() {}).apply(null, module.resolvedDeps.map(function(dep) {
+                return dep.done;
+            }));
         }
         notifyCaller(module);
         if (!require.options.debug) {
@@ -137,7 +132,7 @@
                         appendScript(applyScript(modules[deps[n]], sync, modules, name));
                         lookaheadForDeps(deps[n]);
                     }
-                } else if (getListIndex(parentNames, name) === -1) {
+                } else if (parentNames.indexOf(name) === -1) {
                     parentNames.push(name);
                 }
                 modules[deps[n]].done && notifyCaller(modules[deps[n]]);
