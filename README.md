@@ -11,6 +11,7 @@ CircularJS is a tiny, progressive **MV\* like framework** with its goal to help 
  - **router**: an easy but powerful routing system using internal pubsub.
  - **VOM**: a fast and convenient object-model manager. Works like the DOM-API to abstract components from the DOM, also using pubsub for manipulation event handling. The heart of CircularJS.
  - **Schnauzer**: tiny an fast rendering engine (like Handlebars but smaller than Mustache) to reflect VOM models on the fly in combination with the internal **rendering module**. (Replaces Angular like ng-if, ng-class, etc.)
+ - **blick**: a layer in between Schnauzer and VOM to keep templates dynamic and reactive so they can not only serve at initial rendering but also in the live cycle of components.
  - **rendering module**: internal module syncing VOM model, using Schnauzer templates, with the DOM-model.
  - **automatic event management**.
  - **automatic DOM-Element reference management**.
