@@ -1,7 +1,7 @@
 # Tutorial: Tour of Heroes
 
 The Tour of Heroes tutorial covers the fundamentals of Circular.
-In this tutorial you will build an app that helps a staffing agency manage its stable of heroes.
+In this tutorial you will build an app that helps a staffing agency manage its stable of heroes. See a [live demo here](https://pitpik.github.io/circularjs/heroes)
 
 This basic app has many of the features you'd expect to find in a data-driven application. It acquires and displays a list of heroes, edits a selected hero's detail, and navigates among different views of heroic data.
 
