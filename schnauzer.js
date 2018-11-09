@@ -138,8 +138,9 @@ function crawlObjectUp(data, keys) { // faster than while
   return data;
 }
 
-function check(data, altData) {
-  return data !== undefined ? data : altData;
+function check(data, altData, keys) {
+  return data !== undefined ? data :
+    keys ? crawlObjectUp(altData, keys) : altData;
 }
 
 function findData(data, key, keys, pathDepth) {
@@ -149,7 +150,7 @@ function findData(data, key, keys, pathDepth) {
 
   var _data = data.path[pathDepth] || {};
   var helpers = data.helpers[pathDepth] || {};
-  var value = check(helpers[key], crawlObjectUp(helpers, keys));
+  var value = check(helpers[key], helpers, keys);
 
   if (value === undefined) {
     value = crawlObjectUp(_data, keys);
@@ -158,7 +159,7 @@ function findData(data, key, keys, pathDepth) {
     return value;
   }
   for (var n = data.extra.length; n--; ) {
-    value = check(data.extra[n][key], crawlObjectUp(data.extra[n], keys));
+    value = check(data.extra[n][key], data.extra[n], keys);
     if (value !== undefined) {
       return value;
     }
@@ -172,13 +173,14 @@ function getVar(text) {
 
   var parts = text.split('=');
   var value = parts.length > 1 ? parts[1] : parts[0];
-  var isString = value.charAt(0) === '"' || value.charAt(0) === "'";
+  var valueCharAt0 = value.charAt(0);
+  var isString = valueCharAt0 === '"' || valueCharAt0 === "'";
   var isInline = false;
   var depth = 0;
   var keys = [];
   var path = [];
   var strict = false;
-  var active = value.charAt(1) === '%' ? 2 : value.charAt(0) === '%' ? 1 : 0;
+  var active = value.charAt(1) === '%' ? 2 : valueCharAt0 === '%' ? 1 : 0;
 
   if (isString) {
     value = value.replace(/(?:^['"]|['"]$)/g, '');
