@@ -22,7 +22,7 @@
             <input cr-event="change: toggle" class="toggle" type="checkbox" checked="{{%done}}">
             <label cr-event="dblclick: focus">{{%text}}</label>
             <button class="destroy" cr-event="click: delete"></button>
-            <input class="edit" cr-event="change: save; blur: blur; keyup: keyup" value="{{%%text}}" disabled="{{%editable}}">
+            <input class="edit" cr-view="input" cr-event="change: save; blur: blur; keyup: keyup" value="{{%%text}}" disabled="{{%editable}}">
           </li>
         </ul>
       </section>
