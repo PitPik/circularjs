@@ -26,7 +26,11 @@ require(['circular'], Circular => {
 
         value ? item.text = value : list.removeChild(item);
       },
-      focus: (e, elm, item) => item.editable = 'focus',
+      focus: (e, elm, item) => {
+        item.editable = 'focus';
+        item.views.input.selectionStart =
+          item.views.input.selectionEnd = item.views.input.value.length;
+      },
       blur: (e, elm, item) => item.editable = '',
       keyup: (e, elm, item) => {
         if (e.keyCode === ESCAPE_KEY) item.text = item.text;
