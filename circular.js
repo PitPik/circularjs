@@ -358,18 +358,19 @@ return function(obj, objNew, ext) {
   var _prop = '';
   var _deeper = ext ? [].concat(deeper, ext) : deeper;
   var out = {};
+  var item = {};
 
-  if (!this.window) {
-    obj = this;
+  if (this.extend && !this.prototype) {
     ext = objNew;
     objNew = obj;
+    obj = this;
   }
 
   objNew = objNew || {};
   for (var prop in obj) {
     out[prop] = obj[prop] || {};
     if (prop === 'model' && !objNew.model)
-      out = JSON.parse(JSON.stringify(obj[prop]));
+      out[prop] = JSON.parse(JSON.stringify(obj[prop]));
     if (_deeper[prop]) {
       for (var $prop in obj[prop]) {
         out[prop][$prop] = obj[prop][$prop];
@@ -377,6 +378,7 @@ return function(obj, objNew, ext) {
     }
   }
   for (var prop in objNew) {
+    if (prop === 'extend') continue;
     _prop = prop;
     _extend = false;
     if (prop.charAt(0) === '$') {
@@ -389,14 +391,17 @@ return function(obj, objNew, ext) {
     item = objNew[prop];
 
     if (typeof item === 'function') {
-      out[_prop] = _extend && out[_prop] ? function() {
-        out[_prop].apply(out[_prop], arguments);
-        return item.apply(item, arguments);
-      } : item;
+      out[_prop] = _extend && out[_prop] ? (function(func) {
+        return function() {
+          func.apply(func, arguments);
+          return item.apply(item, arguments);
+        }
+      })(out[_prop]) : item;
     } else if (item.constructor === Array) {
-      out[_prop] = _extend && out[_prop] ? out[_prop].concat(item) : item;
+      out[_prop] = _extend && out[_prop] && item.toString() !== '*' ?
+        out[_prop].concat(item) : item;
     } else if (_deeper.indexOf(_prop) !== -1) {
-      out[_prop] = extend(out[_prop], item);
+      out[_prop] = Circular.extend(out[_prop], item);
     } else {
       out[_prop] = item;
     }
