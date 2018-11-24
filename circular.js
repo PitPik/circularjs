@@ -397,7 +397,7 @@ return function(obj, objNew, ext) {
           return item.apply(item, arguments);
         }
       })(out[_prop]) : item;
-    } else if (item.constructor === Array) {
+    } else if (item && item.constructor === Array) {
       out[_prop] = _extend && out[_prop] && item.toString() !== '*' ?
         out[_prop].concat(item) : item;
     } else if (_deeper.indexOf(_prop) !== -1) {
