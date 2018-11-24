@@ -723,7 +723,7 @@
         var keys = [];
         var path = [];
         var strict = false;
-        var active = value.charAt(1) === "%" ? 2 : valueCharAt0 === "%" ? 1 : 0;
+        var active = valueCharAt0 === "%" ? 1 : value.charAt(1) === "%" ? 2 : 0;
         if (isString) {
             value = value.replace(/(?:^['"]|['"]$)/g, "");
         } else {
@@ -1759,6 +1759,54 @@
         return engine;
     };
     Circular.Toolbox = Toolbox;
+    Circular.extend = function(deeper) {
+        return function(obj, objNew, ext) {
+            var _extend = false;
+            var _prop = "";
+            var _deeper = ext ? [].concat(deeper, ext) : deeper;
+            var out = {};
+            if (!this.window) {
+                obj = this;
+                ext = objNew;
+                objNew = obj;
+            }
+            objNew = objNew || {};
+            for (var prop in obj) {
+                out[prop] = obj[prop] || {};
+                if (prop === "model" && !objNew.model) out = JSON.parse(JSON.stringify(obj[prop]));
+                if (_deeper[prop]) {
+                    for (var $prop in obj[prop]) {
+                        out[prop][$prop] = obj[prop][$prop];
+                    }
+                }
+            }
+            for (var prop in objNew) {
+                _prop = prop;
+                _extend = false;
+                if (prop.charAt(0) === "$") {
+                    _extend = true;
+                    _prop = prop.substr(1);
+                    if (_deeper.indexOf(_prop) !== -1) {
+                        _extend = false;
+                    }
+                }
+                item = objNew[prop];
+                if (typeof item === "function") {
+                    out[_prop] = _extend && out[_prop] ? function() {
+                        out[_prop].apply(out[_prop], arguments);
+                        return item.apply(item, arguments);
+                    } : item;
+                } else if (item.constructor === Array) {
+                    out[_prop] = _extend && out[_prop] ? out[_prop].concat(item) : item;
+                } else if (_deeper.indexOf(_prop) !== -1) {
+                    out[_prop] = extend(out[_prop], item);
+                } else {
+                    out[_prop] = item;
+                }
+            }
+            return out;
+        };
+    }([ "eventListeners", "helpers", "decorators", "attributes", "storage" ]);
     Circular.prototype.subscribe = function(inst, comp, attr, callback, trigger) {
         inst = inst ? inst.name || inst.components && inst.components[comp] || inst : this.name;
         pubsub[inst] = pubsub[inst] || {};

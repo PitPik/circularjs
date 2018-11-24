@@ -180,7 +180,7 @@ function getVar(text) {
   var keys = [];
   var path = [];
   var strict = false;
-  var active = value.charAt(1) === '%' ? 2 : valueCharAt0 === '%' ? 1 : 0;
+  var active = valueCharAt0 === '%' ? 1 : value.charAt(1) === '%' ? 2 : 0;
 
   if (isString) {
     value = value.replace(/(?:^['"]|['"]$)/g, '');
