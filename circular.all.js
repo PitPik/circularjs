@@ -2190,7 +2190,7 @@
         return template.innerHTML;
     }
     function getDOMData(options, parameters, component, name) {
-        var searchContainer = component || document.body, containerAttr = options.containerAttr, namedTplSelector = attrSelector(options.templateAttr, name), container = component.hasAttribute(containerAttr) ? component : $(attrSelector(containerAttr), component), _template, type = container && container.getAttribute(options.containerAttr), template = container && ($(namedTplSelector, searchContainer) || $(namedTplSelector, document.body)), _templates = $$(attrSelector(options.templatesAttr, name), searchContainer) || [], templates = {};
+        var templateName = component.getAttribute(options.componentAttr), _name = templateName && templateName !== name ? templateName : name, searchContainer = component || document.body, containerAttr = options.containerAttr, namedTplSelector = attrSelector(options.templateAttr, _name), container = component.hasAttribute(containerAttr) ? component : $(attrSelector(containerAttr), component), _template, type = container && container.getAttribute(options.containerAttr), template = container && ($(namedTplSelector, searchContainer) || $(namedTplSelector, document.body)), _templates = $$(attrSelector(options.templatesAttr, _name), searchContainer) || [], templates = {};
         for (var n = _templates.length; n--; ) {
             _template = processTemplate(_templates[n], options);
             templates[_templates[n].id || _templates[n].getAttribute("name")] = new Blick(_template, {

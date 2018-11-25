@@ -902,9 +902,11 @@ function processTemplate(template, options) {
 
 // ----- get component data
 function getDOMData(options, parameters, component, name) {
-  var searchContainer = component || document.body,
+  var templateName = component.getAttribute(options.componentAttr),
+    _name = templateName && templateName !== name ? templateName : name,
+    searchContainer = component || document.body,
     containerAttr = options.containerAttr,
-    namedTplSelector = attrSelector(options.templateAttr, name),
+    namedTplSelector = attrSelector(options.templateAttr, _name),
     container = component.hasAttribute(containerAttr) ? component :
       // $(attrSelector(containerAttr, name), component) ||
       $(attrSelector(containerAttr), component),
@@ -912,7 +914,7 @@ function getDOMData(options, parameters, component, name) {
     type = container && container.getAttribute(options.containerAttr),
     template = container && ($(namedTplSelector, searchContainer) ||
       $(namedTplSelector, document.body)), // also outside component
-    _templates = ($$(attrSelector(options.templatesAttr, name),
+    _templates = ($$(attrSelector(options.templatesAttr, _name),
       searchContainer) || []),
     templates = {};
 

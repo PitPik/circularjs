@@ -1,14 +1,15 @@
 define('app-binding', ['circular'], Circular => {
   return class Binding {
-    constructor(name, params = {}) {
+    constructor(selector, params = {}) {
       const circular = params.circular || new Circular();
       const options = Circular.extend({
         model: [{ value: '' }],
+        componentElement: Circular.Toolbox.$(selector),
         listeners: ['value'],
         eventListeners: { input: this.input, clear: this.clear },
       }, params);
 
-      this.component = circular.component(name, options);
+      this.component = circular.component(options);
     }
 
     input(e, elm, item) { // can be extended the Circular or ES6 way
@@ -26,5 +27,5 @@ define('app-binding', ['circular'], Circular => {
 });
 
 require(['app-binding'], Binding => {
-  const binding = new Binding('input-test');
+  const binding = new Binding('.demo.binding');
 });
