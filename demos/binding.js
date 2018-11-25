@@ -19,7 +19,7 @@ define('app-binding', ['circular'], Circular => {
       item.value = '';
     }
 
-    reset(model) {
+    reset(model) { // not used, just for demo
       return this.component.reset(model);
     }
   };
