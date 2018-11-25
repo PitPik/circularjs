@@ -1,6 +1,7 @@
   require.config({
     lookaheadMap: {
       'app-home': ['circular', '!index.js', '!index.html'],
+      'app-git': ['circular', 'template-helpers'],
     },
     paths: {
       'template-helpers': 'demos/helpers',
@@ -14,5 +15,9 @@
       '!git.html': 'demos/git.html',
       '!git.js': 'demos/git.js',
       '!index.html': 'index.html',
+      'app-git': 'demos/git',
+      'app-home': 'demos/home',
+      'app-tree': 'demos/tree',
+      'app-binding': 'demos/binding',
     },
   });
