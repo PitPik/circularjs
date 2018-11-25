@@ -21,6 +21,7 @@ require(['circular'], function(Circular) {
         path: 'demos/' + value + '.html',
         container: $('.module-outlet'),
         require: 'app-' + value,
+        init: false,
       });
     },
   });

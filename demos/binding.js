@@ -1,5 +1,5 @@
 define('app-binding', ['circular'], Circular => {
-  class Binding {
+  return class Binding {
     constructor(name, params = {}) {
       const circular = params.circular || new Circular();
       const options = Circular.extend({
@@ -22,11 +22,9 @@ define('app-binding', ['circular'], Circular => {
     reset(model) {
       return this.component.reset(model);
     }
-  }
-  // demos usage as reusable js module
-  define('Binding', [], () => Binding);
+  };
 });
 
-require(['Binding'], Binding => {
+require(['app-binding'], Binding => {
   const binding = new Binding('input-test');
 });
