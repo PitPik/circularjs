@@ -2002,7 +2002,7 @@
             moveChildrenToCache(data);
         }
         if (name && module) {
-            init = init && init(data.data, module.path);
+            init = init && data.init !== false && init(data.data, module.path);
             hasTransition ? transition(init, data, modules) : data.container.appendChild(module.cache);
             return new Promise(function(resolve) {
                 resolve(data.returnData ? data.data : init);
