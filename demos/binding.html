@@ -13,6 +13,7 @@
 <body>
   <h2>2-way data binding</h2>
   <p>Focus the input field and type something: The paragraph before gets filled with the data from the input. Click on 'clear' to delete the value. Both, the paragraph and the input field get empty.</p>
+  <p>This demo also shows a modern way of working with CircularJS. It shows how to make reusable and extendable components.</p>
     <section class="demo" cr-component="input-test" cr-container>
       <div cr-template-for="input-test">
         <p>Text: {{%value}}</p>
@@ -27,7 +28,7 @@
   <pre><code class="language-html html">ss</code></pre>
 </body>
 
-<script type="text/javascript" src="binding.js"></script>
+<script cr-dev type="text/javascript" src="binding.js"></script>
 <script type="text/javascript">
   require(['replacer', '!binding.js', '!binding.html'],
   function(replacer, indexTxt, indexHTMLTxt) {
