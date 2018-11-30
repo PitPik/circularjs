@@ -132,8 +132,8 @@ Circular.prototype.component = function(name, parameters) {
 
   _inst.collector = {};
   _inst.template = template && template.version ?
-    template : templateCache[name] ? templateCache[name] :
-    data.template ? new Blick(template || data.template, {
+    template : templateCache[name] || (template || data.template) ?
+    new Blick(template || data.template, {
       // doEscape: false,
       helpers: parameters.helpers || options.helpers, // TODO
       decorators: parameters.decorators || options.decorators, // TODO
@@ -187,6 +187,7 @@ Circular.prototype.component = function(name, parameters) {
           siblingOrParent && siblingOrParent[elmsTxt] && siblingOrParent[elmsTxt].element,
         element = fragment && render(fragment, type || data.type || 'appendChild',
           parentNode, siblingElement, idProperty, id) || component.element;
+
       // collect elements
       this.reinforceProperty(item, elmsTxt, {
         element: element,

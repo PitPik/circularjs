@@ -1607,7 +1607,7 @@
             instanceID: _this.id
         });
         _inst.collector = {};
-        _inst.template = template && template.version ? template : templateCache[name] ? templateCache[name] : data.template ? new Blick(template || data.template, {
+        _inst.template = template && template.version ? template : templateCache[name] || (template || data.template) ? new Blick(template || data.template, {
             helpers: parameters.helpers || options.helpers,
             decorators: parameters.decorators || options.decorators,
             attributes: parameters.attributes || options.attributes || {},
