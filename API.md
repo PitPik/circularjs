@@ -107,8 +107,8 @@ Circular.component(name: 'String', parameters: Object {
     subscribe: function(property, item, value, oldValue, type), // subscribe gets called if vars defined in listeners are changed
     listeners: Array [String 'modelItem', '*', ...], // subscribe gets called if defined vars are changed
     eventListeners: Object {String 'name': function(), ...}, // cb functions defined by cr-event
-    componentElement: Object DOMElement, // in case there is no cr-component
-    componentWrapper: Object DOMElement, // in case there is no cr-component and we know it's wrapped
+    element: Object DOMElement, // in case there is no cr-component
+    wrapper: Object DOMElement, // in case there is no cr-component and we know it's wrapped
     mountSelector: Object DOMElement, // selector of containers where children will be rendered into
 
     onBeforeInit: function(component), // one time callback on before first init of component
@@ -167,10 +167,10 @@ The function takes parameters such as:
  - ```element``` the DOM element being defined as component item if event listener is set on the cr-component element, other than that the element where the event listenere was defined.
  - ```item```, the model item being affected.
 
-#### componentElement: Object DOMElement,
+#### element: Object DOMElement,
 If you choose not to have a element defined with ```cr-component="myName"``` you have to let circularJS know what DOM Element should be the component by defining it here.
 
-#### componentWrapper: Object DOMElement,
+#### wrapper: Object DOMElement,
 Is the container or context where to look for the component with the given name. In case there are more components with the same name but the "wrapper" is known, this can help to pick the correct component.
 
 #### mountSelector: String selector,

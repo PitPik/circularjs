@@ -1582,7 +1582,7 @@
         if (this.components[name]) {
             return this.components[name].reset(parameters.model, parameters.extraModel);
         }
-        var _this = this, _inst = {}, proto = {}, options = this.options, elmsTxt = options.elements, componentAttr = options.componentAttr, componentSelector = attrSelector(componentAttr, name), componentElement = parameters.componentElement || $(componentSelector, parameters.componentWrapper || document) || $(name, parameters.componentWrapper || document);
+        var _this = this, _inst = {}, proto = {}, options = this.options, elmsTxt = options.elements, componentAttr = options.componentAttr, componentSelector = attrSelector(componentAttr, name), componentElement = typeof parameters.element === "string" ? $(parameters.element, parameters.wrapper || document) : parameters.element || $(componentSelector, parameters.wrapper || document) || $(name, parameters.wrapper || document);
         if (!componentElement) return;
         var nestingData = handleNesting(componentElement, componentAttr), altName = componentElement && componentElement.getAttribute("name"), data = getDOMData(options, parameters, componentElement, altName || name), component = this.components[name] = {
             name: name,

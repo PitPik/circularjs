@@ -3,11 +3,11 @@ A **component** controls a patch of screen called a view, also used for **state 
 
 ### component
 
-```component()``` takes a part of the DOM (defined by ```cr-component="component-name"``` or by passing the DOM-Element to ```componentElement```) and converts it to a view manageable component.
+```component()``` takes a part of the DOM (defined by ```cr-component="component-name"``` or by passing the DOM-Element to ```element```) and converts it to a view manageable component.
 
 To manage/render repetitive parts of this component you have to define a template with ```<script type="text/template" cr-template-for"component-name">``` or passing a processed template to ```template```where you write Schnauzer templates and a container with ```cr-container``` where the template gets rendered.
 
-The ```model``` (an Array) defines then how those parts get (re-)rendered and the Schnauzer template picks up the model components by its place-holders. ```extraModel``` is meant for Schnauzer to have an alternative lookup-model for rendering so you don't have to polute the main model with extra information. 
+The ```model``` (an Array) defines then how those parts get (re-)rendered and the Schnauzer template picks up the model components by its place-holders. ```extraModel``` is meant for Schnauzer to have an alternative lookup-model for rendering so you don't have to polute the main model with extra information.
 
 If you have a nested model with ```children```, those parts then get rendered inside the container defined by ```mountSelector``` where you pass the selector of the container defined in the template.
 
@@ -20,10 +20,10 @@ Circular.component(name: 'String', parameters: Object {
     subscribe: function(property, item, value, oldValue, type),
     listeners: Array [String 'modelItem', '*', ...],
     eventListeners: Object {String 'name': function(), ...},
-    componentElement: Object DOMElement,
-    componentWrapper: Object DOMElement,
+    element: Object DOMElement,
+    wrapper: Object DOMElement,
     mountSelector: Object DOMElement,
-    
+
     onBeforeInit: function(component),
     onInit: function(component),
 
@@ -37,7 +37,7 @@ Circular.component(name: 'String', parameters: Object {
 
 It returns an instance of the new component and holds a rich model and a lot of methods to rearrange the model just like you would manage a DOM tree.
 
-Every change to the model triggers a callback that is defined in ```subscribe: function(property, item, value, oldValue, type)``` where ```property``` is the name of the property being manipulated in case a listener is defined with ```listeners```, ```item```is the model item, ```value``` is the new value, ```oldValue``` the previous value before the manipulation, ```sibling``` is an Element reference in case of the methods ```appendChild```... are used. 
+Every change to the model triggers a callback that is defined in ```subscribe: function(property, item, value, oldValue, type)``` where ```property``` is the name of the property being manipulated in case a listener is defined with ```listeners```, ```item```is the model item, ```value``` is the new value, ```oldValue``` the previous value before the manipulation, ```sibling``` is an Element reference in case of the methods ```appendChild```... are used.
 
 
 ### module
@@ -58,10 +58,10 @@ Another powerful feature is that you can start downloading data and pass its pro
 ```
 renderModule({
     data: Data getting sent to the required module (aside with path)
-    name: 
-    previousName: 
+    name:
+    previousName:
     path: String: path to the modules's HTML file
-    container: 
+    container:
     require: String:  module name
     init: Boolean: auto-start required module (also if undefined)
 })

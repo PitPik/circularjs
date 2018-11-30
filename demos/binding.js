@@ -4,7 +4,7 @@ define('app-binding', ['circular'], Circular => {
       const circular = params.circular || new Circular();
       const options = Circular.extend({
         model: [{ value: '' }],
-        componentElement: Circular.Toolbox.$(selector),
+        element: selector,
         listeners: ['value'],
         eventListeners: { input: this.input, clear: this.clear },
       }, params);

@@ -85,9 +85,11 @@ Circular.prototype.component = function(name, parameters) {
     elmsTxt = options.elements,
     componentAttr = options.componentAttr,
     componentSelector = attrSelector(componentAttr, name),
-    componentElement = parameters.componentElement || // TODO: ... no wrapper
-      $(componentSelector, parameters.componentWrapper || document) ||
-      $(name, parameters.componentWrapper || document);
+    componentElement = typeof parameters.element === 'string' ?
+      $(parameters.element, parameters.wrapper || document) :
+      parameters.element || // TODO: ... no wrapper
+      $(componentSelector, parameters.wrapper || document) ||
+      $(name, parameters.wrapper || document);
 
   if (!componentElement) return;
 
