@@ -39,10 +39,9 @@ define('app-tree', ['circular'], function(Circular) {
       },
       addChildren: function(e, elm, item) {
         if (!item.childNodes && item.name !== '+') {
-          this.appendChild({ name: 'new stuff' }, item);
-          this.replaceChild(item, item); // re-render to get &lt;UL>
-          this.appendChild({ name: '+' }, item);
-          item.open = true;
+          this.replaceChild({ name: item.name, open: true, childNodes: [
+            { name: 'new stuff' }
+          ]}, item);
         }
       }
     }
