@@ -13,7 +13,18 @@
 
   var resourceCache = null,
     _link = document.createElement('a'),
+    types = {
+      'undefined': undefined,
+      'null': null,
+      'NaN': NaN,
+      'true': true,
+      'false': false,
+    },
     Toolbox = {
+    convertToType: function(value) {
+      return types.hasOwnProperty(value) ? types[value] :
+      value.toString && +value.toString() === value ? +value : value;
+    },
     closest: function(element, selector, root) {
       if (element.closest) {
         Toolbox.closest = function(element, selector) {

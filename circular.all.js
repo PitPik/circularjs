@@ -171,7 +171,16 @@
     }
 })(this, function(window, undefined) {
     "use strict";
-    var resourceCache = null, _link = document.createElement("a"), Toolbox = {
+    var resourceCache = null, _link = document.createElement("a"), types = {
+        undefined: undefined,
+        null: null,
+        NaN: NaN,
+        true: true,
+        false: false
+    }, Toolbox = {
+        convertToType: function(value) {
+            return types.hasOwnProperty(value) ? types[value] : value.toString && +value.toString() === value ? +value : value;
+        },
         closest: function(element, selector, root) {
             if (element.closest) {
                 Toolbox.closest = function(element, selector) {
@@ -1386,7 +1395,7 @@
     }
     function moveItem(_this, item, parent, index, type, sibling) {
         var options = _this.options;
-        options.moveCallback.call(_this, item, type, sibling);
+        var oldParent = item.parentNode;
         if (!item.parentNode) {
             item.__index = index;
             enrichModel(_this, [ item ], parent, type, sibling);
@@ -1401,6 +1410,7 @@
         item = item.index !== -1 && item.parentNode && removeChild(_this, item, true) || item;
         getChildNodes(parent, options.childNodes).splice(index || 0, 0, item);
         item.parentNode = parent;
+        options.moveCallback.call(_this, item, type, sibling, oldParent);
         return item;
     }
     function removeChild(_this, item, preserve) {
@@ -1573,7 +1583,7 @@
             _this.options[option] = options[option];
         }
         _this.events = {};
-    }, $ = Toolbox.$, $$ = Toolbox.$$, id = 0, instanceList = {}, modulesList = {}, templateCache = {}, DOC = null, pubsub = {};
+    }, $ = Toolbox.$, $$ = Toolbox.$$, id = 0, instanceList = {}, modulesMap = {}, templateCache = {}, DOC = null, pubsub = {};
     Circular.prototype.component = function(name, parameters) {
         if (typeof name !== "string") {
             parameters = name;
@@ -1637,6 +1647,7 @@
         }
         _inst.vom = new VOM(component.model, {
             idProperty: _this.options.idProperty || "cr-id",
+            moveCallback: parameters.moveCallback || function() {},
             preRecursionCallback: function(item, type, siblingOrParent) {
                 var idProperty = this.options.idProperty, id = item[idProperty], fragment = _inst.template && _inst.template.schnauzer.partials.self && _inst.template.renderHTML(item, _this.data[name].extraModel), replaceElement = type === "replaceChild" && siblingOrParent[elmsTxt].element, container = item.parentNode[elmsTxt] && item.parentNode[elmsTxt].container, parentNode = fragment && siblingElement || container || component.container, siblingElement = parentNode ? replaceElement || undefined : siblingOrParent && siblingOrParent[elmsTxt] && siblingOrParent[elmsTxt].element, element = fragment && render(fragment, type || data.type || "appendChild", parentNode, siblingElement, idProperty, id) || component.element;
                 this.reinforceProperty(item, elmsTxt, {
@@ -1794,12 +1805,12 @@
                 }
                 item = objNew[prop];
                 if (typeof item === "function") {
-                    out[_prop] = _extend && out[_prop] ? function(func) {
+                    out[_prop] = _extend && out[_prop] ? function(func, _item) {
                         return function() {
-                            func.apply(func, arguments);
-                            return item.apply(item, arguments);
+                            func.apply(this, arguments);
+                            return _item.apply(this, arguments);
                         };
-                    }(out[_prop]) : item;
+                    }(out[_prop], item) : item;
                 } else if (item && item.constructor === Array) {
                     out[_prop] = _extend && out[_prop] && item.toString() !== "*" ? out[_prop].concat(item) : item;
                 } else if (_deeper.indexOf(_prop) !== -1) {
@@ -1967,7 +1978,7 @@
     function moveChildrenToCache(data) {
         var childNodes = data.container.childNodes;
         while (childNodes[0]) {
-            modulesList[data.previousName].cache.appendChild(childNodes[0]);
+            (data.modulesMap || modulesMap)[data.previousName].cache.appendChild(childNodes[0]);
         }
     }
     function transition(init, data, modules, modulePath) {
@@ -1997,7 +2008,7 @@
         });
     }
     Circular.prototype.renderModule = function(data) {
-        var temp = null, isInsideDoc = data.container, modules = modulesList, name = data.name, module = name && modules[name], init = module && module.init, hasTransition = data.transition, Promise = Toolbox.Promise;
+        var temp = null, isInsideDoc = data.container, modules = data.modulesMap || modulesMap, name = data.name, module = name && modules[name], init = module && module.init, hasTransition = data.transition, Promise = Toolbox.Promise;
         if (modules[data.previousName] && (!hasTransition || !name)) {
             moveChildrenToCache(data);
         }
@@ -2111,7 +2122,9 @@
         if (html.nodeType === 11) {
             element = html.children[0];
             if (parentNode.getAttribute("cr-mount") === "parent") {
-                element = element.children[0];
+                var _element = element.children[0];
+                element.parentNode.replaceChild(element.children[0], element);
+                element = _element;
             } else if (element.hasAttribute("cr-mount")) {
                 element.removeChild(element.children[0]);
             }
@@ -2223,7 +2236,7 @@
                     continue;
                 }
                 if (!stopPropagation && (eventElement === e.target || eventElement.contains(e.target))) {
-                    stopPropagation = eventListener.call(component, e, eventElement, item) === false;
+                    stopPropagation = eventListener.call(component, e, eventElement, item, item.elements.element) === false;
                     if (stopPropagation) e.stopPropagation();
                 }
             }

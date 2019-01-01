@@ -143,9 +143,12 @@ function clearMemory(array) { // TODO: check for better
 
 function render(container, helperContainer, fragment) {
   while (helperContainer.childNodes.length) {
-    fragment.appendChild(helperContainer.childNodes[0]);
+     fragment.appendChild(helperContainer.childNodes[0]);
   }
   if (container) { // internal only
+    // if (fragment.childNodes[0].getAttribute('cr-mount') === 'parent') {
+    //   fragment.removeChild(fragment.childNodes[0]);
+    // }
     container.parentNode.insertBefore(fragment, container.nextSibling);
   } else {
     return fragment;

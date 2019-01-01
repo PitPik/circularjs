@@ -65,7 +65,7 @@ var Circular = function(name, options) {
   $$ = Toolbox.$$,
   id = 0, // circular instance counter
   instanceList = {}, // circular instances holding components
-  modulesList = {}, // list of modules for module switching
+  modulesMap = {}, // list of modules for module switching
   templateCache = {}, // general (parsed) template cache (by name)
   DOC = null, // createHTMLDocument for resorce loader
   pubsub = {}; // general data holder
@@ -174,6 +174,7 @@ Circular.prototype.component = function(name, parameters) {
 
   _inst.vom = new VOM(component.model, {
     idProperty: _this.options.idProperty || 'cr-id',
+    moveCallback: parameters.moveCallback || function() {},
     preRecursionCallback: function(item, type, siblingOrParent) {
       var idProperty = this.options.idProperty,
         id = item[idProperty], // container, data, extra
@@ -394,12 +395,12 @@ return function(obj, objNew, ext) {
     item = objNew[prop];
 
     if (typeof item === 'function') {
-      out[_prop] = _extend && out[_prop] ? (function(func) {
+      out[_prop] = _extend && out[_prop] ? (function(func, _item) {
         return function() {
-          func.apply(func, arguments);
-          return item.apply(item, arguments);
+          func.apply(this, arguments);
+          return _item.apply(this, arguments);
         }
-      })(out[_prop]) : item;
+      })(out[_prop], item) : item;
     } else if (item && item.constructor === Array) {
       out[_prop] = _extend && out[_prop] && item.toString() !== '*' ?
         out[_prop].concat(item) : item;
@@ -617,7 +618,7 @@ function moveChildrenToCache(data) {
   var childNodes = data.container.childNodes;
 
   while (childNodes[0]) {
-    modulesList[data.previousName].cache.appendChild(childNodes[0]);
+    (data.modulesMap || modulesMap)[data.previousName].cache.appendChild(childNodes[0]);
   }
 }
 
@@ -660,7 +661,7 @@ function transition(init, data, modules, modulePath) {
 Circular.prototype.renderModule = function(data) {
   var temp = null,
     isInsideDoc = data.container,
-    modules = modulesList, // speeds up var search
+    modules = data.modulesMap || modulesMap, // speeds up var search
     name = data.name,
     module = name && modules[name],
     init = module && module.init,
@@ -807,7 +808,9 @@ function render(html, operator, parentNode, sibling, idProperty, id) {
     element = html.children[0];
 
     if (parentNode.getAttribute('cr-mount') === 'parent') { // get from above
-      element = element.children[0];
+      var _element = element.children[0];
+      element.parentNode.replaceChild(element.children[0], element);
+      element = _element;
     } else if (element.hasAttribute('cr-mount')) { // get from above
       element.removeChild(element.children[0]);
     }
@@ -971,7 +974,8 @@ function eventDistributor(e, idProperty, component, _this) {
         continue;
       }
       if (!stopPropagation && (eventElement === e.target || eventElement.contains(e.target))) {
-        stopPropagation = eventListener.call(component, e, eventElement, item) === false;
+        stopPropagation = eventListener.call(component, e,
+          eventElement, item, item.elements.element) === false; // TODO: item.'elements'
         if (stopPropagation) e.stopPropagation();
       }
     }

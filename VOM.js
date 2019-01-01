@@ -159,8 +159,8 @@ function getChildNodes(item, childNodes) { // adds array if necessary
 
 function moveItem(_this, item, parent, index, type, sibling) {
   var options = _this.options;
+  var oldParent = item.parentNode;
 
-  options.moveCallback.call(_this, item, type, sibling);
   if (!item.parentNode) { // for convenience: append un-enhenced new items
     item.__index = index;
     enrichModel(_this, [item], parent, type, sibling);
@@ -178,6 +178,8 @@ function moveItem(_this, item, parent, index, type, sibling) {
     removeChild(_this, item, true) || item;
   getChildNodes(parent, options.childNodes).splice(index || 0, 0, item);
   item.parentNode = parent;
+  options.moveCallback.call(_this, item, type, sibling, oldParent);
+
   return item;
 };
 
