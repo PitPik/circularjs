@@ -2221,8 +2221,8 @@
     function attrSelector(attr, value) {
         return "[" + attr + (value ? '="' + value + '"]' : "]");
     }
-    function isConnected(elm, contect) {
-        return elm.isConnected !== undefined ? elm.isConnected : _this.options.appElement.contains(eventElement);
+    function isConnected(elm, context) {
+        return elm.isConnected !== undefined ? elm.isConnected || context.contains(elm) : context.contains(elm);
     }
     function eventDistributor(e, idProperty, component, _this) {
         var element = Toolbox.closest(e.target, attrSelector(idProperty)) || component.element, id = element.getAttribute(idProperty), elms = "elements.element", item = component.getElementById(id) || component.getElementsByProperty(elms, component.element)[0] || component.getElementsByProperty(elms, e.target)[0] || component.model[0], eventElements = item && item.events[e.type], eventElement = {}, stopPropagation = false, eventListener;

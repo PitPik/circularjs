@@ -945,9 +945,9 @@ function attrSelector(attr, value) {
   return '[' + attr + (value ? '="' + value + '"]' : ']');
 }
 
-function isConnected(elm, contect) {
-  return elm.isConnected !== undefined ?
-    elm.isConnected : _this.options.appElement.contains(eventElement);
+function isConnected(elm, context) {
+  return elm.isConnected !== undefined ? elm.isConnected || context.contains(elm) :
+    context.contains(elm);
 }
 // -------- for Controller --------- //
 // --------------------------------- //
