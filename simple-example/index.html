@@ -8,6 +8,9 @@
       .highlight {
         background: wheat;
       }
+      label {
+        display: block;
+      }
     </style>
   </head>
   <body>
@@ -23,10 +26,10 @@
               model: model || [{ value: '' }, { value: '' }],
               element: element,
               listeners: ['value'],
-              template: `<label style="display: block">
-                  <input cr-event="input: onInput" class="{{#%value}}highlight{{/%value}}" value="{{%value}}">
-                  {{#if %value}}<button cr-event="click: doEmpty">empty</button>{{/if}}
-                </label>`,
+              template: `<label>
+                <input cr-event="input: onInput" class="{{#%value}}highlight{{/%value}}" value="{{%value}}">
+                {{#if %value}}<button cr-event="click: doEmpty">empty</button>{{/if}}
+              </label>`,
               eventListeners: {
                 onInput: (e, elm, item) => item.value = elm.value,
                 doEmpty: (e, elm, item) => {

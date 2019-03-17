@@ -157,10 +157,12 @@ require(['test-component'], TestComponent => {
 });
 ```
 
-The main differences besides using Klasses is the usage of the element itself in place of the selector. So the first parameter passed to ```circular.component``` is skipped and herefore the ```element``` property is used in the configuration.
+The main differences besides using Klasses is the usage of the element itself in place of a selector. So the first parameter passed to ```circular.component``` is skipped and herefor the ```element``` property is used in the configuration.
 The template is taken out of the markup and placed into the configuration.
 
 For the rest, it is quite the same as was before.
+
+This way you can add methods to your Klass to make your component controllable from outside (besides using other subscribers). You might want to refactor the static function ```$$``` to export the instances so you have access / references to them.
 
 ## Refactoring (even more) of template
 
