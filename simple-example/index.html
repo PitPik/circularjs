@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en" data-framework="circularJS">
+  <head>
+    <meta charset="utf-8">
+    <title>Circular.js • Example</title>
+    <script type="text/javascript" src="../circular.min.js"></script>
+  </head>
+  <body>
+    <h1>Demo: data binding</h1>
+    <p>Focus the input fields and type some text. This will trigger the appearance of buttons that can clear the input fields. If the fields are cleared, either by the button or the back-space key, the button disappears again.</p>
+    <form test-component></form>
+    <form test-component></form>
+    <script>
+      define('test-component', ['circular'], Circular => {
+        return class TestComponent {
+          constructor(element, model, circular) {
+            this.component = (circular || new Circular()).component({
+              model: model || [{ value: '' }, { value: '' }],
+              element: element,
+              listeners: ['value'],
+              template: `<label style="display: block">
+                  <input cr-event="input: onInput" value="{{%value}}">
+                  <button cr-event="click: doEmpty" style="display: {{^%value}}none{{/%value}}">empty</button>
+                </label>`,
+              eventListeners: {
+                onInput: (e, elm, item) => item.value = elm.value,
+                doEmpty: (e, elm, item) => {
+                  item.value = '';
+                  e.preventDefault();
+                }
+              }
+            });
+          }
+
+          static $$(selector, context, model, circular) {
+            Circular.Toolbox.$$(selector, context)
+              .forEach(elm => new this(elm, model, circular));
+          }
+        };
+      });
+
+      require(['test-component'], TestComponent => {
+        TestComponent.$$('[test-component]');
+      });
+
+    </script>
+  </body>
+</html>

@@ -915,7 +915,7 @@ function getDOMData(options, parameters, component, name) {
     namedTplSelector = attrSelector(options.templateAttr, _name),
     container = component.hasAttribute(containerAttr) ? component :
       // $(attrSelector(containerAttr, name), component) ||
-      $(attrSelector(containerAttr), component),
+      $(attrSelector(containerAttr), component) || component,
     _template,
     type = container && container.getAttribute(options.containerAttr),
     template = container && ($(namedTplSelector, searchContainer) ||
