@@ -11,14 +11,14 @@ The second argument of ```circular.component()``` is a configuration object for 
 ## A simple example
 
 Let's look at a simple component, a UI that has a form with an input field that, if filled shows an 'empty' button that, when clicked, will empty the input field and therefore disappears again. So we're dealing with a state model and data binding. The input has an event listener 'oninput' and the button a 'click' listener which callback functions will manipulate our state-model's property 'hasInput':
-```
+```HTML
 <form cr-component="test-component" cr-event="submit: preventDefault">
   <input cr-view="input" cr-event="input: onInput">
   <button cr-view="button" cr-event="click: doEmpty" style="display: none">empty</button>
 </form>
 ```
 and the code:
-```
+```javascript
 require(['circular'], function(Circular){
   const circular = new Circular();
 
@@ -67,7 +67,7 @@ We recommend that event listeners are only used to change the state model and th
 The previous example described a static markup that needed to be controlled by a state model.
 We can also render dynamic views that are dependent on the model we feed the component.
 Let's look at a more complex example, that does the same as above but renders more input / buttons sets, just like in a dynamically rendered form.
-```
+```HTML
 <form cr-component="test-component" cr-container onsubmit="event.preventDefault()">
   <label cr-template-for="test-component" style="display: block">
     <input cr-event="input: onInput" value="{{%value}}">
@@ -76,7 +76,7 @@ Let's look at a more complex example, that does the same as above but renders mo
 </form>
 ```
 and the modified script:
-```
+```javascript
 require(['circular'], function(Circular){
   const circular = new Circular();
 
@@ -119,12 +119,12 @@ Another solution would be to wrap the component by another component that uses t
 
 Here is a reusable approach using Klasses that likes a bit more like the Angular way.
 
-```
+```HTML
 <form test-component></form>
 <form test-component></form>
 ```
 and the script
-```
+```javascript
 define('test-component', ['circular'], Circular => {
   return class TestComponent {
     constructor(element, model, circular) {
