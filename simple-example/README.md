@@ -162,6 +162,11 @@ The template is taken out of the markup and placed into the configuration.
 
 For the rest, it is quite the same as was before.
 
+## Refactoring (even more) of template
+
+If you look at the index.html you'll recognise even more changes. The style in the button is removed and replaced by an ```if``` to render the whole button (like Angular's \*ngIf). The ```<input>``` has an extra class attribute where the class name gets changed according to the ```value```'s state. This demonstrates Amgular's \*ngClass although this approach can be used for all attributes. The attributes ```disabled```, ```checked```, ```autocomplete```, ```contenteditable```, ```readonly```, and ```selected``` have a special behaviour: You can pass ```true```, ```false``` or an empty string to enable / remove the attribute).
+
+
 ## Comparing CircularJS to Angular with this example
 
 Other than in Angular, CircularJS doesn't use decorators, magic functions, strings etc. or classes to create a component. CircularJS is based on vanilla JS and is therefore easier to understand / use as we don't need to know that many architectural design patterns to keep a view in sync with a state model, and that's all we actually need to achieve. CircularJS tries to keep things simple without compromises to the power of a decent MV* framework.

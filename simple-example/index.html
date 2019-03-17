@@ -4,6 +4,11 @@
     <meta charset="utf-8">
     <title>Circular.js • Example</title>
     <script type="text/javascript" src="../circular.min.js"></script>
+    <style type="text/css">
+      .highlight {
+        background: wheat;
+      }
+    </style>
   </head>
   <body>
     <h1>Demo: data binding</h1>
@@ -19,8 +24,8 @@
               element: element,
               listeners: ['value'],
               template: `<label style="display: block">
-                  <input cr-event="input: onInput" value="{{%value}}">
-                  <button cr-event="click: doEmpty" style="display: {{^%value}}none{{/%value}}">empty</button>
+                  <input cr-event="input: onInput" class="{{#%value}}highlight{{/%value}}" value="{{%value}}">
+                  {{#if %value}}<button cr-event="click: doEmpty">empty</button>{{/if}}
                 </label>`,
               eventListeners: {
                 onInput: (e, elm, item) => item.value = elm.value,
