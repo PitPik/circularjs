@@ -35,13 +35,15 @@
 
     <p>Below you can see a demo with component builder, routing and module/widget loader that again shows some demos that explain data-binding, dynamic model manipulation, ...</p>
 
-    <div class="demo" cr-component="demo-nav" cr-container="prepend">
-      <nav cr-template-for="demo-nav">
-        {{#each menu}}
-          <a class="{{#if %active}}active{{/if}}" href="#/{{action}}">{{title}}</a>
-          {{#unless @last}}|{{/unless}}
-        {{/each}}
-      </nav>
+    <div class="demo" cr-component="demo-nav">
+      <div cr-container="prepend">
+        <nav cr-template-for="demo-nav">
+          {{#each menu}}
+            <a class="{{#if %active}}active{{/if}}" href="#/{{action}}">{{title}}</a>
+            {{#unless @last}}|{{/unless}}
+          {{/each}}
+        </nav>
+      </div>
       <div class="module-outlet"></div>
     </div>
 
