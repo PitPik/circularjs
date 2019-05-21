@@ -1645,6 +1645,10 @@
                 }
             }
         }
+        if (_inst.template && component.container) {
+            _inst.altContent = [].slice.call(component.container.childNodes);
+            component.model.length && (component.container.innerHTML = "");
+        }
         _inst.vom = new VOM(component.model, {
             idProperty: _this.options.idProperty || "cr-id",
             moveCallback: parameters.moveCallback || function() {},
@@ -1716,16 +1720,23 @@
         handleNesting(componentElement, null, nestingData);
         proto = transferMethods(VOM, _inst.vom, component, this, proto);
         proto.uncloak = function(item) {
-            var item = item && item.element || component.element;
-            Toolbox.removeClass(item, "cr-cloak");
-            item.removeAttribute("cr-cloak");
+            var element = item && item.element || component.element;
+            Toolbox.removeClass(element, "cr-cloak");
+            element.removeAttribute("cr-cloak");
         };
         proto.reset = function(data, extraModel) {
             if (extraModel) {
                 _this.data[component.name].extraModel = extraModel;
             }
             _inst.vom.destroy();
-            this.container && (this.container.innerHTML = "");
+            if (this.container) {
+                this.container.innerHTML = "";
+                if (!data.length && _inst.altContent) {
+                    for (var n = 0, l = _inst.altContent.length; n < l; n++) {
+                        this.container.appendChild(_inst.altContent[n]);
+                    }
+                }
+            }
             _inst.vom.__isNew = true;
             for (var n = 0, m = data.length; n < m; n++) {
                 this.appendChild(data[n]);
@@ -1735,7 +1746,10 @@
             return component;
         };
         component.__proto__ = proto;
-        parameters.onInit && parameters.onInit(component);
+        component.uncloak();
+        window.setTimeout(function() {
+            parameters.onInit && parameters.onInit(component);
+        });
         return component;
     };
     Circular.prototype.getBaseModel = function(name) {
@@ -1855,7 +1869,7 @@
     };
     Circular.prototype.unsubscribe = function(inst, comp, attr, callback) {
         var funcNo = -1, funcs = {};
-        inst = inst || this.name;
+        inst = typeof inst === "string" ? inst : inst.name || this.name;
         if (pubsub[inst] && pubsub[inst][comp] && pubsub[inst][comp][attr]) {
             funcs = pubsub[inst][comp][attr];
             funcNo = funcs.indexOf(callback.callback || callback);
@@ -1867,7 +1881,7 @@
     };
     function publish(_this, pubsubs, data) {
         for (var n = 0, m = pubsubs.length; n < m; n++) {
-            pubsubs[n].call(_this, data);
+            if (pubsubs[n]) pubsubs[n].call(_this, data);
         }
     }
     Circular.prototype.addRoute = function(data, trigger, hash) {

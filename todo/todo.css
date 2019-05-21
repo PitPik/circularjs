@@ -17,8 +17,13 @@
 	border-color: rgba(175, 47, 47, 0.1);
 }
 .todo-list li .edit {
-	display: block;
+  display: block;
+  position: absolute;
+  top: 6px;
+  left: 53px;
+  width: calc(100% - 59px);
 }
+
 [disabled] {
 	display: none!important;
 }
