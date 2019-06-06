@@ -174,6 +174,20 @@ function checkSectionChild(node, child, sections, options) {
   return sections;
 }
 
+function getDifference(a, b) {
+  var i = 0, j = 0, result = '';
+
+  while (j < b.length) {
+    if (a[i] !== b[j] || i === a.length) {
+      result += b[j];
+    } else {
+      i++;
+    }
+    j++;
+  }
+  return result;
+}
+
 function resolveReferences(_this, memory, html, container, fragment) {
   var search = _this.search;
   var helperContainer = parseHtml(html);
@@ -218,8 +232,20 @@ function resolveReferences(_this, memory, html, container, fragment) {
             elm = null;
             options.attributes[name](ownerElement, name, value);
           } else if (value !== undefined) {
+            var oldValue = elm.valueSplitter.join('').trim();
+            var diff = [];
+            var newValue = '';
+            if (oldValue !== elm.textContent) { // TODO: check for whitespaces??
+              newValue = elm.textContent.split(oldValue)[1] || '';
+              diff = getDifference(elm.textContent, oldValue);
+              diff = diff && diff.split(/\s+/); // TODO: do this in getDifference
+            }
             elm.valueSplitter[elm.valueSplitter.valueTracker[_n]] = value;
-            elm.textContent = elm.valueSplitter.join('').trim();
+            var outValue = elm.valueSplitter.join('').trim() + newValue;
+            for (var m = diff.length; m--; ) {
+              if (diff[m]) outValue = outValue.replace(diff[m], '');
+            }
+            elm.textContent = outValue;
           }
         }
       })(foundNode, foundNode.ownerElement, foundNode.name, search, foundNode.textContent, part, n);

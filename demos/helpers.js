@@ -11,7 +11,7 @@ define('template-helpers', [], function() {
         day: $2 === 'short' ? undefined : 'numeric',
       };
 
-      return  new Date(this.getData($1))
+      return new Date(this.getData($1))
         .toLocaleDateString(undefined, options);
     },
     slice: function($1, $2, $3) {
