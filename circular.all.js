@@ -2132,7 +2132,7 @@
                     if (extra) {
                         for (var key in eventFuncs) {
                             var elms = eventFuncs[key];
-                            for (var nn = elms.length; nn--; ) {
+                            for (var nn = 0, ll = elms.length; nn < ll; nn++) {
                                 if (elms[nn] !== elements[n] && elms[nn].contains(elements[n])) {
                                     var tmp = eventFuncs[key];
                                     delete eventFuncs[key];
