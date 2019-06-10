@@ -764,7 +764,7 @@ Controller.prototype = {
       eventFunc = '',
       eventParts = [],
       eventFuncs = {},
-      extraElement = element !== component.element ? component.element : [];
+      extraElement = element !== component.element && !extra ? component.element : [];
 
     elements = [element].concat([].slice.call(elements), extraElement);
 
@@ -784,7 +784,18 @@ Controller.prototype = {
           eventFuncs[eventFunc] = [];
         }
         eventFuncs[eventFunc].push(elements[n]);
-
+        if (extra) { // fix event delegation order
+          for (var key in eventFuncs) {
+            var elms = eventFuncs[key];
+            for (var nn = elms.length; nn--; ) {
+              if (elms[nn] !== elements[n] && elms[nn].contains(elements[n])) {
+                var tmp = eventFuncs[key];
+                delete eventFuncs[key];
+                eventFuncs[key] = tmp;
+              }
+            }
+          }
+        }
         if (!this.events[eventType]) { // register inside itself
           this.events[eventType] = true;
         }
@@ -799,7 +810,7 @@ Controller.prototype = {
 
     this.installed = this.installed || {};
     for (var key in this.events) {
-      if (this.installed[key]) continue;
+      if (!key || this.installed[key]) continue;
       Toolbox.addEvent(this.options.appElement, key, function(e) {
         eventDistributor(e, idProperty, component, that);
       }, /(?:focus|blur|mouseenter|mouseleave)/.test(key) ? true : false,

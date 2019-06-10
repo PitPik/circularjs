@@ -2112,7 +2112,7 @@
     };
     Controller.prototype = {
         getEventListeners: function(element, events, component, idProperty, extra) {
-            var eventAttribute = this.options.eventAttribute, elements = element.querySelectorAll(attrSelector(eventAttribute)), attribute = "", eventItem = "", eventType = "", eventFunc = "", eventParts = [], eventFuncs = {}, extraElement = element !== component.element ? component.element : [];
+            var eventAttribute = this.options.eventAttribute, elements = element.querySelectorAll(attrSelector(eventAttribute)), attribute = "", eventItem = "", eventType = "", eventFunc = "", eventParts = [], eventFuncs = {}, extraElement = element !== component.element && !extra ? component.element : [];
             elements = [ element ].concat([].slice.call(elements), extraElement);
             for (var n = elements.length; n--; ) {
                 attribute = elements[n].getAttribute(eventAttribute);
@@ -2129,6 +2129,18 @@
                         eventFuncs[eventFunc] = [];
                     }
                     eventFuncs[eventFunc].push(elements[n]);
+                    if (extra) {
+                        for (var key in eventFuncs) {
+                            var elms = eventFuncs[key];
+                            for (var nn = elms.length; nn--; ) {
+                                if (elms[nn] !== elements[n] && elms[nn].contains(elements[n])) {
+                                    var tmp = eventFuncs[key];
+                                    delete eventFuncs[key];
+                                    eventFuncs[key] = tmp;
+                                }
+                            }
+                        }
+                    }
                     if (!this.events[eventType]) {
                         this.events[eventType] = true;
                     }
@@ -2142,7 +2154,7 @@
             var that = this;
             this.installed = this.installed || {};
             for (var key in this.events) {
-                if (this.installed[key]) continue;
+                if (!key || this.installed[key]) continue;
                 Toolbox.addEvent(this.options.appElement, key, function(e) {
                     eventDistributor(e, idProperty, component, that);
                 }, /(?:focus|blur|mouseenter|mouseleave)/.test(key) ? true : false, this.options.instanceID + "_" + component.name);
