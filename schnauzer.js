@@ -191,10 +191,6 @@ function getVar(text) {
       value = (path[0] === '@' && '@' || '') + path.pop();
       depth = path.length;
     }
-    name = name.replace(/^(?:\.|this)\//, function() {
-      strict = true;
-      return '';
-    });
     keys = value.split(/[\.\/]/);
 
     value = value.replace(/^(\.\/|this\.|this\/|\*)/, function(all, $1) {
