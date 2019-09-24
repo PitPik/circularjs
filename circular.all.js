@@ -1,162 +1,162 @@
 !function(root, undefined) {
     "use strict";
-    var _config = root.require || {}, _rand = root.Math.random, _documentFragment = null, _timer = 0, _foo = {}, _link = document.createElement("a"), extend = function(oldObj, newObj) {
-        if (typeof newObj !== "object" || !newObj) return newObj;
-        oldObj = oldObj || {};
-        for (var key in newObj) {
-            oldObj[key] = newObj[key].constructor === Array ? newObj[key] : typeof newObj[key] === "object" ? extend(oldObj[key], newObj[key]) : newObj[key];
-        }
-        return oldObj;
-    }, applyConfiguration = function(config) {
-        var parts = [ "lookaheadMap", "paths", "options", "baseUrl" ];
-        for (var n = parts.length; n--; ) {
-            require[parts[n]] = extend(require[parts[n]], config[parts[n]]) || require[parts[n]] || "";
-        }
-    }, getPathFromName = function(name, _path, _postFix) {
-        _postFix = /(?:^\!|^http[s]*:|.*\.js$)/.test(name) ? "" : ".js";
+    var mathRand = root.Math.random;
+    var link = document.createElement("a");
+    var documentFragment = root.document.createDocumentFragment();
+    var timer = 0;
+    var modules = require.modules = {};
+    var justExecutedModule = {};
+    define.amd = {};
+    root.define = define;
+    root.require = require;
+    require.config = config;
+    require.getFile = function(resource, checkIfDone) {
+        return resource;
+    };
+    function normalizePath(path) {
+        link.href = path;
+        return (path.indexOf(link.host) !== -1 ? link.origin : "") + link.pathname + link.search;
+    }
+    function getPathFromName(name) {
+        var postFix = /(?:^\!|^http[s]*:|.*\.js$)/.test(name) ? "" : ".js";
         name = (require.paths[name] || name).replace(/^\!/, "");
-        _path = normalizePath((require.baseUrl || ".") + "/" + name + _postFix).replace(/^.\//, "");
-        return _path;
-    }, normalizePath = function(path) {
-        _link.href = path;
-        return (path.indexOf(_link.host) !== -1 ? _link.origin : "") + _link.pathname + _link.search;
-    }, applyScript = function(module, sync, modules, name) {
+        return normalizePath((require.baseUrl || ".") + "/" + name + postFix).replace(/^.\//, "");
+    }
+    function config(config) {
+        var items = [ "lookaheadMap", "paths", "options", "baseUrl|string" ];
+        if (!require[items[0]]) {
+            for (var n = items.length, value = []; n--; ) {
+                value = items[n].split("|");
+                require[value[0]] = value[1] === "string" ? "" : {};
+            }
+        }
+        for (var item in config) {
+            if (items.indexOf(item) === -1) continue;
+            for (var key in config[item]) {
+                require[item][key] = config[item][key];
+            }
+        }
+    }
+    function lookaheadForDeps(name) {
+        var deps = require.lookaheadMap[name];
+        var minifyPrefix = require.options.minifyPrefix;
+        if (deps && (require.paths[name] || "").indexOf(minifyPrefix) === -1) {
+            require(deps);
+            for (var n = 0, m = deps.length; n < m; n++) {
+                if (!modules[deps[n]]) {
+                    lookaheadForDeps(deps[n]);
+                }
+            }
+        }
+    }
+    function checkIfDone(module) {
+        var deps = module.deps || [];
+        var parentModules = module.parentModules;
+        var done = true;
+        for (var n = deps.length; n--; ) {
+            if (modules[deps[n]] && !modules[deps[n]].done) {
+                done = false;
+            }
+        }
+        if (!done) return;
+        if (module.factory) {
+            module.done = module.factory.apply(null, module.deps.map(function(dep) {
+                return modules[dep].done;
+            }));
+            delete module.factory;
+        }
+        for (var n = parentModules.length; n--; ) {
+            if (modules[parentModules[n]]) {
+                checkIfDone(modules[parentModules[n]]);
+            }
+        }
+    }
+    function appendScript(script) {
+        documentFragment.appendChild(script);
+        clearTimeout(timer);
+        timer = setTimeout(function() {
+            document.head.appendChild(documentFragment);
+        });
+    }
+    function applyScript(module, sync, modules, parentName) {
         var script = root.document.createElement("script");
-        var _module = {};
         script.type = "text/javascript";
         script.async = script.defer = !sync ? true : false;
         script.charset = "utf-8";
-        script.onload = script.onreadystatechange = function(e) {
-            var last = modules._last;
-            delete modules._last;
-            if (e.type === "load" || (e.currentTarget || e.srcElement).readyState === "complete") {
-                if (!module.factory) {
-                    markAsDone(module);
-                }
-                if (last && !module.done) {
-                    _module = modules[last.name];
-                    if (module.parentNames.indexOf(name) === -1) {
-                        module.parentNames.push(name);
-                    }
-                    if (_module.done) {
-                        module.factory = function() {
-                            return _module.done;
-                        };
-                        markAsDone(module);
-                    }
-                }
+        script.onload = script.onreadystatechange = function(data) {
+            return function(e) {
+                onScriptLoad(data);
                 script.onload = script.onreadystatechange = null;
-            }
-        };
+            };
+        }(module);
         script.src = module.path;
         return script;
-    }, appendScript = function(script) {
-        _documentFragment = _documentFragment || root.document.createDocumentFragment();
-        _documentFragment.appendChild(script);
-        clearTimeout(_timer);
-        _timer = setTimeout(function appendScripts() {
-            document.head.appendChild(_documentFragment);
-        }, 0);
-    }, checkIfModuleIsDone = function(module) {
-        for (var count = 0, n = module.resolvedDeps.length; n--; ) {
-            (module.resolvedDeps[n] || {}).done !== undefined && count++;
-        }
-        module.deps.length === count && markAsDone(module);
-    }, notifyCaller = function(dep) {
-        var module = null;
-        for (var index = 0, n = 0, m = dep.parentNames.length; n < m; n++) {
-            module = modules[dep.parentNames[n]];
-            index = module.deps.indexOf(dep.name);
-            module.resolvedDeps[index] = dep;
-            !module.done && checkIfModuleIsDone(module);
-        }
-        dep.parentNames = [];
-    }, markAsDone = function(module) {
-        if (!module.done) {
-            module.done = (module.factory || function() {}).apply(null, module.resolvedDeps.map(function(dep) {
-                return dep.done;
-            }));
-        }
-        notifyCaller(module);
-        if (!require.options.debug) {
-            delete module.factory;
-            if (module.name.indexOf("_mod") === 0) {}
-        }
-    }, lookaheadForDeps = function(name) {
-        var deps = require.lookaheadMap[name];
-        if (deps && (require.paths[name] || "").indexOf(require.options.minifyPrefix) === -1) {
-            require(deps);
-            for (var n = 0, m = deps.length; n < m; n++) {
-                if (require.lookaheadMap[deps[n]]) {
-                    !modules[deps[n]] && lookaheadForDeps(deps[n]);
-                }
-            }
-        }
-    };
-    if (!root.define || !root.define.amd) {
-        var define = root.define = function define(name, deps, factory, sync) {
-            var parentNames = [];
-            if (typeof name !== "string") {
-                _foo = require(name, deps, factory);
-                return _foo;
-            }
-            if (modules[name]) {
-                if (modules[name].done) {
-                    notifyCaller(modules[name]);
-                    return modules[name].done;
-                }
-                modules[name].deps = deps;
-                modules[name].factory = factory;
-            } else {
-                modules[name] = {
-                    name: name,
-                    deps: deps,
-                    factory: factory,
-                    resolvedDeps: [],
-                    parentNames: []
-                };
-            }
-            for (var n = 0, m = deps.length; n < m; n++) {
-                parentNames = modules[deps[n]] && modules[deps[n]].parentNames;
-                if (!modules[deps[n]]) {
-                    modules[deps[n]] = {
-                        name: deps[n],
-                        isFile: deps[n].substr(0, 1) === "!",
-                        path: getPathFromName(deps[n]),
-                        resolvedDeps: [],
-                        parentNames: [ name ]
-                    };
-                    if (modules[deps[n]].isFile) {
-                        require.getFile(modules[deps[n]], markAsDone);
-                    } else {
-                        appendScript(applyScript(modules[deps[n]], sync, modules, name));
-                        lookaheadForDeps(deps[n]);
-                    }
-                } else if (parentNames.indexOf(name) === -1) {
-                    parentNames.push(name);
-                }
-                modules[deps[n]].done && notifyCaller(modules[deps[n]]);
-            }
-            checkIfModuleIsDone(modules[name]);
-            return modules[name];
-        }, require = root.require = function require(deps, factory, sync) {
-            var rand = "_mod" + (_rand() + _rand());
-            var isDeps = deps.constructor === Array;
-            var _factory = isDeps ? factory : deps;
-            modules._last = _factory ? {
-                factory: _factory,
-                name: rand
-            } : undefined;
-            return isDeps ? define(rand, deps, factory, sync) : define(rand, [], deps, factory);
-        }, modules = require.modules = {}, config = require.config = function(options) {
-            applyConfiguration(_config = options);
-        };
-        require.getFile = function(resource, markAsDone) {
-            return resource;
-        };
-        define.amd = {};
-        config(_config);
     }
+    function onScriptLoad(module) {
+        var module = modules[module.name];
+        if (justExecutedModule.name.indexOf("_mod") === 0) {
+            module.done = justExecutedModule.done;
+            if (justExecutedModule.factory) {
+                module.factory = justExecutedModule.factory;
+            }
+            module.deps = justExecutedModule.deps;
+            module.parentModules.concat(justExecutedModule.parentModules);
+            delete modules[justExecutedModule.name];
+        }
+        checkIfDone(module);
+    }
+    function getDependencies(parentName, deps, sync) {
+        for (var n = 0, m = deps.length, module = {}, name = ""; n < m; n++) {
+            name = deps[n];
+            module = modules[name];
+            if (!module) {
+                module = modules[name] = {
+                    name: name,
+                    isFile: name.charAt(0) === "!",
+                    path: getPathFromName(name),
+                    parentModules: [ parentName ]
+                };
+                if (module.isFile) {
+                    require.getFile(module, checkIfDone);
+                } else {
+                    appendScript(applyScript(module, sync, modules, parentName));
+                    lookaheadForDeps(name);
+                }
+            } else {
+                module.parentModules.push(parentName);
+            }
+        }
+    }
+    function require(deps, factory, sync) {
+        var rand = "_mod" + (mathRand() + mathRand());
+        deps.constructor === Array ? define(rand, deps, factory, sync) : define(rand, [], deps, factory);
+    }
+    function define(name, deps, factory, sync) {
+        if (typeof name !== "string") {
+            return require(name, deps, factory);
+        }
+        if (name === "") {
+            name = "_mod" + (mathRand() + mathRand());
+        }
+        getDependencies(name, deps, sync);
+        if (modules[name]) {
+            modules[name].deps = deps;
+            modules[name].factory = factory;
+        } else {
+            modules[name] = {
+                name: name,
+                deps: deps,
+                factory: factory,
+                parentModules: []
+            };
+            checkIfDone(modules[name]);
+        }
+        justExecutedModule = modules[name];
+        if (!factory && !require.options.debug) {
+            delete modules[name];
+        }
+    }
+    return modules[name];
 }(this);
 
 (function(root, factory) {
@@ -2249,7 +2249,7 @@
         return template.innerHTML;
     }
     function getDOMData(options, parameters, component, name) {
-        var templateName = component.getAttribute(options.componentAttr), _name = templateName && templateName !== name ? templateName : name, searchContainer = component || document.body, containerAttr = options.containerAttr, namedTplSelector = attrSelector(options.templateAttr, _name), container = component.hasAttribute(containerAttr) ? component : $(attrSelector(containerAttr), component) || component, _template, type = container && container.getAttribute(options.containerAttr), template = container && ($(namedTplSelector, searchContainer) || $(namedTplSelector, document.body)), _templates = $$(attrSelector(options.templatesAttr, _name), searchContainer) || [], templates = {};
+        var templateName = component.getAttribute(options.componentAttr), _name = templateName && templateName !== name ? templateName : name, searchContainer = component || document.body, containerAttr = options.containerAttr, namedTplSelector = attrSelector(options.templateAttr, _name), container = component.hasAttribute(containerAttr) ? component : $(attrSelector(containerAttr), component), _template, type = container && container.getAttribute(options.containerAttr), template = container && ($(namedTplSelector, searchContainer) || $(namedTplSelector, document.body)), _templates = $$(attrSelector(options.templatesAttr, _name), searchContainer) || [], templates = {};
         for (var n = _templates.length; n--; ) {
             _template = processTemplate(_templates[n], options);
             templates[_templates[n].id || _templates[n].getAttribute("name")] = new Blick(_template, {
