@@ -1,17 +1,22 @@
 /**! @license amd v0.1.0; Copyright (C) 2019 by Peter Dematté */
-!(function (root, undefined) { 'use strict';
+!(function (root) { 'use strict';
+
   var mathRand = root.Math.random;
   var link = document.createElement('a');
   var documentFragment = root.document.createDocumentFragment();
   var timer = 0;
   var modules = require.modules = {};
-  var justExecutedModule = {};
+  var executedModule = {};
 
   define.amd = {};
   root.define = define;
   root.require = require;
   require.config = config;
-  require.getFile = function(resource, checkIfDone) { return resource; };
+  require.getFile = function(resource, markAsDone) { return resource; };
+
+  function getRandomName() {
+    return '_module_' + (mathRand() + mathRand());
+  }
 
   function normalizePath(path) {
     link.href = path;
@@ -59,8 +64,7 @@
   }
 
   function checkIfDone(module) {
-    var deps = module.deps || []; // fallback for file checker
-    var parentModules = module.parentModules;
+    var deps = module.deps;
     var done = true;
 
     for (var n = deps.length; n--; ) {
@@ -68,18 +72,24 @@
         done = false;
       }
     }
-    if (!done) return;
+    if (done) markAsDone(module);
+  }
+
+  function markAsDone(module) {
+    var parents = module.parents || [];
 
     if (module.factory) {
       module.done = module.factory.apply(null, module.deps.map(function(dep) {
         return modules[dep].done;
       }));
       delete module.factory;
+    } else if (!module.done) {
+      delete modules[module.name]; // from lookaheadForDeps()
     }
 
-    for (var n = parentModules.length; n--; ) {
-      if (modules[parentModules[n]]) {
-        checkIfDone(modules[parentModules[n]]);
+    for (var n = parents.length; n--; ) {
+      if (modules[parents[n]]) {
+        checkIfDone(modules[parents[n]]);
       }
     }
   }
@@ -102,7 +112,7 @@
       return function(e) {
         onScriptLoad(data);
         script.onload = script.onreadystatechange = null;
-      }
+      };
     })(module);
     script.src = module.path;
 
@@ -112,14 +122,14 @@
   function onScriptLoad(module) {
     var module = modules[module.name];
 
-    if (justExecutedModule.name.indexOf('_mod') === 0) { // TODO...
-      module.done = justExecutedModule.done;
-      if (justExecutedModule.factory) {
-        module.factory = justExecutedModule.factory;
+    if (executedModule.name.indexOf('_module_') === 0) { // TODO...
+      module.done = executedModule.done;
+      if (executedModule.factory) {
+        module.factory = executedModule.factory;
       }
-      module.deps = justExecutedModule.deps;
-      module.parentModules.concat(justExecutedModule.parentModules);
-      delete modules[justExecutedModule.name];
+      module.deps = executedModule.deps;
+      module.parents.concat(executedModule.parents);
+      delete modules[executedModule.name];
     }
     checkIfDone(module);
   }
@@ -127,61 +137,46 @@
   function getDependencies(parentName, deps, sync) {
     for (var n = 0, m = deps.length, module = {}, name = ''; n < m; n++) {
       name = deps[n];
-      module = modules[name];
+      if (modules[name]) {
+        modules[name].parents.push(parentName);
+        continue;
+      }
 
-      if (!module) {
-        module = modules[name] = {
-          name: name,
-          isFile: name.charAt(0) === '!',
-          path: getPathFromName(name),
-          parentModules: [parentName]
-        };
-        if (module.isFile) {
-          require.getFile(module, checkIfDone);
-        } else {
-          appendScript(applyScript(module, sync, modules, parentName));
-          lookaheadForDeps(name);
-        }
+      module = modules[name] = {
+        name: name,
+        isFile: name.charAt(0) === '!',
+        path: getPathFromName(name),
+        parents: [parentName]
+      };
+      if (module.isFile) {
+        require.getFile(module, markAsDone);
       } else {
-        module.parentModules.push(parentName);
+        appendScript(applyScript(module, sync, modules, parentName));
+        lookaheadForDeps(name);
       }
     }
   }
 
   function require(deps, factory, sync) {
-    var rand = '_mod' + (mathRand() + mathRand());
-
     deps.constructor === Array ?
-      define(rand, deps, factory, sync) : define(rand, [], deps, factory);
+      define(getRandomName(), deps, factory, sync) :
+      define(getRandomName(), [], deps, factory);
   }
 
   function define(name, deps, factory, sync) {
     if (typeof name !== 'string') {
       return require(name, deps, factory); // shifting arguments
     }
-    if (name === '') {
-      name = '_mod' + (mathRand() + mathRand());
-    }
-
+    name = name || getRandomName();
     getDependencies(name, deps, sync);
 
     if (modules[name]) { // is dependency
       modules[name].deps = deps;
       modules[name].factory = factory;
     } else { // is not dependency
-      modules[name] = {
-        name: name,
-        deps: deps,
-        factory: factory,
-        parentModules: [],
-      };
+      modules[name] = { name: name, deps: deps, factory: factory, parents: [] };
       checkIfDone(modules[name]);
     }
-    justExecutedModule = modules[name];
-
-    if (!factory && !require.options.debug) {
-      delete modules[name]; // from lookaheadForDeps()
-    }
+    executedModule = modules[name];
   }
-  return modules[name];
 })(this);
