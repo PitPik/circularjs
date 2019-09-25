@@ -92,15 +92,18 @@
         script.async = script.defer = !sync ? true : false;
         script.charset = "utf-8";
         script.onload = script.onreadystatechange = function(data) {
-            return function() {
-                onScriptLoad(data);
-                script.onload = script.onreadystatechange = null;
+            return function(e) {
+                var target = e.currentTarget || e.srcElement;
+                if (e.type === "load" || target.readyState === "complete") {
+                    script.onload = script.onreadystatechange = null;
+                    onScriptLoaded(data);
+                }
             };
         }(module);
         script.src = module.path;
         return script;
     }
-    function onScriptLoad(module) {
+    function onScriptLoaded(module) {
         var module = modules[module.name];
         if (executedModule.name.indexOf("_module_") === 0) {
             module.done = executedModule.done;
