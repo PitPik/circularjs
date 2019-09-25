@@ -85,13 +85,13 @@
             document.head.appendChild(documentFragment);
         });
     }
-    function applyScript(module, sync, modules, parentName) {
+    function applyScript(module, sync) {
         var script = root.document.createElement("script");
         script.type = "text/javascript";
         script.async = script.defer = !sync ? true : false;
         script.charset = "utf-8";
         script.onload = script.onreadystatechange = function(data) {
-            return function(e) {
+            return function() {
                 onScriptLoad(data);
                 script.onload = script.onreadystatechange = null;
             };
@@ -128,7 +128,7 @@
             if (module.isFile) {
                 require.getFile(module, markAsDone);
             } else {
-                appendScript(applyScript(module, sync, modules, parentName));
+                appendScript(applyScript(module, sync));
                 lookaheadForDeps(name);
             }
         }
