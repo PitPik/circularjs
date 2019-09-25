@@ -7,12 +7,12 @@
     var modules = require.modules = {};
     var executedModule = {};
     define.amd = {};
-    root.define = define;
-    root.require = require;
     require.config = config;
     require.getFile = function(resource, markAsDone) {
         return resource;
     };
+    root.define = define;
+    root.require = require;
     function getRandomName() {
         return "_module_" + (mathRand() + mathRand());
     }
@@ -137,24 +137,26 @@
         deps.constructor === Array ? define(getRandomName(), deps, factory, sync) : define(getRandomName(), [], deps, factory);
     }
     function define(name, deps, factory, sync) {
+        var module = {};
         if (typeof name !== "string") {
             return require(name, deps, factory);
         }
         name = name || getRandomName();
+        module = modules[name];
         getDependencies(name, deps, sync);
-        if (modules[name]) {
-            modules[name].deps = deps;
-            modules[name].factory = factory;
+        if (module) {
+            module.deps = deps;
+            module.factory = factory;
         } else {
-            modules[name] = {
+            module = modules[name] = {
                 name: name,
                 deps: deps,
                 factory: factory,
                 parents: []
             };
-            checkIfDone(modules[name]);
+            checkIfDone(module);
         }
-        executedModule = modules[name];
+        executedModule = module;
     }
 }(this);
 
