@@ -53,12 +53,13 @@
     var deps = require.lookaheadMap[name];
     var minifyPrefix = require.options.minifyPrefix; // ??
 
-    if (deps && (require.paths[name] || '').indexOf(minifyPrefix) === -1) {
-      require(deps);
-      for (var n = 0, m = deps.length; n < m; n++) {
-        if (!modules[deps[n]]) {
-          lookaheadForDeps(deps[n]);
-        }
+    if (!deps || (require.paths[name] || '').indexOf(minifyPrefix) !== -1) {
+      return;
+    }
+    require(deps);
+    for (var n = 0, m = deps.length; n < m; n++) {
+      if (!modules[deps[n]]) {
+        lookaheadForDeps(deps[n]);
       }
     }
   }
@@ -135,13 +136,12 @@
   }
 
   function getDependencies(parentName, deps, sync) {
-    for (var n = 0, m = deps.length, module = {}, name = ''; n < m; n++) {
+    for (var n = deps.length, module = {}, name = ''; n --; ) {
       name = deps[n];
       if (modules[name]) {
         modules[name].parents.push(parentName);
         continue;
       }
-
       module = modules[name] = {
         name: name,
         isFile: name.charAt(0) === '!',
