@@ -127,13 +127,15 @@
   function onScriptLoaded(module) {
     var module = modules[module.name];
 
-    if (executedModule.name.indexOf('_module_') === 0) { // TODO...
+    if (executedModule.name.indexOf('_module_') === 0) {
       module.done = executedModule.done;
-      if (executedModule.factory) {
-        module.factory = executedModule.factory;
-      }
+      module.factory = executedModule.factory;
       module.deps = executedModule.deps;
-      module.parents.concat(executedModule.parents);
+      // renaming in dependencies for anonymous modules
+      for (var n = module.deps.length, idx = -1, parents = {}; n--; ) {
+        parents = modules[module.deps[n]].parents;
+        parents[parents.indexOf(executedModule.name)] = module.name;
+      }
       delete modules[executedModule.name];
     }
     checkIfDone(module);
