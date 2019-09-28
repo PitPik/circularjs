@@ -132,7 +132,7 @@
       module.factory = executedModule.factory;
       module.deps = executedModule.deps;
       // renaming in dependencies for anonymous modules
-      for (var n = module.deps.length, idx = -1, parents = {}; n--; ) {
+      for (var n = module.deps.length, parents = {}; n--; ) {
         parents = modules[module.deps[n]].parents;
         parents[parents.indexOf(executedModule.name)] = module.name;
       }

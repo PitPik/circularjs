@@ -833,7 +833,7 @@ function render(html, operator, parentNode, sibling, idProperty, id) {
   if (html.nodeType === 11) {
     element = html.children[0];
 
-    if (parentNode.getAttribute('cr-mount') === 'parent') { // get from above
+    if (parentNode && parentNode.getAttribute('cr-mount') === 'parent') { // get from above
       var _element = element.children[0];
       element.parentNode.replaceChild(element.children[0], element);
       element = _element;
@@ -851,6 +851,7 @@ function render(html, operator, parentNode, sibling, idProperty, id) {
         isPrepend && parentNode.children[0];
       operator = sibling ? 'insertBefore' : 'appendChild';
     }
+    if (!parentNode && !element.parentElement) return;
 
     (parentNode || element.parentElement)[operator](element, sibling);
   };

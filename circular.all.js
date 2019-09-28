@@ -109,7 +109,7 @@
             module.done = executedModule.done;
             module.factory = executedModule.factory;
             module.deps = executedModule.deps;
-            for (var n = module.deps.length, idx = -1, parents = {}; n--; ) {
+            for (var n = module.deps.length, parents = {}; n--; ) {
                 parents = modules[module.deps[n]].parents;
                 parents[parents.indexOf(executedModule.name)] = module.name;
             }
@@ -2173,7 +2173,7 @@
         var isPrepend = operator === "prependChild", element = {};
         if (html.nodeType === 11) {
             element = html.children[0];
-            if (parentNode.getAttribute("cr-mount") === "parent") {
+            if (parentNode && parentNode.getAttribute("cr-mount") === "parent") {
                 var _element = element.children[0];
                 element.parentNode.replaceChild(element.children[0], element);
                 element = _element;
@@ -2189,6 +2189,7 @@
                 sibling = sibling && sibling.nextSibling || isPrepend && parentNode.children[0];
                 operator = sibling ? "insertBefore" : "appendChild";
             }
+            if (!parentNode && !element.parentElement) return;
             (parentNode || element.parentElement)[operator](element, sibling);
         };
         element && renderingFunc();
