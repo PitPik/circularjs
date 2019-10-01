@@ -69,7 +69,7 @@
     var done = true;
 
     for (var n = deps.length; n--; ) {
-      if (modules[deps[n]] && !modules[deps[n]].done) {
+      if (modules[deps[n]] && modules[deps[n]].done === undefined) {
         done = false;
       }
     }
@@ -79,12 +79,12 @@
   function markAsDone(module) {
     var parents = module.parents || [];
 
-    if (module.factory) {
+    if (module.factory && !module.isFile) {
       module.done = module.factory.apply(null, module.deps.map(function(dep) {
         return modules[dep].done;
       }));
       delete module.factory;
-    } else if (!module.done) {
+    } else if (module.done === undefined) {
       delete modules[module.name]; // from lookaheadForDeps()
     }
 
