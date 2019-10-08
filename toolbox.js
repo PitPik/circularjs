@@ -220,6 +220,9 @@
           }
 
           xhr.send(prefs.data);
+          return function abortXHR() {
+            xhr.abort();
+          };
         });
 
       if (cache) {
@@ -346,8 +349,7 @@
     this._handled = false;
     this._value = undefined;
     this._deferreds = [];
-
-    doResolve(fn, this);
+    this._returnFn = doResolve(fn, this);
   }
 
   Promise._cache = {};
@@ -389,8 +391,7 @@
           finale(self);
           return;
         } else if (typeof then === 'function') {
-          doResolve(then.bind(newValue), self);
-          return;
+          return doResolve(then.bind(newValue), self);
         }
       }
       self._state = 1;
@@ -431,7 +432,7 @@
       };
 
     try {
-      fn(function (value) {
+      return fn(function (value) {
         if (done) return;
         done = true;
         resolve(self, value);
@@ -448,7 +449,8 @@
   };
 
   Promise.prototype.then = function (onFulfilled, onRejected) {
-    var promise = new Promise(function() {});
+    var _returnFn = this._returnFn;
+    var promise = new Promise(function() { return _returnFn });
 
     handle(this, {
       onFulfilled: onFulfilled || null,
@@ -462,9 +464,13 @@
     var promise = Promise._cache[id];
 
     if (promise) {
+      if (promise._returnFn && typeof promise._returnFn === 'function') {
+        promise._returnFn();
+      }
       promise._deferreds = [];
       promise.then = promise['catch'] = function(){};
       promise._handled = true;
+      promise._state = 1;
     }
 
     return (Promise._cache[id] = this);
@@ -477,7 +483,7 @@
           return promise;
         }).then(function(result) {
           return results.push(result);
-        })
+        });
       }, new Promise(function(resolve, reject) {
         resolve(null);
       }));
