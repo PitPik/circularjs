@@ -553,7 +553,9 @@
     };
     Promise.prototype.cancel = function(id) {
         var promise = Promise._cache[id];
-        if (promise) {
+        Promise._cache[id] = this;
+        if (!promise) return this;
+        if (promise._state !== 1) {
             if (promise._returnFn && typeof promise._returnFn === "function") {
                 promise._returnFn();
             }
@@ -562,7 +564,8 @@
             promise._handled = true;
             promise._state = 1;
         }
-        return Promise._cache[id] = this;
+        promise._returnFn = null;
+        return this;
     };
     Promise.all = function(promises) {
         var results = [];
