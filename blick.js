@@ -24,7 +24,7 @@ parseHtml({
   thead: 'table',
   tr: 'tbody',
   col: 'colgroup',
-  td: 'td',
+  td: 'tr',
   '_default': 'div',
 }, /<\s*(\w*)\s*[\s\S]*?>/);
 

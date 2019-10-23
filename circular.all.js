@@ -1046,7 +1046,7 @@
         thead: "table",
         tr: "tbody",
         col: "colgroup",
-        td: "td",
+        td: "tr",
         _default: "div"
     }, /<\s*(\w*)\s*[\s\S]*?>/);
     var Blick = function(template, options) {
@@ -2183,7 +2183,7 @@
     return Circular;
     function render(html, operator, parentNode, sibling, idProperty, id) {
         var isPrepend = operator === "prependChild", element = {};
-        if (html.nodeType === 11) {
+        if (html.nodeType === document.DOCUMENT_FRAGMENT_NODE) {
             element = html.children[0];
             if (parentNode && parentNode.getAttribute("cr-mount") === "parent") {
                 var _element = element.children[0];

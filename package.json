@@ -39,5 +39,8 @@
   "homepage": "https://github.com/PitPik/circularjs#readme",
   "devDependencies": {
     "uglify-js": "^3.0.26"
+  },
+  "dependencies": {
+    "node-static": "^0.7.11"
   }
 }

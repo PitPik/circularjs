@@ -830,7 +830,7 @@ function render(html, operator, parentNode, sibling, idProperty, id) {
   var isPrepend = operator === 'prependChild',
     element = {};
 
-  if (html.nodeType === 11) {
+  if (html.nodeType === document.DOCUMENT_FRAGMENT_NODE) { // 11
     element = html.children[0];
 
     if (parentNode && parentNode.getAttribute('cr-mount') === 'parent') { // get from above
