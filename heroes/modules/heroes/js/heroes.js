@@ -31,6 +31,10 @@ function(Circular, heroService) {
     return function init(data, path) {
         heroService.getHeroes()
         .then(function(model) {
+            if (heroList) {
+                heroList.model = model;
+                return;
+            }
             heroList = circular.component('heroes-list', {
                 model: model,
                 eventListeners: { deleteHero: deleteHero }

@@ -11,6 +11,8 @@
   <script type="text/javascript" src="VOM.js"></script>
   <script type="text/javascript" src="schnauzer.js"></script>
   <script type="text/javascript" src="blick.js"></script>
+  <script type="text/javascript" src="api.js"></script>
+  <script type="text/javascript" src="controller.js"></script>
   <script type="text/javascript" src="circular.js"></script>
   <!-- <script type="text/javascript" src="circular.min.js"></script> -->
   <script type="text/javascript" src="demos/amd.cfg.js"></script>
@@ -37,7 +39,7 @@
 
     <div class="demo" cr-component="demo-nav">
       <div cr-container="prepend">
-        <nav cr-template-for="demo-nav">
+        <nav cr-template>
           {{#each menu}}
             <a class="{{#if %active}}active{{/if}}" href="#/{{action}}">{{title}}</a>
             {{#unless @last}}|{{/unless}}

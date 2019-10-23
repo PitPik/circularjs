@@ -3,7 +3,15 @@
   <head>
     <meta charset="utf-8">
     <title>Circular.js • Example</title>
-    <script type="text/javascript" src="../circular.min.js"></script>
+    <script src="../amd.js"></script>
+    <script src="../toolbox.js"></script>
+    <script src="../VOM.js"></script>
+    <script src="../schnauzer.js"></script>
+    <script src="../blick.js"></script>
+    <script src="../api.js"></script>
+    <script src="../controller.js"></script>
+    <script src="../circular.js"></script>
+    <!-- <script src="../circular.min.js"></script> -->
     <style type="text/css">
       .highlight {
         background: wheat;
@@ -17,17 +25,16 @@
     <h1>Demo: data binding</h1>
     <p>Focus the input fields and type some text. This will trigger the appearance of buttons that can clear the input fields. If the fields are cleared, either by the button or the back-space key, the button disappears again.</p>
     <form test-component></form>
-    <form test-component></form>
     <script>
       define('test-component', ['circular'], Circular => {
         return class TestComponent {
           constructor(element, model, circular) {
             this.component = (circular || new Circular()).component({
-              model: model || [{ value: '' }, { value: '' }],
+              model: model || [{ value: '' }],
               element: element,
               listeners: ['value'],
-              template: `<label>
-                <input cr-event="input: onInput" class="{{#%value}}highlight{{/%value}}" value="{{%value}}">
+              template: `<label cr-template>
+                <input cr-event="input: onInput" class="{{#if %value}}highlight{{/if}}" value="{{%value}}">
                 {{#if %value}}<button cr-event="click: doEmpty">empty</button>{{/if}}
               </label>`,
               eventListeners: {

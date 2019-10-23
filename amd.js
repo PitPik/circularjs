@@ -13,6 +13,7 @@
   require.getFile = function(resource, markAsDone) { return resource; };
   root.define = define;
   root.require = require;
+  config({});
 
   function getRandomName() {
     return '_module_' + (mathRand() + mathRand());

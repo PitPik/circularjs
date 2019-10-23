@@ -6,10 +6,18 @@
     <link rel="stylesheet" href="index.css">
     <link rel="stylesheet" href="todo.css">
 
-    <script type="text/javascript" src="../circular.min.js"></script>
-  </head>
+    <!-- <script type="text/javascript" src="../circular.min.js"></script> -->
+    <script src="../amd.js"></script>
+    <script src="../toolbox.js"></script>
+    <script src="../VOM.js"></script>
+    <script src="../schnauzer.js"></script>
+    <script src="../blick.js"></script>
+    <script src="../api.js"></script>
+    <script src="../controller.js"></script>
+    <script src="../circular.js"></script>
+    </head>
   <body cr-component="app" cr-container="prepend">
-    <section class="todoapp" cr-template-for="app">
+    <section class="todoapp" cr-template>
       <header class="header">
         <h1>todos</h1>
         <input class="new-todo" cr-event="keypress: addItem" placeholder="What needs to be done?" autofocus>
@@ -18,7 +26,7 @@
         <input cr-event="click: toggleAll" class="toggle-all" id="toggle-all" type="checkbox" checked="{{%all}}" disabled="{{%hide}}">
         <label for="toggle-all">Mark all as complete</label>
         <ul class="todo-list" cr-component="list" cr-container>
-          <li cr-template-for="list" class="todo-list-item{{#%done}} completed{{/%done}}">
+          <li cr-template class="todo-list-item{{#%done}} completed{{/%done}}">
             <input cr-event="change: toggle" class="toggle" type="checkbox" checked="{{%done}}">
             <label cr-event="dblclick: focus">{{%text}}</label>
             <button class="destroy" cr-event="click: delete"></button>

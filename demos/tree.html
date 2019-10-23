@@ -16,7 +16,7 @@
 
   <!-- the demo root element -->
     <ul class="tree demo" cr-component="tree" cr-container>
-      <li class="leaf" cr-event="click: toggle; dblclick: addChildren" cr-template-for="tree">
+      <li class="leaf" cr-event="click: toggle; dblclick: addChildren" cr-template>
         <div class="{{#if childNodes.0}}bold{{/if}}">
           {{name}}{{#if childNodes.0}} [{{#if %open}}-{{else}}+{{/if}}]{{/if}}
         </div>
@@ -29,7 +29,15 @@
   The HTML:
   <pre><code class="language-html html">ss</code></pre>
 
-  <script cr-dev type="text/javascript" src='../circular.min.js'></script>
+  <script type="text/javascript" src="../amd.js"></script>
+  <script type="text/javascript" src="../toolbox.js"></script>
+  <script type="text/javascript" src="../VOM.js"></script>
+  <script type="text/javascript" src="../schnauzer.js"></script>
+  <script type="text/javascript" src="../blick.js"></script>
+  <script type="text/javascript" src="../api.js"></script>
+  <script type="text/javascript" src="../controller.js"></script>
+  <script type="text/javascript" src="../circular.js"></script>
+  <!-- <script cr-dev type="text/javascript" src='../circular.min.js'></script> -->
   <script cr-dev type="text/javascript" src="tree.js"></script>
   <script type="text/javascript">
     require(['replacer', '!tree.js', '!tree.html'],

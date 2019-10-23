@@ -106,12 +106,12 @@ require(['circular'], function(Circular) {
       }
     },
     onInit: (self) => {
-      dots.reset(buildDotsModel([], {
+      dots.model = buildDotsModel([], {
         x: 0,
         y: 0,
         s: 1000,
         seconds: 0
-      }, targetSize));
+      }, targetSize);
 
       self.model[0].allDots = dots.getElementsByProperty('text');
       // self.model[0].elements.element.appendChild(dots.element);

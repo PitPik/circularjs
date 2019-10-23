@@ -45,12 +45,17 @@
       }
       return Toolbox.closest(element, selector, root);
     },
+    // isConnected: function(elm, context) {
+    //   return elm.isConnected !== undefined ?
+    //     elm.isConnected || context.contains(elm) :
+    //     context.contains(elm);
+    // },
     $: function(selector, root) {
-      return (root || document.body).querySelector(selector);
+      return (root || document).querySelector(selector);
     },
 
     $$: function(selector, root) {
-      return (root || document.body).querySelectorAll(selector);
+      return (root || document).querySelectorAll(selector);
     },
 
     parentsIndexOf: function(elements, target) {
@@ -61,6 +66,20 @@
       }
       return -1;
     },
+
+    keys: function(obj) {
+      var result = [];
+    
+      for (var key in obj) if (obj.hasOwnProperty(key)) result.push(key);
+    
+      return result;
+    },
+
+    // extendClass: function(newClass, Class) {
+    //   newClass.prototype = Object.create(Class.prototype);
+    //   newClass.prototype.constructor = newClass;
+    //   newClass.prototype._super = Class;
+    // },
 
     addClass: function(element, className) {
       element && element.classList.add(className);
@@ -91,46 +110,30 @@
       newElm && Toolbox.addClass(newElm, newClass || oldClass);
     },
 
-    addEvents: function (elements, type, func, cap, _this) {
+    addEvents: function (elements, type, func, cap) {
+      var collection = [];
+  
       for (var n = elements.length; n--; ) {
-        Toolbox.addEvent(elements[n], type, func, cap, _this);
+        collection.push(Toolbox.addEvent(elements[n], type, func, cap));
+      }
+      return collection;
+    },
+
+    removeEvents: function(collection) {
+      for (var n = collection.length; n--; ) {
+        collection[n]();
       }
     },
 
-    removeEvents: function(_this, elements, type) {
-      for (var n = elements.length; n--; ) {
-        Toolbox.removeEvent(_this, elements[n], type);
-      }
-    },
-
-    addEvent: function(element, type, func, cap, _this) {
-      Toolbox.addEvent.events = Toolbox.addEvent.events || [];
-      Toolbox.addEvent.events.push({ // cache references for reliable removal
-        e: element,
-        t: type,
-        f: func,
-        c: cap,
-        i: (_this || Toolbox)
-      });
+    addEvent: function(element, type, func, cap) {
+      cap = cap !== undefined ? cap :
+        /(?:focus|blur|mouseenter|mouseleave)/.test(type) ? true : false;
 
       element.addEventListener(type, func, cap);
+
+      return function removeEvent() { element.removeEventListener(type, func, cap) };
     },
 
-    removeEvent: function(_this, element, type) { // removes all events from nameSpace
-      var item = {},
-        elmCondition = false,
-        n = 0;
-
-      for (n = (Toolbox.addEvent.events || []).length; n--; ) {
-        item = Toolbox.addEvent.events[n];
-        elmCondition = !element ||
-          (item.e === element && (!type || type === item.t));
-        if (item.i === (_this || Toolbox) && elmCondition) {
-          item.e.removeEventListener(item.t, item.f, item.c);
-          Toolbox.addEvent.events.splice(n, 1);
-        }
-      }
-    },
     storageHelper: {
       fetch: function (key) {
         var data = localStorage.getItem(key);

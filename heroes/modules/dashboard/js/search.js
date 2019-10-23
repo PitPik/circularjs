@@ -3,7 +3,8 @@ function(Circular, heroService) {
     'use strict';
 
     var circular = new Circular(),
-        searchModel = {};
+        searchModel = {},
+        heroesList = null;
 
     circular.component('heroes-search', {
         model: [searchModel],
@@ -14,6 +15,9 @@ function(Circular, heroService) {
                     search(value);
                 }, 300, element.value);
             }
+        },
+        onInit: function() {
+            setupList();
         }
     });
 
@@ -22,7 +26,11 @@ function(Circular, heroService) {
     }
 
     function setupList(model) {
-        circular.component('heroes-search-list', {
+        if (heroesList) {
+            heroesList.model = model;
+            return;
+        }
+        heroesList = circular.component('heroes-search-list', {
             model: model,
             eventListeners: { select: resetSearch }
         });

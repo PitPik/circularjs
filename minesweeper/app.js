@@ -9,7 +9,7 @@ function(Circular, gameCtrl, gameSrv) { 'use strict';
     item.mines = value[2];
     item.interval = clearInterval(item.interval);
     item.views.timer.textContent = 0;
-    gameBoard.reset(gameSrv.createBoard(item.rowcol, item.mines));
+    gameBoard.model = gameSrv.createBoard(item.rowcol, item.mines);
     item.won = undefined;
   };
 

@@ -34,7 +34,7 @@ var VOM = function(model, options) {
       _options[option] = options[option];
     }
     _options.listeners = [];
-    for (var n = options.listeners.length; n--; ) {
+    for (var n = (options.listeners || []).length; n--; ) {
       if (!options.listeners[n]) continue;
       _options.listeners[n] = options.listeners[n].split(pathSplit);
     }
@@ -290,7 +290,7 @@ function reinforceProperty(model, item, value, writeable, enumable) {
   return Object.defineProperty(model, item, {
     enumerable: !!enumable,
     configurable: false,
-    writable: !!writeable,
+    writable: writeable === undefined ? true : !!writeable,
     value: value
   });
 }

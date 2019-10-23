@@ -10,7 +10,7 @@ require(['circular'], function(Circular) {
     listeners: ['*'],
     subscribe: function(propName, item, value) {
       if (propName === 'levelRaster') {
-        app.reset(initModel(value, []));
+        app.model = initModel(value, []);
         item.views.displayRaster.textContent =
           value + ' x ' + value + ' = ' + (value * value) + ' x 2 items';
         item.levelSpeed = item.levelSpeed;
@@ -40,7 +40,7 @@ console.log(app.model)
     for (var n = raster, newData = 0; n--; ) {
       data[n] = { items : [] };
       for (var m = raster; m--; ) {
-        newData = Math.round(Math.random() * 98);
+        newData = Math.round(Math.random() * 1000) % 100;
         data[n].items.push({ value: newData, max: newData > 90 ? 'max' : '' });
       }
     }
@@ -53,10 +53,10 @@ console.log(app.model)
       // window.requestAnimationFrame(function() {
         for (var n = 0, m = app.model.length, newData = 0; n < m; n++) {
           for (var x = 0, y = app.model[n].items.length; x < y; x++) {
-            newData = Math.round(Math.random() * 98);
+            newData = Math.round(Math.random() * 1000) % 100;
             app.model[n].items[x] = { value: newData, max: newData > 90 ? 'max' : '' };
-            // app.model[n].items[x].value = newData;
-            // app.model[n].items[x].max = newData > 90 ? 'max' : '';
+            // app.model[n].items[x].foo.value = newData;
+            // app.model[n].items[x].foo.max = newData > 90 ? 'max' : '';
           }
         }
         update(model);

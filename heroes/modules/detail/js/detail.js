@@ -32,7 +32,7 @@ function(Circular, heroService) {
         callback: function(data) {
             heroService.getHero(parseInt(data.parameters.heroId))
             .then(function(model) {
-                heroDetail.replaceChild(model, heroDetail.model[0]);
+                heroDetail.model = [model];
             });
         }
     }, true);
