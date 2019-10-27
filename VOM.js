@@ -38,8 +38,14 @@ var VOM = function(model, options) {
       if (!options.listeners[n]) continue;
       _options.listeners[n] = options.listeners[n].split(pathSplit);
     }
+    if (_this.model.constructor !== Array) {
+      _this.model = [_this.model];
+      _this.standalone = true;
+    }
     rootItem[_options.childNodes] = _this.model;
-    reinforceProperty(_this.model, 'root', rootItem);
+    if (!_this.standalone) {
+      reinforceProperty(_this.model, 'root', rootItem);
+    }
     enrichModel(_this, _this.model);
   },
   pathSplit = /\.|\//,
@@ -55,17 +61,17 @@ VOM.prototype = {
       hasValue = undefined !== value,
       hasProperty = undefined !== property,
       keys = [],
-      propValue = null;
+      propValue = null,
+      node = NODES[this.id];
 
-    for (var id in NODES[this.id]) {
-      propValue = undefined !== NODES[this.id][id][property] ?
-        NODES[this.id][id][property] :
-        crawlObject(NODES[this.id][id], (keys[0] ?
-          keys : (keys = hasProperty && property.split(pathSplit))));
+    for (var id in node) {
+      propValue = undefined !== node[id][property] ?
+        node[id][property] : crawlObject(node[id], (keys[0] ?
+        keys : (keys = hasProperty && property.split(pathSplit))));
       if ((hasValue && propValue === value) ||
           (!hasValue && undefined !== propValue) ||
           (!hasValue && !hasProperty)) {
-        result.push(NODES[this.id][id]);
+        result.push(node[id]);
       }
     }
     return result;
@@ -123,6 +129,12 @@ VOM.prototype = {
   destroy: function() {
     return destroy(this, this.model);
   }
+};
+
+VOM.getElementById = function(id) {
+  var split = id.split(':');
+
+  return NODES[split[0]] && NODES[split[0]][split[1]];
 };
 
 return VOM;
@@ -212,19 +224,23 @@ function enrichModel(_this, model, parent, type, sibling) {
   for (var n = 0, l = model.length; n < l; n++) {
     item = model[n];
 
-    if (!item[idProperty]) {
-      item[idProperty] = 'vom_' + idCounter++;
+    if (!item[idProperty] && !_this.standalone) { // TODO: cr-id="0:undefined"
+      item[idProperty] = idCounter++;
       hasOwnId = false;
     }
 
     NODES[_this.id][item[idProperty]] = item; // push to flat index model
     isNew = !item.parentNode;
-    item.parentNode = parent || _this.model.root;
-    item.index = item.index || 0; // will be reset on get()
+    if (!_this.standalone) {
+      item.parentNode = parent || _this.model.root;
+      item.index = item.index || 0; // will be reset on get()
+    }
     if (isNew) {
-      reinforceProperty(item, idProperty, item[idProperty], hasOwnId);
-      addProperty(_this, 'index', { current: item }, null, true);
-      addProperty(_this, 'parentNode', { current: item }, null, true);
+      if (!_this.standalone) {
+        reinforceProperty(item, idProperty, item[idProperty], hasOwnId);
+        addProperty(_this, 'index', { current: item }, null, true);
+        addProperty(_this, 'parentNode', { current: item }, null, true);
+      }
       enhanceModel(_this, item, _this.options.listeners);
     }
 

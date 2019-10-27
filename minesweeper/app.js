@@ -1,55 +1,71 @@
 require(['circular', 'game-controller', 'game-service'],
-function(Circular, gameCtrl, gameSrv) { 'use strict';
+function({ Component, instance: cr }, gameCtrl, gameSrv) {
 
-  var circular = new Circular();
-  var reset = function(e, elm, item) { // reset game and gameBoard
-    var value = elm.value.split(',');
+Component({
+  selector: 'body',
+  template: document.body.innerHTML,
+  $: {
+    this: ['won', 'counter', 'time', 'class'],
+    board: ['isProcessed', 'mark'],
+  },
+}, class Minesweeper {
+  counter = 0;
+  time = 0;
+  class = '';
+  interval;
+  won;
 
-    item.rowcol = [value[0], value[1]];
-    item.mines = value[2];
-    item.interval = clearInterval(item.interval);
-    item.views.timer.textContent = 0;
-    gameBoard.model = gameSrv.createBoard(item.rowcol, item.mines);
-    item.won = undefined;
-  };
+  board = [];
+  rowCol = [];
+  mines = 0;
 
-  var gameBoard = circular.component('game-bord', {
-    listeners: ['isProcessed', 'mark'],
-    eventListeners: {
-      reveal: function(e, elm, item) {
-        e.preventDefault();
-        if (uiModel.won !== undefined) return;
-        if(!uiModel.interval) { // start timer
-          uiModel.interval = setInterval(function() {
-            uiModel.views.timer.textContent = +uiModel.views.timer.textContent + 1;
-          }, 1000);
-        }
-        uiModel.won = gameCtrl.checkItem(this, item, e.type === 'contextmenu');
-      },
-      huh: function(e, elm, item) { // make "o" face
-        uiModel.elements.element.classList.add('huh');
-      },
+  constructor() {
+    document.body.innerHTML = '';
+    this.reset();
+  }
+
+  this$(propName, item, value) {
+    if (propName !== 'won') return;
+
+    this.class = value ? 'win' : value === false ? 'loose' : '';
+    this.counter = this.mines -
+      this.board.getElementsByProperty('mark', 'marked').length;
+    if (value !== undefined) clearInterval(this.interval);
+  }
+
+  reveal(e, elm, item) {
+    e.preventDefault();
+
+    if (this.won !== undefined) return;
+    if (!this.interval) {
+      this.interval = setInterval(() => this.time++, 1000);
     }
-  });
+    this.won = gameCtrl.checkItem(this.board, item, e.type === 'contextmenu');
+  }
 
-  var uiModel = circular.component('game', { // component without template
-    model: [{ won: true, rowcol: [0, 0], mines: 0 }],
-    listeners: ['won'],
-    subscribe: function(propName, item, value) {
-      item.elements.element.className =
-        value ? 'win' : value === false ? 'loose' : '';
-      item.views.counter.textContent = item.mines -
-        gameBoard.getElementsByProperty('mark', 'marked').length;
-      if (value !== undefined) clearInterval(item.interval);
-    },
-    eventListeners: {
-      restart: function(e, elm, item) {
-        reset(null, item.views.level, item);
-      },
-      level: reset,
-    },
-    onInit: function(inst) {
-      reset(null, inst.model[0].views.level, inst.model[0]);
-    },
-  }).model[0];
+  huh() {
+    this.class += ' huh';
+  }
+
+  level(e, elm) {
+    this.reset(elm.value.split(','));
+  }
+
+  restart() {
+    this.reset(this.rowCol.concat(this.mines));
+  }
+
+  reset(value = [9, 9, 10]) {
+    this.rowCol = [value[0], value[1]];
+    this.mines = value[2];
+    this.board = gameSrv.createBoard(this.rowCol, this.mines);
+    this.interval = clearInterval(this.interval);
+    this.time = 0;
+    this.counter = this.mines;
+    this.won = undefined;
+  }
+});
+
+cr.initComponents('body');
+
 });

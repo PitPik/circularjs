@@ -1,13 +1,13 @@
 /**! @license CircularJS v0.5.0; Copyright (C) 2019 by Peter Dematté */
 define('circular', ['toolbox', 'blick', 'VOM', 'api', 'controller'],
-  function(Toolbox, Blick, VOM, addCircularAPI, Controller) { 'use strict';
+function(Toolbox, Blick, VOM, addCircularAPI, Controller) { 'use strict';
 
 var $ = Toolbox.$;
 var $$ = Toolbox.$$;
 var keys = Toolbox.keys;
 var id = 0; // circular instance counter
 var components = {}; // collection of blueprints
-var instances = {}; // key: id; collection of instances
+var templateWrapper = document.createElement('div');
 
 function Circular(name, options) {
   this.options = {
@@ -20,6 +20,7 @@ function Circular(name, options) {
     helpers: {},
     decorators: {},
   };
+  this.instances = {};
 
   initCircular(this, name, options || {});
 }
@@ -36,46 +37,40 @@ function initCircular(_this, name, options) {
   _this.version = '0.5.0';
   _this.id = 'cr_' + id++;
   _this.name = isName ? name : _this.id;
-  
-  instances[_this.id] = {};
+  _this.instances[_this.id] = {};
 }
 
-Circular.prototype = {
-  initComponents: function(selector, context) {
+Object.defineProperties(Circular.prototype, { // methods
+  initComponents: { value: function(selector, context) {
     var selectors = selector ? [selector] : keys(components);
     var innerComponents = getInnerComponents(selectors, [], context);
-    
+
     innerComponents.forEach(function(element) {
       components[element.getAttribute('cr-component') || element.tagName.toLowerCase()]
         .init(element, context && innerComponents);
     });
-  },
-};
+  }},
+  getInstance: { value: function(id) {
+    return this.instances[this.id][id];
+  }},
+});
+
+Object.defineProperties(Circular, { // static
+  Component: { value: function(defData, Klass) {
+    return components[defData.selector] || (components[defData.selector] = {
+      Klass: Klass,
+      selector: defData.selector,
+      templates: processTemplate(templateWrapper, defData), // TODO: defData.selector
+      styles: installStyles(defData.selector, defData),
+      name: defData.name || Klass.name,
+      init: function init(element, innerComponents) {
+        return initComponent(element, defData, Klass, innerComponents);
+      },
+    });
+  }},
+});
 
 addCircularAPI(Circular);
-
-Circular.Component = function(defData, Klass) {
-  Klass.prototype.uncloak = function(item) {
-    var elm = item && item.element;
-
-    if (!elm) return;
-    Toolbox.removeClass(elm, 'cr-cloak');
-    elm.removeAttribute('cr-cloak');
-  };
-
-  return components[defData.selector] = {
-    Klass: Klass,
-    selector: defData.selector,
-    template: defData.template,
-    childTemplate: null,
-    HTML: null, // DOTO: this concept will die
-    styles: installStyles(defData.selector, defData),
-    name: defData.name || Klass.name,
-    init: function init(element, innerComponents) {
-      return initComponent(element, defData, Klass, innerComponents);
-    },
-  };
-};
 
 return Circular;
 
@@ -89,64 +84,84 @@ function initComponent(element, defData, Klass, innerComponents) {
   var crInstance = defData.circular || Circular.instance;
   var initComponents = {};
   var controller = {};
-  var restoreInnerComponents = function(){};
+  var models = [];
+  var templates = component.templates;
 
   if (element.hasAttribute('cr-id')) return;
 
-  ['partials', 'helpers', 'decorators'].forEach(function(key) {
+  ['partials', 'helpers', 'decorators', 'attributes'].forEach(function(key) {
     if (!defData[key]) defData[key] = crInstance.options[key];
   });
 
-  restoreInnerComponents = removeInnerComponents(
-    innerComponents || getInnerComponents(keys(components), [], element),
-    element
-  );
-  items = getComponentItems(element, id++, component, defData);
-  instance = instances[crInstance.id][items['cr-id']] =
-    new Klass(element, items.elements.container, items.views, items.events);
-  controller = new Controller({ element: element });
-  controller.installEvents(instance, element, items.events, items);
-  applyModel({ // TODO: only send ids only (instance, ...); TODO: loop through models
-    instance: instance,
-    items: items,
-    defData: defData,
-    template: items.template,
-    childTemplate: component.childTemplate,
-    modelName: 'model', // TODO: only for now
-    crInstance: crInstance,
-    controller: controller,
-    component: component,
-  });
-  restoreInnerComponents();
-  if (!instance.model.length) { // TODO: make new template... :)
-    instance.container.innerHTML = component.HTML; // TODO: this will go different
-  }
-  // ------ end
-  initComponents = function(context) {
-    crInstance.initComponents(undefined, context || element);
+  items = {
+    'cr-id': (element.setAttribute('cr-id', 'cr-' + ++id), id),
+    elements: { element: element },
+    events: {},
+    parentNode: {},
+    views: {},
   };
-  instance.onInit && instance.onInit(instance, initComponents); // regression
-  defData.autoInit && initComponents();
-  instance.uncloak(instance);
+  instance =
+    crInstance.instances[crInstance.id][element.getAttribute('cr-name') || items['cr-id']] =
+    new Klass(element, items.views); // TODO
+  controller = new Controller({ element: element });
+  models = keys(templates).concat(keys(defData.$));
+  models.filter(function(item, idx) { return models.indexOf(item) === idx })
+  .sort(function(a) { return a === 'this' ? -1 : 0 })
+  .forEach(function(key) {
+    if (!key) return;
+    applyModel({ // TODO: only send ids only (instance, ...);
+      instance: instance,
+      items: items,
+      defData: defData,
+      template: templates[key] && templates[key].template,
+      childTemplate: templates[key] && templates[key].child,
+      templateContainer: templates[key] ?
+        getPlaceHolder(element, templates[key].container + '') : element,
+      modelName: key,
+      listeners: defData.$ && defData.$[key],
+      crInstance: crInstance,
+      controller: controller,
+    });
+  });
+
+  element.removeAttribute('cr-cloak'); // TODO
+  initComponents = function(context) {
+    crInstance.initComponents(null, context || element);
+  };
+  instance.onInit && instance.onInit(element, items, initComponents, crInstance); // TODO
+  defData.autoInit !== false && initComponents();
 
   return instance;
 }
 
 /* ---------------------------------------------------------- */
 
+function getPlaceHolder(element, idx) {
+  var placeholder = idx && element.querySelector('script[data-idx="' + idx + '"]');
+  var parent = placeholder && placeholder.parentNode;
+
+  if (placeholder) {
+    parent.removeChild(placeholder);
+  }
+
+  return parent || element;
+}
+
 function destroyCollector(collector) {
   if (!collector) return;
   for (var item in collector) delete collector[item];
 }
 
-function resetComponent(data, length) {
-  destroyCollector(data.template.collector);
+function resetComponent(data, vom) {
+  destroyCollector(data.template && data.template.collector);
   destroyCollector(data.childTemplate && data.childTemplate.collector);
-  data.instance.container.innerHTML = length ? '' : data.component.HTML;
+  data.templateContainer.innerHTML = '';
 }
 
 function applyModel(data) {
   var vom = getVOMInstance(data);
+
+  if (data.modelName === 'this' || data.instance[data.modelName].constructor !== Array) return;
 
   for (var key in VOM.prototype) {
     Object.defineProperty(vom.model, key, { value: vom[key].bind(vom) });
@@ -155,66 +170,80 @@ function applyModel(data) {
     get: function() { return vom.model },
     set: function(newModel) { // TODO: check performance
       vom.destroy();
-      resetComponent(data, newModel.length);
+      resetComponent(data, vom);
+      vom.__isNew = true; // TODO: check why
       newModel.forEach(function(item) { vom.appendChild(item) });
+      delete vom.__isNew;
     },
   });
 }
 
 function getVOMInstance(data) {
-  var defData = data.defData;
   var instance = data.instance;
+  var modelName = data.modelName;
 
-  return data.crInstance.model(instance[data.modelName] || defData.model || [], {
+  return data.crInstance.model(modelName === 'this' ? instance : instance[modelName] || [], {
     idProperty: 'cr-id', // TODO: optional
-    moveCallback: defData.moveCallback || function() {},
-    enrichModelCallback: defData.enrichModelCallback || function() {},
-    listeners: defData.listeners,
+    moveCallback: instance[modelName + 'Move$'] || function() {},
+    enrichModelCallback: instance[modelName + 'Enrich$'] || function() {},
+    listeners: data.listeners,
     preRecursionCallback: function(item, type, siblPar) {
       var element = setNewItem(this, { item: item, type: type, siblPar: siblPar, data: data });
 
-      instance.preRecursionCallback && instance.preRecursionCallback.call(this, item, element);
+      instance[modelName + 'PreRecursion$'] &&
+        instance[modelName + 'PreRecursion$'](item, element);
     },
     subscribe: function(property, item, value, oldValue, sibling) {
       changeItem(this, property, item, value, oldValue, sibling, data);
-      defData.subscribe && defData.subscribe.call(this, property, item, value, oldValue);
+      instance[modelName + '$'] && (!this[property] || this.hasOwnProperty(property)) && // TODO
+        instance[modelName + '$'](property, item, value, oldValue);
     },
   });
 }
 
-function setNewItem(vomInstance, param) { // reused in subscribe when item === sibling
+function setNewItem(vomInstance, param) {
   var item = param.item;
   var data = param.data;
-  var instContainer = data.items.elements.container;
+  var rootElement = data.items.elements.element;
+  var instContainer = data.templateContainer; // TODO: check
   var define = vomInstance.reinforceProperty;
   var isChild = !item.childNodes && !!data.childTemplate;
   var template = isChild ? data.childTemplate : data.template;
   var fragment = template && template.renderHTML(item, data.defData.extraModel);
-  var parentElements = item.parentNode.elements;
+  var parentElements = item.parentNode && item.parentNode.elements;
   var tmpParent = parentElements && parentElements.container || instContainer;
-  var parent = isChild ? tmpParent.lastElementChild : tmpParent; // TODO: lastChildElement; prepend...
-  var type = instContainer.getAttribute('cr-container');
-  var sibling = param.siblPar && param.siblPar.elements && param.siblPar.elements.element; // TODO: check siblPar
-  var element = !fragment ? instContainer : // data.items.elements.element
-    render(fragment.children[0], type && type + 'Child' || param.type, parent, sibling);
+  var parent = isChild ? tmpParent.lastElementChild : tmpParent;
+  var sibling = param.siblPar && param.siblPar.elements && param.siblPar.elements.element;
+  var element = !fragment ? instContainer :
+    render(fragment.children[0], param.type, parent, sibling);
   var container = isChild ? parent :
     element.hasAttribute('cr-mount') ? element : $('[cr-mount]', element); // TODO
 
-  element.setAttribute('cr-id', item['cr-id']);
-  define(item, 'elements', { element: element, container: container });
-  define(item, 'views', getViewMap(element, function(elm) {
-    // elm.removeAttribute('cr-view');
-  }));
-  define(item, 'events', getEventMap(element, function(eventName) {
-    data.controller.installEvent(data.instance, instContainer, eventName);
-  }));
+  element.setAttribute('cr-id', vomInstance.id + ':' + (item['cr-id'] || 0));
+
+  if (instContainer !== rootElement) { // TODO...
+    define(item, 'elements', { element: element, container: container });
+    define(item, 'views', getViewMap(element, function(elm) {
+      // elm.removeAttribute('cr-view');
+    }));
+    define(item, 'events', getEventMap(element, function(eventName) {
+      data.controller.installEvent(data.instance, rootElement, eventName);
+    }));
+  } else {
+    data.items.views = getViewMap(element, function(elm) {
+      // elm.removeAttribute('cr-view');
+    });
+    data.items.events = getEventMap(rootElement, function(eventName) {
+      data.controller.installEvent(data.instance, rootElement, eventName, data.items);
+    });
+  }
 
   return element;
 }
 
 function changeItem(vomInstance, property, item, value, oldValue, sibling, data) {
-  var element = item.elements.element;
-  var parentElements = item.parentNode.elements;
+  var element = item.elements && item.elements.element; // TODO: item.elements
+  var parentElements = item.parentNode && item.parentNode.elements;
   var parentElement = parentElements ? // TODO: check again
     parentElements.container || parentElements.element :
     data.items.elements.container;
@@ -234,8 +263,6 @@ function changeItem(vomInstance, property, item, value, oldValue, sibling, data)
     } else if (property !== 'replaceChild' && !vomInstance.__isNew) {
       render(element, property, parentElement, sibling.elements && sibling.elements.element);
     }
-  } else if ('do magic with' === 'hasStorage') {
-    // TODO: should we?
   }
 
   blickItems(data, item, collector, id, property, value, oldValue);
@@ -247,7 +274,7 @@ function blickItems(data, item, collector, id, property, value, oldValue) {
   if (!blickItem) return;
 
   for (var n = blickItem.length, elm; n--; ) {
-    if (blickItem[n].forceUpdate || value !== oldValue) { // TODO: %
+    if (blickItem[n].forceUpdate || value !== oldValue) {
       elm = blickItem[n].fn(blickItem[n].parent);
       if (data.controller && elm) for (var m = elm.length; m--; ) {
         getEventMap(elm[m], function(eventName, fnName) {
@@ -259,7 +286,7 @@ function blickItems(data, item, collector, id, property, value, oldValue) {
           }
           if (!elms[fnName]) {
             elms[fnName] = [elm[m]];
-          } else { // TODO: %value change prduces new DOMElement...
+          } else {
             elms[fnName].filter(function(elm, idx) { // cleanup; lazy in controller?
               if (!data.items.elements.element.contains(elm)) elms[fnName].splice(idx, 1);
             });
@@ -293,7 +320,7 @@ function installStyles(selector, options) {
 
   var link = document.createElement('style');
   link.setAttribute('name', selector);
-  link.innerHTML = options.styles; // TODO: sourceURL
+  link.innerHTML = '\n' + options.styles + '\n'; // TODO: sourceURL
   document.head.appendChild(link);
 
   return link;
@@ -303,7 +330,7 @@ function getInnerComponents(selectors, result, context) {
   var join = selectors.join('|.//');
   var wishList = (join ? './/' + join + '|' : '') + './/*[@cr-component]';
   var elms = selectors.length ? document.evaluate(wishList,
-    context || document.body, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null) : [];
+    context || document, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null) : [];
 
   for (var n = elms.snapshotLength; n--; ) result.push(elms.snapshotItem(n));
 
@@ -329,76 +356,57 @@ function setBlickItem(collector, name, fn, data, active, parent) {
   });
 }
 
-function getTemplate(template, defData, component) {
+function getTemplate(template, defData) {
   var blick = {};
-  var parent = template && template.parentNode;
-
-  if (!template || template.nodeType !== 1) return null;
-  if (template.version) return template;
 
   template.parentNode && template.parentNode.removeChild(template);
-  template.removeAttribute('cr-template');
-  component.HTML = parent.children.length || parent.innerText ? parent.innerHTML : '';
-  parent.innerHTML = ''; // TODO: move somewhere else...
+  template.removeAttribute('cr-for');
+  template.removeAttribute('cr-child');
 
-  blick = new Blick(template.tagName.toLowerCase() === 'script' ? template.innerHTML :
-    template.outerHTML.replace(/(?:{{&gt;|cr-src=)/g, function($1) {
-      return $1.charAt(0) === '{' ? '{{>' : 'src=';
-    }), {
-      helpers: defData.helpers || {},
-      decorators: defData.decorators,
-      attributes: defData.attributes,
-      partials: defData.partials,
-      registerProperty: function(name, fn, data, active, parent) {
-        setBlickItem(blick.collector, name, fn, data, active, parent);
-      },
-    }
-  );
+  blick = new Blick(template.outerHTML.replace(/(?:{{&gt;|cr-src=)/g, function($1) {
+    return $1.charAt(0) === '{' ? '{{>' : 'src=';
+  }), { // TODO: maybe use this.template()
+    helpers: defData.helpers || {},
+    decorators: defData.decorators,
+    partials: defData.partials,
+    attributes: defData.attributes, // DOMElement attribute fn
+    registerProperty: function(name, fn, data, active, parent) {
+      setBlickItem(blick.collector, name, fn, data, active, parent);
+    },
+  });
   blick.collector = {};
 
   return blick;
 }
 
-function extractTemplateChild(element, component, defData) { // TODO: check if good
-  var template = $('[cr-template]', element);
-  var child = template && $('[cr-child]', template);
+function createPlaceHolder(elm, idx) {
+  var placeHolder = document.createElement('script');
 
-  if (!child) return template;
+  placeHolder.setAttribute('type', 'placeholder/tmpl');
+  placeHolder.setAttribute('data-idx', idx);
 
-  child.removeAttribute('cr-child');
-  component.childTemplate = getTemplate(child, defData, {});
-
-  return template;
+  return elm.parentNode.replaceChild(placeHolder, elm);
 }
 
-function checkTemplate(element, component, defData) { // TODO: check again
-  var template = {};
+function processTemplate(element, defData) { // TODO: check again: before instanciating
+  var _ = element.innerHTML = defData.template;
+  var templates = element.querySelectorAll('[cr-for]');
+  var result = {};
 
-  if (component.HTML === null) {
-    if (typeof component.template === 'string') { // TODO: check if ever string (new stuff)
-      element.innerHTML += component.template;
-      template = extractTemplateChild(element, component, defData);
-      template = component.template = getTemplate(template, defData, component);
-      // component.HTML = element.removeChild(element.lastElementChild).outerHTML;
-      // console.log(component.HTML);
-    } else {
-      // component.HTML = '';
-      template = extractTemplateChild(element, component, defData);;
-      if (template) {
-        template = component.template = getTemplate(template, defData, component);
-      }
-    }
-  } else {
-    template = extractTemplateChild(element, component, defData);;
-    if (template) {
-      template = getTemplate(template, defData, component);
-    }
-  }
-  if (!component.template && template) {
-    component.template = template;
-  }
+  templates.forEach(function(elm, idx) {
+    var child = $('[cr-child]', elm);
+    var modelName = elm.getAttribute('cr-for');
 
-  return template || component.template;
+    result[modelName] = {
+      container: idx,
+      child: child ? getTemplate(child, defData) : null,
+      template: getTemplate(createPlaceHolder(elm, idx), defData),
+    };
+  });
+
+  result['this'] = { template: getTemplate(element.firstElementChild, defData) };
+
+  return result;
 }
 
 function getEventMap(element, fn) {
@@ -436,47 +444,6 @@ function getViewMap(element, fn) {
   }
 
   return views;
-}
-
-function restoreInnerComponents(items, component) {
-  for (var n = items.length, cache = []; n--; ) { // TODO: maybe $$('')
-    var tmpElm = $('[cr-replace="' + items[n].index + '"]', component);
-
-    if (tmpElm) {
-      tmpElm.parentNode.replaceChild(items[n].element, tmpElm);
-    } else {
-      cache.push(items[n]);
-    }
-  }
-  if (cache.length) restoreInnerComponents(cache, component);
-}
-
-function removeInnerComponents(elements, component) {
-  var items = [].slice.call(elements).map(function(element, idx) {
-    var tmpElm = document.createElement(element.tagName);
-    
-    element.parentNode.replaceChild(tmpElm, element);
-    tmpElm.setAttribute('cr-replace', idx);
-
-    return { index: idx, element: element };
-  });
-
-  return function() {
-    restoreInnerComponents(items, component);
-  }
-}
-
-function getComponentItems(element, id, component, defData) {
-  return {
-    elements: {
-      container: $('[cr-container]', element) || element,
-      element: element,
-    },
-    template: checkTemplate(element, component, defData),
-    views: getViewMap(element),
-    events: getEventMap(element),
-    'cr-id': (element.setAttribute('cr-id', id), id),
-  };
 }
 
 });

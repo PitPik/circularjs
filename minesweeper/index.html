@@ -5,49 +5,49 @@
     <title>Minesweeper</title>
     <link rel="stylesheet" href="index.css">
   </head>
-  <body cr-component="game">
-
-    <div class="game-board">
+  <body cr-cloak>
+    <div class="game-board {{%class}}">
       <div class="header level">
-        <select cr-view="level" cr-event="change: level">
+        <select cr-event="change: level">
           <option value="9,9,10">beginner</option>
           <option value="16,16,40">intermediate</option>
           <option value="16,30,99">expert</option>
         </select>
       </div>
       <div class="header">
-        <div cr-view="counter" class="counter">0</div>
+        <div class="counter">{{%counter}}</div>
         <button type="button" cr-event="click: restart"></button>
-        <div cr-view="timer" class="timer">0</div>
+        <div class="timer">{{%time}}</div>
       </div>
-      <table class="board">
-        <tbody cr-component="game-bord" cr-container>
-          <tr cr-template>
-            <td cr-child class="{{%mark}}{{#if %isProcessed}} color-{{surroundingMines}}{{else}} hidden{{/if}}" cr-event="click: reveal; contextmenu: reveal; mousedown: huh">{{#if %isProcessed}}{{surroundingMines}}{{/if}}</td>
+      <table class="board"
+        cr-event="click: reveal; contextmenu: reveal; mousedown: huh"
+      >
+        <tbody>
+          <tr cr-for="board">
+            <td
+              cr-child
+              class="{{%mark}}{{#if %isProcessed}}
+                color-{{surroundingMines}}{{else}} hidden{{/if}}"
+            >
+              {{#if %isProcessed}}{{surroundingMines}}{{/if}}
+            </td>
           </tr>
         </tbody>
       </table>
     </div>
-
-    <script src="../amd.js"></script>
+    <!-- <script src="../amd.js"></script>
     <script src="../toolbox.js"></script>
     <script src="../VOM.js"></script>
     <script src="../schnauzer.js"></script>
     <script src="../blick.js"></script>
     <script src="../api.js"></script>
     <script src="../controller.js"></script>
-    <script src="../circular.js"></script>
-    <!-- <script src="../circular.min.js"></script> -->
-    <!-- <script>
-      require.config({
-        paths: {
-          'game-controller': 'game.ctrl',
-          'game-service': 'game.srv',
-        },
-      });
-    </script> -->
-    <script src="game.srv.js"></script>
-    <script src="game.ctrl.js"></script>
+    <script src="../circular.js"></script> -->
+    <script src="../circular.min.js"></script>
+
+    <!-- <script src="game.srv.js"></script>
+    <script src="game.ctrl.js"></script> -->
+    <script src="game.min.js"></script>
 
     <script src="app.js"></script>
   </body>

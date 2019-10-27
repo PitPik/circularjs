@@ -7,7 +7,7 @@ html, body {
   padding: 0;
 }
 
-[cr-template-for] {
+[cr-for], [cr-cloak], .cr-cloak {
   display: none;
 }
 

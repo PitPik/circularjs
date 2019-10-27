@@ -1,0 +1,42 @@
+{
+  "name": "circularjs",
+  "version": "0.1.0",
+  "description": "Minesweeper",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "uglify": "uglifyjs game.srv.js game.ctrl.js -o game.min.js --source-map 'url=game.min.js.map' -c -m"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PitPik/circularjs.git"
+  },
+  "keywords": [
+    "MVC",
+    "MVVM",
+    "MV*",
+    "PubSub",
+    "SPA",
+    "single",
+    "page",
+    "application",
+    "view",
+    "javascript",
+    "framework",
+    "tree",
+    "menu",
+    "categories",
+    "object",
+    "model",
+    "controller"
+  ],
+  "author": "Peter Dematté",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/PitPik/circularjs/issues"
+  },
+  "homepage": "https://github.com/PitPik/circularjs#readme",
+  "devDependencies": {
+    "uglify-js": "^3.0.26"
+  }
+}

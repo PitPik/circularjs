@@ -1,12 +1,12 @@
 define('game-controller', ['game-service'], function(gameSrv) {  'use strict';
 
-  function lookAround(inst, item, checkAround, foundMarked) {
-    gameSrv.lookAround(inst.model, item.parentNode.index, item.index,
+  function lookAround(model, item, checkAround, foundMarked) {
+    gameSrv.lookAround(model, item.parentNode.index, item.index,
       function(row, col, foundItem) {
         if (foundMarked !== undefined) {
           if (foundItem.mark === 'marked') foundMarked++;
         } else if (checkAround || !foundItem.isMine && !foundItem.isProcessed) {
-          checkItem(inst, foundItem);
+          checkItem(model, foundItem);
         }
       });
 
@@ -20,25 +20,25 @@ define('game-controller', ['game-service'], function(gameSrv) {  'use strict';
     return true;
   }
 
-  function checkItem(inst, item, mark) {
+  function checkItem(model, item, mark) {
     if (item.isProcessed && mark !== undefined) {
-      delete checkItem._win && lookAround(inst, item, false, 0) ===
-        item.surroundingMines && lookAround(inst, item, true);
+      delete checkItem._win && lookAround(model, item, false, 0) ===
+        item.surroundingMines && lookAround(model, item, true);
       if (checkItem._win === false) return false;
     } else if (mark && !item.isProcessed) {
       item.mark = item.mark === 'marked' ? 'open' :
         item.mark === 'open' ? '' : 'marked';
     } else if (item.isMine && item.mark !== 'marked') {
-      inst.getElementsByProperty('isMine', true).forEach(function(_item) {
+      model.getElementsByProperty('isMine', true).forEach(function(_item) {
         _item.mark = _item === item ? 'mine last' : 'mine';
       });
       return checkItem._win = false; // no proper return on lookAround
     } else if (item.mark !== 'marked' && !item.isProcessed) {
       item.mark = '';
       item.isProcessed = true;
-      if (!item.surroundingMines) lookAround(inst, item);
+      if (!item.surroundingMines) lookAround(model, item);
     }
-    return checkAll(inst.getElementsByProperty('isProcessed', false));
+    return checkAll(model.getElementsByProperty('isProcessed', false));
   }
 
   return { checkItem: checkItem };

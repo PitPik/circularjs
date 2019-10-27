@@ -6,48 +6,6 @@ var pubsub = {}; // general data holder
 var modulesMap = {}; // list of modules for module switching
 var DOC = null; // createHTMLDocument for resorce loader
 
-Circular.prototype.component = function(selector, defData) { // regression
-  if (typeof selector !== 'string') { // TODO: before var
-    defData = selector;
-    selector = defData.name;
-  }
-  var element = $(selector) || $('[cr-component="' + selector + '"]') || defData.element;
-  var instOptions = this.options;
-  var name = defData.name || selector && selector.replace(/^(.)|-(.)/g, function(_, $1, $2) {
-    return ($1 || $2).toUpperCase();
-  });
-  var ComponentKlass = function(element, container, views, events) {
-    this[instOptions.element] = element;
-    this[instOptions.container] = container;
-    this[instOptions.views] = views;
-    this[instOptions.events] = events; // TODO: review
-    this.name = name; // more like this?
-  };
-
-  defData.selector = selector;
-  defData.name = name;
-  defData.circular = this;
-  this.Toolbox = Toolbox;
-
-  for (var key in defData) {
-    if (typeof defData[key] === 'function') {
-      ComponentKlass.prototype[key] = defData[key];
-    }
-  }
-  for (var key in defData.eventListeners) {
-    ComponentKlass.prototype[key] = defData.eventListeners[key];
-  }
-  for (var key in VOM.prototype) { // TODO: check if we still should need this
-    ComponentKlass.prototype[key] = (function(_key) {
-      return function() { return this.model[_key].apply(null, [].slice.call(arguments)) }
-    })(key);
-  }
-
-  return Circular.Component(defData, ComponentKlass).init(
-    typeof element === 'string' ? $(element) : element
-  );
-};
-
 Circular.prototype.constructor = Circular;
 Circular.prototype.model = function(model, options) {
   return new VOM(model, options);
@@ -266,8 +224,7 @@ Circular.prototype.loadResource = function(fileName, cache) {
 };
 
 Circular.prototype.insertResources = function(container, data) {
-  var body = $(attrSelector(this.options.devAttribute, 'container'),
-    data.body) || data.body;
+  var body = $('[cr-dev="container"]', data.body) || data.body;
 
   Toolbox.requireResources(data, 'styles', container);
   while(body.childNodes[0]) container.appendChild(body.childNodes[0]);
@@ -413,69 +370,4 @@ Circular.prototype.renderModule = function(data) {
 Circular.Toolbox = Toolbox;
 Circular.instance = new Circular();
 
-/* ------------------------ from old ----------------------- */
-/* ---------------------- remove ASAP ---------------------- */
-
-function attrSelector(attr, value) {
-  return '[' + attr + (value ? '="' + value + '"]' : ']');
-}
-
-Circular.extend = (function(deeper) {
-  return function(obj, objNew, ext) {
-    var _extend = false;
-    var _prop = '';
-    var _deeper = ext ? [].concat(deeper, ext) : deeper;
-    var out = {};
-    var item = {};
-  
-    if (this.extend && !this.prototype) {
-      ext = objNew;
-      objNew = obj;
-      obj = this;
-    }
-  
-    objNew = objNew || {};
-    for (var prop in obj) {
-      out[prop] = obj[prop] || {};
-      if (prop === 'model' && !objNew.model)
-        out[prop] = JSON.parse(JSON.stringify(obj[prop]));
-      if (_deeper[prop]) {
-        for (var $prop in obj[prop]) {
-          out[prop][$prop] = obj[prop][$prop];
-        }
-      }
-    }
-    for (var prop in objNew) {
-      if (prop === 'extend') continue;
-      _prop = prop;
-      _extend = false;
-      if (prop.charAt(0) === '$') {
-        _extend = true;
-        _prop = prop.substr(1);
-        if (_deeper.indexOf(_prop) !== -1) {
-          _extend = false;
-        }
-      }
-      item = objNew[prop];
-  
-      if (typeof item === 'function') {
-        out[_prop] = _extend && out[_prop] ? (function(func, _item) {
-          return function() {
-            func.apply(this, arguments);
-            return _item.apply(this, arguments);
-          }
-        })(out[_prop], item) : item;
-      } else if (item && item.constructor === Array) {
-        out[_prop] = _extend && out[_prop] && item.toString() !== '*' ?
-          out[_prop].concat(item) : item;
-      } else if (_deeper.indexOf(_prop) !== -1) {
-        out[_prop] = Circular.extend(out[_prop], item);
-      } else {
-        out[_prop] = item;
-      }
-    }
-  
-    return out;
-  }})(['eventListeners', 'helpers', 'decorators', 'attributes', 'storage']);
-  
 }});
