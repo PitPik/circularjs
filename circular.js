@@ -269,7 +269,7 @@ function blickItems(data, item, collector, id, property, value, oldValue) {
       elm = blickItem[n].fn(blickItem[n].parent);
       if (data.controller && elm) for (var m = elm.length; m--; ) {
         getEventMap(elm[m], function(eventName, fnName) {
-          var elms = item.events[eventName];
+          var elms = (item.events || data.items.events)[eventName];
 
           if (!elms) {
             elms = item.events[eventName] = {};
@@ -282,6 +282,9 @@ function blickItems(data, item, collector, id, property, value, oldValue) {
               if (!data.items.elements.element.contains(elm)) elms[fnName].splice(idx, 1);
             });
             elms[fnName].push(elm[m]);
+          }
+          if (value !== undefined && value && data.defData.autoInit !== false) {
+            data.crInstance.initComponents(); // TODO: destroy...
           }
         });
       }
