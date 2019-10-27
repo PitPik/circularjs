@@ -1953,9 +1953,6 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
     var templateWrapper = document.createElement("div");
     function Circular(name, options) {
         this.options = {
-            elements: "elements",
-            events: "events",
-            views: "views",
             hash: "#",
             partials: {},
             helpers: {},
@@ -1982,8 +1979,8 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
             value: function(selector, context) {
                 var selectors = selector ? [ selector ] : keys(components);
                 var innerComponents = getInnerComponents(selectors, [], context);
-                innerComponents.forEach(function(element) {
-                    components[element.getAttribute("cr-component") || element.tagName.toLowerCase()].init(element, context && innerComponents);
+                return innerComponents.filter(function(element) {
+                    return components[element.getAttribute("cr-component") || element.tagName.toLowerCase()].init(element, context && innerComponents);
                 });
             }
         }
@@ -2019,7 +2016,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
             if (!defData[key]) defData[key] = crInst.options[key];
         });
         items = {
-            "cr-id": (element.setAttribute("cr-id", "cr-" + ++id), id),
+            "cr-id": (element.setAttribute("cr-id", "cr-" + id), id++),
             elements: {
                 element: element
             },
@@ -2117,8 +2114,10 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                 instance[modelName + "PreRecursion$"] && instance[modelName + "PreRecursion$"](item, element);
             },
             subscribe: function(property, item, value, oldValue, sibling) {
+                var internal = this[property] && !this.hasOwnProperty(property);
                 changeItem(this, property, item, value, oldValue, sibling, data);
-                instance[modelName + "$"] && (!this[property] || this.hasOwnProperty(property)) && instance[modelName + "$"](property, item, value, oldValue);
+                instance[modelName + "$"] && !internal && instance[modelName + "$"](property, item, value, oldValue);
+                instance[modelName + "$$"] && instance[modelName + "$$"](property, item, value, oldValue, internal);
             }
         });
     }
@@ -2158,7 +2157,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
     function changeItem(vomInstance, property, item, value, oldValue, sibling, data) {
         var element = item.elements && item.elements.element;
         var parentElements = item.parentNode && item.parentNode.elements;
-        var parentElement = parentElements ? parentElements.container || parentElements.element : data.items.elements.container;
+        var parentElement = parentElements ? parentElements.container || parentElements.element : data.templateContainer;
         var id = item["cr-id"];
         var template = !item.childNodes && data.childTemplate || data.template;
         var collector = template ? template.collector : {};

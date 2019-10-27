@@ -11,9 +11,6 @@ var templateWrapper = document.createElement('div');
 
 function Circular(name, options) {
   this.options = {
-    elements: 'elements',
-    events: 'events',
-    views: 'views',
     hash: '#',
     partials: {},
     helpers: {},
@@ -44,8 +41,8 @@ Object.defineProperties(Circular.prototype, mixinAPI({ // methods
     var selectors = selector ? [selector] : keys(components);
     var innerComponents = getInnerComponents(selectors, [], context);
 
-    innerComponents.forEach(function(element) {
-      components[element.getAttribute('cr-component') || element.tagName.toLowerCase()]
+    return innerComponents.filter(function(element) {
+      return components[element.getAttribute('cr-component') || element.tagName.toLowerCase()]
         .init(element, context && innerComponents);
     });
   }},
@@ -79,14 +76,14 @@ function initComponent(element, defData, Klass, innerComponents) {
   var models = [];
   var templates = component.templates;
 
-  if (element.hasAttribute('cr-id')) return;
+  if (element.hasAttribute('cr-id')) return; // TODO: return instance?
 
   ['partials', 'helpers', 'decorators', 'attributes'].forEach(function(key) {
     if (!defData[key]) defData[key] = crInst.options[key];
   });
 
   items = {
-    'cr-id': (element.setAttribute('cr-id', 'cr-' + ++id), id),
+    'cr-id': (element.setAttribute('cr-id', 'cr-' + id), id++),
     elements: { element: element },
     events: {},
     parentNode: {},
@@ -185,9 +182,13 @@ function getVOMInstance(data) {
         instance[modelName + 'PreRecursion$'](item, element);
     },
     subscribe: function(property, item, value, oldValue, sibling) {
+      var internal = this[property] && !this.hasOwnProperty(property);
+
       changeItem(this, property, item, value, oldValue, sibling, data);
-      instance[modelName + '$'] && (!this[property] || this.hasOwnProperty(property)) && // TODO
+      instance[modelName + '$'] && !internal &&
         instance[modelName + '$'](property, item, value, oldValue);
+      instance[modelName + '$$'] &&
+        instance[modelName + '$$'](property, item, value, oldValue, internal);
     },
   });
 }
@@ -236,8 +237,7 @@ function changeItem(vomInstance, property, item, value, oldValue, sibling, data)
   var element = item.elements && item.elements.element; // TODO: item.elements
   var parentElements = item.parentNode && item.parentNode.elements;
   var parentElement = parentElements ? // TODO: check again
-    parentElements.container || parentElements.element :
-    data.items.elements.container;
+    parentElements.container || parentElements.element : data.templateContainer;
   var id = item['cr-id'];
   var template = !item.childNodes && data.childTemplate || data.template;
   var collector = template ? template.collector : {};
