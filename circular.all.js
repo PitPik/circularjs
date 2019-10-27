@@ -1865,9 +1865,9 @@ define("api", [ "VOM", "blick", "toolbox" ], function(VOM, Blick, Toolbox) {
             }
         });
         for (var key in prototype) {
-            Object.defineProperty(Circular.prototype, key, {
+            inbound[key] = {
                 value: prototype[key]
-            });
+            };
         }
         return inbound;
     };

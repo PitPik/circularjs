@@ -379,7 +379,7 @@ Object.defineProperties(Circular, { // static
 });
 
 for(var key in prototype) { // methods
-  Object.defineProperty(Circular.prototype, key, { value: prototype[key] });
+  inbound[key] = { value: prototype[key] };
 }
 
 return inbound;
