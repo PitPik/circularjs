@@ -7,13 +7,13 @@ var $$ = Toolbox.$$;
 var pubsub = {}; // general data holder
 var modulesMap = {}; // list of modules for module switching
 var DOC = null; // createHTMLDocument for resorce loader
-var api = {};
+var prototype = {};
 
-api.model = function(model, options) {
+prototype.model = function(model, options) {
   return new VOM(model, options);
 };
-api.getBaseModel = function(name) { /* attrName, cr-id */ };
-api.destroy = function(name) { // TODO: review -> use reset
+prototype.getBaseModel = function(name) { /* attrName, cr-id */ };
+prototype.destroy = function(name) { // TODO: review -> use reset
   // var _instList = instanceList[this.id];
   // var _instance = {};
 
@@ -25,17 +25,17 @@ api.destroy = function(name) { // TODO: review -> use reset
   //   }
   // }
 };
-api.getInstances = function() {
+prototype.getInstances = function() {
   return instances[this.id];
 };
 
-api.getInstance = function(id) {
+prototype.getInstance = function(id) {
   return this.instances[this.id][id];
 };
 
   /* --------------------  pubsub  ----------------------- */
 
-api.subscribe = function(inst, comp, attr, callback, trigger) {
+prototype.subscribe = function(inst, comp, attr, callback, trigger) {
   inst = inst ? inst.name || inst.components && inst.components[comp] || inst : this.name;
   pubsub[inst] = pubsub[inst] || {};
   comp = pubsub[inst][comp] = pubsub[inst][comp] || {};
@@ -58,7 +58,7 @@ api.subscribe = function(inst, comp, attr, callback, trigger) {
   return (callback.callback || callback);
 };
 
-api.publish = function(inst, comp, attr, data) {
+prototype.publish = function(inst, comp, attr, data) {
   inst = typeof inst === 'string' ? inst : this.name;
   pubsub[inst] = pubsub[inst] || {};
   if (pubsub[inst]) {
@@ -69,7 +69,7 @@ api.publish = function(inst, comp, attr, data) {
   }
 };
 
-api.unsubscribe = function(inst, comp, attr, callback) {
+prototype.unsubscribe = function(inst, comp, attr, callback) {
   var funcNo = -1,
     funcs = {};
 
@@ -92,7 +92,7 @@ function publish(_this, pubsubs, data) {
 
 /* ----------------------- routing -------------------------- */
 
-api.addRoute = function(data, trigger, hash) {
+prototype.addRoute = function(data, trigger, hash) {
   var path = typeof data.path === 'object' ?
       {regexp: data.path} : routeToRegExp(data.path),
     _hash = hash || this.options.hash,
@@ -112,11 +112,11 @@ api.addRoute = function(data, trigger, hash) {
   return data;
 };
 
-api.removedRoute = function(data) {
+prototype.removedRoute = function(data) {
   return this.unsubscribe(null, '__router', data.path, data.callback);
 };
 
-api.toggleRoute = function(data, isOn) { // TODO
+prototype.toggleRoute = function(data, isOn) { // TODO
   var router = pubsub[this.name].__router,
     callbacks = router[data.path].paused || router[data.path];
 
@@ -189,7 +189,7 @@ function extractRouteParameters(route, fragment) {
 
 /* ----------------------- template ------------------------- */
 
-api.template = function(template, options) {
+prototype.template = function(template, options) {
   options = options || {};
   options.helpers = options.helpers || this.options.helpers;
   var engine = new Blick(template, options);
@@ -205,7 +205,7 @@ api.template = function(template, options) {
 
 /* ------------------- resource loader -------------------- */
 
-api.loadResource = function(fileName, cache) {
+prototype.loadResource = function(fileName, cache) {
   var _this = this,
     devFilter = function(elm) {
       return !elm.hasAttribute('cr-dev');
@@ -229,7 +229,7 @@ api.loadResource = function(fileName, cache) {
   }).catch();
 };
 
-api.insertResources = function(container, data) {
+prototype.insertResources = function(container, data) {
   var body = $('[cr-dev="container"]', data.body) || data.body;
 
   Toolbox.requireResources(data, 'styles', container);
@@ -238,7 +238,7 @@ api.insertResources = function(container, data) {
   return Toolbox.requireResources(data, 'scripts', container);
 };
 
-api.insertModule = function(fileName, container) {
+prototype.insertModule = function(fileName, container) {
   var _this = this;
 
   return this.loadResource(fileName, true).then(function(data) {
@@ -292,7 +292,7 @@ function transition(init, data, modules, modulePath) {
     });
 }
 
-api.renderModule = function(data) {
+prototype.renderModule = function(data) {
   var temp = null,
     isInsideDoc = data.container,
     modules = data.modulesMap || modulesMap, // speeds up var search
@@ -373,13 +373,13 @@ api.renderModule = function(data) {
 
 /* ---------------------------------------------------------- */
 
-Object.defineProperties(Circular, {
+Object.defineProperties(Circular, { // static
   Toolbox: { value: Toolbox },
   instance: { value: new Circular() },
 });
 
-for(var key in api) {
-  Object.defineProperty(Circular.prototype, key, { value: api[key] });
+for(var key in prototype) { // methods
+  Object.defineProperty(Circular.prototype, key, { value: prototype[key] });
 }
 
 return inbound;

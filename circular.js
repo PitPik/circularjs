@@ -51,7 +51,7 @@ Object.defineProperties(Circular.prototype, mixinAPI({ // methods
   }},
 }, Circular));
 
-Object.defineProperties(Circular, { // static
+return Object.defineProperties(Circular, { // static
   Component: { value: function(defData, Klass) {
     return components[defData.selector] || (components[defData.selector] = {
       Klass: Klass,
@@ -65,8 +65,6 @@ Object.defineProperties(Circular, { // static
     });
   }},
 });
-
-return Circular;
 
 /* -------------------- private functions ------------------- */
 

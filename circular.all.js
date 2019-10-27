@@ -1581,16 +1581,19 @@ define("api", [ "VOM", "blick", "toolbox" ], function(VOM, Blick, Toolbox) {
         var pubsub = {};
         var modulesMap = {};
         var DOC = null;
-        Circular.prototype.constructor = Circular;
-        Circular.prototype.model = function(model, options) {
+        var prototype = {};
+        prototype.model = function(model, options) {
             return new VOM(model, options);
         };
-        Circular.prototype.getBaseModel = function(name) {};
-        Circular.prototype.destroy = function(name) {};
-        Circular.prototype.getInstances = function() {
+        prototype.getBaseModel = function(name) {};
+        prototype.destroy = function(name) {};
+        prototype.getInstances = function() {
             return instances[this.id];
         };
-        Circular.prototype.subscribe = function(inst, comp, attr, callback, trigger) {
+        prototype.getInstance = function(id) {
+            return this.instances[this.id][id];
+        };
+        prototype.subscribe = function(inst, comp, attr, callback, trigger) {
             inst = inst ? inst.name || inst.components && inst.components[comp] || inst : this.name;
             pubsub[inst] = pubsub[inst] || {};
             comp = pubsub[inst][comp] = pubsub[inst][comp] || {};
@@ -1611,7 +1614,7 @@ define("api", [ "VOM", "blick", "toolbox" ], function(VOM, Blick, Toolbox) {
             }
             return callback.callback || callback;
         };
-        Circular.prototype.publish = function(inst, comp, attr, data) {
+        prototype.publish = function(inst, comp, attr, data) {
             inst = typeof inst === "string" ? inst : this.name;
             pubsub[inst] = pubsub[inst] || {};
             if (pubsub[inst]) {
@@ -1621,7 +1624,7 @@ define("api", [ "VOM", "blick", "toolbox" ], function(VOM, Blick, Toolbox) {
                 comp[attr][0] && publish(this, comp[attr], data);
             }
         };
-        Circular.prototype.unsubscribe = function(inst, comp, attr, callback) {
+        prototype.unsubscribe = function(inst, comp, attr, callback) {
             var funcNo = -1, funcs = {};
             inst = typeof inst === "string" ? inst : inst.name || this.name;
             if (pubsub[inst] && pubsub[inst][comp] && pubsub[inst][comp][attr]) {
@@ -1638,7 +1641,7 @@ define("api", [ "VOM", "blick", "toolbox" ], function(VOM, Blick, Toolbox) {
                 if (pubsubs[n]) pubsubs[n].call(_this, data);
             }
         }
-        Circular.prototype.addRoute = function(data, trigger, hash) {
+        prototype.addRoute = function(data, trigger, hash) {
             var path = typeof data.path === "object" ? {
                 regexp: data.path
             } : routeToRegExp(data.path), _hash = hash || this.options.hash, parts = extractRouteParameters(path, getPath(_hash)), routers = pubsub[this.name] && pubsub[this.name].__router;
@@ -1653,10 +1656,10 @@ define("api", [ "VOM", "blick", "toolbox" ], function(VOM, Blick, Toolbox) {
             !routers && installRouter(pubsub[this.name].__router, this, _hash);
             return data;
         };
-        Circular.prototype.removedRoute = function(data) {
+        prototype.removedRoute = function(data) {
             return this.unsubscribe(null, "__router", data.path, data.callback);
         };
-        Circular.prototype.toggleRoute = function(data, isOn) {
+        prototype.toggleRoute = function(data, isOn) {
             var router = pubsub[this.name].__router, callbacks = router[data.path].paused || router[data.path];
             router[data.path] = isOn ? callbacks : [];
             router[data.path].paused = !isOn ? callbacks : null;
@@ -1706,7 +1709,7 @@ define("api", [ "VOM", "blick", "toolbox" ], function(VOM, Blick, Toolbox) {
             params.path = fragment.replace(/^\//, "").split("/");
             return params;
         }
-        Circular.prototype.template = function(template, options) {
+        prototype.template = function(template, options) {
             options = options || {};
             options.helpers = options.helpers || this.options.helpers;
             var engine = new Blick(template, options);
@@ -1719,7 +1722,7 @@ define("api", [ "VOM", "blick", "toolbox" ], function(VOM, Blick, Toolbox) {
             }
             return engine;
         };
-        Circular.prototype.loadResource = function(fileName, cache) {
+        prototype.loadResource = function(fileName, cache) {
             var _this = this, devFilter = function(elm) {
                 return !elm.hasAttribute("cr-dev");
             };
@@ -1739,13 +1742,13 @@ define("api", [ "VOM", "blick", "toolbox" ], function(VOM, Blick, Toolbox) {
                 };
             }).catch();
         };
-        Circular.prototype.insertResources = function(container, data) {
+        prototype.insertResources = function(container, data) {
             var body = $('[cr-dev="container"]', data.body) || data.body;
             Toolbox.requireResources(data, "styles", container);
             while (body.childNodes[0]) container.appendChild(body.childNodes[0]);
             return Toolbox.requireResources(data, "scripts", container);
         };
-        Circular.prototype.insertModule = function(fileName, container) {
+        prototype.insertModule = function(fileName, container) {
             var _this = this;
             return this.loadResource(fileName, true).then(function(data) {
                 return _this.insertResources(container, data).then(function() {
@@ -1788,7 +1791,7 @@ define("api", [ "VOM", "blick", "toolbox" ], function(VOM, Blick, Toolbox) {
                 previousComponent: (previousModule || {}).wrap
             });
         }
-        Circular.prototype.renderModule = function(data) {
+        prototype.renderModule = function(data) {
             var temp = null, isInsideDoc = data.container, modules = data.modulesMap || modulesMap, name = data.name, module = name && modules[name], init = module && module.init, hasTransition = data.transition, Promise = Toolbox.Promise;
             if (modules[data.previousName] && (!hasTransition || !name)) {
                 moveChildrenToCache(data);
@@ -1853,8 +1856,19 @@ define("api", [ "VOM", "blick", "toolbox" ], function(VOM, Blick, Toolbox) {
                 a();
             });
         };
-        Circular.Toolbox = Toolbox;
-        Circular.instance = new Circular();
+        Object.defineProperties(Circular, {
+            Toolbox: {
+                value: Toolbox
+            },
+            instance: {
+                value: new Circular()
+            }
+        });
+        for (var key in prototype) {
+            Object.defineProperty(Circular.prototype, key, {
+                value: prototype[key]
+            });
+        }
         return inbound;
     };
 });
@@ -1972,14 +1986,9 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                     components[element.getAttribute("cr-component") || element.tagName.toLowerCase()].init(element, context && innerComponents);
                 });
             }
-        },
-        getInstance: {
-            value: function(id) {
-                return this.instances[this.id][id];
-            }
         }
     }, Circular));
-    Object.defineProperties(Circular, {
+    return Object.defineProperties(Circular, {
         Component: {
             value: function(defData, Klass) {
                 return components[defData.selector] || (components[defData.selector] = {
@@ -1995,7 +2004,6 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
             }
         }
     });
-    return Circular;
     function initComponent(element, defData, Klass, innerComponents) {
         var selector = defData.selector;
         var component = components[selector];
