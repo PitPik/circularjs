@@ -1,4 +1,6 @@
-define('api', ['VOM', 'blick', 'toolbox'], function(VOM, Blick, Toolbox) { return function(Circular) {
+/**! @license CircularJS v1.0.0; Copyright (C) 2019 by Peter Dematté */
+define('api', ['VOM', 'blick', 'toolbox'], function(VOM, Blick, Toolbox) {
+return function addCircularAPI(inbound, Circular) {
 
 var $ = Toolbox.$;
 var $$ = Toolbox.$$;
@@ -369,5 +371,7 @@ Circular.prototype.renderModule = function(data) {
 
 Circular.Toolbox = Toolbox;
 Circular.instance = new Circular();
+
+return inbound;
 
 }});

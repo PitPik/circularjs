@@ -1,6 +1,6 @@
-/**! @license CircularJS v0.5.0; Copyright (C) 2019 by Peter Dematté */
+/**! @license CircularJS v1.0.0; Copyright (C) 2019 by Peter Dematté */
 define('circular', ['toolbox', 'blick', 'VOM', 'api', 'controller'],
-function(Toolbox, Blick, VOM, addCircularAPI, Controller) { 'use strict';
+function(Toolbox, Blick, VOM, mixinAPI, Controller) { 'use strict';
 
 var $ = Toolbox.$;
 var $$ = Toolbox.$$;
@@ -11,8 +11,7 @@ var templateWrapper = document.createElement('div');
 
 function Circular(name, options) {
   this.options = {
-    element: 'element',
-    container: 'container',
+    elements: 'elements',
     events: 'events',
     views: 'views',
     hash: '#',
@@ -34,13 +33,13 @@ function initCircular(_this, name, options) {
   for (var option in options) {
     _this.options[option] = options[option];
   }
-  _this.version = '0.5.0';
+  _this.version = '1.0.0';
   _this.id = 'cr_' + id++;
   _this.name = isName ? name : _this.id;
   _this.instances[_this.id] = {};
 }
 
-Object.defineProperties(Circular.prototype, { // methods
+Object.defineProperties(Circular.prototype, mixinAPI({ // methods
   initComponents: { value: function(selector, context) {
     var selectors = selector ? [selector] : keys(components);
     var innerComponents = getInnerComponents(selectors, [], context);
@@ -53,7 +52,7 @@ Object.defineProperties(Circular.prototype, { // methods
   getInstance: { value: function(id) {
     return this.instances[this.id][id];
   }},
-});
+}, Circular));
 
 Object.defineProperties(Circular, { // static
   Component: { value: function(defData, Klass) {
@@ -69,8 +68,6 @@ Object.defineProperties(Circular, { // static
     });
   }},
 });
-
-addCircularAPI(Circular);
 
 return Circular;
 

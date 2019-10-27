@@ -1575,7 +1575,7 @@
 });
 
 define("api", [ "VOM", "blick", "toolbox" ], function(VOM, Blick, Toolbox) {
-    return function(Circular) {
+    return function addCircularAPI(inbound, Circular) {
         var $ = Toolbox.$;
         var $$ = Toolbox.$$;
         var pubsub = {};
@@ -1855,6 +1855,7 @@ define("api", [ "VOM", "blick", "toolbox" ], function(VOM, Blick, Toolbox) {
         };
         Circular.Toolbox = Toolbox;
         Circular.instance = new Circular();
+        return inbound;
     };
 });
 
@@ -1928,7 +1929,7 @@ define("controller", [ "toolbox", "VOM" ], function(Toolbox, VOM) {
     }
 });
 
-define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(Toolbox, Blick, VOM, addCircularAPI, Controller) {
+define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(Toolbox, Blick, VOM, mixinAPI, Controller) {
     "use strict";
     var $ = Toolbox.$;
     var $$ = Toolbox.$$;
@@ -1938,8 +1939,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
     var templateWrapper = document.createElement("div");
     function Circular(name, options) {
         this.options = {
-            element: "element",
-            container: "container",
+            elements: "elements",
             events: "events",
             views: "views",
             hash: "#",
@@ -1958,12 +1958,12 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         for (var option in options) {
             _this.options[option] = options[option];
         }
-        _this.version = "0.5.0";
+        _this.version = "1.0.0";
         _this.id = "cr_" + id++;
         _this.name = isName ? name : _this.id;
         _this.instances[_this.id] = {};
     }
-    Object.defineProperties(Circular.prototype, {
+    Object.defineProperties(Circular.prototype, mixinAPI({
         initComponents: {
             value: function(selector, context) {
                 var selectors = selector ? [ selector ] : keys(components);
@@ -1978,7 +1978,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                 return this.instances[this.id][id];
             }
         }
-    });
+    }, Circular));
     Object.defineProperties(Circular, {
         Component: {
             value: function(defData, Klass) {
@@ -1995,7 +1995,6 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
             }
         }
     });
-    addCircularAPI(Circular);
     return Circular;
     function initComponent(element, defData, Klass, innerComponents) {
         var selector = defData.selector;
