@@ -2009,14 +2009,14 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         var component = components[selector];
         var items = {};
         var instance = {};
-        var crInstance = defData.circular || Circular.instance;
+        var crInst = defData.circular || Circular.instance;
         var initComponents = {};
         var controller = {};
         var models = [];
         var templates = component.templates;
         if (element.hasAttribute("cr-id")) return;
         [ "partials", "helpers", "decorators", "attributes" ].forEach(function(key) {
-            if (!defData[key]) defData[key] = crInstance.options[key];
+            if (!defData[key]) defData[key] = crInst.options[key];
         });
         items = {
             "cr-id": (element.setAttribute("cr-id", "cr-" + ++id), id),
@@ -2027,7 +2027,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
             parentNode: {},
             views: {}
         };
-        instance = crInstance.instances[crInstance.id][element.getAttribute("cr-name") || items["cr-id"]] = new Klass(element, items.views);
+        instance = crInst.instances[crInst.id][element.getAttribute("cr-name") || items["cr-id"]] = new Klass(element, items.views);
         controller = new Controller({
             element: element
         });
@@ -2047,15 +2047,15 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                 templateContainer: templates[key] ? getPlaceHolder(element, templates[key].container + "") : element,
                 modelName: key,
                 listeners: defData.$ && defData.$[key],
-                crInstance: crInstance,
+                crInstance: crInst,
                 controller: controller
             });
         });
         element.removeAttribute("cr-cloak");
         initComponents = function(context) {
-            crInstance.initComponents(null, context || element);
+            crInst.initComponents(null, context || element);
         };
-        instance.onInit && instance.onInit(element, items, initComponents, crInstance);
+        instance.onInit && instance.onInit(element, items, initComponents, crInst);
         defData.autoInit !== false && initComponents();
         return instance;
     }

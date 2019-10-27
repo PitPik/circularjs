@@ -73,7 +73,7 @@ function initComponent(element, defData, Klass, innerComponents) {
   var component = components[selector];
   var items = {};
   var instance = {};
-  var crInstance = defData.circular || Circular.instance;
+  var crInst = defData.circular || Circular.instance;
   var initComponents = {};
   var controller = {};
   var models = [];
@@ -82,7 +82,7 @@ function initComponent(element, defData, Klass, innerComponents) {
   if (element.hasAttribute('cr-id')) return;
 
   ['partials', 'helpers', 'decorators', 'attributes'].forEach(function(key) {
-    if (!defData[key]) defData[key] = crInstance.options[key];
+    if (!defData[key]) defData[key] = crInst.options[key];
   });
 
   items = {
@@ -92,8 +92,7 @@ function initComponent(element, defData, Klass, innerComponents) {
     parentNode: {},
     views: {},
   };
-  instance =
-    crInstance.instances[crInstance.id][element.getAttribute('cr-name') || items['cr-id']] =
+  instance = crInst.instances[crInst.id][element.getAttribute('cr-name') || items['cr-id']] =
     new Klass(element, items.views); // TODO
   controller = new Controller({ element: element });
   models = keys(templates).concat(keys(defData.$));
@@ -111,16 +110,16 @@ function initComponent(element, defData, Klass, innerComponents) {
         getPlaceHolder(element, templates[key].container + '') : element,
       modelName: key,
       listeners: defData.$ && defData.$[key],
-      crInstance: crInstance,
+      crInstance: crInst,
       controller: controller,
     });
   });
 
   element.removeAttribute('cr-cloak'); // TODO
   initComponents = function(context) {
-    crInstance.initComponents(null, context || element);
+    crInst.initComponents(null, context || element);
   };
-  instance.onInit && instance.onInit(element, items, initComponents, crInstance); // TODO
+  instance.onInit && instance.onInit(element, items, initComponents, crInst); // TODO
   defData.autoInit !== false && initComponents();
 
   return instance;
