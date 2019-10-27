@@ -49,9 +49,6 @@ Object.defineProperties(Circular.prototype, mixinAPI({ // methods
         .init(element, context && innerComponents);
     });
   }},
-  getInstance: { value: function(id) {
-    return this.instances[this.id][id];
-  }},
 }, Circular));
 
 Object.defineProperties(Circular, { // static

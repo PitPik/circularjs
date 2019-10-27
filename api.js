@@ -7,13 +7,13 @@ var $$ = Toolbox.$$;
 var pubsub = {}; // general data holder
 var modulesMap = {}; // list of modules for module switching
 var DOC = null; // createHTMLDocument for resorce loader
+var api = {};
 
-Circular.prototype.constructor = Circular;
-Circular.prototype.model = function(model, options) {
+api.model = function(model, options) {
   return new VOM(model, options);
 };
-Circular.prototype.getBaseModel = function(name) { /* attrName, cr-id */ };
-Circular.prototype.destroy = function(name) { // TODO: review -> use reset
+api.getBaseModel = function(name) { /* attrName, cr-id */ };
+api.destroy = function(name) { // TODO: review -> use reset
   // var _instList = instanceList[this.id];
   // var _instance = {};
 
@@ -25,13 +25,17 @@ Circular.prototype.destroy = function(name) { // TODO: review -> use reset
   //   }
   // }
 };
-Circular.prototype.getInstances = function() {
+api.getInstances = function() {
   return instances[this.id];
+};
+
+api.getInstance = function(id) {
+  return this.instances[this.id][id];
 };
 
   /* --------------------  pubsub  ----------------------- */
 
-Circular.prototype.subscribe = function(inst, comp, attr, callback, trigger) {
+api.subscribe = function(inst, comp, attr, callback, trigger) {
   inst = inst ? inst.name || inst.components && inst.components[comp] || inst : this.name;
   pubsub[inst] = pubsub[inst] || {};
   comp = pubsub[inst][comp] = pubsub[inst][comp] || {};
@@ -54,7 +58,7 @@ Circular.prototype.subscribe = function(inst, comp, attr, callback, trigger) {
   return (callback.callback || callback);
 };
 
-Circular.prototype.publish = function(inst, comp, attr, data) {
+api.publish = function(inst, comp, attr, data) {
   inst = typeof inst === 'string' ? inst : this.name;
   pubsub[inst] = pubsub[inst] || {};
   if (pubsub[inst]) {
@@ -65,7 +69,7 @@ Circular.prototype.publish = function(inst, comp, attr, data) {
   }
 };
 
-Circular.prototype.unsubscribe = function(inst, comp, attr, callback) {
+api.unsubscribe = function(inst, comp, attr, callback) {
   var funcNo = -1,
     funcs = {};
 
@@ -88,7 +92,7 @@ function publish(_this, pubsubs, data) {
 
 /* ----------------------- routing -------------------------- */
 
-Circular.prototype.addRoute = function(data, trigger, hash) {
+api.addRoute = function(data, trigger, hash) {
   var path = typeof data.path === 'object' ?
       {regexp: data.path} : routeToRegExp(data.path),
     _hash = hash || this.options.hash,
@@ -108,11 +112,11 @@ Circular.prototype.addRoute = function(data, trigger, hash) {
   return data;
 };
 
-Circular.prototype.removedRoute = function(data) {
+api.removedRoute = function(data) {
   return this.unsubscribe(null, '__router', data.path, data.callback);
 };
 
-Circular.prototype.toggleRoute = function(data, isOn) { // TODO
+api.toggleRoute = function(data, isOn) { // TODO
   var router = pubsub[this.name].__router,
     callbacks = router[data.path].paused || router[data.path];
 
@@ -185,7 +189,7 @@ function extractRouteParameters(route, fragment) {
 
 /* ----------------------- template ------------------------- */
 
-Circular.prototype.template = function(template, options) {
+api.template = function(template, options) {
   options = options || {};
   options.helpers = options.helpers || this.options.helpers;
   var engine = new Blick(template, options);
@@ -201,7 +205,7 @@ Circular.prototype.template = function(template, options) {
 
 /* ------------------- resource loader -------------------- */
 
-Circular.prototype.loadResource = function(fileName, cache) {
+api.loadResource = function(fileName, cache) {
   var _this = this,
     devFilter = function(elm) {
       return !elm.hasAttribute('cr-dev');
@@ -225,7 +229,7 @@ Circular.prototype.loadResource = function(fileName, cache) {
   }).catch();
 };
 
-Circular.prototype.insertResources = function(container, data) {
+api.insertResources = function(container, data) {
   var body = $('[cr-dev="container"]', data.body) || data.body;
 
   Toolbox.requireResources(data, 'styles', container);
@@ -234,7 +238,7 @@ Circular.prototype.insertResources = function(container, data) {
   return Toolbox.requireResources(data, 'scripts', container);
 };
 
-Circular.prototype.insertModule = function(fileName, container) {
+api.insertModule = function(fileName, container) {
   var _this = this;
 
   return this.loadResource(fileName, true).then(function(data) {
@@ -288,7 +292,7 @@ function transition(init, data, modules, modulePath) {
     });
 }
 
-Circular.prototype.renderModule = function(data) {
+api.renderModule = function(data) {
   var temp = null,
     isInsideDoc = data.container,
     modules = data.modulesMap || modulesMap, // speeds up var search
@@ -369,8 +373,14 @@ Circular.prototype.renderModule = function(data) {
 
 /* ---------------------------------------------------------- */
 
-Circular.Toolbox = Toolbox;
-Circular.instance = new Circular();
+Object.defineProperties(Circular, {
+  Toolbox: { value: Toolbox },
+  instance: { value: new Circular() },
+});
+
+for(var key in api) {
+  Object.defineProperty(Circular.prototype, key, { value: api[key] });
+}
 
 return inbound;
 
