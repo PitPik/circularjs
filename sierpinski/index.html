@@ -13,11 +13,16 @@
   <h1>CircularJS Perf Demo</h1>
   <p>sierpinski triangle: 1821 elements (60fps)</p>
 
-  <sierpinski cr-container>
-    <div cr-template class="root-triangle" style="{{%style}}">
-      <dots cr-container>
-        <div cr-template>
-          <dot cr-mount class="dot" cr-event="mouseenter: mouseenter; mouseleave: mouseleave" style="{{style}}">{{%text}}</dot>
+  <sierpinski>
+    <div class="root-triangle" style="{{%style}}">
+      <dots>
+        <div cr-for="dots">
+          <dot
+            cr-mount
+            class="dot"
+            cr-event="mouseenter: mouseenter; mouseleave: mouseleave"
+            style="{{style}}"
+          >{{%text}}</dot>
         </div>
       </dots>
     </div>

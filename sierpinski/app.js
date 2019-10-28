@@ -1,22 +1,68 @@
-require(['circular'], function(Circular) {
-  const circular = new Circular();
+require(['circular'], ({ Component }) => {
   const targetSize = 31;
 
-  const dots = circular.component('dots', {
-    listeners: ['text', 'hover'],
-    subscribe: (propName, item, value) => {
+  Component({
+    selector: 'sierpinski',
+    template: document.querySelector('sierpinski').innerHTML,
+    $: {
+      this: ['style'],
+      sierpinski: ['seconds', 'scale'],
+      dots: ['text', 'hover'],
+    }
+  }, class Dots {
+    style = '';
+    sierpinski = {
+      elapsed: 0,
+      scale: 1,
+      seconds: 0,
+      start: null,
+    };
+    dots = buildDotsModel([], {
+      x: 0,
+      y: 0,
+      s: 1000,
+      seconds: 0,
+    }, targetSize);
+
+    constructor(elm) {
+      elm.innerHTML = '';
+    }
+
+    dots$(propName, item, value) {
       if (propName === 'hover') {
-        item.text = value ? '*' + item.text + '*' :
-          item.text.replace(/\*/g, '');
-        item.elements.container.style.background =
-          value ? '#ff0' : '#61dafb'
+        item.text = value ? '*' + item.text + '*' : item.text.replace(/\*/g, '');
+        item.elements.container.style.background = value ? '#ff0' : '#61dafb'
       }
-    },
-    eventListeners: {
-      mouseenter: (e, elm, item) => item.hover = true,
-      mouseleave: (e, elm, item) => item.hover = false,
-    },
-  });
+    }
+
+    sierpinski$(propName, item) {
+      if (propName === 'scale') {
+        this.style = 'transform: scaleX(' +
+          (item.scale / 2.1) + ') scaleY(0.7) translateZ(0.1px)';
+      } else if (propName === 'seconds') {
+        item.allDots.forEach(atom => atom.text =
+          atom.hover ? '*' + item.seconds + '*' : item.seconds + '');
+      }
+    }
+
+    onInit(self) {
+      this.sierpinski.allDots = this.dots.getElementsByProperty('text');
+      this.sierpinski.start = Date.now();
+
+      nextFrame(this.sierpinski);
+      nextSecond(this.sierpinski);
+    }
+
+
+    mouseenter(e, elm, item) {
+      item.hover = true;
+    }
+
+    mouseleave(e, elm, item) {
+      item.hover = false;
+    }
+
+  }).init('sierpinski');
 
   function getStyles(item) {
     return 'width: ' + item.size + 'px;' +
@@ -86,41 +132,6 @@ require(['circular'], function(Circular) {
       }
     ];
   }
-
-  const sierpinski = circular.component('sierpinski', {
-    model: [{
-      elapsed: 0,
-      scale: 1,
-      seconds: 0,
-      start: null,
-      style: '',
-    }],
-    listeners: ['seconds', 'scale', 'style'],
-    subscribe: (propName, item, value, oldValue) => {
-      if (propName === 'scale') {
-        item.style = 'transform: scaleX(' +
-          (item.scale / 2.1) + ') scaleY(0.7) translateZ(0.1px)';
-      } else if (propName === 'seconds') {
-        item.allDots.forEach(atom => atom.text =
-          atom.hover ? '*' + item.seconds + '*' : item.seconds + '');
-      }
-    },
-    onInit: (self) => {
-      dots.model = buildDotsModel([], {
-        x: 0,
-        y: 0,
-        s: 1000,
-        seconds: 0
-      }, targetSize);
-
-      self.model[0].allDots = dots.getElementsByProperty('text');
-      // self.model[0].elements.element.appendChild(dots.element);
-
-      self.model[0].start = Date.now();
-      nextFrame(self.model[0]);
-      nextSecond(self.model[0]);
-    },
-  });
 
   function nextFrame(item) {
     item.elapsed = Date.now() - item.start;
