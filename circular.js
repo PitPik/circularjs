@@ -144,7 +144,7 @@ function initComponent(element, defData, Klass, innerComponents) {
     instance: instance,
     controller: controller,
     models: models,
-  }
+  };
 
   element.removeAttribute('cr-cloak'); // TODO
   Object.defineProperty(instance, '__cr-id', { value: crInst.id + ':' + name });
@@ -252,16 +252,12 @@ function setNewItem(vomInstance, param) {
 
   if (instContainer !== rootElement) { // TODO...
     define(item, 'elements', { element: element, container: container });
-    define(item, 'views', getViewMap(element, function(elm) {
-      // elm.removeAttribute('cr-view');
-    }));
+    define(item, 'views', getViewMap(element, function(elm) {}));
     define(item, 'events', getEventMap(element, function(eventName) {
       data.controller.installEvent(data.instance, rootElement, eventName);
     }));
   } else {
-    data.items.views = getViewMap(element, function(elm) {
-      // elm.removeAttribute('cr-view');
-    });
+    data.items.views = getViewMap(element, function(elm) {});
     data.items.events = getEventMap(rootElement, function(eventName) {
       data.controller.installEvent(data.instance, rootElement, eventName, data.items);
     });
