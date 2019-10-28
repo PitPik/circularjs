@@ -51,9 +51,8 @@ Object.defineProperties(Circular.prototype, mixinAPI({ // methods
     insts.forEach(function(inst) {
       var id = inst['__cr-id'].split(':'); // TODO: __cr-id
       var data = instances[id[0]][id[1]];
-      var controller = data.controller;
 
-      controller.removeEvents(keys(controller.events));
+      data.controller.removeEvents(keys(data.controller.events));
       data.models.forEach(function(model) { model.destroy() });
       for (var key in data) data[key] = null;
       
