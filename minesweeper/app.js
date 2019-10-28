@@ -64,8 +64,6 @@ Component({
     this.counter = this.mines;
     this.won = undefined;
   }
-});
-
-cr.initComponents('body');
+}).init(document.body);
 
 });

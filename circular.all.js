@@ -23,23 +23,31 @@
     }
     function getPathFromName(name) {
         var postFix = /(?:^\!|^http[s]*:|.*\.js$)/.test(name) ? "" : ".js";
+        var path = "";
         name = (require.paths[name] || name).replace(/^\!/, "");
-        return normalizePath((require.baseUrl || ".") + "/" + name + postFix).replace(/^.\//, "");
+        path = normalizePath((require.baseUrl || ".") + "/" + name + postFix).replace(/^.\//, "");
+        return require.mapPath ? require.mapPath(name, postFix, path) : path;
     }
     function config(config) {
-        var items = [ "lookaheadMap", "paths", "options", "baseUrl|string" ];
+        var exceptions = {
+            mapPath: "function",
+            baseUrl: "string"
+        };
+        var items = [ "lookaheadMap", "paths", "options", "mapPath", "baseUrl" ];
         if (!require[items[0]]) {
-            for (var n = items.length, value = []; n--; ) {
-                value = items[n].split("|");
-                require[value[0]] = value[1] === "string" ? "" : {};
+            for (var n = items.length; n--; ) {
+                require[items[n]] = exceptions[items[n]] === "string" ? "" : exceptions[items[n]] === "function" ? null : {};
             }
         }
         for (var item in config) {
             if (items.indexOf(item) === -1) continue;
-            for (var key in config[item]) {
-                require[item][key] = config[item][key];
+            if (!exceptions[item]) {
+                for (var key in config[item]) require[item][key] = config[item][key];
+            } else {
+                require[item] = config[item];
             }
         }
+        return require;
     }
     function lookaheadForDeps(name) {
         var deps = require.lookaheadMap[name];
@@ -1585,14 +1593,6 @@ define("api", [ "VOM", "blick", "toolbox" ], function(VOM, Blick, Toolbox) {
         prototype.model = function(model, options) {
             return new VOM(model, options);
         };
-        prototype.getBaseModel = function(name) {};
-        prototype.destroy = function(name) {};
-        prototype.getInstances = function() {
-            return instances[this.id];
-        };
-        prototype.getInstance = function(id) {
-            return this.instances[this.id][id];
-        };
         prototype.subscribe = function(inst, comp, attr, callback, trigger) {
             inst = inst ? inst.name || inst.components && inst.components[comp] || inst : this.name;
             pubsub[inst] = pubsub[inst] || {};
@@ -1906,7 +1906,7 @@ define("controller", [ "toolbox", "VOM" ], function(Toolbox, VOM) {
             }
         },
         removeEvents: function(events) {
-            events.forEach(this.removeEvent);
+            events.forEach(this.removeEvent.bind(this));
         },
         destroy: function() {
             this.removeEvents(keys(this.events));
@@ -1950,6 +1950,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
     var keys = Toolbox.keys;
     var id = 0;
     var components = {};
+    var instances = {};
     var templateWrapper = document.createElement("div");
     function Circular(name, options) {
         this.options = {
@@ -1958,7 +1959,6 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
             helpers: {},
             decorators: {}
         };
-        this.instances = {};
         initCircular(this, name, options || {});
     }
     function initCircular(_this, name, options) {
@@ -1972,16 +1972,47 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         _this.version = "1.0.0";
         _this.id = "cr_" + id++;
         _this.name = isName ? name : _this.id;
-        _this.instances[_this.id] = {};
+        instances[_this.id] = {};
     }
     Object.defineProperties(Circular.prototype, mixinAPI({
         initComponents: {
             value: function(selector, context) {
                 var selectors = selector ? [ selector ] : keys(components);
                 var innerComponents = getInnerComponents(selectors, [], context);
-                return innerComponents.filter(function(element) {
+                return innerComponents.map(function(element) {
                     return components[element.getAttribute("cr-component") || element.tagName.toLowerCase()].init(element, context && innerComponents);
+                }).filter(function(element) {
+                    return element;
                 });
+            }
+        },
+        destroyComponents: {
+            value: function(insts) {
+                insts.forEach(function(inst) {
+                    var id = inst["__cr-id"].split(":");
+                    var data = instances[id[0]][id[1]];
+                    var controller = data.controller;
+                    controller.removeEvents(keys(controller.events));
+                    data.models.forEach(function(model) {
+                        model.destroy();
+                    });
+                    for (var key in data) data[key] = null;
+                    delete instances[id[0]][id[1]];
+                });
+            }
+        },
+        getComponent: {
+            value: function(name) {
+                var data = instances[this.id][name];
+                return data.instance;
+            }
+        },
+        destroy: {
+            value: function() {
+                var insts = instances[this.id];
+                this.destroyComponents(keys(insts).map(function(key) {
+                    return insts[key].instance;
+                }));
             }
         }
     }, Circular));
@@ -1995,7 +2026,8 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                     styles: installStyles(defData.selector, defData),
                     name: defData.name || Klass.name,
                     init: function init(element, innerComponents) {
-                        return initComponent(element, defData, Klass, innerComponents);
+                        var elm = typeof element === "string" ? $(element) : element;
+                        return initComponent(elm, defData, Klass, innerComponents);
                     }
                 });
             }
@@ -2005,6 +2037,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         var selector = defData.selector;
         var component = components[selector];
         var items = {};
+        var name = "";
         var instance = {};
         var crInst = defData.circular || Circular.instance;
         var initComponents = {};
@@ -2016,7 +2049,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
             if (!defData[key]) defData[key] = crInst.options[key];
         });
         items = {
-            "cr-id": (element.setAttribute("cr-id", "cr-" + id), id++),
+            "cr-id": (element.setAttribute("cr-id", "cr-" + id), id),
             elements: {
                 element: element
             },
@@ -2024,18 +2057,19 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
             parentNode: {},
             views: {}
         };
-        instance = crInst.instances[crInst.id][element.getAttribute("cr-name") || items["cr-id"]] = new Klass(element, items.views);
+        name = element.getAttribute("cr-name") || items["cr-id"];
+        instance = new Klass(element, items.views);
         controller = new Controller({
             element: element
         });
         models = keys(templates).concat(keys(defData.$));
-        models.filter(function(item, idx) {
+        models = models.filter(function(item, idx) {
             return models.indexOf(item) === idx;
         }).sort(function(a) {
             return a === "this" ? -1 : 0;
-        }).forEach(function(key) {
+        }).map(function(key) {
             if (!key) return;
-            applyModel({
+            return applyModel({
                 instance: instance,
                 items: items,
                 defData: defData,
@@ -2048,13 +2082,21 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                 controller: controller
             });
         });
+        instances[crInst.id][name] = {
+            instance: instance,
+            controller: controller,
+            models: models
+        };
         element.removeAttribute("cr-cloak");
+        Object.defineProperty(instance, "__cr-id", {
+            value: crInst.id + ":" + name
+        });
         initComponents = function(context) {
             crInst.initComponents(null, context || element);
         };
         instance.onInit && instance.onInit(element, items, initComponents, crInst);
         defData.autoInit !== false && initComponents();
-        return instance;
+        return id++, instance;
     }
     function getPlaceHolder(element, idx) {
         var placeholder = idx && element.querySelector('script[data-idx="' + idx + '"]');
@@ -2075,7 +2117,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
     }
     function applyModel(data) {
         var vom = getVOMInstance(data);
-        if (data.modelName === "this" || data.instance[data.modelName].constructor !== Array) return;
+        if (data.modelName === "this" || data.instance[data.modelName].constructor !== Array) return vom;
         for (var key in VOM.prototype) {
             Object.defineProperty(vom.model, key, {
                 value: vom[key].bind(vom)
@@ -2095,6 +2137,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                 delete vom.__isNew;
             }
         });
+        return vom;
     }
     function getVOMInstance(data) {
         var instance = data.instance;
@@ -2182,31 +2225,36 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         blickItems(data, item, collector, id, property, value, oldValue);
     }
     function blickItems(data, item, collector, id, property, value, oldValue) {
-        var blickItem = collector[id] && collector[id][property];
-        if (!blickItem) return;
-        for (var n = blickItem.length, elm; n--; ) {
-            if (blickItem[n].forceUpdate || value !== oldValue) {
-                elm = blickItem[n].fn(blickItem[n].parent);
-                if (data.controller && elm) for (var m = elm.length; m--; ) {
-                    getEventMap(elm[m], function(eventName, fnName) {
-                        var elms = (item.events || data.items.events)[eventName];
-                        if (!elms) {
-                            elms = item.events[eventName] = {};
-                            data.controller.installEvent(data.instance, data.instance.element, eventName);
-                        }
-                        if (!elms[fnName]) {
-                            elms[fnName] = [ elm[m] ];
-                        } else {
-                            elms[fnName].filter(function(elm, idx) {
-                                if (!data.items.elements.element.contains(elm)) elms[fnName].splice(idx, 1);
-                            });
-                            elms[fnName].push(elm[m]);
-                        }
-                        if (value !== undefined && value && data.defData.autoInit !== false) {
-                            data.crInstance.initComponents();
-                        }
-                    });
-                }
+        var blickItems = collector[id] && collector[id][property];
+        var blickItem = {};
+        if (!blickItems) return;
+        for (var n = blickItems.length, elm; n--; ) {
+            blickItem = blickItems[n];
+            if (value === oldValue && !blickItem.forceUpdate) continue;
+            elm = blickItem.fn(blickItem.parent);
+            if (data.controller && elm) for (var m = elm.length; m--; ) {
+                getEventMap(elm[m], function(eventName, fnName) {
+                    var elms = (item.events || data.items.events)[eventName];
+                    if (!elms) {
+                        elms = item.events[eventName] = {};
+                        data.controller.installEvent(data.instance, data.instance.element, eventName);
+                    }
+                    if (!elms[fnName]) {
+                        elms[fnName] = [ elm[m] ];
+                    } else {
+                        elms[fnName].filter(function(elm, idx) {
+                            if (!data.items.elements.element.contains(elm)) elms[fnName].splice(idx, 1);
+                        });
+                        elms[fnName].push(elm[m]);
+                    }
+                });
+            }
+            if (blickItem.components) {
+                data.crInstance.destroyComponents(blickItem.components);
+                blickItem.components = null;
+            }
+            if (elm && data.defData.autoInit !== false) {
+                blickItem.components = data.crInstance.initComponents();
             }
         }
     }

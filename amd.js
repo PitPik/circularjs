@@ -27,27 +27,33 @@
 
   function getPathFromName(name) {
     var postFix = /(?:^\!|^http[s]*:|.*\.js$)/.test(name) ? '' : '.js';
+    var path = '';
 
     name = (require.paths[name] || name).replace(/^\!/, '');
-    return  normalizePath((require.baseUrl || '.') + '/' +
+    path = normalizePath((require.baseUrl || '.') + '/' +
       name + postFix).replace(/^.\//, '');
+    return require.mapPath ? require.mapPath(name, postFix, path) : path;
   }
 
   function config(config) {
-    var items = ['lookaheadMap', 'paths', 'options', 'baseUrl|string'];
+    var exceptions = { mapPath: 'function', baseUrl: 'string' };
+    var items = ['lookaheadMap', 'paths', 'options', 'mapPath', 'baseUrl'];
 
     if (!require[items[0]]) { // init first time
-      for (var n = items.length, value = []; n--; ) {
-        value = items[n].split('|');
-        require[value[0]] = value[1] === 'string' ? '' : {};
+      for (var n = items.length; n--; ) {
+        require[items[n]] = exceptions[items[n]] === 'string' ? '' :
+          exceptions[items[n]] === 'function' ? null : {};
       }
     }
     for (var item in config) {
       if (items.indexOf(item) === -1) continue; // whitelist only
-      for (var key in config[item]) {
-        require[item][key] = config[item][key];
+      if (!exceptions[item]) {
+        for (var key in config[item]) require[item][key] = config[item][key];
+      } else {
+        require[item] = config[item];
       }
     }
+    return require;
   }
 
   function lookaheadForDeps(name) {

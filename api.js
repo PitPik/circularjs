@@ -12,26 +12,6 @@ var prototype = {};
 prototype.model = function(model, options) {
   return new VOM(model, options);
 };
-prototype.getBaseModel = function(name) { /* attrName, cr-id */ };
-prototype.destroy = function(name) { // TODO: review -> use reset
-  // var _instList = instanceList[this.id];
-  // var _instance = {};
-
-  // for (var component in _instList) {
-  //   if (name && name !== component) continue;
-  //   for (var instance in _instList[component]) {
-  //     _instance = _instList[component][instance];
-  //     _instance && _instance.destroy && _instance.destroy(component);
-  //   }
-  // }
-};
-prototype.getInstances = function() {
-  return instances[this.id];
-};
-
-prototype.getInstance = function(id) {
-  return this.instances[this.id][id];
-};
 
   /* --------------------  pubsub  ----------------------- */
 

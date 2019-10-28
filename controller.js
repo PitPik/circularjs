@@ -35,7 +35,7 @@ Controller.prototype = {
     }
   },
   removeEvents: function(events) {
-    events.forEach(this.removeEvent);
+    events.forEach(this.removeEvent.bind(this));
   },
   destroy: function() {
     this.removeEvents(keys(this.events));
