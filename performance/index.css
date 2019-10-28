@@ -5,7 +5,9 @@ body {
   margin: 0;
   padding: 30px;
 }
-
+table {
+	margin-top: 2em;
+}
 td {
 	padding: 8px;
 	text-align: center;
