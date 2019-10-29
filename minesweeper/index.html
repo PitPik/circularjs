@@ -27,9 +27,9 @@
             <td
               cr-child
               class="{{%mark}}{{#if %isProcessed}}
-                color-{{surroundingMines}}{{else}} hidden{{/if}}"
+                color-{{surrounding}}{{else}} hidden{{/if}}"
             >
-              {{#if %isProcessed}}{{surroundingMines}}{{/if}}
+              {{#if %isProcessed}}{{#if surrounding}}{{surrounding}}{{/if}}{{/if}}
             </td>
           </tr>
         </tbody>
@@ -45,9 +45,8 @@
     <script src="../circular.js"></script> -->
     <script src="../circular.min.js"></script>
 
-    <!-- <script src="game.srv.js"></script>
-    <script src="game.ctrl.js"></script> -->
-    <script src="game.min.js"></script>
+    <script src="game.srv.js"></script>
+    <script src="game.ctrl.js"></script>
 
     <script src="app.js"></script>
   </body>

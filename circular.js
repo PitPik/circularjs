@@ -190,16 +190,36 @@ function applyModel(data) {
   }
   Object.defineProperty(data.instance, data.modelName, {
     get: function() { return vom.model },
-    set: function(newModel) { // TODO: check performance
-      vom.destroy();
-      resetComponent(data, vom);
-      vom.__isNew = true; // TODO: check why
-      newModel.forEach(function(item) { vom.appendChild(item) });
-      delete vom.__isNew;
+    set: function(newModel) {
+      // window.requestAnimationFrame(function() {
+        injectNewModel(vom, vom.model, newModel);
+      // });
     },
   });
 
   return vom;
+}
+
+function injectNewModel(vom, model, newModel) {
+  newModel.forEach(function(newItem, idx) {
+    if (model[idx]) {
+      updateModelItem(vom, model[idx], newItem);
+    } else {
+      vom.appendChild(newItem, model[0] ? model[0].parentNode : model);
+    }
+  });
+  while (model.length > newModel.length) vom.removeChild(model[model.length - 1]);
+}
+
+function updateModelItem(vom, item, newItem) {
+  for (var key in newItem) {
+    if (key !== 'childNodes' && newItem[key] !== item[key]) {
+      item[key] = newItem[key];
+    }
+  }
+  if (newItem.childNodes) {
+   injectNewModel(vom, item.childNodes, newItem.childNodes);
+  }
 }
 
 function getVOMInstance(data) {
@@ -283,7 +303,7 @@ function changeItem(vomInstance, property, item, value, oldValue, sibling, data)
   } else if (vomInstance[property]) {
     if (item === sibling) { // replaceChild by itself;
       setNewItem(vomInstance, { item: item, type: property, siblPar: sibling, data: data });
-    } else if (property !== 'replaceChild' && !vomInstance.__isNew) {
+    } else if (property !== 'replaceChild') {
       render(element, property, parentElement, sibling.elements && sibling.elements.element);
     }
   }

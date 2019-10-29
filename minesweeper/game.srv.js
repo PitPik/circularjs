@@ -16,7 +16,7 @@ define('game-service', [], function() { 'use strict';
       board[n] = { childNodes: [] };
       for (var m = rowcol[1]; m--; ) {
         board[n].childNodes[m] =
-          { mark: '', isProcessed: false, isMine: false };
+          { mark: '', isProcessed: false, isMine: false, surrounding: 0 };
       }
     }
 
@@ -32,8 +32,7 @@ define('game-service', [], function() { 'use strict';
         board[row].childNodes[col].isMine = true;
         mineCount--;
         lookAround(board, row, col, function(_row, _col, item) {
-          item.surroundingMines = isNaN(item.surroundingMines) ?
-            1 : item.surroundingMines + 1;
+          item.surrounding += 1;
         });
       }
     }

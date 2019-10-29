@@ -23,7 +23,7 @@ define('game-controller', ['game-service'], function(gameSrv) {  'use strict';
   function checkItem(model, item, mark) {
     if (item.isProcessed && mark !== undefined) {
       delete checkItem._win && lookAround(model, item, false, 0) ===
-        item.surroundingMines && lookAround(model, item, true);
+        item.surrounding && lookAround(model, item, true);
       if (checkItem._win === false) return false;
     } else if (mark && !item.isProcessed) {
       item.mark = item.mark === 'marked' ? 'open' :
@@ -36,7 +36,7 @@ define('game-controller', ['game-service'], function(gameSrv) {  'use strict';
     } else if (item.mark !== 'marked' && !item.isProcessed) {
       item.mark = '';
       item.isProcessed = true;
-      if (!item.surroundingMines) lookAround(model, item);
+      if (!item.surrounding) lookAround(model, item);
     }
     return checkAll(model.getElementsByProperty('isProcessed', false));
   }
