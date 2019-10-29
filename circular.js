@@ -51,11 +51,16 @@ Object.defineProperties(Circular.prototype, mixinAPI({ // methods
     insts.forEach(function(inst) {
       var id = inst['__cr-id'].split(':'); // TODO: __cr-id
       var data = instances[id[0]][id[1]];
+      var instance = data.instance;
 
+      for (var key in instance) if ( // removes collectors and rendering
+        instance[key] &&
+        instance.hasOwnProperty(key) &&
+        instance[key].constructor === Array) instance[key] = [];
       data.controller.removeEvents(keys(data.controller.events));
       data.models.forEach(function(model) { model.destroy() });
       for (var key in data) data[key] = null;
-      
+
       delete instances[id[0]][id[1]];
     });
   }},
@@ -167,11 +172,6 @@ function getPlaceHolder(element, idx) {
   }
 
   return parent || element;
-}
-
-function destroyCollector(collector) {
-  if (!collector) return;
-  for (var item in collector) delete collector[item];
 }
 
 function applyModel(data) {
@@ -290,8 +290,7 @@ function changeItem(vomInstance, property, item, value, oldValue, sibling, data)
 
   if (property === 'removeChild') {
     render(element, property, element.parentElement);
-    destroyCollector(collector[id]);
-    delete collector[id];
+    destroyCollector(collector, id);
   } else if (property === 'sortChildren') {
     render(element, 'appendChild', parentElement);
   } else if (vomInstance[property]) {
@@ -303,6 +302,12 @@ function changeItem(vomInstance, property, item, value, oldValue, sibling, data)
   }
 
   blickItems(data, item, collector, id, property, value, oldValue);
+}
+
+function destroyCollector(collector, id, keep) {
+  if (!collector[id]) return;
+  for (var item in collector[id]) delete collector[id][item];
+  if (!keep) delete collector[id];
 }
 
 function blickItems(data, item, collector, id, property, value, oldValue) {

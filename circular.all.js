@@ -1991,6 +1991,8 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                 insts.forEach(function(inst) {
                     var id = inst["__cr-id"].split(":");
                     var data = instances[id[0]][id[1]];
+                    var instance = data.instance;
+                    for (var key in instance) if (instance[key] && instance.hasOwnProperty(key) && instance[key].constructor === Array) instance[key] = [];
                     data.controller.removeEvents(keys(data.controller.events));
                     data.models.forEach(function(model) {
                         model.destroy();
@@ -2105,10 +2107,6 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         }
         return parent || element;
     }
-    function destroyCollector(collector) {
-        if (!collector) return;
-        for (var item in collector) delete collector[item];
-    }
     function applyModel(data) {
         var vom = getVOMInstance(data);
         if (data.modelName === "this" || data.instance[data.modelName].constructor !== Array) return vom;
@@ -2214,8 +2212,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         var collector = template ? template.collector : {};
         if (property === "removeChild") {
             render(element, property, element.parentElement);
-            destroyCollector(collector[id]);
-            delete collector[id];
+            destroyCollector(collector, id);
         } else if (property === "sortChildren") {
             render(element, "appendChild", parentElement);
         } else if (vomInstance[property]) {
@@ -2231,6 +2228,11 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
             }
         }
         blickItems(data, item, collector, id, property, value, oldValue);
+    }
+    function destroyCollector(collector, id, keep) {
+        if (!collector[id]) return;
+        for (var item in collector[id]) delete collector[id][item];
+        if (!keep) delete collector[id];
     }
     function blickItems(data, item, collector, id, property, value, oldValue) {
         var blickItems = collector[id] && collector[id][property];
