@@ -33,6 +33,10 @@ body {
   font-weight: 300;
 }
 
+[cr-cloak] {
+  display: none;
+}
+
 :focus {
   outline: 0;
 }

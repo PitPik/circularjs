@@ -2127,16 +2127,32 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                 return vom.model;
             },
             set: function(newModel) {
-                vom.destroy();
-                resetComponent(data, vom);
-                vom.__isNew = true;
-                newModel.forEach(function(item) {
-                    vom.appendChild(item);
-                });
-                delete vom.__isNew;
+                injectNewModel(vom, vom.model, newModel);
             }
         });
         return vom;
+    }
+    function injectNewModel(vom, model, newModel) {
+        newModel.forEach(function(newItem, idx) {
+            if (model[idx]) {
+                updateModelItem(vom, model[idx], newItem);
+            } else {
+                vom.appendChild(newItem, model[0] ? model[0].parentNode : model);
+            }
+        });
+        while (model.length > newModel.length) {
+            vom.removeChild(model[model.length - 1]);
+        }
+    }
+    function updateModelItem(vom, item, newItem) {
+        for (var key in newItem) {
+            if (key !== "childNodes" && newItem[key] !== item[key]) {
+                item[key] = newItem[key];
+            }
+        }
+        if (newItem.childNodes) {
+            injectNewModel(vom, item.childNodes, newItem.childNodes);
+        }
     }
     function getVOMInstance(data) {
         var instance = data.instance;
@@ -2217,7 +2233,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                     siblPar: sibling,
                     data: data
                 });
-            } else if (property !== "replaceChild" && !vomInstance.__isNew) {
+            } else if (property !== "replaceChild") {
                 render(element, property, parentElement, sibling.elements && sibling.elements.element);
             }
         }
