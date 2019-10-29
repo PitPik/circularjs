@@ -2109,11 +2109,6 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         if (!collector) return;
         for (var item in collector) delete collector[item];
     }
-    function resetComponent(data, vom) {
-        destroyCollector(data.template && data.template.collector);
-        destroyCollector(data.childTemplate && data.childTemplate.collector);
-        data.templateContainer.innerHTML = "";
-    }
     function applyModel(data) {
         var vom = getVOMInstance(data);
         if (data.modelName === "this" || data.instance[data.modelName].constructor !== Array) return vom;

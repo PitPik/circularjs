@@ -26,10 +26,10 @@
           <tr cr-for="board">
             <td
               cr-child
-              class="{{%mark}}{{#if %isProcessed}}
+              class="{{%mark}}{{#if %%isProcessed}}
                 color-{{surrounding}}{{else}} hidden{{/if}}"
             >
-              {{#if %isProcessed}}{{#if surrounding}}{{surrounding}}{{/if}}{{/if}}
+              {{#if %%isProcessed}}{{#if surrounding}}{{surrounding}}{{/if}}{{/if}}
             </td>
           </tr>
         </tbody>

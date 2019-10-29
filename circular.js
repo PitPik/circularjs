@@ -174,12 +174,6 @@ function destroyCollector(collector) {
   for (var item in collector) delete collector[item];
 }
 
-function resetComponent(data, vom) {
-  destroyCollector(data.template && data.template.collector);
-  destroyCollector(data.childTemplate && data.childTemplate.collector);
-  data.templateContainer.innerHTML = '';
-}
-
 function applyModel(data) {
   var vom = getVOMInstance(data);
 
