@@ -6,7 +6,7 @@ Component({
   template: document.body.innerHTML,
   $: {
     this: ['won', 'counter', 'time', 'class'],
-    board: ['isProcessed', 'mark', 'surroundingMines'],
+    board: ['isProcessed', 'mark'],
   },
 }, class Minesweeper {
   counter = 0;

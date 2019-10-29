@@ -431,7 +431,7 @@ function getTemplate(template, defData) {
 }
 
 function createPlaceHolder(elm, idx) {
-  var placeHolder = document.createElement('script');
+  var placeHolder = document.createElement('script'); // TODO: match to parent
 
   placeHolder.setAttribute('type', 'placeholder/tmpl');
   placeHolder.setAttribute('data-idx', idx);

@@ -1,6 +1,8 @@
 With **circularJS** you basically develop **components**, **modules** and **services**.
 A **component** controls a patch of screen called a view, also used for **state management**, where as **modules** are a compositions of several components in a widget like HTML document that can be rendered inside an existing app or even component.
 
+**ATTENTION** the new version 1.0.0 has totally changed and includes a new architecture. Components are composed totally different as described below. Updates will follow soon. (See minesweeper, todo or performance for now. Those apps are updated). 
+
 ### component
 
 ```component()``` takes a part of the DOM (defined by ```cr-component="component-name"``` or by passing the DOM-Element to ```element```) and converts it to a view manageable component.
