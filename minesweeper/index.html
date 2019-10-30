@@ -8,7 +8,7 @@
   <body cr-cloak>
     <div class="game-board {{%class}}">
       <div class="header level">
-        <select cr-event="change: level">
+        <select cr-view="levels" cr-event="change: level">
           <option value="9,9,10">beginner</option>
           <option value="16,16,40">intermediate</option>
           <option value="16,30,99">expert</option>

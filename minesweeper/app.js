@@ -1,9 +1,9 @@
 require(['circular', 'game-controller', 'game-service'],
-function({ Component, instance: cr }, gameCtrl, gameSrv) {
+function({ Component }, gameCtrl, gameSrv) {
 
 Component({
   selector: 'body',
-  template: document.body.innerHTML,
+  template: document.body.innerHTML + (document.body.innerHTML = '', ''),
   $: {
     this: ['won', 'counter', 'time', 'class'],
     board: ['isProcessed', 'mark'],
@@ -19,9 +19,8 @@ Component({
   rowCol = [];
   mines = 0;
 
-  constructor() {
-    document.body.innerHTML = '';
-    this.reset();
+  onInit(element, { views: { levels }}) {
+    this.reset(levels.value.split(','));
   }
 
   this$(propName, item, value) {
@@ -31,6 +30,16 @@ Component({
     this.counter = this.mines -
       this.board.getElementsByProperty('mark', 'marked').length;
     if (value !== undefined) clearInterval(this.interval);
+  }
+
+  reset(value) {
+    this.rowCol = [value[0], value[1]];
+    this.mines = value[2];
+    this.board = gameSrv.createBoard(this.rowCol, this.mines);
+    this.interval = clearInterval(this.interval);
+    this.time = 0;
+    this.counter = this.mines;
+    this.won = undefined;
   }
 
   reveal(e, elm, item) {
@@ -53,16 +62,6 @@ Component({
 
   restart() {
     this.reset(this.rowCol.concat(this.mines));
-  }
-
-  reset(value = [9, 9, 10]) {
-    this.rowCol = [value[0], value[1]];
-    this.mines = value[2];
-    this.board = gameSrv.createBoard(this.rowCol, this.mines);
-    this.interval = clearInterval(this.interval);
-    this.time = 0;
-    this.counter = this.mines;
-    this.won = undefined;
   }
 }).init(document.body);
 

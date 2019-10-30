@@ -2066,7 +2066,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
             views: {}
         };
         name = element.getAttribute("cr-name") || items["cr-id"];
-        instance = new Klass(element, items.views);
+        instance = new Klass(element, crInst);
         controller = new Controller({
             element: element
         });
@@ -2137,7 +2137,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
             if (model[n]) {
                 updateModelItem(vom, model[n], newModel[n]);
             } else if (!deltaOnly) {
-                vom.appendChild(newModel[n], model[0] ? model[0].parentNode : model);
+                vom.appendChild(newModel[n], model.parentNode || model[0] && model[0].parentNode);
             }
         }
         if (deltaOnly) return;
