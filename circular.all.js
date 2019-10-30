@@ -233,6 +233,9 @@
             for (var key in obj) if (obj.hasOwnProperty(key)) result.push(key);
             return result;
         },
+        isArray: Array.isArray || function(obj) {
+            return obj && obj.constructor === Array;
+        },
         addClass: function(element, className) {
             element && element.classList.add(className);
         },
@@ -1947,6 +1950,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
     "use strict";
     var $ = Toolbox.$;
     var $$ = Toolbox.$$;
+    var isArray = Toolbox.isArray;
     var keys = Toolbox.keys;
     var id = 0;
     var components = {};
@@ -1992,7 +1996,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                     var id = inst["__cr-id"].split(":");
                     var data = instances[id[0]][id[1]];
                     var instance = data.instance;
-                    for (var key in instance) if (instance[key] && instance.hasOwnProperty(key) && instance[key].constructor === Array) instance[key] = [];
+                    for (var key in instance) if (instance[key] && instance.hasOwnProperty(key) && isArray(instance[key])) instance[key] = [];
                     data.controller.removeEvents(keys(data.controller.events));
                     data.models.forEach(function(model) {
                         model.destroy();
@@ -2045,7 +2049,10 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         var controller = {};
         var models = [];
         var templates = component.templates;
-        if (element.hasAttribute("cr-id")) return;
+        var elmId = element.getAttribute("cr-id");
+        if (elmId) {
+            return instances[crInst.id + ":" + (element.getAttribute("cr-name") || elmId)];
+        }
         [ "partials", "helpers", "decorators", "attributes" ].forEach(function(key) {
             if (!defData[key]) defData[key] = crInst.options[key];
         });
@@ -2109,7 +2116,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
     }
     function applyModel(data) {
         var vom = getVOMInstance(data);
-        if (data.modelName === "this" || data.instance[data.modelName].constructor !== Array) return vom;
+        if (data.modelName === "this" || !isArray(data.instance[data.modelName])) return vom;
         for (var key in VOM.prototype) {
             Object.defineProperty(vom.model, key, {
                 value: vom[key].bind(vom)
@@ -2126,13 +2133,13 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         return vom;
     }
     function injectNewModel(vom, model, newModel) {
-        newModel.forEach(function(newItem, idx) {
-            if (model[idx]) {
-                updateModelItem(vom, model[idx], newItem);
+        for (var n = 0, m = newModel.length; n < m; n++) {
+            if (model[n]) {
+                updateModelItem(vom, model[n], newModel[n]);
             } else {
-                vom.appendChild(newItem, model[0] ? model[0].parentNode : model);
+                vom.appendChild(newModel[n], model[0] ? model[0].parentNode : model);
             }
-        });
+        }
         while (model.length > newModel.length) vom.removeChild(model[model.length - 1]);
     }
     function updateModelItem(vom, item, newItem) {
@@ -2146,12 +2153,12 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         }
     }
     function getVOMInstance(data) {
-        var instance = data.instance;
+        var inst = data.instance;
         var modelName = data.modelName;
-        return data.crInstance.model(modelName === "this" ? instance : instance[modelName] || [], {
+        return data.crInstance.model(modelName === "this" ? inst : inst[modelName] || [], {
             idProperty: "cr-id",
-            moveCallback: instance[modelName + "Move$"] || function() {},
-            enrichModelCallback: instance[modelName + "Enrich$"] || function() {},
+            moveCallback: inst[modelName + "Move$"] || function() {},
+            enrichModelCallback: inst[modelName + "Enrich$"] || function() {},
             listeners: data.listeners,
             preRecursionCallback: function(item, type, siblPar) {
                 var element = setNewItem(this, {
@@ -2160,13 +2167,13 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                     siblPar: siblPar,
                     data: data
                 });
-                instance[modelName + "PreRecursion$"] && instance[modelName + "PreRecursion$"](item, element);
+                inst[modelName + "PreRecursion$"] && inst[modelName + "PreRecursion$"](item, element);
             },
             subscribe: function(property, item, value, oldValue, sibling) {
                 var internal = this[property] && !this.hasOwnProperty(property);
                 changeItem(this, property, item, value, oldValue, sibling, data);
-                instance[modelName + "$"] && !internal && instance[modelName + "$"](property, item, value, oldValue);
-                instance[modelName + "$$"] && instance[modelName + "$$"](property, item, value, oldValue, internal);
+                inst[modelName + "$"] && !internal && inst[modelName + "$"](property, item, value, oldValue);
+                inst[modelName + "$$"] && inst[modelName + "$$"](property, item, value, oldValue, internal);
             }
         });
     }
@@ -2205,10 +2212,10 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
     }
     function changeItem(vomInstance, property, item, value, oldValue, sibling, data) {
         var element = item.elements && item.elements.element;
-        var parentElements = item.parentNode && item.parentNode.elements;
+        var parentElements = item.parentNode && item.parentNode.elements || null;
         var parentElement = parentElements ? parentElements.container || parentElements.element : data.templateContainer;
         var id = item["cr-id"];
-        var template = !item.childNodes && data.childTemplate || data.template;
+        var template = !item.childNodes && data.childTemplate || data.template || null;
         var collector = template ? template.collector : {};
         if (property === "removeChild") {
             render(element, property, element.parentElement);
@@ -2237,9 +2244,11 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
     function blickItems(data, item, collector, id, property, value, oldValue) {
         var blickItems = collector[id] && collector[id][property];
         var blickItem = {};
+        var components = {};
         if (!blickItems) return;
         for (var n = blickItems.length, elm; n--; ) {
             blickItem = blickItems[n];
+            components = blickItem.components;
             if (value === oldValue && !blickItem.forceUpdate) continue;
             elm = blickItem.fn(blickItem.parent);
             if (data.controller && elm) for (var m = elm.length; m--; ) {
@@ -2253,18 +2262,20 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                         elms[fnName] = [ elm[m] ];
                     } else {
                         elms[fnName].filter(function(elm, idx) {
-                            if (!data.items.elements.element.contains(elm)) elms[fnName].splice(idx, 1);
+                            if (!data.items.elements.element.contains(elm)) {
+                                elms[fnName].splice(idx, 1);
+                            }
                         });
                         elms[fnName].push(elm[m]);
                     }
                 });
             }
-            if (blickItem.components) {
-                data.crInstance.destroyComponents(blickItem.components);
+            if (components) {
+                data.crInstance.destroyComponents(components);
                 blickItem.components = null;
             }
             if (elm && data.defData.autoInit !== false) {
-                blickItem.components = data.crInstance.initComponents();
+                components = data.crInstance.initComponents();
             }
         }
     }

@@ -74,6 +74,9 @@
     
       return result;
     },
+    isArray: Array.isArray || function(obj) { // obj instanceof Array;
+      return obj && obj.constructor === Array;
+    },
 
     // extendClass: function(newClass, Class) {
     //   newClass.prototype = Object.create(Class.prototype);

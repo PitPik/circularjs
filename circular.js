@@ -4,9 +4,10 @@ function(Toolbox, Blick, VOM, mixinAPI, Controller) { 'use strict';
 
 var $ = Toolbox.$;
 var $$ = Toolbox.$$;
+var isArray = Toolbox.isArray;
 var keys = Toolbox.keys;
-var id = 0; // circular instance counter
-var components = {}; // collection of blueprints
+var id = 0;
+var components = {};
 var instances = {};
 var templateWrapper = document.createElement('div');
 
@@ -36,7 +37,7 @@ function initCircular(_this, name, options) {
   instances[_this.id] = {};
 }
 
-Object.defineProperties(Circular.prototype, mixinAPI({ // methods
+Object.defineProperties(Circular.prototype, mixinAPI({
   initComponents: { value: function(selector, context) {
     var selectors = selector ? [selector] : keys(components);
     var innerComponents = getInnerComponents(selectors, [], context);
@@ -56,7 +57,7 @@ Object.defineProperties(Circular.prototype, mixinAPI({ // methods
       for (var key in instance) if ( // removes collectors and rendering
         instance[key] &&
         instance.hasOwnProperty(key) &&
-        instance[key].constructor === Array) instance[key] = [];
+        isArray(instance[key])) instance[key] = [];
       data.controller.removeEvents(keys(data.controller.events));
       data.models.forEach(function(model) { model.destroy() });
       for (var key in data) data[key] = null;
@@ -78,7 +79,7 @@ Object.defineProperties(Circular.prototype, mixinAPI({ // methods
   }},
 }, Circular));
 
-return Object.defineProperties(Circular, { // static
+return Object.defineProperties(Circular, {
   Component: { value: function(defData, Klass) {
     return components[defData.selector] || (components[defData.selector] = {
       Klass: Klass,
@@ -108,8 +109,11 @@ function initComponent(element, defData, Klass, innerComponents) {
   var controller = {};
   var models = [];
   var templates = component.templates;
+  var elmId = element.getAttribute('cr-id');
 
-  if (element.hasAttribute('cr-id')) return; // TODO: return instance?
+  if (elmId) {
+    return instances[crInst.id + ':' + (element.getAttribute('cr-name') || elmId)];
+  }
 
   ['partials', 'helpers', 'decorators', 'attributes'].forEach(function(key) {
     if (!defData[key]) defData[key] = crInst.options[key];
@@ -123,7 +127,7 @@ function initComponent(element, defData, Klass, innerComponents) {
     views: {},
   };
   name = element.getAttribute('cr-name') || items['cr-id'];
-  instance = new Klass(element, items.views); // TODO
+  instance = new Klass(element, items.views);
   controller = new Controller({ element: element });
   models = keys(templates).concat(keys(defData.$));
   models = models.filter(function(item, idx) { return models.indexOf(item) === idx })
@@ -150,12 +154,12 @@ function initComponent(element, defData, Klass, innerComponents) {
     models: models,
   };
 
-  element.removeAttribute('cr-cloak'); // TODO
+  element.removeAttribute('cr-cloak');
   Object.defineProperty(instance, '__cr-id', { value: crInst.id + ':' + name });
   initComponents = function(context) {
     crInst.initComponents(null, context || element);
   };
-  instance.onInit && instance.onInit(element, items, initComponents, crInst); // TODO
+  instance.onInit && instance.onInit(element, items, initComponents, crInst);
   defData.autoInit !== false && initComponents();
 
   return id++, instance;
@@ -177,7 +181,8 @@ function getPlaceHolder(element, idx) {
 function applyModel(data) {
   var vom = getVOMInstance(data);
 
-  if (data.modelName === 'this' || data.instance[data.modelName].constructor !== Array) return vom;
+  if (data.modelName === 'this' || !isArray(data.instance[data.modelName]))
+    return vom;
 
   for (var key in VOM.prototype) {
     Object.defineProperty(vom.model, key, { value: vom[key].bind(vom) });
@@ -195,13 +200,13 @@ function applyModel(data) {
 }
 
 function injectNewModel(vom, model, newModel) {
-  newModel.forEach(function(newItem, idx) {
-    if (model[idx]) {
-      updateModelItem(vom, model[idx], newItem);
+  for (var n = 0, m = newModel.length; n < m; n++) {
+    if (model[n]) {
+      updateModelItem(vom, model[n], newModel[n]);
     } else {
-      vom.appendChild(newItem, model[0] ? model[0].parentNode : model);
+      vom.appendChild(newModel[n], model[0] ? model[0].parentNode : model);
     }
-  });
+  }
   while (model.length > newModel.length) vom.removeChild(model[model.length - 1]);
 }
 
@@ -217,28 +222,28 @@ function updateModelItem(vom, item, newItem) {
 }
 
 function getVOMInstance(data) {
-  var instance = data.instance;
+  var inst = data.instance;
   var modelName = data.modelName;
 
-  return data.crInstance.model(modelName === 'this' ? instance : instance[modelName] || [], {
-    idProperty: 'cr-id', // TODO: optional
-    moveCallback: instance[modelName + 'Move$'] || function() {},
-    enrichModelCallback: instance[modelName + 'Enrich$'] || function() {},
+  return data.crInstance.model(modelName === 'this' ? inst : inst[modelName] || [], {
+    idProperty: 'cr-id',
+    moveCallback: inst[modelName + 'Move$'] || function() {},
+    enrichModelCallback: inst[modelName + 'Enrich$'] || function() {},
     listeners: data.listeners,
     preRecursionCallback: function(item, type, siblPar) {
       var element = setNewItem(this, { item: item, type: type, siblPar: siblPar, data: data });
 
-      instance[modelName + 'PreRecursion$'] &&
-        instance[modelName + 'PreRecursion$'](item, element);
+      inst[modelName + 'PreRecursion$'] &&
+        inst[modelName + 'PreRecursion$'](item, element);
     },
     subscribe: function(property, item, value, oldValue, sibling) {
       var internal = this[property] && !this.hasOwnProperty(property);
 
       changeItem(this, property, item, value, oldValue, sibling, data);
-      instance[modelName + '$'] && !internal &&
-        instance[modelName + '$'](property, item, value, oldValue);
-      instance[modelName + '$$'] &&
-        instance[modelName + '$$'](property, item, value, oldValue, internal);
+      inst[modelName + '$'] && !internal &&
+        inst[modelName + '$'](property, item, value, oldValue);
+      inst[modelName + '$$'] &&
+        inst[modelName + '$$'](property, item, value, oldValue, internal);
     },
   });
 }
@@ -247,7 +252,7 @@ function setNewItem(vomInstance, param) {
   var item = param.item;
   var data = param.data;
   var rootElement = data.items.elements.element;
-  var instContainer = data.templateContainer; // TODO: check
+  var instContainer = data.templateContainer;
   var define = vomInstance.reinforceProperty;
   var isChild = !item.childNodes && !!data.childTemplate;
   var template = isChild ? data.childTemplate : data.template;
@@ -259,11 +264,11 @@ function setNewItem(vomInstance, param) {
   var element = !fragment ? instContainer :
     render(fragment.children[0], param.type, parent, sibling);
   var container = isChild ? parent :
-    element.hasAttribute('cr-mount') ? element : $('[cr-mount]', element); // TODO
+    element.hasAttribute('cr-mount') ? element : $('[cr-mount]', element);
 
   element.setAttribute('cr-id', vomInstance.id + ':' + (item['cr-id'] || 0));
 
-  if (instContainer !== rootElement) { // TODO...
+  if (instContainer !== rootElement) {
     define(item, 'elements', { element: element, container: container });
     define(item, 'views', getViewMap(element, function(elm) {}));
     define(item, 'events', getEventMap(element, function(eventName) {
@@ -280,12 +285,12 @@ function setNewItem(vomInstance, param) {
 }
 
 function changeItem(vomInstance, property, item, value, oldValue, sibling, data) {
-  var element = item.elements && item.elements.element; // TODO: item.elements
-  var parentElements = item.parentNode && item.parentNode.elements;
+  var element = item.elements && item.elements.element; 
+  var parentElements = item.parentNode && item.parentNode.elements || null;
   var parentElement = parentElements ? // TODO: check again
     parentElements.container || parentElements.element : data.templateContainer;
   var id = item['cr-id'];
-  var template = !item.childNodes && data.childTemplate || data.template;
+  var template = !item.childNodes && data.childTemplate || data.template || null;
   var collector = template ? template.collector : {};
 
   if (property === 'removeChild') {
@@ -313,11 +318,14 @@ function destroyCollector(collector, id, keep) {
 function blickItems(data, item, collector, id, property, value, oldValue) {
   var blickItems = collector[id] && collector[id][property];
   var blickItem = {};
+  var components = {};
 
   if (!blickItems) return;
 
   for (var n = blickItems.length, elm; n--; ) {
     blickItem = blickItems[n];
+    components = blickItem.components;
+
     if (value === oldValue && !blickItem.forceUpdate) continue;
 
     elm = blickItem.fn(blickItem.parent);
@@ -333,23 +341,25 @@ function blickItems(data, item, collector, id, property, value, oldValue) {
           elms[fnName] = [elm[m]];
         } else {
           elms[fnName].filter(function(elm, idx) {
-            if (!data.items.elements.element.contains(elm)) elms[fnName].splice(idx, 1);
+            if (!data.items.elements.element.contains(elm)) {
+              elms[fnName].splice(idx, 1);
+            }
           });
           elms[fnName].push(elm[m]);
         }
       });
     }
-    if (blickItem.components) {
-      data.crInstance.destroyComponents(blickItem.components);
+    if (components) {
+      data.crInstance.destroyComponents(components);
       blickItem.components = null;
     }
     if (elm && data.defData.autoInit !== false) {
-      blickItem.components = data.crInstance.initComponents();
+      components = data.crInstance.initComponents();
     } 
   }
 }
 
-function render(html, operator, parentNode, sibling) { // not optimized
+function render(html, operator, parentNode, sibling) {
   if (operator === 'prependChild') {
     operator = 'insertBefore';
     sibling = parentNode.children[0];
@@ -358,7 +368,7 @@ function render(html, operator, parentNode, sibling) { // not optimized
       operator = 'insertBefore';
       sibling = sibling.nextElementSibling;
     } else {
-      operator = ''; // appendChild
+      operator = '';
     }
   }
   parentNode[operator || 'appendChild'](html, sibling);
@@ -416,11 +426,11 @@ function getTemplate(template, defData) {
 
   blick = new Blick(template.outerHTML.replace(/(?:{{&gt;|cr-src=)/g, function($1) {
     return $1.charAt(0) === '{' ? '{{>' : 'src=';
-  }), { // TODO: maybe use this.template()
+  }), {
     helpers: defData.helpers || {},
     decorators: defData.decorators,
     partials: defData.partials,
-    attributes: defData.attributes, // DOMElement attribute fn
+    attributes: defData.attributes,
     registerProperty: function(name, fn, data, active, parent) {
       setBlickItem(blick.collector, name, fn, data, active, parent);
     },
@@ -439,7 +449,7 @@ function createPlaceHolder(elm, idx) {
   return elm.parentNode.replaceChild(placeHolder, elm);
 }
 
-function processTemplate(element, defData) { // TODO: check again: before instanciating
+function processTemplate(element, defData) {
   var _ = element.innerHTML = defData.template;
   var templates = element.querySelectorAll('[cr-for]');
   var result = {};
@@ -485,10 +495,10 @@ function getEventMap(element, fn) {
 
 function getViewMap(element, fn) {
   var start = element.hasAttribute('cr-view') ? [element] : [];
-  var elements = start.concat([].slice.call($$('[cr-view]', element))); // TODO: concat
+  var elements = start.concat([].slice.call($$('[cr-view]', element)));
   var views = {};
 
-  for (var n = elements.length; n--; ) { // TODO: if (!attribute)
+  for (var n = elements.length; n--; ) {
     views[elements[n].getAttribute('cr-view')] = elements[n];
     // elements[n].removeAttribute('cr-view');
     fn && fn(elements[n]);
