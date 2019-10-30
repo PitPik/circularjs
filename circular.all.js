@@ -2190,7 +2190,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         var tmpParent = parentElements && parentElements.container || instContainer;
         var parent = isChild ? tmpParent.lastElementChild : tmpParent;
         var sibling = param.siblPar && param.siblPar.elements && param.siblPar.elements.element;
-        var element = !fragment ? instContainer : render(fragment.children[0], param.type, parent, sibling);
+        var element = !fragment ? instContainer : render(fragment.children[0], param.type, parent, sibling, true);
         var container = isChild ? parent : element.hasAttribute("cr-mount") ? element : $("[cr-mount]", element);
         element.setAttribute("cr-id", vomInstance.id + ":" + (item["cr-id"] || 0));
         if (instContainer !== rootElement) {
@@ -2252,7 +2252,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
             if (value === oldValue && !blickItem.forceUpdate) continue;
             elm = blickItem.fn(blickItem.parent);
             if (data.controller && elm) for (var m = elm.length; m--; ) {
-                getEventMap(elm[m], function(eventName, fnName) {
+                getEventMap(elm[m], function(eventName, fnName, element) {
                     var elms = (item.events || data.items.events)[eventName];
                     if (!elms) {
                         elms = item.events[eventName] = {};
@@ -2266,7 +2266,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                                 elms[fnName].splice(idx, 1);
                             }
                         });
-                        elms[fnName].push(elm[m]);
+                        elms[fnName].push(element);
                     }
                 });
             }
@@ -2279,7 +2279,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
             }
         }
     }
-    function render(html, operator, parentNode, sibling) {
+    function render(html, operator, parentNode, sibling, created) {
         if (operator === "prependChild") {
             operator = "insertBefore";
             sibling = parentNode.children[0];
@@ -2379,7 +2379,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                 events[type] = events[type] || {};
                 events[type][func] = events[type][func] || [];
                 events[type][func].push(elements[n]);
-                fn && fn(type, func);
+                fn && fn(type, func, element);
             }
         }
         return events;

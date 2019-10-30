@@ -26,6 +26,7 @@ return Component({
   this$(propName, item, value) {
     if (propName === 'levelRaster') {
       this.model = initModel(value, []);
+      this.levelSpeed = this.levelSpeed;
       this.raster = 
         value + ' x ' + value + ' = ' + (value * value) + ' x 2 items';
       update(this.model, this.levelSpeed);

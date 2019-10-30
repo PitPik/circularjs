@@ -212,7 +212,7 @@ function injectNewModel(vom, model, newModel) {
 
 function updateModelItem(vom, item, newItem) {
   for (var key in newItem) {
-    if (key !== 'childNodes' && newItem[key] !== item[key]) {
+    if (key !== 'childNodes' && newItem[key] !== item[key]) { // TODO: force update
       item[key] = newItem[key];
     }
   }
@@ -262,7 +262,7 @@ function setNewItem(vomInstance, param) {
   var parent = isChild ? tmpParent.lastElementChild : tmpParent;
   var sibling = param.siblPar && param.siblPar.elements && param.siblPar.elements.element;
   var element = !fragment ? instContainer :
-    render(fragment.children[0], param.type, parent, sibling);
+    render(fragment.children[0], param.type, parent, sibling, true);
   var container = isChild ? parent :
     element.hasAttribute('cr-mount') ? element : $('[cr-mount]', element);
 
@@ -330,7 +330,7 @@ function blickItems(data, item, collector, id, property, value, oldValue) {
 
     elm = blickItem.fn(blickItem.parent);
     if (data.controller && elm) for (var m = elm.length; m--; ) {
-      getEventMap(elm[m], function(eventName, fnName) {
+      getEventMap(elm[m], function(eventName, fnName, element) {
         var elms = (item.events || data.items.events)[eventName];
 
         if (!elms) {
@@ -345,7 +345,7 @@ function blickItems(data, item, collector, id, property, value, oldValue) {
               elms[fnName].splice(idx, 1);
             }
           });
-          elms[fnName].push(elm[m]);
+          elms[fnName].push(element);
         }
       });
     }
@@ -359,7 +359,7 @@ function blickItems(data, item, collector, id, property, value, oldValue) {
   }
 }
 
-function render(html, operator, parentNode, sibling) {
+function render(html, operator, parentNode, sibling, created) { // TODO: created
   if (operator === 'prependChild') {
     operator = 'insertBefore';
     sibling = parentNode.children[0];
@@ -485,7 +485,7 @@ function getEventMap(element, fn) {
       events[type] = events[type] || {};
       events[type][func] = events[type][func] || [];
       events[type][func].push(elements[n]);
-      fn && fn(type, func);
+      fn && fn(type, func, element);
     }
     // elements[n].removeAttribute('cr-event');
   }
