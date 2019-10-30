@@ -191,7 +191,7 @@ function applyModel(data) {
     get: function() { return vom.model },
     set: function(newModel) {
       // window.requestAnimationFrame(function() {
-        injectNewModel(vom, vom.model, newModel);
+        injectNewModel(vom, vom.model, newModel, newModel.isDelta); // TODO: document
       // });
     },
   });
@@ -199,20 +199,21 @@ function applyModel(data) {
   return vom;
 }
 
-function injectNewModel(vom, model, newModel) {
+function injectNewModel(vom, model, newModel, deltaOnly) {
   for (var n = 0, m = newModel.length; n < m; n++) {
     if (model[n]) {
       updateModelItem(vom, model[n], newModel[n]);
-    } else {
+    } else if (!deltaOnly) {
       vom.appendChild(newModel[n], model[0] ? model[0].parentNode : model);
     }
   }
+  if (deltaOnly) return;
   while (model.length > newModel.length) vom.removeChild(model[model.length - 1]);
 }
 
 function updateModelItem(vom, item, newItem) {
   for (var key in newItem) {
-    if (key !== 'childNodes' && newItem[key] !== item[key]) { // TODO: force update
+    if (key !== 'childNodes') { //  && newItem[key] !== item[key]) { // force update
       item[key] = newItem[key];
     }
   }

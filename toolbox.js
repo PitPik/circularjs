@@ -74,6 +74,7 @@
     
       return result;
     },
+
     isArray: Array.isArray || function(obj) { // obj instanceof Array;
       return obj && obj.constructor === Array;
     },
