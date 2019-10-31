@@ -17,7 +17,7 @@ declare const require: Require;
 declare const define: defineNames & defineRegular;
 
 
-export interface Blick {
+interface Blick {
   attrSplitter: RegExp;
   collector: { [key: string]: any };
   options: { [key: string]: any };
@@ -43,7 +43,7 @@ interface VOMItem {
   [key: string]: any;
 }
 
-export interface VOM {
+interface VOM {
   model: { [key: string] : any }[] | { [key: string] : any };
   options: { [key: string]: any };
   id: number;
