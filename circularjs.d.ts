@@ -132,7 +132,8 @@ export declare class Circular {
 
     }): Promise<T>;
     captureResources(): { [key: string]: HTMLStyleElement | HTMLScriptElement | HTMLLinkElement };
-    requireResources(data: {
+    requireResources(
+      data: {
         styleSheets: HTMLStyleElement[];
         scripts: HTMLScriptElement[];
         path: string;
