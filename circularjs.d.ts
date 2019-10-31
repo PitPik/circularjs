@@ -9,7 +9,7 @@ type defineNames = (name: string, deps: string[], callback: () => {}, sync: bool
 type defineRegular = (deps: string[], callback: () => {}, sync: boolean) => void;
 
 declare const require: Require;
-declare const define: defineNames | defineRegular;
+declare const define: defineNames & defineRegular;
 
 
 export interface Blick {
