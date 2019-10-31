@@ -1,3 +1,5 @@
+/* ---------- amd --------- */
+
 interface ReqireConfigurable {
   config: (config: {
     lookaheadMap: { [key: string]: string[] };
@@ -7,25 +9,30 @@ interface ReqireConfigurable {
   }) => Require;
 }
 
-type require = (deps: string[], callback: () => {}, sync: boolean) => void;
-type Require = ReqireConfigurable & require;
+type require = (deps: string[], callback: Function, sync?: boolean) => void;
+type requireNoDps = (callback: Function, sync?: boolean) => void;
+type Require = ReqireConfigurable & require & requireNoDps;
 
-type defineNames = (
+type defineRegular = (
   name: string,
   deps: string[],
-  callback: () => {},
-  sync: boolean
+  callback: Function,
+  sync?: boolean
 ) => void;
-type defineRegular = (
+type defineAnonymous = (
   deps: string[],
-  callback: () => {},
-  sync: boolean
+  callback: Function,
+  sync?: boolean
 ) => void;
+type defineAnonymousNoDeps = (callback: Function, sync?: boolean) => void;
+type Define = defineRegular & defineAnonymous & defineAnonymousNoDeps;
 
 declare const require: Require;
-declare const define: defineNames & defineRegular;
+declare const define: Define;
 
-interface Blick {
+/* ------------------------ */
+
+export interface Blick {
   attrSplitter: RegExp;
   collector: { [key: string]: any };
   options: { [key: string]: any };
@@ -51,11 +58,9 @@ interface VOMItem {
   [key: string]: any;
 }
 
-interface VOM {
-  model: { [key: string]: any }[] | { [key: string]: any };
-  options: { [key: string]: any };
-  id: number;
+export interface VOMModel extends VOMItem, VOMMethods {}[];
 
+interface VOMMethods {
   addProperty(property: string, item: any, readonly: boolean): void;
   appendChild(item: VOMItem | any, parent?: VOMItem): void;
   destroy(): void;
@@ -78,14 +83,13 @@ interface VOM {
   sortChildren(callback: () => {}, model: VOMItem[], children: VOMItem[]): void;
 }
 
-interface CircularOptions {
-  hash?: string;
-  partials?: { [key: string]: () => {} };
-  helpers?: { [key: string]: () => {} };
-  decorators?: { [key: string]: () => {} };
+interface VOM extends VOMMethods {
+  model: { [key: string]: any }[] | { [key: string]: any };
+  options: { [key: string]: any };
+  id: number;
 }
 
-declare class Promise<T> {
+export declare class Promise<T> {
   constructor(fn: () => {});
 
   private _state: number;
@@ -101,6 +105,104 @@ declare class Promise<T> {
   catch(onRejected: () => {}): Promise<T>;
   cancel(id: string): Promise<T>;
 }
+
+interface Toolbox {
+  Promise: <T>() => Promise<T>;
+  storageHelper: {
+    fetch(key: string): void;
+    saveLazy(data: JSON, key: string, obj: any): void;
+    save(data: JSON, key: string): void;
+  };
+  convertToType(input: any): any;
+  closest(
+    element: HTMLElement,
+    selector: string,
+    root: HTMLElement
+  ): HTMLElement | null;
+  $(selector: string, root: HTMLElement): HTMLElement;
+  $$(selector: string, root: HTMLElement): HTMLElement[];
+  addClass(element: HTMLElement, className: string): void;
+  removeClass(element: HTMLElement, className: string): void;
+  hasClass(element: HTMLElement, className: string): boolean;
+  toggleClass(
+    element: HTMLElement,
+    className: string,
+    condition: boolean
+  ): void;
+  toggleClasses(
+    oldElm: HTMLElement,
+    newElm: HTMLElement,
+    oldClass: string,
+    newClass: string
+  ): void;
+
+  addEvent(
+    element: HTMLElement,
+    type: string,
+    func: Function,
+    cap?: boolean
+  ): () => void;
+  addEvents(
+    elements: HTMLElement[],
+    type: string,
+    func: Function,
+    cap?: boolean
+  ): () => void;
+  removeEvents(collection: Function[]): void;
+  ajax<T>(url: string, prefs: {}): Promise<T>;
+  captureResources(): {
+    [key: string]: HTMLStyleElement | HTMLScriptElement | HTMLLinkElement;
+  };
+  requireResources(
+    data: {
+      styleSheets: HTMLStyleElement[];
+      scripts: HTMLScriptElement[];
+      path: string;
+    },
+    type: "styles" | "scripts",
+    container: HTMLElement
+  ): Promise<
+    Promise<HTMLStyleElement | HTMLScriptElement | HTMLLinkElement>[]
+  >;
+  errorHandler(e: any): void;
+  isArray(array: any): boolean;
+  keys(obj: { [key: string]: any }): string[];
+  lazy(fn: Function, obj: JSON, pref: any): void;
+  normalizePath(path: string): string;
+  parentsIndexOf(elements: HTMLElement[], target: HTMLElement): number;
+  itemsSorter<T>(a: any, b: any, type: string, asc: boolean): T[];
+}
+
+interface ModulesMap<T> {
+  [name: string]: T;
+}
+
+interface ResourceModulesData<T> {
+  container: HTMLElement;
+  modulesMap: ModulesMap<T>;
+  name: string;
+  previousName: any;
+  init: boolean;
+  returnData: boolean;
+  data: any;
+  dontWrap: boolean;
+  preInit: string[];
+  require: boolean;
+  transition: (
+    init: boolean,
+    data: ResourceModulesData<T>,
+    modules: ModulesMap<T>
+  ) => {};
+}
+
+interface CircularOptions {
+  hash?: string;
+  partials?: { [key: string]: () => {} };
+  helpers?: { [key: string]: () => {} };
+  decorators?: { [key: string]: () => {} };
+}
+
+/* ------- circular ------- */
 
 export declare class Circular {
   version: string;
@@ -120,13 +222,13 @@ export declare class Circular {
       };
       name?: string;
       autoInit: boolean;
-      partials?: { [key: string]: () => {} };
-      helpers?: { [key: string]: () => {} };
-      decorators?: { [key: string]: () => {} };
+      partials?: { [key: string]: Function };
+      helpers?: { [key: string]: Function };
+      decorators?: { [key: string]: Function };
       circular?: Circular;
       hash?: string;
     },
-    objClass: T
+    Klass: T
   ): {
     Klass: T;
     selector: string;
@@ -135,79 +237,25 @@ export declare class Circular {
     name: string;
     init: (el: HTMLElement | string) => T;
   };
-  static Toolbox: {
-    Promise: <T>() => Promise<T>;
-    storageHelper: {
-      fetch(key: string): void;
-      saveLazy(data: JSON, key: string, obj: any): void;
-      save(data: JSON, key: string): void;
-    };
-    convertToType(input: any): any;
-    closest(
-      element: HTMLElement,
-      selector: string,
-      root: HTMLElement
-    ): HTMLElement | null;
-    $(selector: string, root: HTMLElement): HTMLElement;
-    $$(selector: string, root: HTMLElement): HTMLElement[];
-    addClass(element: HTMLElement, className: string): void;
-    removeClass(element: HTMLElement, className: string): void;
-    hasClass(element: HTMLElement, className: string): boolean;
-    toggleClass(
-      element: HTMLElement,
-      className: string,
-      condition: boolean
-    ): void;
-    toggleClasses(
-      oldElm: HTMLElement,
-      newElm: HTMLElement,
-      oldClass: string,
-      newClass: string
-    ): void;
-
-    addEvent(
-      element: HTMLElement,
-      type: string,
-      func: Function,
-      cap?: boolean
-    ): () => void;
-    addEvents(
-      elements: HTMLElement[],
-      type: string,
-      func: Function,
-      cap?: boolean
-    ): () => void;
-    removeEvents(collection: Function[]): void;
-    ajax<T>(url: string, prefs: {}): Promise<T>;
-    captureResources(): {
-      [key: string]: HTMLStyleElement | HTMLScriptElement | HTMLLinkElement;
-    };
-    requireResources(
-      data: {
-        styleSheets: HTMLStyleElement[];
-        scripts: HTMLScriptElement[];
-        path: string;
-      },
-      type: "styles" | "scripts",
-      container: HTMLElement
-    ): Promise<
-      Promise<HTMLStyleElement | HTMLScriptElement | HTMLLinkElement>[]
-    >;
-    errorHandler(e: any): void;
-    isArray(array: any): boolean;
-    keys(obj: { [key: string]: any }): string[];
-    lazy(fn: Function, obj: JSON, pref: any): void;
-    normalizePath(path: string): string;
-    parentsIndexOf(elements: HTMLElement[], target: HTMLElement): number;
-    itemsSorter<T>(a: any, b: any, type: string, asc: boolean): T[];
-  };
+  static Toolbox: Toolbox;
   static instance: Circular;
 
   initComponents<T>(selector: HTMLElement | string, context: HTMLElement): T;
   destroyComponents<T>(insts: T[]): void;
   getComponent<T>(name: string): T;
   destroy(): void;
-  model(model, options): VOM;
+  model(model: any, options: {
+    parentCheck: boolean;
+    idProperty: string;
+    subscribe: () => void;
+    enrichModelCallback: () => void;
+    preRecursionCallback: () => void;
+    moveCallback: () => void;
+    listeners: string[];
+    forceEnhance: boolean;
+      childNodes: string;
+    throwErrors: boolean;
+  }): VOM;
   template(
     template: string,
     options: {
@@ -268,26 +316,4 @@ export declare class Circular {
     container: HTMLElement
   ): Promise<Promise<HTMLElement>>;
   renderModule<T>(data: ResourceModulesData<T>): Promise<HTMLElement>;
-}
-
-interface ModulesMap<T> {
-  [name: string]: T;
-}
-
-interface ResourceModulesData<T> {
-  container: HTMLElement;
-  modulesMap: ModulesMap<T>;
-  name: string;
-  previousName: any;
-  init: boolean;
-  returnData: boolean;
-  data: any;
-  dontWrap: boolean;
-  preInit: string[];
-  require: boolean;
-  transition: (
-    init: boolean,
-    data: ResourceModulesData<T>,
-    modules: ModulesMap<T>
-  ) => {};
 }
