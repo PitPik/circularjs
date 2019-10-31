@@ -1,3 +1,17 @@
+interface ReqireConfigurable {
+  config: (config: any) => void;
+}
+
+type require = (deps: string[], callback: () => {}, sync: boolean) => void;
+type Require = ReqireConfigurable & require;
+
+type defineNames = (name: string, deps: string[], callback: () => {}, sync: boolean) => void;
+type defineRegular = (deps: string[], callback: () => {}, sync: boolean) => void;
+
+declare const require: Require;
+declare const define: defineNames | defineRegular;
+
+
 export interface Blick {
   attrSplitter: RegExp;
   collector: { [key: string]: any };
