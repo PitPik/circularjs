@@ -77,21 +77,21 @@ interface CircularOptions {
   decorators?: { [key: string]: () => {} },
 }
 
-declare class Promise {
+declare class Promise<T> {
   constructor (fn: () => {});
 
-  private _state = number;
-  private _handled = boolean;
-  private _value = any;
-  private _deferreds = [];
-  private _returnFn = () => {};
+  private _state: number;
+  private _handled: boolean;
+  private _value: any;
+  private _deferreds: [];
+  private _returnFn: () => {};
 
-  static private _cache = {};
-  static all(promises: Promise[]): Promise;
+  private static _cache: { [key: string]: any };
+  static all<T>(promises: Promise<T>[]): Promise<T>;
 
-  then(onFulfilled: () => {}, onRejected: () => {}): Promise;
-  catch(onRejected: () => {}): Promise;
-  cancel(id: string): Promise;
+  then(onFulfilled: () => {}, onRejected: () => {}): Promise<T>;
+  catch(onRejected: () => {}): Promise<T>;
+  cancel(id: string): Promise<T>;
 }
 
 export declare class Circular {
@@ -100,8 +100,8 @@ export declare class Circular {
   name: string;
   options: CircularOptions;
 
-  constructor(name: string, options?: CircularOptions): Circular;
-  constructor(options?: CircularOptions): Circular;
+  constructor(name: string, options?: CircularOptions);
+  constructor(options?: CircularOptions);
 
   static Component<T>(
     options: {
@@ -128,7 +128,7 @@ export declare class Circular {
     init: (el: HTMLElement | string) =>  T;
   };
   static Toolbox: {
-    Promise: Promise;
+    Promise: <T>() => Promise<T>;
     storageHelper: {
       fetch(key: string): void;
       saveLazy(data: JSON, key: string, obj: any): void;
@@ -144,9 +144,9 @@ export declare class Circular {
     toggleClass(element: HTMLElement, className: string, condition: boolean): void;
     toggleClasses(oldElm: HTMLElement, newElm: HTMLElement, oldClass: string, newClass: string): void;
 
-    addEvent(element: HTMLElement, type: string, func: Function, cap?: boolean): removeEvents;
-    addEvents(elements: HTMLElement[], type: string, func: Function, cap?: boolean): removeEvents;
-    removeEvents(collection: FUnction[]): void;
+    addEvent(element: HTMLElement, type: string, func: Function, cap?: boolean): () => void;
+    addEvents(elements: HTMLElement[], type: string, func: Function, cap?: boolean): () => void;
+    removeEvents(collection: Function[]): void;
     ajax<T>(url: string, prefs: {
 
     }): Promise<T>;
@@ -185,7 +185,7 @@ export declare class Circular {
     regexp: RegExp;
     names: string[];
     callback: T;
-  }, trigger: booleaan): T;
+  }, trigger: boolean): T;
   publish(inst: string | any, comp: string, attr: string, data: any): void;
   unsubscribe(inst: string | any, comp: string, attr: string, callback: Function): void;
 
@@ -205,16 +205,16 @@ export declare class Circular {
     body?: HTMLElement
   }): Promise<HTMLElement>;
   insertModule(fileName: string, container: HTMLElement): Promise<Promise<HTMLElement>>;
-  renderModule(data: ResourceModulesData): Promise<HTMLElement>;
+  renderModule<T>(data: ResourceModulesData<T>): Promise<HTMLElement>;
 }
 
 interface ModulesMap<T> {
   [name: string]: T;
 }
 
-interface ResourceModulesData {
+interface ResourceModulesData<T> {
   container: HTMLElement;
-  modulesMap: ModulesMap;
+  modulesMap: ModulesMap<T>;
   name: string;
   previousName: any;
   init: boolean;
@@ -223,5 +223,5 @@ interface ResourceModulesData {
   dontWrap: boolean;
   preInit: string[];
   require: boolean;
-  transition: (init: boolean, data: ResourceModulesData, modules: ModulesMap) => {};
+  transition: (init: boolean, data: ResourceModulesData<T>, modules: ModulesMap<T>) => {};
 }
