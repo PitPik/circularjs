@@ -19,17 +19,27 @@
         <button type="button" cr-event="click: restart"></button>
         <div class="timer">{{%time}}</div>
       </div>
-      <table class="board"
+      <table
+        class="board"
         cr-event="click: reveal; contextmenu: reveal; mousedown: huh"
       >
         <tbody>
           <tr cr-for="board">
             <td
               cr-child
-              class="{{%mark}}{{#if %%isProcessed}}
-                color-{{surrounding}}{{else}} hidden{{/if}}"
+              class="{{%mark}}
+                {{#if %%isProcessed}}
+                  {{#if surrounding}}color-{{surrounding}}
+                  {{else}}
+                  {{/if}}
+                {{else}} hidden
+                {{/if}}"
             >
-              {{#if %%isProcessed}}{{#if surrounding}}{{surrounding}}{{/if}}{{/if}}
+              {{#if %%isProcessed}}
+                {{#if surrounding}}
+                  {{surrounding}}
+                {{/if}}
+              {{/if}}
             </td>
           </tr>
         </tbody>
