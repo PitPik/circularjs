@@ -1,8 +1,8 @@
 interface ReqireConfigurable {
   config: (config: {
-    lookaheadMap: { [key: string]: string[] },
-    paths: { [key: string]: string },
-    mapPath: () => string,
+    lookaheadMap: { [key: string]: string[] };
+    paths: { [key: string]: string };
+    mapPath: () => string;
     baseUr: string;
   }) => Require;
 }
@@ -10,12 +10,20 @@ interface ReqireConfigurable {
 type require = (deps: string[], callback: () => {}, sync: boolean) => void;
 type Require = ReqireConfigurable & require;
 
-type defineNames = (name: string, deps: string[], callback: () => {}, sync: boolean) => void;
-type defineRegular = (deps: string[], callback: () => {}, sync: boolean) => void;
+type defineNames = (
+  name: string,
+  deps: string[],
+  callback: () => {},
+  sync: boolean
+) => void;
+type defineRegular = (
+  deps: string[],
+  callback: () => {},
+  sync: boolean
+) => void;
 
 declare const require: Require;
 declare const define: defineNames & defineRegular;
-
 
 interface Blick {
   attrSplitter: RegExp;
@@ -26,9 +34,9 @@ interface Blick {
   version: string;
 
   parse(text: string): Blick;
-  registerDecorator(name: string, decorator: () => {}): void;
-  registerHelper(name: string, decorator: () => {}): void;
-  registerPartial(name: string, decorator: () => {}): void;
+  registerDecorator(name: string, decorator: () => void): void;
+  registerHelper(name: string, decorator: () => void): void;
+  registerPartial(name: string, decorator: () => void): void;
   render(data: any[], extra: any[]): string;
   setTags(tags: string[]): void;
   unregisterDecorator(name: string): void;
@@ -44,7 +52,7 @@ interface VOMItem {
 }
 
 interface VOM {
-  model: { [key: string] : any }[] | { [key: string] : any };
+  model: { [key: string]: any }[] | { [key: string]: any };
   options: { [key: string]: any };
   id: number;
 
@@ -72,13 +80,13 @@ interface VOM {
 
 interface CircularOptions {
   hash?: string;
-  partials?: { [key: string]: () => {} },
-  helpers?: { [key: string]: () => {} },
-  decorators?: { [key: string]: () => {} },
+  partials?: { [key: string]: () => {} };
+  helpers?: { [key: string]: () => {} };
+  decorators?: { [key: string]: () => {} };
 }
 
 declare class Promise<T> {
-  constructor (fn: () => {});
+  constructor(fn: () => {});
 
   private _state: number;
   private _handled: boolean;
@@ -105,27 +113,27 @@ export declare class Circular {
 
   static Component<T>(
     options: {
-      selector: string,
-      template?: string,
+      selector: string;
+      template?: string;
       $?: {
         [key: string]: string[];
       };
       name?: string;
       autoInit: boolean;
-      partials?: { [key: string]: () => {} },
-      helpers?: { [key: string]: () => {} },
-      decorators?: { [key: string]: () => {} },
+      partials?: { [key: string]: () => {} };
+      helpers?: { [key: string]: () => {} };
+      decorators?: { [key: string]: () => {} };
       circular?: Circular;
       hash?: string;
     },
     objClass: T
   ): {
-    Klass: T,
-    selector: string,
-    templates: Blick,
-    styles: HTMLStyleElement,
-    name: string,
-    init: (el: HTMLElement | string) =>  T;
+    Klass: T;
+    selector: string;
+    templates: Blick;
+    styles: HTMLStyleElement;
+    name: string;
+    init: (el: HTMLElement | string) => T;
   };
   static Toolbox: {
     Promise: <T>() => Promise<T>;
@@ -135,31 +143,56 @@ export declare class Circular {
       save(data: JSON, key: string): void;
     };
     convertToType(input: any): any;
-    closest(element: HTMLElement, selector: string, root: HTMLElement): HTMLElement | null;
+    closest(
+      element: HTMLElement,
+      selector: string,
+      root: HTMLElement
+    ): HTMLElement | null;
     $(selector: string, root: HTMLElement): HTMLElement;
     $$(selector: string, root: HTMLElement): HTMLElement[];
     addClass(element: HTMLElement, className: string): void;
     removeClass(element: HTMLElement, className: string): void;
     hasClass(element: HTMLElement, className: string): boolean;
-    toggleClass(element: HTMLElement, className: string, condition: boolean): void;
-    toggleClasses(oldElm: HTMLElement, newElm: HTMLElement, oldClass: string, newClass: string): void;
+    toggleClass(
+      element: HTMLElement,
+      className: string,
+      condition: boolean
+    ): void;
+    toggleClasses(
+      oldElm: HTMLElement,
+      newElm: HTMLElement,
+      oldClass: string,
+      newClass: string
+    ): void;
 
-    addEvent(element: HTMLElement, type: string, func: Function, cap?: boolean): () => void;
-    addEvents(elements: HTMLElement[], type: string, func: Function, cap?: boolean): () => void;
+    addEvent(
+      element: HTMLElement,
+      type: string,
+      func: Function,
+      cap?: boolean
+    ): () => void;
+    addEvents(
+      elements: HTMLElement[],
+      type: string,
+      func: Function,
+      cap?: boolean
+    ): () => void;
     removeEvents(collection: Function[]): void;
-    ajax<T>(url: string, prefs: {
-
-    }): Promise<T>;
-    captureResources(): { [key: string]: HTMLStyleElement | HTMLScriptElement | HTMLLinkElement };
+    ajax<T>(url: string, prefs: {}): Promise<T>;
+    captureResources(): {
+      [key: string]: HTMLStyleElement | HTMLScriptElement | HTMLLinkElement;
+    };
     requireResources(
       data: {
         styleSheets: HTMLStyleElement[];
         scripts: HTMLScriptElement[];
         path: string;
       },
-      type: 'styles' | 'scripts',
+      type: "styles" | "scripts",
       container: HTMLElement
-    ): Promise<Promise<HTMLStyleElement | HTMLScriptElement | HTMLLinkElement>[]>;
+    ): Promise<
+      Promise<HTMLStyleElement | HTMLScriptElement | HTMLLinkElement>[]
+    >;
     errorHandler(e: any): void;
     isArray(array: any): boolean;
     keys(obj: { [key: string]: any }): string[];
@@ -175,36 +208,65 @@ export declare class Circular {
   getComponent<T>(name: string): T;
   destroy(): void;
   model(model, options): VOM;
-  template(template: string, options: {
-    partials?: { [key: string]: () => {} }, // TODO: repetitive
-    helpers?: { [key: string]: () => {} },
-    decorators?: { [key: string]: () => {} },
-  }): Blick;
+  template(
+    template: string,
+    options: {
+      partials?: { [key: string]: () => {} }; // TODO: repetitive
+      helpers?: { [key: string]: () => {} };
+      decorators?: { [key: string]: () => {} };
+    }
+  ): Blick;
 
-  subscribe<T>(inst: string | any, comp: string, attr: string, callback: T | {
-    regexp: RegExp;
-    names: string[];
-    callback: T;
-  }, trigger: boolean): T;
+  subscribe<T>(
+    inst: string | any,
+    comp: string,
+    attr: string,
+    callback:
+      | T
+      | {
+          regexp: RegExp;
+          names: string[];
+          callback: T;
+        },
+    trigger: boolean
+  ): T;
   publish(inst: string | any, comp: string, attr: string, data: any): void;
-  unsubscribe(inst: string | any, comp: string, attr: string, callback: Function): void;
+  unsubscribe(
+    inst: string | any,
+    comp: string,
+    attr: string,
+    callback: Function
+  ): void;
 
-  addRoute(data: { path: RegExp, callback: Function }, trigger?: boolean, hash?: string): void;
-  removedRoute(data: { path: RegExp, callback: Function }): void;
-  toggleRoute(data: { path: RegExp, callback: Function }, isOn: boolean): void;
+  addRoute(
+    data: { path: RegExp; callback: Function },
+    trigger?: boolean,
+    hash?: string
+  ): void;
+  removedRoute(data: { path: RegExp; callback: Function }): void;
+  toggleRoute(data: { path: RegExp; callback: Function }, isOn: boolean): void;
 
-  loadResource(fileName: string, cache: boolean | number): Promise<{
+  loadResource(
+    fileName: string,
+    cache: boolean | number
+  ): Promise<{
     scripts: HTMLScriptElement[];
     styleSheets: HTMLStyleElement[];
-    body: HTMLBodyElement,
-    head: HTMLHeadElement,
-    path: string,
+    body: HTMLBodyElement;
+    head: HTMLHeadElement;
+    path: string;
   }>;
-  insertResources(container: HTMLElement, data: {
-    path: string,
-    body?: HTMLElement
-  }): Promise<HTMLElement>;
-  insertModule(fileName: string, container: HTMLElement): Promise<Promise<HTMLElement>>;
+  insertResources(
+    container: HTMLElement,
+    data: {
+      path: string;
+      body?: HTMLElement;
+    }
+  ): Promise<HTMLElement>;
+  insertModule(
+    fileName: string,
+    container: HTMLElement
+  ): Promise<Promise<HTMLElement>>;
   renderModule<T>(data: ResourceModulesData<T>): Promise<HTMLElement>;
 }
 
@@ -223,5 +285,9 @@ interface ResourceModulesData<T> {
   dontWrap: boolean;
   preInit: string[];
   require: boolean;
-  transition: (init: boolean, data: ResourceModulesData<T>, modules: ModulesMap<T>) => {};
+  transition: (
+    init: boolean,
+    data: ResourceModulesData<T>,
+    modules: ModulesMap<T>
+  ) => {};
 }
