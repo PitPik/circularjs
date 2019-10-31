@@ -1,5 +1,10 @@
 interface ReqireConfigurable {
-  config: (config: any) => void;
+  config: (config: {
+    lookaheadMap: { [key: string]: string[] },
+    paths: { [key: string]: string },
+    mapPath: () => string,
+    baseUr: string;
+  }) => Require;
 }
 
 type require = (deps: string[], callback: () => {}, sync: boolean) => void;
