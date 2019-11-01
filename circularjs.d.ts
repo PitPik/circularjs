@@ -204,6 +204,8 @@ interface CircularOptions {
 
 /* ------- circular ------- */
 
+export type CircularConstructor = typeof Circular;
+
 export declare class Circular {
   version: string;
   id: string;
