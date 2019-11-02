@@ -315,7 +315,7 @@ function changeItem(vomInstance, property, item, value, oldValue, sibling, data)
   } else if (vomInstance[property]) {
     if (item === sibling) { // replaceChild by itself;
       setNewItem(vomInstance, { item: item, type: property, siblPar: sibling, data: data });
-    } else if (property !== 'replaceChild') {
+    } else if (property !== 'replaceChild' && element) {
       render(element, property, parentElement, sibling.elements && sibling.elements.element);
     }
   }

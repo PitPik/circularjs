@@ -2247,7 +2247,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                     siblPar: sibling,
                     data: data
                 });
-            } else if (property !== "replaceChild") {
+            } else if (property !== "replaceChild" && element) {
                 render(element, property, parentElement, sibling.elements && sibling.elements.element);
             }
         }

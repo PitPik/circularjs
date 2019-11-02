@@ -7,9 +7,17 @@ define('app-git', ['circular', 'template-helpers'], ({
   const templateElm = elm.removeChild(elm.firstElementChild);
   const apiURL = 'https://api.github.com/repos/PitPik/circularjs/commits?per_page=3';
 
-  ajax(apiURL, { dataType: 'json' }).then(data => Component({
+  Component({
     selector: 'git-test',
     template: templateElm.outerHTML,
     helpers: helpers({}),
-  }, class Git { data = data }).init(elm));
+  }, class Git {
+    data = [];
+
+    constructor() {
+      ajax(apiURL, { dataType: 'json' }).then(data => this.data = data);
+    }
+  }).init(elm)
+
+  
 });
