@@ -51,7 +51,7 @@ export interface Blick {
   unregisterPartial(name: string): void;
 }
 
-interface VOMItem {
+export interface VOMItem {
   parentNode?: VOMItem;
   childNodes?: VOMItem[];
   root?: { chidNodes: VOMItem[] };
@@ -83,7 +83,7 @@ interface VOMMethods {
   sortChildren(callback: () => {}, model: VOMItem[], children: VOMItem[]): void;
 }
 
-interface VOM extends VOMMethods {
+export interface VOM extends VOMMethods {
   model: { [key: string]: any }[] | { [key: string]: any };
   options: { [key: string]: any };
   id: number;
@@ -101,8 +101,8 @@ export declare class Promise<T> {
   private static _cache: { [key: string]: any };
   static all<T>(promises: Promise<T>[]): Promise<T>;
 
-  then(onFulfilled: () => {}, onRejected: () => {}): Promise<T>;
-  catch(onRejected: () => {}): Promise<T>;
+  then(onFulfilled: Function, onRejected: Function): Promise<T>;
+  catch(onRejected: Function): Promise<T>;
   cancel(id: string): Promise<T>;
 }
 
@@ -197,9 +197,9 @@ interface ResourceModulesData<T> {
 
 interface CircularOptions {
   hash?: string;
-  partials?: { [key: string]: () => {} };
-  helpers?: { [key: string]: () => {} };
-  decorators?: { [key: string]: () => {} };
+  partials?: { [key: string]: (data: any, extra?: any) => void };
+  helpers?: { [key: string]: Function };
+  decorators?: { [key: string]: Function };
 }
 
 /* ------- circular ------- */
@@ -219,11 +219,11 @@ export declare class Circular {
     options: {
       selector: string;
       template?: string;
-      $?: {
+      subscribe$?: {
         [key: string]: string[];
       };
       name?: string;
-      autoInit: boolean;
+      autoInit?: boolean;
       partials?: { [key: string]: Function };
       helpers?: { [key: string]: Function };
       decorators?: { [key: string]: Function };

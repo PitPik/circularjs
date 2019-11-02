@@ -3,7 +3,7 @@ require(['circular'], ({ Component }) => {
 return Component({
   selector: 'body',
   template: document.body.innerHTML,
-  $: {
+  subscribe$: {
     model: ['value', 'max'],
     this: ['levelRaster', 'levelSpeed', 'refresh', 'raster'],
   }

@@ -4,7 +4,7 @@ require(['circular'], ({ Component }) => {
   Component({
     selector: 'sierpinski',
     template: document.querySelector('sierpinski').innerHTML,
-    $: {
+    subscribe$: {
       this: ['style'],
       sierpinski: ['seconds', 'scale'],
       dots: ['text', 'hover'],

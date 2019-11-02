@@ -12,7 +12,7 @@ const storage = Toolbox.storageHelper;
 Component({
   selector: 'body',
   template: document.body.innerHTML,
-  $: {
+  subscribe$: {
     this: ['*'],
     list: ['*'],
   },

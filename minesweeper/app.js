@@ -4,7 +4,7 @@ function({ Component }, gameCtrl, gameSrv) {
 Component({
   selector: 'body',
   template: document.body.innerHTML + (document.body.innerHTML = '', ''),
-  $: {
+  subscribe$: {
     this: ['won', 'counter', 'time', 'class'],
     board: ['isProcessed', 'mark'],
   },
