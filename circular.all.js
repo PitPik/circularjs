@@ -1082,12 +1082,13 @@
         }
         var registerProperty = _this.options.registerProperty;
         _this.options.registerProperty = function(part, foundNode) {
-            registerProperty(part.name, part.replacer, part.data.path[0], part.isActive, part.parent, foundNode);
+            registerProperty(part.name, part.replacer, part.data.path[0], part.isActive, part.parent, foundNode, _this.collector);
         };
         options.render = renderHook;
         _this.search = /{{#\d+}}[\S\s]*{{\/\d+}}/;
         _this.attrSplitter = /([^}{]*)({{#(\d+)}}[\s\S]*?{{\/\d+}})/g;
         _this.schnauzer = new Schnauzer(template, options);
+        _this.collector = {};
     }, dump = [], dummy = function() {}, disableAttribute = function(element, name, value) {
         if (value === true || value === "true" || !value && value !== false) {
             element.setAttribute(name, "");
@@ -2156,10 +2157,13 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
     function getVOMInstance(data) {
         var inst = data.instance;
         var modelName = data.modelName;
-        return data.crInstance.model(modelName === "this" ? inst : inst[modelName] || [], {
+        var name = modelName + "$";
+        var nameAll = modelName + "$$";
+        var namePR = modelName + "$PR";
+        return new VOM(modelName === "this" ? inst : inst[modelName] || [], {
             idProperty: "cr-id",
-            moveCallback: inst[modelName + "Move$"] || function() {},
-            enrichModelCallback: inst[modelName + "Enrich$"] || function() {},
+            moveCallback: inst[modelName + "$Move"] || function() {},
+            enrichModelCallback: inst[modelName + "$Enrich"] || function() {},
             listeners: data.listeners,
             preRecursionCallback: function(item, type, siblPar) {
                 var element = setNewItem(this, {
@@ -2168,13 +2172,12 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                     siblPar: siblPar,
                     data: data
                 });
-                inst[modelName + "PreRecursion$"] && inst[modelName + "PreRecursion$"](item, element);
+                inst[namePR] && inst[namePR](item, element);
             },
             subscribe: function(property, item, value, oldValue, sibling) {
-                var internal = this[property] && !this.hasOwnProperty(property);
                 changeItem(this, property, item, value, oldValue, sibling, data);
-                inst[modelName + "$"] && !internal && inst[modelName + "$"](property, item, value, oldValue);
-                inst[modelName + "$$"] && inst[modelName + "$$"](property, item, value, oldValue, internal);
+                inst[name] && !VOM.prototype[property] && inst[name](property, item, value, oldValue);
+                inst[nameAll] && inst[nameAll](property, item, value, oldValue, internal);
             }
         });
     }
@@ -2310,7 +2313,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         for (var n = elms.snapshotLength; n--; ) result.push(elms.snapshotItem(n));
         return result;
     }
-    function setBlickItem(collector, name, fn, data, active, parent) {
+    function registerBlickProperty(name, fn, data, active, parent, foundNode, collector) {
         var noGetter = parent && data[parent[0]] && !Object.getOwnPropertyDescriptor(data[parent[0]], "0").get;
         var _parent = parent ? parent.slice(0) : parent;
         var blickItem = collector[data["cr-id"]] = collector[data["cr-id"]] || {};
@@ -2325,23 +2328,18 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         });
     }
     function getTemplate(template, defData) {
-        var blick = {};
         template.parentNode && template.parentNode.removeChild(template);
         template.removeAttribute("cr-for");
         template.removeAttribute("cr-child");
-        blick = new Blick(template.outerHTML.replace(/(?:{{&gt;|cr-src=)/g, function($1) {
+        return new Blick(template.outerHTML.replace(/(?:{{&gt;|cr-src=)/g, function($1) {
             return $1.charAt(0) === "{" ? "{{>" : "src=";
         }), {
             helpers: defData.helpers || {},
             decorators: defData.decorators,
             partials: defData.partials,
             attributes: defData.attributes,
-            registerProperty: function(name, fn, data, active, parent) {
-                setBlickItem(blick.collector, name, fn, data, active, parent);
-            }
+            registerProperty: registerBlickProperty
         });
-        blick.collector = {};
-        return blick;
     }
     function createPlaceHolder(elm, idx) {
         var placeHolder = document.createElement("script");

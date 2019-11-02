@@ -60,12 +60,13 @@ var Blick = function(template, options) {
     var registerProperty = _this.options.registerProperty;
     _this.options.registerProperty = function(part, foundNode) {
       registerProperty(part.name, part.replacer, part.data.path[0],
-        part.isActive, part.parent, foundNode);
+        part.isActive, part.parent, foundNode, _this.collector);
     };
     options.render = renderHook;
     _this.search = /{{#\d+}}[\S\s]*{{\/\d+}}/;
     _this.attrSplitter = /([^}{]*)({{#(\d+)}}[\s\S]*?{{\/\d+}})/g;
     _this.schnauzer = new Schnauzer(template, options);
+    _this.collector = {}; // external map
   },
   dump = [],
   dummy = function(){},

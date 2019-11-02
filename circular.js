@@ -225,26 +225,24 @@ function updateModelItem(vom, item, newItem) {
 function getVOMInstance(data) {
   var inst = data.instance;
   var modelName = data.modelName;
+  var name =  modelName + '$';
+  var nameAll = modelName + '$$';
+  var namePR = modelName + '$PR'
 
-  return data.crInstance.model(modelName === 'this' ? inst : inst[modelName] || [], {
+  return new VOM(modelName === 'this' ? inst : inst[modelName] || [], {
     idProperty: 'cr-id',
-    moveCallback: inst[modelName + 'Move$'] || function() {},
-    enrichModelCallback: inst[modelName + 'Enrich$'] || function() {},
+    moveCallback: inst[modelName + '$Move'] || function() {},
+    enrichModelCallback: inst[modelName + '$Enrich'] || function() {},
     listeners: data.listeners,
     preRecursionCallback: function(item, type, siblPar) {
       var element = setNewItem(this, { item: item, type: type, siblPar: siblPar, data: data });
 
-      inst[modelName + 'PreRecursion$'] &&
-        inst[modelName + 'PreRecursion$'](item, element);
+      inst[namePR] && inst[namePR](item, element);
     },
     subscribe: function(property, item, value, oldValue, sibling) {
-      var internal = this[property] && !this.hasOwnProperty(property);
-
       changeItem(this, property, item, value, oldValue, sibling, data);
-      inst[modelName + '$'] && !internal &&
-        inst[modelName + '$'](property, item, value, oldValue);
-      inst[modelName + '$$'] &&
-        inst[modelName + '$$'](property, item, value, oldValue, internal);
+      inst[name] && !VOM.prototype[property] && inst[name](property, item, value, oldValue);
+      inst[nameAll] && inst[nameAll](property, item, value, oldValue, internal);
     },
   });
 }
@@ -399,7 +397,7 @@ function getInnerComponents(selectors, result, context) {
   return result;
 }
 
-function setBlickItem(collector, name, fn, data, active, parent) {
+function registerBlickProperty(name, fn, data, active, parent, foundNode, collector) {
   var noGetter = parent && data[parent[0]] &&
     !Object.getOwnPropertyDescriptor(data[parent[0]], '0').get;
   var _parent = parent ? parent.slice(0) : parent;
@@ -419,26 +417,19 @@ function setBlickItem(collector, name, fn, data, active, parent) {
 }
 
 function getTemplate(template, defData) {
-  var blick = {};
-
   template.parentNode && template.parentNode.removeChild(template);
   template.removeAttribute('cr-for');
   template.removeAttribute('cr-child');
 
-  blick = new Blick(template.outerHTML.replace(/(?:{{&gt;|cr-src=)/g, function($1) {
+  return new Blick(template.outerHTML.replace(/(?:{{&gt;|cr-src=)/g, function($1) {
     return $1.charAt(0) === '{' ? '{{>' : 'src=';
   }), {
     helpers: defData.helpers || {},
     decorators: defData.decorators,
     partials: defData.partials,
     attributes: defData.attributes,
-    registerProperty: function(name, fn, data, active, parent) {
-      setBlickItem(blick.collector, name, fn, data, active, parent);
-    },
+    registerProperty: registerBlickProperty,
   });
-  blick.collector = {};
-
-  return blick;
 }
 
 function createPlaceHolder(elm, idx) {
