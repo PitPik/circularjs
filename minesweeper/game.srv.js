@@ -4,8 +4,7 @@ define('game-service', [], function() { 'use strict';
     for (var row = _row - 1, rowLen = _row + 1; row <= rowLen; row++) {
       if (!board[row]) continue;
       for (var col = _col - 1, colLen = _col + 1; col <= colLen; col++) {
-        if (!board[row].childNodes[col] ||
-          row === _row && col === _col) continue;
+        if (!board[row].childNodes[col] || row === _row && col === _col) continue;
         callback(row, col, board[row].childNodes[col]);
       }
     }
@@ -28,13 +27,13 @@ define('game-service', [], function() { 'use strict';
       var row = Math.floor(Math.random() * rowcol[0]);
       var col = Math.floor(Math.random() * rowcol[1]);
 
-      if (!board[row].childNodes[col].isMine) {
-        board[row].childNodes[col].isMine = true;
-        mineCount--;
-        lookAround(board, row, col, function(_row, _col, item) {
-          item.surrounding += 1;
-        });
-      }
+      if (board[row].childNodes[col].isMine) continue;
+
+      board[row].childNodes[col].isMine = true;
+      mineCount--;
+      lookAround(board, row, col, function(_row, _col, item) {
+        item.surrounding += 1;
+      });
     }
 
     return board;

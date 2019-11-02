@@ -227,7 +227,7 @@ function getVOMInstance(data) {
   var modelName = data.modelName;
   var name =  modelName + '$';
   var nameAll = modelName + '$$';
-  var namePR = modelName + '$PR'
+  var namePR = modelName + '$PR';
 
   return new VOM(modelName === 'this' ? inst : inst[modelName] || [], {
     idProperty: 'cr-id',
@@ -242,7 +242,7 @@ function getVOMInstance(data) {
     subscribe: function(property, item, value, oldValue, sibling) {
       changeItem(this, property, item, value, oldValue, sibling, data);
       inst[name] && !VOM.prototype[property] && inst[name](property, item, value, oldValue);
-      inst[nameAll] && inst[nameAll](property, item, value, oldValue, internal);
+      inst[nameAll] && inst[nameAll](property, item, value, oldValue, !!VOM.prototype[property]);
     },
   });
 }
