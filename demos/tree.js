@@ -1,6 +1,9 @@
-define('app-tree', ['circular'], function(Circular) {
+define('app-tree', ['circular'], ({ Component, Toolbox: { $ }, instance: cr }) => {
+  var elm = $('[cr-component="tree"]');
+  var templateElm = elm.removeChild(elm.firstElementChild);
   var data = {
     name: 'My Tree',
+    open: true,
     childNodes: [
       { name: 'hello' },
       { name: 'some more' },
@@ -21,29 +24,33 @@ define('app-tree', ['circular'], function(Circular) {
     ]
   };
 
-  new Circular().component('tree', {
-    model: [data, { name: '+' }],
-    listeners: ['open'],
-    preRecursionCallback: function(item) { // enhance initial model
+  Component({
+    selector: 'tree',
+    template: templateElm.outerHTML,
+    subscribe$: { tree: ['open'] },
+  }, class Tree {
+    tree = [data];
+
+    tree$PR(vomInst, item, elm) {
       item.open = item.open || false;
-      this.addProperty('open', item);
+      vomInst.addProperty('open', item);
       item.childNodes && item.childNodes.push({ name: '+' });
-    },
-    eventListeners: {
-      toggle: function(e, elm, item) {
-        if (item.childNodes) {
-          item.open = !item.open;
-        } else if (item.name === '+') {
-          this.insertBefore({ name: 'new stuff' }, item);
-        }
-      },
-      addChildren: function(e, elm, item) {
-        if (!item.childNodes && item.name !== '+') {
-          this.replaceChild({ name: item.name, open: true, childNodes: [
-            { name: 'new stuff' }
-          ]}, item);
-        }
+    }
+
+    toggle(e, elm, item) {
+      if (item.childNodes) {
+        item.open = !item.open;
+      } else if (item.name === '+') {
+        this.tree.insertBefore({ name: 'new stuff' }, item);
       }
     }
-  });
+
+    addChildren(e, elm, item) {
+      if (!item.childNodes && item.name !== '+') {
+        this.tree.replaceChild({ name: item.name, open: true, childNodes: [
+          { name: 'new stuff' }
+        ]}, item);
+      }
+    }
+  }).init(elm);
 });

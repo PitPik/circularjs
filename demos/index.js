@@ -1,21 +1,40 @@
-require(['circular'], function(Circular) {
-  var circular = new Circular();
-  var $ = Circular.Toolbox.$;
-  var model = { // menu model with states
-    menu: [
-      { title: 'Demo home', action: 'home', active: false },
-      { title: 'Data binding', action: 'binding', active: false },
-      { title: 'Dynamic tree', action: 'tree', active: false },
-      { title: 'GitHub Commits', action: 'git', active: false }
-    ],
-    state: '',
-  };
+require(['circular'], function({ Component, instance: cr, Toolbox: { $ } }) {
+  var templateElm = $('demo-nav');
+  var model = [
+    { title: 'Demo home', action: 'home', active: false },
+    { title: 'Data binding', action: 'binding', active: false },
+    { title: 'Dynamic tree', action: 'tree', active: false },
+    { title: 'GitHub Commits', action: 'git', active: false }
+  ];
 
-  circular.component('demo-nav', {
-    model: [model],
-    listeners: ['state', 'menu.*.active'],
-    subscribe: function(propName, item, value, oldValue) {
-      propName === 'state' && circular.renderModule({
+  Component({
+    selector: 'demo-nav',
+    template: templateElm.innerHTML,
+    subscribe$: {
+      this: ['state'],
+      menu: ['active'],
+    },
+  }, class DemoNav {
+    state = '';
+    menu = model;
+
+    constructor() {
+      templateElm.removeChild(templateElm.firstElementChild); // just being lazy
+
+      cr.addRoute({
+        path: '(/:state)',
+        callback: data => this.state = data.parameters.state || this.menu[0].action,
+      }, true);
+    }
+
+    onInit() {
+      this.state = this.state;
+    }
+
+    this$(propName, item, value, oldValue) {
+      this.menu.forEach(item => item.active = item.action === this.state);
+
+      cr.renderModule({
         name: value,
         previousName: oldValue,
         path: 'demos/' + value + '.html',
@@ -23,16 +42,6 @@ require(['circular'], function(Circular) {
         require: 'app-' + value,
         init: false,
       });
-    },
-  });
-
-  circular.addRoute({
-    path: '(/:state)',
-    callback: function(data) {
-      model.state = data.parameters.state || model.menu[0].action;
-      model.menu.forEach(function(item) {
-        item.active = item.action === model.state;
-      });
     }
-  }, true);
+  }).init('demo-nav');
 });

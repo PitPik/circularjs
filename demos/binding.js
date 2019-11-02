@@ -1,31 +1,20 @@
-define('app-binding', ['circular'], Circular => {
-  return class Binding {
-    constructor(selector, params = {}) {
-      const circular = params.circular || new Circular();
-      const options = Circular.extend({
-        model: [{ value: '' }],
-        element: selector,
-        listeners: ['value'],
-        eventListeners: { input: this.input, clear: this.clear },
-      }, params);
+define('app-binding', ['circular'], ({ Component, Toolbox: { $ } }) => {
+  const element = $('[cr-component="input-test"]');
+  const templateElm = element.removeChild(element.firstElementChild);
 
-      this.component = circular.component(options);
+  Component({
+    selector: 'input-test',
+    template: templateElm.outerHTML,
+    subscribe$: { this: ['value'] },
+  }, class Binding {
+    value = '';
+
+    input(e, elm) {
+      this.value = elm.value;
     }
 
-    input(e, elm, item) { // can be extended the Circular or ES6 way
-      item.value = elm.value;
+    clear() {
+      this.value = '';
     }
-
-    clear(e, elm, item) {
-      item.value = '';
-    }
-
-    reset(model) { // not used, just for demo
-      return this.component.reset(model);
-    }
-  };
-});
-
-require(['app-binding'], Binding => {
-  const binding = new Binding('.demo.binding');
+  }).init(element);
 });

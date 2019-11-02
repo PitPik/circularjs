@@ -15,16 +15,16 @@
   <p>You can double click on an item to turn it into a folder.</p>
 
   <!-- the demo root element -->
-    <ul class="tree demo" cr-component="tree" cr-container>
-      <li class="leaf" cr-event="click: toggle; dblclick: addChildren" cr-template>
-        <div class="{{#if childNodes.0}}bold{{/if}}">
-          {{name}}{{#if childNodes.0}} [{{#if %open}}-{{else}}+{{/if}}]{{/if}}
-        </div>
-        {{#if childNodes.0}}
+  <section cr-component="tree">
+      <ul class="tree demo">
+        <li cr-for="tree" class="leaf" cr-event="click: toggle; dblclick: addChildren">
+          <div class="{{#if childNodes.0}}bold{{/if}}">
+            {{name}}{{#if childNodes.0}} [{{#if %open}}-{{else}}+{{/if}}]{{/if}}
+          </div>
           <ul cr-mount class="{{#if %open}}open{{else}}closed{{/if}}"></ul>
-        {{/if}}
-      </li>
-    </ul>
+        </li>
+      </ul>
+</section>
   <pre><code class="language-javascript code">ss</code></pre>
   The HTML:
   <pre><code class="language-html html">ss</code></pre>

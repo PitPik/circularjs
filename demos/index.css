@@ -53,26 +53,29 @@ section {
 	 margin: 10px;  /* only for demo on this page */
 }
 
+
 .demo {
 	border: 1px solid #aaa;
 	border-radius: 6px;
 }
 
-.demo nav {
+demo-nav {
+	display: block;
+  margin: 0 -1em;
 	border-bottom: 1px solid #aaa;
-	padding: 12px;
+	padding: 0.75em;
 }
-.demo nav a {
+demo-nav a {
 	padding: 6px 9px;
 	text-decoration: none;
 }
-.demo nav a.active {
+demo-nav a.active {
 	font-weight: bold;
 	background: #eee;
 }
 
 .module-outlet {
-	padding: 12px;
+	padding: 0 0.75em;
 }
 section.demo {
 	padding-top: 0;

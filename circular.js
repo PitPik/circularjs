@@ -237,7 +237,7 @@ function getVOMInstance(data) {
     preRecursionCallback: function(item, type, siblPar) {
       var element = setNewItem(this, { item: item, type: type, siblPar: siblPar, data: data });
 
-      inst[name$PR] && inst[name$PR](item, element);
+      inst[name$PR] && inst[name$PR](this, item, element);
     },
     subscribe: function(property, item, value, oldValue, sibling) {
       changeItem(this, property, item, value, oldValue, sibling, data);
@@ -245,6 +245,20 @@ function getVOMInstance(data) {
       inst[name$$] && inst[name$$](property, item, value, oldValue, !!VOM.prototype[property]);
     },
   });
+}
+
+function getHelperData(item) {
+  var parent = item.parentNode;
+  var index = item.index;
+  var isLast = parent && parent.childNodes.length - 1 === item.index;
+  var isFirst = index === 0;
+
+  return parent ? {
+    '@last': isLast,
+    '@first': isFirst,
+    '@index': index,
+    '@counter': index + 1,
+  } : {};
 }
 
 function setNewItem(vomInstance, param) {
@@ -255,7 +269,8 @@ function setNewItem(vomInstance, param) {
   var define = vomInstance.reinforceProperty;
   var isChild = !item.childNodes && !!data.childTemplate;
   var template = isChild ? data.childTemplate : data.template;
-  var fragment = template && template.renderHTML(item, data.defData.extraModel);
+  var extraModel = (data.defData.extraModel || []).concat(getHelperData(item));
+  var fragment = template && template.renderHTML(item, extraModel);
   var parentElements = item.parentNode && item.parentNode.elements;
   var tmpParent = parentElements && parentElements.container || instContainer;
   var parent = isChild ? tmpParent.lastElementChild : tmpParent;
