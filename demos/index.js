@@ -29,7 +29,7 @@ require(['circular'], function({ Component, Toolbox: { $ } }) {
     }
 
     onInit() {
-      this.state = this.state;
+      this.state = this.state; // triggers this$()
     }
 
     this$(propName, item, value, oldValue) {
