@@ -1,4 +1,4 @@
-define('app-tree', ['circular'], ({ Component, Toolbox: { $ }, instance: cr }) => {
+define('app-tree', ['circular'], ({ Component, Toolbox: { $ } }) => {
   var elm = $('[cr-component="tree"]');
   var templateElm = elm.removeChild(elm.firstElementChild);
   var data = {

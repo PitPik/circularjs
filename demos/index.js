@@ -1,5 +1,6 @@
-require(['circular'], function({ Component, instance: cr, Toolbox: { $ } }) {
-  var templateElm = $('demo-nav');
+require(['circular'], function({ Component, Toolbox: { $ } }) {
+  var elm = $('demo-nav');
+  var templateElm = elm.removeChild(elm.firstElementChild);
   var model = [
     { title: 'Demo home', action: 'home', active: false },
     { title: 'Data binding', action: 'binding', active: false },
@@ -9,7 +10,7 @@ require(['circular'], function({ Component, instance: cr, Toolbox: { $ } }) {
 
   Component({
     selector: 'demo-nav',
-    template: templateElm.innerHTML,
+    template: templateElm.outerHTML,
     subscribe$: {
       this: ['state'],
       menu: ['active'],
@@ -17,11 +18,11 @@ require(['circular'], function({ Component, instance: cr, Toolbox: { $ } }) {
   }, class DemoNav {
     state = '';
     menu = model;
+    cr;
 
-    constructor() {
-      templateElm.removeChild(templateElm.firstElementChild); // just being lazy
-
-      cr.addRoute({
+    constructor(rootElement, crInst) {
+      this.cr = crInst;
+      this.cr.addRoute({
         path: '(/:state)',
         callback: data => this.state = data.parameters.state || this.menu[0].action,
       }, true);
@@ -34,7 +35,7 @@ require(['circular'], function({ Component, instance: cr, Toolbox: { $ } }) {
     this$(propName, item, value, oldValue) {
       this.menu.forEach(item => item.active = item.action === this.state);
 
-      cr.renderModule({
+      this.cr.renderModule({
         name: value,
         previousName: oldValue,
         path: 'demos/' + value + '.html',

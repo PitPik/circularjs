@@ -20,7 +20,7 @@
   <p>This example fetches latest CircularJS.js commits data from GitHub’s API and displays them as a list.<br>
   This demo shows the easy to use ajax() function.</p>
     <section class="demo">
-    <ul cr-component="git-test" cr-container>
+    <ul cr-component="git-test">
       <li cr-for="data">
         <a href="{{html_url}}}" target="_blank" class="commit">{{slice sha 0 7}}</a>
         - <span class="message">{{commit.message}}</span><br>
