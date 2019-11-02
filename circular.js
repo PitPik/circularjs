@@ -224,25 +224,25 @@ function updateModelItem(vom, item, newItem) {
 
 function getVOMInstance(data) {
   var inst = data.instance;
-  var modelName = data.modelName;
-  var name =  modelName + '$';
-  var nameAll = modelName + '$$';
-  var namePR = modelName + '$PR';
+  var name = data.modelName;
+  var name$ =  name + '$';
+  var name$$ = name + '$$';
+  var name$PR = name + '$PR';
 
-  return new VOM(modelName === 'this' ? inst : inst[modelName] || [], {
+  return new VOM(name === 'this' ? inst : inst[name] || [], {
     idProperty: 'cr-id',
-    moveCallback: inst[modelName + '$Move'] || function() {},
-    enrichModelCallback: inst[modelName + '$Enrich'] || function() {},
+    moveCallback: inst[name + '$Move'] || function() {},
+    enrichModelCallback: inst[name + '$Enrich'] || function() {},
     listeners: data.listeners,
     preRecursionCallback: function(item, type, siblPar) {
       var element = setNewItem(this, { item: item, type: type, siblPar: siblPar, data: data });
 
-      inst[namePR] && inst[namePR](item, element);
+      inst[name$PR] && inst[name$PR](item, element);
     },
     subscribe: function(property, item, value, oldValue, sibling) {
       changeItem(this, property, item, value, oldValue, sibling, data);
-      inst[name] && !VOM.prototype[property] && inst[name](property, item, value, oldValue);
-      inst[nameAll] && inst[nameAll](property, item, value, oldValue, !!VOM.prototype[property]);
+      inst[name$] && !VOM.prototype[property] && inst[name$](property, item, value, oldValue);
+      inst[name$$] && inst[name$$](property, item, value, oldValue, !!VOM.prototype[property]);
     },
   });
 }
