@@ -129,7 +129,7 @@ function initComponent(element, defData, Klass, innerComponents) {
   name = element.getAttribute('cr-name') || items['cr-id'];
   instance = new Klass(element, crInst);
   controller = new Controller({ element: element });
-  models = keys(templates).concat(keys(defData.$));
+  models = keys(templates).concat(keys(defData.subscribe$));
   models = models.filter(function(item, idx) { return models.indexOf(item) === idx })
   .sort(function(a) { return a === 'this' ? -1 : 0 })
   .map(function(key) {
@@ -143,7 +143,7 @@ function initComponent(element, defData, Klass, innerComponents) {
       templateContainer: templates[key] ?
         getPlaceHolder(element, templates[key].container + '') : element,
       modelName: key,
-      listeners: defData.$ && defData.$[key],
+      listeners: defData.subscribe$ && defData.subscribe$[key],
       crInstance: crInst,
       controller: controller,
     });

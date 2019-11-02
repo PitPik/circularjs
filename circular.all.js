@@ -2071,7 +2071,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         controller = new Controller({
             element: element
         });
-        models = keys(templates).concat(keys(defData.$));
+        models = keys(templates).concat(keys(defData.subscribe$));
         models = models.filter(function(item, idx) {
             return models.indexOf(item) === idx;
         }).sort(function(a) {
@@ -2086,7 +2086,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                 childTemplate: templates[key] && templates[key].child,
                 templateContainer: templates[key] ? getPlaceHolder(element, templates[key].container + "") : element,
                 modelName: key,
-                listeners: defData.$ && defData.$[key],
+                listeners: defData.subscribe$ && defData.subscribe$[key],
                 crInstance: crInst,
                 controller: controller
             });
