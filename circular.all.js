@@ -2342,6 +2342,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         });
     }
     function getTemplate(template, defData) {
+        if (!template) return null;
         template.parentNode && template.parentNode.removeChild(template);
         template.removeAttribute("cr-for");
         template.removeAttribute("cr-child");

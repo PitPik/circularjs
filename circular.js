@@ -433,6 +433,7 @@ function registerBlickProperty(name, fn, data, active, parent, foundNode, collec
 }
 
 function getTemplate(template, defData) {
+  if (!template) return null;
   template.parentNode && template.parentNode.removeChild(template);
   template.removeAttribute('cr-for');
   template.removeAttribute('cr-child');
