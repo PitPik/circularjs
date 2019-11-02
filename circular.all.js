@@ -2207,7 +2207,8 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         var tmpParent = parentElements && parentElements.container || instContainer;
         var parent = isChild ? tmpParent.lastElementChild : tmpParent;
         var sibling = param.siblPar && param.siblPar.elements && param.siblPar.elements.element;
-        var element = !fragment ? instContainer : render(fragment.children[0], param.type, parent, sibling, true);
+        var isNew = item.__index !== undefined && !item.childNodes;
+        var element = !fragment ? instContainer : !isNew ? render(fragment.children[0], param.type, parent, sibling, true) : fragment.children[0];
         var container = isChild ? parent : element.hasAttribute("cr-mount") ? element : $("[cr-mount]", element);
         element.setAttribute("cr-id", vomInstance.id + ":" + (item["cr-id"] || 0));
         if (instContainer !== rootElement) {
