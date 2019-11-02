@@ -2137,7 +2137,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         for (var n = 0, m = newModel.length; n < m; n++) {
             if (model[n]) {
                 updateModelItem(vom, model[n], newModel[n]);
-            } else if (!deltaOnly) {
+            } else {
                 vom.appendChild(newModel[n], model.parentNode || model[0] && model[0].parentNode);
             }
         }
