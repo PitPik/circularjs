@@ -240,9 +240,11 @@ function getVOMInstance(data) {
       inst[name$PR] && inst[name$PR](this, item, element);
     },
     subscribe: function(property, item, value, oldValue, sibling) {
+      var intern = property === 'childNodes' || !!VOM.prototype[property];
+
       data.items && changeItem(this, property, item, value, oldValue, sibling, data);
-      inst[name$] && !VOM.prototype[property] && inst[name$](property, item, value, oldValue);
-      inst[name$$] && inst[name$$](property, item, value, oldValue, !!VOM.prototype[property]);
+      inst[name$] &&  !intern && inst[name$](property, item, value, oldValue);
+      inst[name$$] && inst[name$$](property, item, value, oldValue, intern);
     },
   });
 }
@@ -345,7 +347,8 @@ function blickItems(data, item, collector, id, property, value, oldValue) {
 
     elm = blickItem.fn(blickItem.parent);
     if (data.controller && elm) for (var m = elm.length; m--; ) {
-      getAttrMap(elm[m], 'cr-event', function(eventName, fnName, element) {
+      // console.log(123, elm[m]);
+      getAttrMap(elm[m], 'cr-event', function(eventName, fnName) {
         var elms = (item.events || data.items.events)[eventName];
 
         if (!elms) {
@@ -360,7 +363,7 @@ function blickItems(data, item, collector, id, property, value, oldValue) {
               elms[fnName].splice(idx, 1);
             }
           });
-          elms[fnName].push(element);
+          elms[fnName].push(elm[m]);
         }
       });
     }
@@ -480,32 +483,31 @@ function processTemplate(element, defData) {
 }
 
 function getAttrMap(element, attr, fn) {
-  var events = {};
+  var data = {};
   var elements = [element].concat([].slice.call($$('[' + attr + ']', element)));
 
   for (var n = elements.length, attribute = '', chunks = []; n--; ) {
     attribute = elements[n].getAttribute(attr);
     chunks = attribute ? attribute.split(/\s*;+\s*/) : [];
  
-    for (var m = chunks.length, item = [], type = '', func = ''; m--; ) {
+    for (var m = chunks.length, item = [], type = '', value = ''; m--; ) {
       item = chunks[m].split(/\s*:+\s*/);
       type = item[0];
-      func = item[1];
-      if (!func) {
-        events[type] = events[type] || [];
-        events[type].push(elements[n]);
-        fn && fn(type, elements[n]);
+      value = item[1];
+      if (!value) {
+        data[type] = data[type] || [];
+        data[type].push(elements[n]);
       } else {
-        events[type] = events[type] || {};
-        events[type][func] = events[type][func] || [];
-        events[type][func].push(elements[n]);
-        fn && fn(type, func, element);
+        data[type] = data[type] || {};
+        data[type][value] = data[type][value] || [];
+        data[type][value].push(elements[n]);
       }
+      fn && fn(type, value, elements[n]);
     }
     // elements[n].removeAttribute('cr-event');
   }
 
-  return events;
+  return data;
 }
 
 function getViewMap(element, fn) {

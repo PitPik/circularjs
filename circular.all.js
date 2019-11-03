@@ -2175,9 +2175,10 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                 inst[name$PR] && inst[name$PR](this, item, element);
             },
             subscribe: function(property, item, value, oldValue, sibling) {
+                var intern = property === "childNodes" || !!VOM.prototype[property];
                 data.items && changeItem(this, property, item, value, oldValue, sibling, data);
-                inst[name$] && !VOM.prototype[property] && inst[name$](property, item, value, oldValue);
-                inst[name$$] && inst[name$$](property, item, value, oldValue, !!VOM.prototype[property]);
+                inst[name$] && !intern && inst[name$](property, item, value, oldValue);
+                inst[name$$] && inst[name$$](property, item, value, oldValue, intern);
             }
         });
     }
@@ -2270,7 +2271,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
             if (value === oldValue && !blickItem.forceUpdate) continue;
             elm = blickItem.fn(blickItem.parent);
             if (data.controller && elm) for (var m = elm.length; m--; ) {
-                getAttrMap(elm[m], "cr-event", function(eventName, fnName, element) {
+                getAttrMap(elm[m], "cr-event", function(eventName, fnName) {
                     var elms = (item.events || data.items.events)[eventName];
                     if (!elms) {
                         elms = item.events[eventName] = {};
@@ -2284,7 +2285,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                                 elms[fnName].splice(idx, 1);
                             }
                         });
-                        elms[fnName].push(element);
+                        elms[fnName].push(elm[m]);
                     }
                 });
             }
@@ -2381,28 +2382,27 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         return result;
     }
     function getAttrMap(element, attr, fn) {
-        var events = {};
+        var data = {};
         var elements = [ element ].concat([].slice.call($$("[" + attr + "]", element)));
         for (var n = elements.length, attribute = "", chunks = []; n--; ) {
             attribute = elements[n].getAttribute(attr);
             chunks = attribute ? attribute.split(/\s*;+\s*/) : [];
-            for (var m = chunks.length, item = [], type = "", func = ""; m--; ) {
+            for (var m = chunks.length, item = [], type = "", value = ""; m--; ) {
                 item = chunks[m].split(/\s*:+\s*/);
                 type = item[0];
-                func = item[1];
-                if (!func) {
-                    events[type] = events[type] || [];
-                    events[type].push(elements[n]);
-                    fn && fn(type, elements[n]);
+                value = item[1];
+                if (!value) {
+                    data[type] = data[type] || [];
+                    data[type].push(elements[n]);
                 } else {
-                    events[type] = events[type] || {};
-                    events[type][func] = events[type][func] || [];
-                    events[type][func].push(elements[n]);
-                    fn && fn(type, func, element);
+                    data[type] = data[type] || {};
+                    data[type][value] = data[type][value] || [];
+                    data[type][value].push(elements[n]);
                 }
+                fn && fn(type, value, elements[n]);
             }
         }
-        return events;
+        return data;
     }
     function getViewMap(element, fn) {
         var start = element.hasAttribute("cr-view") ? [ element ] : [];
