@@ -235,12 +235,12 @@ function getVOMInstance(data) {
     enrichModelCallback: inst[name + '$Enrich'] || function() {},
     listeners: data.listeners,
     preRecursionCallback: function(item, type, siblPar) {
-      var element = setNewItem(this, { item: item, type: type, siblPar: siblPar, data: data });
+      var element = data.items && setNewItem(this, { item: item, type: type, siblPar: siblPar, data: data });
 
       inst[name$PR] && inst[name$PR](this, item, element);
     },
     subscribe: function(property, item, value, oldValue, sibling) {
-      changeItem(this, property, item, value, oldValue, sibling, data);
+      data.items && changeItem(this, property, item, value, oldValue, sibling, data);
       inst[name$] && !VOM.prototype[property] && inst[name$](property, item, value, oldValue);
       inst[name$$] && inst[name$$](property, item, value, oldValue, !!VOM.prototype[property]);
     },
@@ -286,12 +286,12 @@ function setNewItem(vomInstance, param) {
   if (instContainer !== rootElement) {
     define(item, 'elements', { element: element, container: container });
     define(item, 'views', getViewMap(element, function(elm) {}));
-    define(item, 'events', getEventMap(element, function(eventName) {
+    define(item, 'events', getAttrMap(element, 'cr-event', function(eventName) {
       data.controller.installEvent(data.instance, rootElement, eventName);
     }));
   } else {
     data.items.views = getViewMap(element, function(elm) {});
-    data.items.events = getEventMap(rootElement, function(eventName) {
+    data.items.events = getAttrMap(rootElement, 'cr-event', function(eventName) {
       data.controller.installEvent(data.instance, rootElement, eventName, data.items);
     });
   }
@@ -345,7 +345,7 @@ function blickItems(data, item, collector, id, property, value, oldValue) {
 
     elm = blickItem.fn(blickItem.parent);
     if (data.controller && elm) for (var m = elm.length; m--; ) {
-      getEventMap(elm[m], function(eventName, fnName, element) {
+      getAttrMap(elm[m], 'cr-event', function(eventName, fnName, element) {
         var elms = (item.events || data.items.events)[eventName];
 
         if (!elms) {
@@ -479,22 +479,28 @@ function processTemplate(element, defData) {
   return result;
 }
 
-function getEventMap(element, fn) {
+function getAttrMap(element, attr, fn) {
   var events = {};
-  var elements = [element].concat([].slice.call($$('[cr-event]', element)));
+  var elements = [element].concat([].slice.call($$('[' + attr + ']', element)));
 
   for (var n = elements.length, attribute = '', chunks = []; n--; ) {
-    attribute = elements[n].getAttribute('cr-event');
+    attribute = elements[n].getAttribute(attr);
     chunks = attribute ? attribute.split(/\s*;+\s*/) : [];
  
     for (var m = chunks.length, item = [], type = '', func = ''; m--; ) {
       item = chunks[m].split(/\s*:+\s*/);
       type = item[0];
       func = item[1];
-      events[type] = events[type] || {};
-      events[type][func] = events[type][func] || [];
-      events[type][func].push(elements[n]);
-      fn && fn(type, func, element);
+      if (!func) {
+        events[type] = events[type] || [];
+        events[type].push(elements[n]);
+        fn && fn(type, elements[n]);
+      } else {
+        events[type] = events[type] || {};
+        events[type][func] = events[type][func] || [];
+        events[type][func].push(elements[n]);
+        fn && fn(type, func, element);
+      }
     }
     // elements[n].removeAttribute('cr-event');
   }
