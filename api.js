@@ -35,7 +35,7 @@ prototype.subscribe = function(inst, comp, attr, callback, trigger) {
   if (trigger && comp[attr].value !== undefined) {
     (callback.callback || callback).call(this, comp[attr].value);
   }
-  return (callback.callback || callback);
+  return function() { this.unsubscribe(inst, comp, attr, callback) };
 };
 
 prototype.publish = function(inst, comp, attr, data) {

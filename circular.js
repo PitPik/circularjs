@@ -68,7 +68,7 @@ Object.defineProperties(Circular.prototype, mixinAPI({
   getComponent: { value: function(name) {
     var data = instances[this.id][name];
 
-    return data.instance;
+    return data && data.instance;
   }},
   destroy: { value: function() {
     var insts = instances[this.id];
@@ -118,7 +118,6 @@ function initComponent(element, defData, Klass, innerComponents) {
   ['partials', 'helpers', 'decorators', 'attributes'].forEach(function(key) {
     if (!defData[key]) defData[key] = crInst.options[key];
   });
-
   items = {
     'cr-id': (element.setAttribute('cr-id', 'cr-' + id), id),
     elements: { element: element },
@@ -126,8 +125,8 @@ function initComponent(element, defData, Klass, innerComponents) {
     parentNode: {},
     views: {},
   };
-  name = element.getAttribute('cr-name') || items['cr-id'];
-  instance = new Klass(element, crInst);
+  name = items['cr-id']; // element.getAttribute('cr-name') || TODO: also name
+  instance = getInstance(Klass, element, crInst, id);
   controller = new Controller({ element: element });
   models = keys(templates).concat(keys(defData.subscribe$));
   models = models.filter(function(item, idx) { return models.indexOf(item) === idx })
@@ -152,17 +151,59 @@ function initComponent(element, defData, Klass, innerComponents) {
     instance: instance,
     controller: controller,
     models: models,
+    parent: '', // TODO.....
+    subscribers: [],
   };
 
+  id++;
   element.removeAttribute('cr-cloak');
   Object.defineProperty(instance, '__cr-id', { value: crInst.id + ':' + name });
   initComponents = function(context) {
     crInst.initComponents(null, context || element);
   };
-  instance.onInit && instance.onInit(element, items, initComponents, crInst);
+  instance.onInit && instance.onInit(element, items, initComponents);
   defData.autoInit !== false && initComponents();
 
-  return id++, instance;
+  return instance;
+}
+
+function getInstance(Klass, element, crInst, instId) {
+  var parent = {};
+  var parentId = '';
+  var parentValues = {};
+
+  parent = Toolbox.closest(element.parentNode, '[cr-id^="cr-"]');
+  parentId = parent && parent.getAttribute('cr-id').substr(3)// .split(':')[2];
+  parentValues = parent && processInput(element, parent && crInst.getComponent(parentId)) || {};
+
+  return new Klass(element, crInst, function(scope, subscribe) {
+    for (var key in parentValues.vars) scope[key] = parentValues.vars[key];
+    if (subscribe) {
+      for (var key in parentValues.origin) {
+        // instances[crInst.id][scope['__cr-id']].subscribers.push((function(value) {
+        (function(names, key) {
+          crInst.subscribe(crInst.id, crInst.id + ':' + parentId, key, function(value) {
+            scope[names[key]] = value;
+          }, true);
+        })(parentValues.names, key);
+      }
+    }
+  }, function() { return crInst.getComponent(parentId) });
+}
+
+function processInput(element, parent) {
+  var input = element.getAttribute('cr-input');
+  var vars = input && input.split(/\s*,\s*/) || [];
+  var name = [];
+  var out = { vars: {}, origin: {}, names : {}};
+
+  for (var n = vars.length; n--; ) {
+    name = vars[n].split(/\s+as\s+/);
+    out.vars[name[1] || name[0]] = parent[name[0]];
+    out.origin[name[0]] = parent[name[0]];
+    out.names[name[0]] = name[1] || name[0];
+  }
+  return out;
 }
 
 /* ---------------------------------------------------------- */
@@ -245,6 +286,7 @@ function getVOMInstance(data) {
       data.items && changeItem(this, property, item, value, oldValue, sibling, data);
       inst[name$] &&  !intern && inst[name$](property, item, value, oldValue);
       inst[name$$] && inst[name$$](property, item, value, oldValue, intern);
+      !intern && data.crInstance.publish(data.crInstance.id, inst['__cr-id'], property, value);
     },
   });
 }
@@ -283,7 +325,9 @@ function setNewItem(vomInstance, param) {
   var container = isChild ? parent :
     element.hasAttribute('cr-mount') ? element : $('[cr-mount]', element);
 
-  element.setAttribute('cr-id', vomInstance.id + ':' + (item['cr-id'] || 0));
+  if (!element.hasAttribute('cr-id')) {
+    element.setAttribute('cr-id', vomInstance.id + ':' + (item['cr-id'] || 0));
+  }
 
   if (instContainer !== rootElement) {
     define(item, 'elements', { element: element, container: container });
@@ -347,7 +391,6 @@ function blickItems(data, item, collector, id, property, value, oldValue) {
 
     elm = blickItem.fn(blickItem.parent);
     if (data.controller && elm) for (var m = elm.length; m--; ) {
-      // console.log(123, elm[m]);
       getAttrMap(elm[m], 'cr-event', function(eventName, fnName) {
         var elms = (item.events || data.items.events)[eventName];
 

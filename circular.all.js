@@ -1616,7 +1616,9 @@ define("api", [ "VOM", "blick", "toolbox" ], function(VOM, Blick, Toolbox) {
             if (trigger && comp[attr].value !== undefined) {
                 (callback.callback || callback).call(this, comp[attr].value);
             }
-            return callback.callback || callback;
+            return function() {
+                this.unsubscribe(inst, comp, attr, callback);
+            };
         };
         prototype.publish = function(inst, comp, attr, data) {
             inst = typeof inst === "string" ? inst : this.name;
@@ -2010,7 +2012,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         getComponent: {
             value: function(name) {
                 var data = instances[this.id][name];
-                return data.instance;
+                return data && data.instance;
             }
         },
         destroy: {
@@ -2066,8 +2068,8 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
             parentNode: {},
             views: {}
         };
-        name = element.getAttribute("cr-name") || items["cr-id"];
-        instance = new Klass(element, crInst);
+        name = items["cr-id"];
+        instance = getInstance(Klass, element, crInst, id);
         controller = new Controller({
             element: element
         });
@@ -2094,8 +2096,11 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         instances[crInst.id][name] = {
             instance: instance,
             controller: controller,
-            models: models
+            models: models,
+            parent: "",
+            subscribers: []
         };
+        id++;
         element.removeAttribute("cr-cloak");
         Object.defineProperty(instance, "__cr-id", {
             value: crInst.id + ":" + name
@@ -2103,9 +2108,48 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         initComponents = function(context) {
             crInst.initComponents(null, context || element);
         };
-        instance.onInit && instance.onInit(element, items, initComponents, crInst);
+        instance.onInit && instance.onInit(element, items, initComponents);
         defData.autoInit !== false && initComponents();
-        return id++, instance;
+        return instance;
+    }
+    function getInstance(Klass, element, crInst, instId) {
+        var parent = {};
+        var parentId = "";
+        var parentValues = {};
+        parent = Toolbox.closest(element.parentNode, '[cr-id^="cr-"]');
+        parentId = parent && parent.getAttribute("cr-id").substr(3);
+        parentValues = parent && processInput(element, parent && crInst.getComponent(parentId)) || {};
+        return new Klass(element, crInst, function(scope, subscribe) {
+            for (var key in parentValues.vars) scope[key] = parentValues.vars[key];
+            if (subscribe) {
+                for (var key in parentValues.origin) {
+                    (function(names, key) {
+                        crInst.subscribe(crInst.id, crInst.id + ":" + parentId, key, function(value) {
+                            scope[names[key]] = value;
+                        }, true);
+                    })(parentValues.names, key);
+                }
+            }
+        }, function() {
+            return crInst.getComponent(parentId);
+        });
+    }
+    function processInput(element, parent) {
+        var input = element.getAttribute("cr-input");
+        var vars = input && input.split(/\s*,\s*/) || [];
+        var name = [];
+        var out = {
+            vars: {},
+            origin: {},
+            names: {}
+        };
+        for (var n = vars.length; n--; ) {
+            name = vars[n].split(/\s+as\s+/);
+            out.vars[name[1] || name[0]] = parent[name[0]];
+            out.origin[name[0]] = parent[name[0]];
+            out.names[name[0]] = name[1] || name[0];
+        }
+        return out;
     }
     function getPlaceHolder(element, idx) {
         var placeholder = idx && element.querySelector('script[data-idx="' + idx + '"]');
@@ -2179,6 +2223,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                 data.items && changeItem(this, property, item, value, oldValue, sibling, data);
                 inst[name$] && !intern && inst[name$](property, item, value, oldValue);
                 inst[name$$] && inst[name$$](property, item, value, oldValue, intern);
+                !intern && data.crInstance.publish(data.crInstance.id, inst["__cr-id"], property, value);
             }
         });
     }
@@ -2211,7 +2256,9 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         var isNew = item.__index !== undefined && !item.childNodes;
         var element = !fragment ? instContainer : !isNew ? render(fragment.children[0], param.type, parent, sibling, true) : fragment.children[0];
         var container = isChild ? parent : element.hasAttribute("cr-mount") ? element : $("[cr-mount]", element);
-        element.setAttribute("cr-id", vomInstance.id + ":" + (item["cr-id"] || 0));
+        if (!element.hasAttribute("cr-id")) {
+            element.setAttribute("cr-id", vomInstance.id + ":" + (item["cr-id"] || 0));
+        }
         if (instContainer !== rootElement) {
             define(item, "elements", {
                 element: element,
