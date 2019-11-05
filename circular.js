@@ -54,12 +54,13 @@ Object.defineProperties(Circular.prototype, mixinAPI({
       var data = instances[id[0]][id[1]];
       var instance = data.instance;
 
-      for (var key in instance) if ( // removes collectors and rendering
+      for (var key in instance) if ( // removes collectors, rendering, ...
         instance[key] &&
         instance.hasOwnProperty(key) &&
         isArray(instance[key])) instance[key] = [];
       data.controller.removeEvents(keys(data.controller.events));
       data.models.forEach(function(model) { model.destroy() });
+      data.subscribers.forEach(function(unsubscribe) { unsubscribe() });
       for (var key in data) data[key] = null;
 
       delete instances[id[0]][id[1]];
@@ -81,29 +82,40 @@ Object.defineProperties(Circular.prototype, mixinAPI({
 
 return Object.defineProperties(Circular, {
   Component: { value: function(defData, Klass) {
+    defData.plugins = {};
     return components[defData.selector] || (components[defData.selector] = {
       Klass: Klass,
       selector: defData.selector,
       templates: processTemplate(templateWrapper, defData),
       styles: installStyles(defData.selector, defData),
       name: defData.name || Klass.name,
-      init: function init(element, innerComponents) {
+      init: function init(element, innerComponents, plugData) {
         var elm = typeof element === 'string' ? $(element) : element;
-
-        return initComponent(elm, defData, Klass, innerComponents);
+      
+      return initComponent(elm, defData, Klass, innerComponents, plugData);
+      },
+      prepare: function prepare(element, pData, values) {
+        (pData.plugins[defData.selector] = pData.plugins[defData.selector] || [])
+          .push(values);
+    
+        return preparePlugin(element, defData);
       },
     });
+  }},
+  Plugin: { value: function(defData, Klass) {
+    return Circular.Component(defData, Klass);
   }},
 });
 
 /* -------------------- private functions ------------------- */
 
-function initComponent(element, defData, Klass, innerComponents) {
+function initComponent(element, defData, Klass, innerComponents, plugData) {
   var selector = defData.selector;
   var component = components[selector];
   var items = {};
   var name = '';
   var instance = {};
+  var inst = {};
   var crInst = defData.circular || Circular.instance;
   var initComponents = {};
   var controller = {};
@@ -111,7 +123,7 @@ function initComponent(element, defData, Klass, innerComponents) {
   var templates = component.templates;
   var elmId = element.getAttribute('cr-id');
 
-  if (elmId) {
+  if (elmId && !plugData) {
     return instances[crInst.id + ':' + (element.getAttribute('cr-name') || elmId)];
   }
 
@@ -119,17 +131,24 @@ function initComponent(element, defData, Klass, innerComponents) {
     if (!defData[key]) defData[key] = crInst.options[key];
   });
   items = {
-    'cr-id': (element.setAttribute('cr-id', 'cr-' + id), id),
+    'cr-id': !plugData && (element.setAttribute('cr-id', 'cr-' + id), id) || id,
     elements: { element: element },
     events: {},
     parentNode: {},
     views: {},
   };
   name = items['cr-id']; // element.getAttribute('cr-name') || TODO: also name
-  instance = getInstance(Klass, element, crInst, id);
-  controller = new Controller({ element: element });
+  inst = instances[crInst.id][name] = {
+    instance: {}, // for overwrite
+    controller: {}, // for overwrite
+    models: [], // for overwrite
+    parent: '', // for overwrite
+    subscribers: [],
+  };
+  instance = inst.instance = getInstance(Klass, element, crInst, id++, plugData, defData, inst);
+  controller = inst.controller = new Controller({ element: element });
   models = keys(templates).concat(keys(defData.subscribe$));
-  models = models.filter(function(item, idx) { return models.indexOf(item) === idx })
+  inst.models = models.filter(function(item, idx) { return models.indexOf(item) === idx })
   .sort(function(a) { return a === 'this' ? -1 : 0 })
   .map(function(key) {
     if (!key) return;
@@ -137,9 +156,9 @@ function initComponent(element, defData, Klass, innerComponents) {
       instance: instance,
       items: items,
       defData: defData,
-      template: templates[key] && templates[key].template,
-      childTemplate: templates[key] && templates[key].child,
-      templateContainer: templates[key] ?
+      template: !plugData && templates[key] && templates[key].template,
+      childTemplate: !plugData && templates[key] && templates[key].child,
+      templateContainer: !plugData && templates[key] ?
         getPlaceHolder(element, templates[key].container + '') : element,
       modelName: key,
       listeners: defData.subscribe$ && defData.subscribe$[key],
@@ -147,15 +166,22 @@ function initComponent(element, defData, Klass, innerComponents) {
       controller: controller,
     });
   });
-  instances[crInst.id][name] = {
-    instance: instance,
-    controller: controller,
-    models: models,
-    parent: '', // TODO.....
-    subscribers: [],
-  };
 
-  id++;
+  for (var key in defData.plugins) {
+    defData.plugins[key].forEach(function(variables) {
+      var elm = $$('[cr-pl-temp]', element); // TODO: check if this really works...
+
+      for (var n = 0, m = elm.length; n < m; n++) {
+        components[key].init(elm[n], innerComponents, {
+          variables: variables,
+          parentId: id - 1,
+          parent: instance,
+        });
+        elm[n].removeAttribute('cr-pl-temp');
+      }
+    });
+    }
+
   element.removeAttribute('cr-cloak');
   Object.defineProperty(instance, '__cr-id', { value: crInst.id + ':' + name });
   initComponents = function(context) {
@@ -167,43 +193,77 @@ function initComponent(element, defData, Klass, innerComponents) {
   return instance;
 }
 
-function getInstance(Klass, element, crInst, instId) {
-  var parent = {};
-  var parentId = '';
-  var parentValues = {};
+/* -------------- scoping ------------ */
 
-  parent = Toolbox.closest(element.parentNode, '[cr-id^="cr-"]');
-  parentId = parent && parent.getAttribute('cr-id').substr(3)// .split(':')[2];
-  parentValues = parent && processInput(element, parent && crInst.getComponent(parentId)) || {};
+function getInstance(Klass, element, crInst, instId, plugData, defData, inst) {
+  var plug = plugData || {};
+  var parent = plug.parent || Toolbox.closest(element.parentNode, '[cr-id^="cr-"]');
+  var parentId = plug.parentId || parent && parent.getAttribute('cr-id').substr(3);
+  var parentValues = plug.parent && processInput(plug.variables, inst.parent = plug.parent) ||
+    parent && processInput(
+      element.getAttribute('cr-input'),
+      inst.parent = parent && crInst.getComponent(parentId)
+    ) || {};
 
   return new Klass(element, crInst, function(scope, subscribe) {
     for (var key in parentValues.vars) scope[key] = parentValues.vars[key];
-    if (subscribe) {
+    if (subscribe !== false) {
       for (var key in parentValues.origin) {
-        // instances[crInst.id][scope['__cr-id']].subscribers.push((function(value) {
-        (function(names, key) {
-          crInst.subscribe(crInst.id, crInst.id + ':' + parentId, key, function(value) {
+        if (parentValues.static[key]) continue;
+        instances[crInst.id][instId].subscribers.push((function(names, key) {
+          return crInst.subscribe(crInst.id, crInst.id + ':' + parentId, key, function(value) {
             scope[names[key]] = value;
           }, true);
-        })(parentValues.names, key);
+        })(parentValues.names, key));
       }
     }
+    plugData && installEvents(plugData.parent, scope, defData);
   }, function() { return crInst.getComponent(parentId) });
 }
 
-function processInput(element, parent) {
-  var input = element.getAttribute('cr-input');
+function installEvents(parent, scope, defData) {
+  var events = defData.events || {};
+
+  for (var key in events) {
+    parent['pl-' + events[key]] = function(e, elm, item) {
+      return scope[events[key]](e, elm, item);
+    }
+  }
+}
+
+function processInput(input, parent) { // TODO: enable static 'vars'
   var vars = input && input.split(/\s*,\s*/) || [];
   var name = [];
-  var out = { vars: {}, origin: {}, names : {}};
+  var out = { vars: {}, origin: {}, names: {}, static: {} };
+  var isStatic = false;
+  var staticValue = '';
+  var key = '';
 
   for (var n = vars.length; n--; ) {
     name = vars[n].split(/\s+as\s+/);
-    out.vars[name[1] || name[0]] = parent[name[0]];
-    out.origin[name[0]] = parent[name[0]];
-    out.names[name[0]] = name[1] || name[0];
+    isStatic = name[0].charAt(0) === '\'';
+    staticValue = isStatic ? name[0].replace(/'/g, '') : '';
+    key = staticValue || name[0];
+
+    out.vars[name[1] || key] = staticValue || parent[key];
+    out.origin[key] = staticValue || parent[key];
+    out.names[key] = name[1] || key;
+    out.static[key] = isStatic;
   }
   return out;
+}
+
+/* -------------- plugins ------------ */
+
+function preparePlugin(element, defData) {
+  var events = element.getAttribute('cr-event');
+  var all = events ? [events] : [];
+
+  for (var key in defData.events) {
+    all.push(key + ': pl-' + defData.events[key]);
+  }
+  element.setAttribute('cr-event', all.join('; '));
+  element.setAttribute('cr-pl-temp', defData.selector);
 }
 
 /* ---------------------------------------------------------- */
@@ -276,14 +336,15 @@ function getVOMInstance(data) {
     enrichModelCallback: inst[name + '$Enrich'] || function() {},
     listeners: data.listeners,
     preRecursionCallback: function(item, type, siblPar) {
-      var element = data.items && setNewItem(this, { item: item, type: type, siblPar: siblPar, data: data });
+      var element = data.template &&
+        setNewItem(this, { item: item, type: type, siblPar: siblPar, data: data });
 
       inst[name$PR] && inst[name$PR](this, item, element);
     },
     subscribe: function(property, item, value, oldValue, sibling) {
       var intern = property === 'childNodes' || !!VOM.prototype[property];
 
-      data.items && changeItem(this, property, item, value, oldValue, sibling, data);
+      data.template && changeItem(this, property, item, value, oldValue, sibling, data);
       inst[name$] &&  !intern && inst[name$](property, item, value, oldValue);
       inst[name$$] && inst[name$$](property, item, value, oldValue, intern);
       !intern && data.crInstance.publish(data.crInstance.id, inst['__cr-id'], property, value);
@@ -508,6 +569,10 @@ function processTemplate(element, defData) {
   var _ = element.innerHTML = defData.template;
   var templates = element.querySelectorAll('[cr-for]');
   var result = {};
+
+  getAttrMap(element, 'cr-plugin', function(key, value, element) {
+    components[key] && components[key].prepare(element, defData, value);
+  });
 
   templates.forEach(function(elm, idx) {
     var child = $('[cr-child]', elm);

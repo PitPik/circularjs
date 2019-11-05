@@ -16,6 +16,8 @@ prototype.model = function(model, options) {
   /* --------------------  pubsub  ----------------------- */
 
 prototype.subscribe = function(inst, comp, attr, callback, trigger) {
+  var _this = this;
+
   inst = inst ? inst.name || inst.components && inst.components[comp] || inst : this.name;
   pubsub[inst] = pubsub[inst] || {};
   comp = pubsub[inst][comp] = pubsub[inst][comp] || {};
@@ -35,7 +37,8 @@ prototype.subscribe = function(inst, comp, attr, callback, trigger) {
   if (trigger && comp[attr].value !== undefined) {
     (callback.callback || callback).call(this, comp[attr].value);
   }
-  return function() { this.unsubscribe(inst, comp, attr, callback) };
+
+  return function() { _this.unsubscribe(inst, comp, attr, callback) };
 };
 
 prototype.publish = function(inst, comp, attr, data) {
