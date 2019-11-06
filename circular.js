@@ -38,14 +38,14 @@ function initCircular(_this, name, options) {
 }
 
 Object.defineProperties(Circular.prototype, mixinAPI({
-  initComponents: { value: function(selector, context) {
+  initComponents: { value: function(selector, context, parent) {
     var selectors = selector ? [selector] : keys(components);
     var innerComponents = getInnerComponents(selectors, [], context); // TODO: remove
 
     return innerComponents.map(function(element) {
       return components[
         element.getAttribute('cr-component') || element.tagName.toLowerCase()
-      ].init(element, context && innerComponents);
+      ].init(element, context && innerComponents, null, parent);
     }).filter(function(element) { return element });
   }},
   initPlugins: { value: function(key, value, element, inst) {
@@ -54,11 +54,7 @@ Object.defineProperties(Circular.prototype, mixinAPI({
     var all = self ? [element].concat(elms) : elms;
 
     for (var n = 0, m = all.length; n < m; n++) {
-      components[key].init(all[n], [], {
-        variables: value[n],
-        parentId: inst['__cr-id'].split(':')[1],
-        parent: inst,
-      });
+      components[key].init(all[n], [], value[n], inst);
     }
   }},
   destroyComponents: { value: function(insts) {
@@ -103,10 +99,10 @@ return Object.defineProperties(Circular, {
       templates: processTemplate(templateWrapper, defData),
       styles: installStyles(defData.selector, defData),
       name: defData.name || Klass.name,
-      init: function init(element, innerComponents, plugData) {
+      init: function init(element, innerComponents, plugData, parent) {
         var elm = typeof element === 'string' ? $(element) : element;
 
-        return initComponent(elm, defData, Klass, plugData);
+        return initComponent(elm, defData, Klass, plugData, parent);
       },
       prepare: function prepare(element, pData, values) {
         var plug = pData.plugins[defData.selector] = pData.plugins[defData.selector] || {};
@@ -125,7 +121,7 @@ return Object.defineProperties(Circular, {
 
 /* -------------------- private functions ------------------- */
 
-function initComponent(element, defData, Klass, plugData) {
+function initComponent(element, defData, Klass, plugData, parent) {
   var selector = defData.selector;
   var component = components[selector];
   var items = {};
@@ -160,7 +156,8 @@ function initComponent(element, defData, Klass, plugData) {
     parent: '', // for overwrite
     subscribers: [],
   };
-  instance = inst.instance = getInstance(Klass, element, crInst, id++, plugData, defData, inst);
+  instance = inst.instance =
+    getInstance(Klass, element, crInst, id++, plugData, defData, inst, parent);
   Object.defineProperty(instance, '__cr-id', { value: crInst.id + ':' + name });
   controller = inst.controller = new Controller({ element: element });
   models = keys(templates).concat(keys(defData.subscribe$));
@@ -191,15 +188,10 @@ function initComponent(element, defData, Klass, plugData) {
 
 /* -------------- scoping ------------ */
 
-function getInstance(Klass, element, crInst, instId, plugData, defData, inst) {
-  var plug = plugData || {};
-  var parent = plug.parent || Toolbox.closest(element.parentNode, '[cr-id^="cr-"]');
-  var parentId = plug.parentId || parent && parent.getAttribute('cr-id').substr(3);
-  var parentValues = plug.parent && processInput(plug.variables, inst.parent = plug.parent) ||
-    parent && processInput(
-      element.getAttribute('cr-input'),
-      inst.parent = parent && crInst.getComponent(parentId)
-    ) || {};
+function getInstance(Klass, element, crInst, instId, plugData, defData, inst, parentComp) {
+  var data = plugData || element.getAttribute('cr-input');
+  var parentValues = processInput(data, inst.parent = parentComp) || {};
+  var parentId = parentComp && parentComp['__cr-id'].split(':')[1];
 
   return new Klass(element, crInst, function(scope, subscribe) {
     for (var key in parentValues.vars) scope[key] = parentValues.vars[key];
@@ -213,8 +205,8 @@ function getInstance(Klass, element, crInst, instId, plugData, defData, inst) {
         })(parentValues.names, key));
       }
     }
-    plugData && installEvents(plugData.parent, scope, defData);
-  }, function() { return crInst.getComponent(parentId) });
+    plugData && installEvents(parentComp, scope, defData);
+  }, function() { return parentComp });
 }
 
 function installEvents(parent, scope, defData) {
@@ -419,7 +411,7 @@ function initComponentsAndPlugins(element, defData, modelName, isChild, crInstan
   // components
   for (var key in components) {
     if (what && components[key][what][modelName]) {
-      insts = insts.concat(crInstance.initComponents(key, element));
+      insts = insts.concat(crInstance.initComponents(key, element, instance));
     }
   }
   // plugins
