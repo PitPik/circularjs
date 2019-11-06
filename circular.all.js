@@ -2001,6 +2001,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                 var all = self ? [ element ].concat(elms) : elms;
                 for (var n = 0, m = all.length; n < m; n++) {
                     components[key].init(all[n], [], value[n], inst);
+                    all[n].removeAttribute("cr-plugin");
                 }
             }
         },
@@ -2139,6 +2140,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         var data = plugData || element.getAttribute("cr-input");
         var parentValues = processInput(data, inst.parent = parentComp) || {};
         var parentId = parentComp && parentComp["__cr-id"].split(":")[1];
+        element.removeAttribute("cr-input");
         return new Klass(element, crInst, function(scope, subscribe) {
             for (var key in parentValues.vars) scope[key] = parentValues.vars[key];
             if (subscribe !== false) {
