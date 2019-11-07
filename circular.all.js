@@ -186,13 +186,15 @@
     }
 })(this, function(window, undefined) {
     "use strict";
-    var resourceCache = null, _link = document.createElement("a"), types = {
+    var _link = document.createElement("a");
+    var types = {
         undefined: undefined,
         null: null,
         NaN: NaN,
         true: true,
         false: false
-    }, Toolbox = {
+    };
+    var Toolbox = {
         convertToType: function(value) {
             return types.hasOwnProperty(value) ? types[value] : value.toString && +value.toString() === value ? +value : value;
         },
@@ -266,9 +268,7 @@
             return collection;
         },
         removeEvents: function(collection) {
-            for (var n = collection.length; n--; ) {
-                collection[n]();
-            }
+            for (var n = collection.length; n--; ) collection[n]();
         },
         addEvent: function(element, type, func, cap) {
             cap = cap !== undefined ? cap : /(?:focus|blur|mouseenter|mouseleave)/.test(type) ? true : false;
@@ -366,63 +366,7 @@
         errorHandler: function(e) {
             console.error(e);
         },
-        Promise: Promise,
-        requireResources: function(data, type, container) {
-            var promises = [];
-            var item = null;
-            var resourceName = "";
-            var absolute = false;
-            var path = "";
-            var text = "";
-            var isStyles = type === "styles";
-            var attribute = isStyles ? "href" : "src";
-            var items = isStyles ? data.styleSheets : data.scripts;
-            var cache = resourceCache = resourceCache || Toolbox.captureResources();
-            while (item = items.shift()) {
-                resourceName = item.getAttribute(attribute);
-                absolute = resourceName && resourceName.indexOf("://") !== -1;
-                path = Toolbox.normalizePath(data.path && !absolute ? data.path + "/" + resourceName : "" + resourceName);
-                if (resourceName && cache[path]) continue;
-                if (!isStyles) {
-                    text = item.text;
-                    item = document.createElement("script");
-                    item.setAttribute("type", "text/javascript");
-                    item.async = true;
-                    if (!resourceName) {
-                        item.text = text;
-                    }
-                }
-                if (resourceName) {
-                    item[attribute] = path;
-                    document.head.appendChild(item);
-                    cache[path] = item;
-                }
-                promises.push(new Toolbox.Promise(function(resolve) {
-                    if (resourceName && item.onload !== undefined) {
-                        item.onload = function() {
-                            resolve(this);
-                        };
-                    } else {
-                        !resourceName && (isStyles ? container : document.body).appendChild(item);
-                        resolve(item);
-                    }
-                }));
-            }
-            return Toolbox.Promise.all(promises);
-        },
-        captureResources: function() {
-            var cache = {};
-            var resources = [].slice.call(document.scripts).concat([].slice.call(Toolbox.$$("link", document)));
-            var path = "";
-            for (var n = resources.length; n--; ) {
-                path = resources[n].getAttribute("src") || resources[n].getAttribute("href");
-                if (path) {
-                    path = Toolbox.normalizePath(path);
-                    cache[path] = resources[n];
-                }
-            }
-            return cache;
-        }
+        Promise: Promise
     };
     window.Event = window.Event || function Event(event, params) {
         var evt = document.createEvent("CustomEvent");
@@ -1729,138 +1673,27 @@ define("api", [ "VOM", "blick", "toolbox" ], function(VOM, Blick, Toolbox) {
             }
             return engine;
         };
-        prototype.loadResource = function(fileName, cache) {
-            var _this = this, devFilter = function(elm) {
-                return !elm.hasAttribute("cr-dev");
-            };
-            return Toolbox.ajax(fileName, {
-                cache: cache
-            }).then(function(data) {
-                DOC = DOC || document.implementation.createHTMLDocument("");
-                DOC.documentElement.innerHTML = data;
-                return {
-                    scripts: [].slice.call(DOC.scripts).filter(function(elm) {
-                        return elm.type === "text/javascript" && devFilter(elm.parentNode.removeChild(elm));
-                    }),
-                    styleSheets: [].slice.call($$("link", DOC) || []).filter(devFilter).concat([].slice.call($$("style", DOC) || []).filter(devFilter)),
-                    body: DOC.body,
-                    head: DOC.head,
-                    path: fileName.split("/").slice(0, -1).join("/")
-                };
-            }).catch();
-        };
-        prototype.insertResources = function(container, data) {
-            var body = $('[cr-dev="container"]', data.body) || data.body;
-            Toolbox.requireResources(data, "styles", container);
-            while (body.childNodes[0]) container.appendChild(body.childNodes[0]);
-            return Toolbox.requireResources(data, "scripts", container);
-        };
-        prototype.insertModule = function(fileName, container) {
-            var _this = this;
-            return this.loadResource(fileName, true).then(function(data) {
-                return _this.insertResources(container, data).then(function() {
-                    return {
-                        path: data.path,
-                        container: container
-                    };
-                });
-            });
-        };
-        function moveChildrenToCache(data) {
-            var childNodes = data.container.childNodes;
-            while (childNodes[0]) {
-                (data.modulesMap || modulesMap)[data.previousName].cache.appendChild(childNodes[0]);
-            }
-        }
-        function transition(init, data, modules, modulePath) {
-            var promise = init && init.then ? init : data.data, container = data.container, previousName = data.previousName, previousModule = modules[previousName], name = data.name, wrap = modules[name].wrap, remove = function() {
-                if (!previousName || previousName === name) return;
-                previousModule.cache.appendChild(previousModule.wrap);
-            }, append = function() {
-                if (modules[name].dontWrap) {
-                    modules[name].wrap = wrap = modules[name].wrap.children[0];
-                    delete modules[name].dontWrap;
-                }
-                container && container.appendChild(wrap);
-                modulePath && data.init !== false && init(data.data, modulePath);
-            };
-            data.transition === true ? (remove(), append()) : data.transition({
-                container: container,
-                remove: remove,
-                append: append,
-                promise: new Toolbox.Promise(function(resolve) {
-                    promise ? promise.then(function(_data) {
-                        resolve();
-                        return _data;
-                    }) : resolve();
-                }),
-                component: wrap,
-                previousComponent: (previousModule || {}).wrap
-            });
-        }
         prototype.renderModule = function(data) {
-            var temp = null, isInsideDoc = data.container, modules = data.modulesMap || modulesMap, name = data.name, module = name && modules[name], init = module && module.init, hasTransition = data.transition, Promise = Toolbox.Promise;
-            if (modules[data.previousName] && (!hasTransition || !name)) {
-                moveChildrenToCache(data);
-            }
-            if (name && module) {
-                init = init && data.init !== false && init(data.data, module.path);
-                hasTransition ? transition(init, data, modules) : data.container.appendChild(module.cache);
-                return new Promise(function(resolve) {
-                    resolve(data.returnData ? data.data : init);
+            var isValid = data.selector && data.container;
+            var container = isValid && typeof data.container === "string" ? $(data.container) : data.container;
+            var componentElm = isValid && document.createElement(data.selector);
+            if (!isValid) return;
+            if (modulesMap[data.context + data.selector]) {
+                return new Toolbox.Promise(function(resolve, decline) {
+                    container.innerHTML = "";
+                    container.appendChild(modulesMap[data.context + data.selector].element);
+                    resolve(modulesMap[data.context + data.selector]);
                 });
             }
-            modules[name] = module = {
-                cache: document.createDocumentFragment(),
-                dontWrap: data.dontWrap
-            };
-            if (!isInsideDoc) {
-                temp = document.createElement("div");
-                temp.style.display = "none";
-                document.body.appendChild(temp);
-            }
-            if (hasTransition) {
-                module.wrap = document.createElement("div");
-                module.wrap.setAttribute("cr-wrap", name);
-                if (temp) {
-                    temp.appendChild(module.wrap);
-                } else if (!data.data || (data.preInit || []).indexOf(data.name) !== -1 || (data.preInit || [])[0] === "*") {
-                    data.container.appendChild(module.wrap);
-                }
-            }
-            return name ? this.insertModule(data.path, module.wrap || data.container || temp).then(function(moduleData) {
-                return new Promise(function(resolve) {
-                    var moduleName = data.require === true ? name : data.require === false ? "" : data.require;
-                    module.path = moduleData.path;
-                    if (moduleName) {
-                        require([ moduleName ], function(init) {
-                            module.init = init;
-                            if (!isInsideDoc && !hasTransition) {
-                                data.init !== false && init(data.data, moduleData.path);
-                                data.container = temp;
-                                moveChildrenToCache(data);
-                                temp.parentElement.removeChild(temp);
-                            } else if (hasTransition) {
-                                transition(init, data, modules, moduleData.path);
-                            } else {
-                                data.init !== false && init(data.data, moduleData.path);
-                            }
-                            if (data.data && data.data.then) {
-                                data.data.then(function() {
-                                    resolve(data.returnData ? data.data : init);
-                                });
-                            } else {
-                                resolve(data.returnData ? data.data : init);
-                            }
-                        });
-                    } else if (temp) {
-                        moveChildrenToCache(data);
-                        temp.parentElement.removeChild(temp);
-                        resolve();
-                    }
+            data.input && componentElm.addAtttribute("cr-input", data.input);
+            data.event && componentElm.addAtttribute("cr-event", data.event);
+            return new Toolbox.Promise(function(resolve, decline) {
+                require([ data.selector ], function(module) {
+                    container.innerHTML = "";
+                    container.appendChild(componentElm);
+                    if (data.init) module.init(componentElm);
+                    resolve(modulesMap[data.context + data.selector] = module);
                 });
-            }).catch() : new Promise(function(a) {
-                a();
             });
         };
         Object.defineProperties(Circular, {
@@ -1983,51 +1816,40 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         instances[_this.id] = {};
     }
     Object.defineProperties(Circular.prototype, mixinAPI({
-        initComponents: {
-            value: function(selector, context, parent) {
-                var selectors = selector ? [ selector ] : keys(components);
-                var innerComponents = getInnerComponents(selectors, [], context);
-                return innerComponents.map(function(element) {
-                    return components[element.getAttribute("cr-component") || element.tagName.toLowerCase()].init(element, context && innerComponents, null, parent);
-                }).filter(function(element) {
-                    return element;
-                });
-            }
-        },
-        initPlugins: {
-            value: function(key, value, element, inst) {
-                var self = (element.getAttribute("cr-plugin") || "").indexOf(key) !== -1;
-                var elms = [].slice.call($$('[cr-plugin*="' + key + '"]', element));
-                var all = self ? [ element ].concat(elms) : elms;
-                for (var n = 0, m = all.length; n < m; n++) {
-                    components[key].init(all[n], [], value[n], inst);
-                    all[n].removeAttribute("cr-plugin");
-                }
-            }
-        },
-        destroyComponents: {
-            value: function(insts) {
-                insts.forEach(function(inst) {
-                    var id = inst["__cr-id"].split(":");
-                    var data = instances[id[0]][id[1]];
-                    var instance = data.instance;
-                    for (var key in instance) if (instance[key] && instance.hasOwnProperty(key) && isArray(instance[key])) instance[key] = [];
-                    data.controller.removeEvents(keys(data.controller.events));
-                    data.models.forEach(function(model) {
-                        model.destroy();
-                    });
-                    data.subscribers.forEach(function(unsubscribe) {
-                        unsubscribe();
-                    });
-                    for (var key in data) data[key] = null;
-                    delete instances[id[0]][id[1]];
-                });
-            }
-        },
         getComponent: {
             value: function(name) {
                 var data = instances[this.id][name];
                 return data && data.instance;
+            }
+        },
+        getComponentBlueprint: {
+            value: function(name) {
+                return components[name];
+            }
+        },
+        destroyComponents: {
+            value: function(insts) {
+                var _this = this;
+                insts.forEach(function(inst) {
+                    _this.destroyComponent(inst);
+                });
+            }
+        },
+        destroyComponent: {
+            value: function(inst) {
+                var id = inst["__cr-id"].split(":");
+                var data = instances[id[0]][id[1]];
+                var instance = data.instance;
+                for (var key in instance) if (instance[key] && instance.hasOwnProperty(key) && isArray(instance[key])) instance[key] = [];
+                data.controller.removeEvents(keys(data.controller.events));
+                data.models.forEach(function(model) {
+                    model.destroy();
+                });
+                data.subscribers.forEach(function(unsubscribe) {
+                    unsubscribe();
+                });
+                for (var key in data) data[key] = null;
+                delete instances[id[0]][id[1]];
             }
         },
         destroy: {
@@ -2040,6 +1862,17 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         }
     }, Circular));
     return Object.defineProperties(Circular, {
+        Module: {
+            value: function(defData, Klass) {
+                var elm = $(defData.selector, defData.context);
+                var component = Circular.Component(defData, Klass);
+                return {
+                    component: component,
+                    instance: component.init(elm, null, getParentComponent(elm)),
+                    element: elm
+                };
+            }
+        },
         Component: {
             value: function(defData, Klass) {
                 defData.plugins = {};
@@ -2050,11 +1883,11 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                     templates: processTemplate(templateWrapper, defData),
                     styles: installStyles(defData.selector, defData),
                     name: defData.name || Klass.name,
-                    init: function init(element, innerComponents, plugData, parent) {
+                    init: function init(element, plugData, parent) {
                         var elm = typeof element === "string" ? $(element) : element;
                         return initComponent(elm, defData, Klass, plugData, parent);
                     },
-                    prepare: function prepare(element, pData, values) {
+                    preparePlugin: function preparePlugin(element, pData, values) {
                         var plug = pData.plugins[defData.selector] = pData.plugins[defData.selector] || {};
                         var where = plug[values.where] = plug[values.where] || {};
                         var model = where[values.modelName] = where[values.modelName] || [];
@@ -2089,7 +1922,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
             if (!defData[key]) defData[key] = crInst.options[key];
         });
         items = {
-            "cr-id": !plugData && (element.setAttribute("cr-id", "cr-" + id), id) || id,
+            "cr-id": !plugData && (element.setAttribute("cr-id", crInst.id + ":" + id), id) || id,
             elements: {
                 element: element
             },
@@ -2161,9 +1994,13 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
     function installEvents(parent, scope, defData) {
         var events = defData.events || {};
         for (var key in events) {
-            parent["pl-" + events[key]] = function(e, elm, item) {
-                return scope[events[key]](e, elm, item);
-            };
+            if (!parent["pl-" + events[key]]) (function(event) {
+                Object.defineProperty(parent, "pl-" + event, {
+                    value: function(e, elm, item) {
+                        return scope[event](e, elm, item);
+                    }
+                });
+            })(events[key]);
         }
     }
     function processInput(input, parent) {
@@ -2190,6 +2027,11 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         }
         return out;
     }
+    function getParentComponent(elm) {
+        var parent = elm.closest('[cr-id^="cr_"]');
+        var ids = parent && parent.getAttribute("cr-id").substr(3).split(":");
+        return ids && instances["cr_" + ids[0]][ids[1]];
+    }
     function preparePluginInTemplate(element, defData) {
         var events = element.getAttribute("cr-event");
         var all = events ? [ events ] : [];
@@ -2197,6 +2039,15 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
             all.push(key + ": pl-" + defData.events[key]);
         }
         element.setAttribute("cr-event", all.join("; "));
+    }
+    function initPlugins(key, value, element, inst) {
+        var self = (element.getAttribute("cr-plugin") || "").indexOf(key) !== -1;
+        var elms = [].slice.call($$('[cr-plugin*="' + key + '"]', element));
+        var all = self ? [ element ].concat(elms) : elms;
+        for (var n = 0, m = all.length; n < m; n++) {
+            components[key].init(all[n], value[n], inst);
+            all[n].removeAttribute("cr-plugin");
+        }
     }
     function getPlaceHolder(element, idx) {
         var placeholder = idx && element.querySelector('script[data-idx="' + idx + '"]');
@@ -2306,7 +2157,6 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         if (!element.hasAttribute("cr-id")) {
             element.setAttribute("cr-id", vomInstance.id + ":" + (item["cr-id"] || 0));
         }
-        initComponentsAndPlugins(element, data.defData, data.modelName, isChild, data.crInstance, data.instance);
         if (instContainer !== rootElement) {
             define(item, "elements", {
                 element: element,
@@ -2322,23 +2172,26 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                 data.controller.installEvent(data.instance, rootElement, eventName, data.items);
             });
         }
+        initComponentsAndPlugins(element, data.defData, data.modelName, isChild, data.instance);
         return element;
     }
-    function initComponentsAndPlugins(element, defData, modelName, isChild, crInstance, instance) {
-        var components = defData.components;
+    function initComponentsAndPlugins(element, defData, modelName, isChild, instance) {
+        var componentsDefs = defData.components;
         var plugins = defData.plugins;
         var isMain = modelName === "this";
         var isLoop = !isMain && !isChild;
         var what = isMain ? "main" : isLoop ? "loop" : isChild ? "child" : "";
         var insts = [];
-        for (var key in components) {
-            if (what && components[key][what][modelName]) {
-                insts = insts.concat(crInstance.initComponents(key, element, instance));
+        for (var key in componentsDefs) {
+            if (what && componentsDefs[key][what][modelName]) {
+                [].slice.call($$(key, element)).forEach(function(elm) {
+                    insts.push(components[key].init(elm, null, instance));
+                });
             }
         }
         for (var key in plugins) {
             if (what && plugins[key][what] && plugins[key][what][modelName]) {
-                crInstance.initPlugins(key, plugins[key][what][modelName], element, instance);
+                initPlugins(key, plugins[key][what][modelName], element, instance);
             }
         }
         return insts;
@@ -2409,7 +2262,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
             }
             if (elm && elm.length && data.defData.autoInit !== false) {
                 for (var x = 0, y = elm.length; x < y; x++) {
-                    blickItem.components = initComponentsAndPlugins(elm[x].parentNode, data.defData, data.modelName, false, data.crInstance, data.instance);
+                    blickItem.components = initComponentsAndPlugins(elm[x].parentNode, data.defData, data.modelName, false, data.instance);
                 }
             }
         }
@@ -2468,7 +2321,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         template.removeAttribute("cr-for");
         template.removeAttribute("cr-child");
         getAttrMap(template, "cr-plugin", function(key, value, element) {
-            components[key] && components[key].prepare(element, defData, {
+            components[key] && components[key].preparePlugin(element, defData, {
                 where: where,
                 modelName: modelName,
                 value: value

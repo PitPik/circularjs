@@ -189,12 +189,7 @@ prototype.template = function(template, options) {
 /* ------------------- resource loader -------------------- */
 
 prototype.renderModule = function(data) {
-  var options = {
-    data: '',
-    transition: true,
-    init: function() {}, // don't know
-  };
-
+  // TODO: data and transition
   var isValid = data.selector && data.container;
   var container = isValid && typeof data.container === 'string' ?
     $(data.container) : data.container;
@@ -212,182 +207,16 @@ prototype.renderModule = function(data) {
 
   data.input && componentElm.addAtttribute('cr-input', data.input);
   data.event && componentElm.addAtttribute('cr-event', data.event);
-  container.innerHTML = '';
-  container.appendChild(componentElm);
 
   return new Toolbox.Promise(function(resolve, decline) {
     require([data.selector], function(module) {
+      container.innerHTML = '';
+      container.appendChild(componentElm);
+      if (data.init) module.init(componentElm);
       resolve(modulesMap[data.context + data.selector] = module);
     });
   });
 };
-
-
-// prototype.loadResource = function(fileName, cache) {
-//   var _this = this,
-//     devFilter = function(elm) {
-//       return !elm.hasAttribute('cr-dev');
-//     };
-
-//   return Toolbox.ajax(fileName, { cache: cache }).then(function(data) {
-//     DOC = DOC || document.implementation.createHTMLDocument('');
-//     DOC.documentElement.innerHTML = data;
-
-//     return {
-//       scripts: [].slice.call(DOC.scripts).filter(function(elm) {
-//         return elm.type === 'text/javascript' &&
-//           devFilter(elm.parentNode.removeChild(elm));
-//       }),
-//       styleSheets: [].slice.call($$('link', DOC) || []).filter(devFilter)
-//         .concat([].slice.call($$('style', DOC) || []).filter(devFilter)),
-//       body: DOC.body,
-//       head: DOC.head,
-//       path: fileName.split('/').slice(0, -1).join('/'),
-//     };
-//   }).catch();
-// };
-
-// prototype.insertResources = function(container, data) {
-//   var body = $('[cr-dev="container"]', data.body) || data.body;
-
-//   Toolbox.requireResources(data, 'styles', container);
-//   while(body.childNodes[0]) container.appendChild(body.childNodes[0]);
-
-//   return Toolbox.requireResources(data, 'scripts', container);
-// };
-
-// prototype.insertModule = function(fileName, container) {
-//   var _this = this;
-
-//   return this.loadResource(fileName, true).then(function(data) {
-//     return _this.insertResources(container, data).then(function() {
-//       return { path: data.path, container: container };
-//     });
-//   });
-// };
-
-// function moveChildrenToCache(data) {
-//   var childNodes = data.container.childNodes;
-
-//   while (childNodes[0]) {
-//     (data.modulesMap || modulesMap)[data.previousName].cache.appendChild(childNodes[0]);
-//   }
-// }
-
-// function transition(init, data, modules, modulePath) {
-//   var promise = (init && init.then ? init : data.data),
-//     container = data.container,
-//     previousName = data.previousName,
-//     previousModule = modules[previousName],
-//     name = data.name,
-//     wrap = modules[name].wrap,
-//     remove = function() {
-//       if (!previousName || previousName === name) return;
-//       previousModule.cache.appendChild(previousModule.wrap);
-//     },
-//     append = function() {
-//       if (modules[name].dontWrap) {
-//         modules[name].wrap = wrap = modules[name].wrap.children[0];
-//         delete modules[name].dontWrap;
-//       }
-//       container && container.appendChild(wrap);
-//       modulePath && data.init !== false && init(data.data, modulePath);
-//     };
-
-//   data.transition === true ? (remove(), append()) :
-//     data.transition({
-//       container: container,
-//       remove: remove,
-//       append: append,
-//       promise: new Toolbox.Promise(function(resolve) {
-//         promise ? promise.then(function(_data) {
-//           resolve();
-//           return _data;
-//         }) : resolve();
-//       }),
-//       component: wrap, // TODO: test
-//       previousComponent: (previousModule || {}).wrap,
-//     });
-// }
-
-// prototype.renderModule = function(data) {
-//   var temp = null,
-//     isInsideDoc = data.container,
-//     modules = data.modulesMap || modulesMap, // speeds up var search
-//     name = data.name,
-//     module = name && modules[name],
-//     init = module && module.init,
-//     hasTransition = data.transition,
-//     Promise = Toolbox.Promise;
-
-//   if (modules[data.previousName] && (!hasTransition || !name)) { // remove old app
-//     moveChildrenToCache(data);
-//   }
-//   if (name && module) { // append current app and initialize
-//     init = init && data.init !== false && init(data.data, module.path);
-//     hasTransition ? transition(init, data, modules) :
-//       data.container.appendChild(module.cache);
-
-//     return new Promise(function(resolve) { resolve(data.returnData ? data.data : init) });
-//   }
-//   // create new app and initialize
-//   modules[name] = module = {
-//     cache: document.createDocumentFragment(),
-//     dontWrap: data.dontWrap
-//   };
-
-//   if (!isInsideDoc) { // TODO: find other solution
-//     temp = document.createElement('div');
-//     temp.style.display = 'none';
-//     document.body.appendChild(temp);
-//   }
-//   if (hasTransition) {
-//     module.wrap = document.createElement('div');
-//     module.wrap.setAttribute('cr-wrap', name);
-//     if (temp) {
-//       temp.appendChild(module.wrap);
-//     } else if (!data.data || (data.preInit || []).indexOf(data.name) !== -1 ||
-//         (data.preInit || [])[0] === '*') {
-//       data.container.appendChild(module.wrap);
-//     }
-//   }
-
-//   return name ? this.insertModule(data.path, module.wrap || data.container || temp)
-//     .then(function(moduleData) {
-//       return new Promise(function(resolve) {
-//         var moduleName = data.require === true ? name :
-//             data.require === false ? '' : data.require;
-//         module.path = moduleData.path;
-//         if (moduleName) {
-//           require([moduleName], function(init) {
-//             module.init = init;
-
-//             if (!isInsideDoc && !hasTransition) {
-//               data.init !== false && init(data.data, moduleData.path);
-//               data.container = temp;
-//               moveChildrenToCache(data);
-//               temp.parentElement.removeChild(temp);
-//             } else if (hasTransition) {
-//               transition(init, data, modules, moduleData.path);
-//             } else {
-//               data.init !== false && init(data.data, moduleData.path);
-//             }
-//             if (data.data && data.data.then) {
-//               data.data.then(function() {
-//                 resolve(data.returnData ? data.data : init);
-//               });
-//             } else {
-//               resolve(data.returnData ? data.data : init);
-//             }
-//           });
-//         } else if (temp) {
-//           moveChildrenToCache(data);
-//           temp.parentElement.removeChild(temp);
-//           resolve();
-//         }
-//       })
-//     }).catch() : new Promise(function(a){a()});
-// };
 
 /* ---------------------------------------------------------- */
 
