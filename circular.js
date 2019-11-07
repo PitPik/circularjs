@@ -43,9 +43,6 @@ Object.defineProperties(Circular.prototype, mixinAPI({
 
     return data && data.instance;
   }},
-  getComponentBlueprint: { value: function(name) {
-    return components[name];
-  }},
   destroyComponents: { value: function(insts) {
     var _this = this;
 
