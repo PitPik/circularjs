@@ -38,48 +38,34 @@ function initCircular(_this, name, options) {
 }
 
 Object.defineProperties(Circular.prototype, mixinAPI({
-  initComponents: { value: function(selector, context, parent) {
-    var selectors = selector ? [selector] : keys(components);
-    var innerComponents = getInnerComponents(selectors, [], context); // TODO: remove
-
-    return innerComponents.map(function(element) {
-      return components[
-        element.getAttribute('cr-component') || element.tagName.toLowerCase()
-      ].init(element, context && innerComponents, null, parent);
-    }).filter(function(element) { return element });
-  }},
-  initPlugins: { value: function(key, value, element, inst) {
-    var self = (element.getAttribute('cr-plugin') || '').indexOf(key) !== -1;
-    var elms = [].slice.call($$('[cr-plugin*="' + key + '"]', element));
-    var all = self ? [element].concat(elms) : elms;
-
-    for (var n = 0, m = all.length; n < m; n++) {
-      components[key].init(all[n], [], value[n], inst);
-      all[n].removeAttribute('cr-plugin');
-    }
-  }},
-  destroyComponents: { value: function(insts) {
-    insts.forEach(function(inst) {
-      var id = inst['__cr-id'].split(':'); // TODO: __cr-id
-      var data = instances[id[0]][id[1]];
-      var instance = data.instance;
-
-      for (var key in instance) if ( // removes collectors, rendering, ...
-        instance[key] &&
-        instance.hasOwnProperty(key) &&
-        isArray(instance[key])) instance[key] = [];
-      data.controller.removeEvents(keys(data.controller.events));
-      data.models.forEach(function(model) { model.destroy() });
-      data.subscribers.forEach(function(unsubscribe) { unsubscribe() });
-      for (var key in data) data[key] = null;
-
-      delete instances[id[0]][id[1]];
-    });
-  }},
   getComponent: { value: function(name) {
     var data = instances[this.id][name];
 
     return data && data.instance;
+  }},
+  getComponentBlueprint: { value: function(name) {
+    return components[name];
+  }},
+  destroyComponents: { value: function(insts) {
+    var _this = this;
+
+    insts.forEach(function(inst) {  _this.destroyComponent(inst) });
+  }},
+  destroyComponent: { value: function(inst) {
+    var id = inst['__cr-id'].split(':'); // TODO: __cr-id
+    var data = instances[id[0]][id[1]];
+    var instance = data.instance;
+
+    for (var key in instance) if ( // removes collectors, rendering, ...
+      instance[key] &&
+      instance.hasOwnProperty(key) &&
+      isArray(instance[key])) instance[key] = [];
+    data.controller.removeEvents(keys(data.controller.events));
+    data.models.forEach(function(model) { model.destroy() });
+    data.subscribers.forEach(function(unsubscribe) { unsubscribe() });
+    for (var key in data) data[key] = null;
+
+    delete instances[id[0]][id[1]];
   }},
   destroy: { value: function() {
     var insts = instances[this.id];
@@ -91,21 +77,32 @@ Object.defineProperties(Circular.prototype, mixinAPI({
 }, Circular));
 
 return Object.defineProperties(Circular, {
+  Module: { value: function(defData, Klass) {
+    var elm = $(defData.selector, defData.context);
+    var component = Circular.Component(defData, Klass);
+
+    return {
+      component: component,
+      instance: component.init(elm, null, getParentComponent(elm)),
+      element: elm,
+    };
+  }},
   Component: { value: function(defData, Klass) {
     defData.plugins = {};
     defData.components = {};
+
     return components[defData.selector] || (components[defData.selector] = {
       Klass: Klass,
       selector: defData.selector,
       templates: processTemplate(templateWrapper, defData),
       styles: installStyles(defData.selector, defData),
       name: defData.name || Klass.name,
-      init: function init(element, innerComponents, plugData, parent) {
+      init: function init(element, plugData, parent) {
         var elm = typeof element === 'string' ? $(element) : element;
 
         return initComponent(elm, defData, Klass, plugData, parent);
       },
-      prepare: function prepare(element, pData, values) {
+      preparePlugin: function preparePlugin(element, pData, values) {
         var plug = pData.plugins[defData.selector] = pData.plugins[defData.selector] || {};
         var where = plug[values.where] = plug[values.where] || {};
         var model = where[values.modelName] = where[values.modelName] || [];
@@ -143,7 +140,7 @@ function initComponent(element, defData, Klass, plugData, parent) {
     if (!defData[key]) defData[key] = crInst.options[key];
   });
   items = {
-    'cr-id': !plugData && (element.setAttribute('cr-id', 'cr-' + id), id) || id,
+    'cr-id': !plugData && (element.setAttribute('cr-id', crInst.id + ':' + id), id) || id,
     elements: { element: element },
     events: {},
     parentNode: {},
@@ -216,9 +213,11 @@ function installEvents(parent, scope, defData) {
   var events = defData.events || {};
 
   for (var key in events) {
-    parent['pl-' + events[key]] = function(e, elm, item) {
-      return scope[events[key]](e, elm, item);
-    }
+    if (!parent['pl-' + events[key]]) (function(event) {
+      Object.defineProperty(parent, 'pl-' + event, { value: function(e, elm, item) {
+        return scope[event](e, elm, item);
+      }});
+    })(events[key]);
   }
 }
 
@@ -244,6 +243,13 @@ function processInput(input, parent) { // TODO: enable static 'vars'
   return out;
 }
 
+function getParentComponent(elm) {
+  var parent = elm.closest('[cr-id^="cr_"]');
+  var ids = parent && parent.getAttribute('cr-id').substr(3).split(':');
+
+  return ids && instances['cr_' + ids[0]][ids[1]];
+}
+
 /* -------------- plugins ------------ */
 
 function preparePluginInTemplate(element, defData) {
@@ -255,6 +261,18 @@ function preparePluginInTemplate(element, defData) {
   }
   element.setAttribute('cr-event', all.join('; '));
 }
+
+function initPlugins(key, value, element, inst) {
+  var self = (element.getAttribute('cr-plugin') || '').indexOf(key) !== -1;
+  var elms = [].slice.call($$('[cr-plugin*="' + key + '"]', element));
+  var all = self ? [element].concat(elms) : elms;
+
+  for (var n = 0, m = all.length; n < m; n++) {
+    components[key].init(all[n], value[n], inst);
+    all[n].removeAttribute('cr-plugin');
+  }
+}
+
 
 /* ---------------------------------------------------------- */
 
@@ -379,16 +397,6 @@ function setNewItem(vomInstance, param) {
   if (!element.hasAttribute('cr-id')) {
     element.setAttribute('cr-id', vomInstance.id + ':' + (item['cr-id'] || 0));
   }
-
-  initComponentsAndPlugins(
-    element,
-    data.defData,
-    data.modelName,
-    isChild,
-    data.crInstance,
-    data.instance
-  );
-
   if (instContainer !== rootElement) {
     define(item, 'elements', { element: element, container: container });
     define(item, 'views', getViewMap(element, function(elm) {}));
@@ -401,26 +409,30 @@ function setNewItem(vomInstance, param) {
       data.controller.installEvent(data.instance, rootElement, eventName, data.items);
     });
   }
+  initComponentsAndPlugins(element, data.defData, data.modelName, isChild, data.instance);
+
   return element;
 }
 
-function initComponentsAndPlugins(element, defData, modelName, isChild, crInstance, instance) {
-  var components = defData.components;
+function initComponentsAndPlugins(element, defData, modelName, isChild, instance) {
+  var componentsDefs = defData.components;
   var plugins = defData.plugins;
   var isMain = modelName === 'this';
   var isLoop = !isMain && !isChild;
   var what = isMain ? 'main' : isLoop ? 'loop' : isChild ? 'child' : '';
   var insts = [];
   // components
-  for (var key in components) {
-    if (what && components[key][what][modelName]) {
-      insts = insts.concat(crInstance.initComponents(key, element, instance));
+  for (var key in componentsDefs) {
+    if (what && componentsDefs[key][what][modelName]) {
+      [].slice.call($$(key, element)).forEach(function(elm) {
+        insts.push(components[key].init(elm, null, instance));
+      });
     }
   }
   // plugins
   for (var key in plugins) {
     if (what && plugins[key][what] && plugins[key][what][modelName]) {
-      crInstance.initPlugins(key, plugins[key][what][modelName], element, instance);
+      initPlugins(key, plugins[key][what][modelName], element, instance);
     }
   }
   return insts;
@@ -502,7 +514,6 @@ function blickItems(data, item, collector, id, property, value, oldValue) {
           data.defData,
           data.modelName,
           false, // TODO: isChild,
-          data.crInstance,
           data.instance
         );
       }
@@ -579,7 +590,7 @@ function getTemplate(template, defData, where, modelName) {
   template.removeAttribute('cr-child');
 
   getAttrMap(template, 'cr-plugin', function(key, value, element) {
-    components[key] && components[key].prepare(element, defData, {
+    components[key] && components[key].preparePlugin(element, defData, {
       where: where,
       modelName: modelName,
       value: value,
