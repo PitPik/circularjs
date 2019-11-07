@@ -5,15 +5,18 @@ body {
   margin: 0 auto;
 }
 
-[cr-component="git-test"] a {
+git-test {
+  display: block;
+}
+git-test a {
   text-decoration: none;
   color: #f66;
 }
-[cr-component="git-test"] li {
+git-test li {
   line-height: 1.5em;
   margin-bottom: 20px;
 }
-[cr-component="git-test"] .author, [cr-component="git-test"] .date {
+git-test .author, git-test .date {
   font-weight: bold;
 }
 
@@ -77,7 +80,9 @@ demo-nav a.active {
 .module-outlet {
 	padding: 0 0.75em;
 }
-section.demo {
+input-test.demo {
+	display: block;
+	padding: 1em;
 	padding-top: 0;
 	border: 1px solid #aaa;
 	border-radius: 6px;

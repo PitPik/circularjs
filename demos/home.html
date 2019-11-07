@@ -1,19 +1,4 @@
-<!doctype html>
-<html lang="en" data-framework="circularJS">
-<head>
-  <meta charset="utf-8">
-  <title>Circular.js • demo</title>
-
-  <link cr-dev rel="stylesheet" type="text/css" href="index.css">
-  <script cr-dev type="text/javascript" src="../circular.min.js"></script>
-  <script cr-dev type="text/javascript" src="amd.cfg.js"></script>
-  <script cr-dev type="text/javascript">
-    require.config({ baseUrl: '../' });
-  </script>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/prism.min.js"></script>
-  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/themes/prism.css">
-</head>
-<body>
+<section>
   <h2>Demo of the demos</h2>
   <p>This demo shows how the demo app itself is working, so what you're just seeing.</p>
   <p>This <strong>demo</strong> is driven by a <strong>navigation</strong> that also shows its <strong>state</strong> and an <strong>outlet</strong> that shows the pages controlled by the menu, that show the individual demos like this you just see.</p>
@@ -23,8 +8,4 @@
   <pre><code class="language-html html">ss</code></pre>
   <p>All the modules are actually individual HTML pages that are loaded via <code>circular.renderModule()</code> into <code>&lt;div class="module-outlet">&lt;/div></code> and can therefor also be called as web-pages/widgets without the surrounding app. Those modules can be developed independently.<br>
   Just replace the '#' in the URL with 'demos' and add '.html' at the end of the URL.</p>
-</body>
-
-<script cr-dev type="text/javascript" src="home.js"></script>
-
-</html>
+</section>

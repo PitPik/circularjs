@@ -1,6 +1,5 @@
-define('app-tree', ['circular'], ({ Component, Toolbox: { $ } }) => {
-  var elm = $('[cr-component="tree"]');
-  var templateElm = elm.removeChild(elm.firstElementChild);
+define('app-tree', ['circular', '!tree.html'],
+({ Component, Toolbox: { $ } }, template) => {
   var data = {
     name: 'My Tree',
     open: true,
@@ -24,9 +23,9 @@ define('app-tree', ['circular'], ({ Component, Toolbox: { $ } }) => {
     ]
   };
 
-  Component({
+  return Component({
     selector: 'tree',
-    template: templateElm.outerHTML,
+    template,
     subscribe$: { tree: ['open'] },
   }, class Tree {
     tree = [data];
@@ -52,5 +51,5 @@ define('app-tree', ['circular'], ({ Component, Toolbox: { $ } }) => {
         ]}, item);
       }
     }
-  }).init(elm);
+  });
 });

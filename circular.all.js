@@ -1688,11 +1688,13 @@ define("api", [ "VOM", "blick", "toolbox" ], function(VOM, Blick, Toolbox) {
             data.input && componentElm.addAtttribute("cr-input", data.input);
             data.event && componentElm.addAtttribute("cr-event", data.event);
             return new Toolbox.Promise(function(resolve, decline) {
-                require([ data.selector ], function(module) {
+                require([ data.path || data.selector ], function(module) {
                     container.innerHTML = "";
                     container.appendChild(componentElm);
                     if (data.init) module.init(componentElm);
-                    resolve(modulesMap[data.context + data.selector] = module);
+                    resolve(modulesMap[data.context + data.selector] = data.init ? {
+                        element: componentElm
+                    } : module);
                 });
             });
         };

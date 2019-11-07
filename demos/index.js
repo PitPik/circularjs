@@ -1,4 +1,4 @@
-require(['circular'], function({ Component, Toolbox: { $ } }) {
+require(['circular', 'replacer'], function({ Component, Toolbox: { $ } }, replacer) {
   var elm = $('demo-nav');
   var templateElm = elm.removeChild(elm.firstElementChild);
   var model = [
@@ -36,13 +36,13 @@ require(['circular'], function({ Component, Toolbox: { $ } }) {
       this.menu.forEach(item => item.active = item.action === this.state);
 
       this.cr.renderModule({
-        name: value,
-        previousName: oldValue,
-        path: 'demos/' + value + '.html',
+        selector: 'app-' + value,
         container: $('.module-outlet'),
-        require: 'app-' + value,
-        init: false,
-      });
+        init: true,
+      }).then(() => value === 'home' ? null : require([
+        '!' + value + '.html',
+        '!' + value + '.js'
+      ], (html, js) => replacer('.demo', js, html)));
     }
   }).init('demo-nav');
 });

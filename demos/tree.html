@@ -1,49 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Tree - demo</title>
-    <link cr-dev rel="stylesheet" type="text/css" href="index.css">
-
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/prism.min.js"></script>
-  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/themes/prism.css">
-</head>
-  </head>
-  <body>
+<section>
   <h2>Dynamic model structure</h2>
   <p>In this demo you can see how <strong>VOM.js</strong> is working, how you can dynamically restructure the model and how it reflects in the view. <strong>blick.js</strong> enhances <strong>schnauzer.js</strong> and makes it possible to keep track of <strong>dynamic variables</strong>.</p>
   <p>You can double click on an item to turn it into a folder.</p>
 
   <!-- the demo root element -->
-  <section cr-component="tree">
-      <ul class="tree demo">
-        <li cr-for="tree" class="leaf" cr-event="click: toggle; dblclick: addChildren">
-          <div class="{{#if childNodes.0}}bold{{/if}}">
-            {{name}}{{#if childNodes.0}} [{{#if %open}}-{{else}}+{{/if}}]{{/if}}
-          </div>
-          <ul cr-mount class="{{#if %open}}open{{else}}closed{{/if}}"></ul>
-        </li>
-      </ul>
-</section>
+  <tree>
+    <ul class="tree demo">
+      <li cr-for="tree" class="leaf" cr-event="click: toggle; dblclick: addChildren">
+        <div class="{{#if childNodes.0}}bold{{/if}}">
+          {{name}}{{#if childNodes.0}} [{{#if %open}}-{{else}}+{{/if}}]{{/if}}
+        </div>
+        <ul cr-mount class="{{#if %open}}open{{else}}closed{{/if}}"></ul>
+      </li>
+    </ul>
+</tree>
   <pre><code class="language-javascript code">ss</code></pre>
   The HTML:
   <pre><code class="language-html html">ss</code></pre>
-
-  <script cr-dev type="text/javascript" src="../amd.js"></script>
-  <script cr-dev type="text/javascript" src="../toolbox.js"></script>
-  <script cr-dev type="text/javascript" src="../VOM.js"></script>
-  <script cr-dev type="text/javascript" src="../schnauzer.js"></script>
-  <script cr-dev type="text/javascript" src="../blick.js"></script>
-  <script cr-dev type="text/javascript" src="../api.js"></script>
-  <script cr-dev type="text/javascript" src="../controller.js"></script>
-  <script cr-dev type="text/javascript" src="../circular.js"></script>
-  <!-- <script cr-dev type="text/javascript" src='../circular.min.js'></script> -->
-  <script cr-dev type="text/javascript" src="tree.js"></script>
-  <script type="text/javascript">
-    require(['replacer', '!tree.js', '!tree.html'],
-    function(replacer, indexTxt, indexHTMLTxt) {
-      replacer('[cr-component="tree"]', indexTxt, indexHTMLTxt);
-    });
-  </script>
-  </body>
-</html>
+</section>

@@ -15,6 +15,7 @@
       '!git.html': 'demos/git.html',
       '!git.js': 'demos/git.js',
       '!index.html': 'index.html',
+      '!home.html': 'demos/home.html',
       'app-git': 'demos/git',
       'app-home': 'demos/home',
       'app-tree': 'demos/tree',

@@ -1,20 +1,16 @@
-define('app-binding', ['circular'], ({ Component, Toolbox: { $ } }) => {
-  const element = $('[cr-component="input-test"]');
-  const templateElm = element.removeChild(element.firstElementChild);
+define('app-binding', ['circular', '!binding.html'],
+({ Component }, template) => Component({
+  selector: 'input-test',
+  template,
+  subscribe$: { this: ['value'] },
+}, class Binding {
+  value = '';
 
-  Component({
-    selector: 'input-test',
-    template: templateElm.outerHTML,
-    subscribe$: { this: ['value'] },
-  }, class Binding {
-    value = '';
+  input(e, elm) {
+    this.value = elm.value;
+  }
 
-    input(e, elm) {
-      this.value = elm.value;
-    }
-
-    clear() {
-      this.value = '';
-    }
-  }).init(element);
-});
+  clear() {
+    this.value = '';
+  }
+}));
