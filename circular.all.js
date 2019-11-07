@@ -1685,8 +1685,8 @@ define("api", [ "VOM", "blick", "toolbox" ], function(VOM, Blick, Toolbox) {
                 });
             }
             componentElm = document.createElement(data.selector);
-            data.input && componentElm.addAtttribute("cr-input", data.input);
-            data.event && componentElm.addAtttribute("cr-event", data.event);
+            data.input && componentElm.setAttribute("cr-input", data.input);
+            data.event && componentElm.setAttribute("cr-event", data.event);
             return new Toolbox.Promise(function(resolve, decline) {
                 require([ data.path || data.selector ], function(module) {
                     appendChildToContainer(componentElm, container, data.transition);
