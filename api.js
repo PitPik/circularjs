@@ -213,7 +213,7 @@ prototype.renderModule = function(data) {
 
   return new Toolbox.Promise(function(resolve, decline) {
     require([data.path || data.selector], function(module) {
-      appendChildToContainer(container, componentElm, data.transition);
+      appendChildToContainer(componentElm, container, data.transition);
       if (data.init) module.init(componentElm, null, data.data);
       resolve(modulesMap[data.context + data.selector] = data.init ? {
         element: componentElm,
@@ -229,13 +229,13 @@ function appendChildToContainer(element, container, transition) {
         container.removeChild(container.children[0]);
       }
     }, function append() {
-      component.appendChild(element);
+      container.appendChild(element);
     });
   }
   if (container.children[0]) {
     container.replaceChild(element, container.children[0]);
   } else {
-    component.appendChild(element);
+    container.appendChild(element);
   }
 }
 
