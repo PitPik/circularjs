@@ -1676,28 +1676,43 @@ define("api", [ "VOM", "blick", "toolbox" ], function(VOM, Blick, Toolbox) {
         prototype.renderModule = function(data) {
             var isValid = data.selector && data.container;
             var container = isValid && typeof data.container === "string" ? $(data.container) : data.container;
-            var componentElm = isValid && document.createElement(data.selector);
+            var componentElm = {};
             if (!isValid) return;
             if (modulesMap[data.context + data.selector]) {
                 return new Toolbox.Promise(function(resolve, decline) {
-                    container.innerHTML = "";
-                    container.appendChild(modulesMap[data.context + data.selector].element);
+                    appendChildToContainer(modulesMap[data.context + data.selector].element, container, data.transition);
                     resolve(modulesMap[data.context + data.selector]);
                 });
             }
+            componentElm = document.createElement(data.selector);
             data.input && componentElm.addAtttribute("cr-input", data.input);
             data.event && componentElm.addAtttribute("cr-event", data.event);
             return new Toolbox.Promise(function(resolve, decline) {
                 require([ data.path || data.selector ], function(module) {
-                    container.innerHTML = "";
-                    container.appendChild(componentElm);
-                    if (data.init) module.init(componentElm);
+                    appendChildToContainer(container, componentElm, data.transition);
+                    if (data.init) module.init(componentElm, null, data.data);
                     resolve(modulesMap[data.context + data.selector] = data.init ? {
                         element: componentElm
                     } : module);
                 });
             });
         };
+        function appendChildToContainer(element, container, transition) {
+            if (transition) {
+                return transition(function remove() {
+                    if (container.children[0]) {
+                        container.removeChild(container.children[0]);
+                    }
+                }, function append() {
+                    component.appendChild(element);
+                });
+            }
+            if (container.children[0]) {
+                container.replaceChild(element, container.children[0]);
+            } else {
+                component.appendChild(element);
+            }
+        }
         Object.defineProperties(Circular, {
             Toolbox: {
                 value: Toolbox
