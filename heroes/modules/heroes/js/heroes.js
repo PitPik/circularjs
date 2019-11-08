@@ -11,8 +11,8 @@ define('app-heroes', ['circular', 'data-provider', '!modules/heroes/css/index.cs
       </form>
       <ul>
         <li cr-for="heroList">
-          <a href="#/detail/{{id}}">
-            <span class="badge">{{id}}</span> {{%name}}
+          <a href="#/detail/{{%id}}">
+            <span class="badge">{{%id}}</span> {{%name}}
           </a>
           <button class="delete" title="delete hero" cr-event="click: deleteHero">x</button>
         </li>
