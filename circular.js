@@ -43,6 +43,11 @@ Object.defineProperties(Circular.prototype, mixinAPI({
 
     return data && data.instance;
   }},
+  sendToComponent: { value: function(name, data) {
+    var component = this.getComponent(name);
+
+    if (component && component.onSend) component.onSend(data);
+  }},
   destroyComponents: { value: function(insts) {
     var _this = this;
 
@@ -129,9 +134,10 @@ function initComponent(element, defData, Klass, plugData, parent) {
   var models = [];
   var templates = component.templates;
   var elmId = element.getAttribute('cr-id');
+  var elmName = element.getAttribute('cr-name');
 
   if (elmId && !plugData) {
-    return instances[crInst.id + ':' + (element.getAttribute('cr-name') || elmId)];
+    return instances[crInst.id + ':' + elmId];
   }
 
   ['partials', 'helpers', 'decorators', 'attributes'].forEach(function(key) {
@@ -144,7 +150,7 @@ function initComponent(element, defData, Klass, plugData, parent) {
     parentNode: {},
     views: {},
   };
-  name = items['cr-id']; // element.getAttribute('cr-name') || TODO: also name
+  name = items['cr-id'];
   inst = instances[crInst.id][name] = {
     instance: {}, // for overwrite
     controller: {}, // for overwrite
@@ -152,6 +158,9 @@ function initComponent(element, defData, Klass, plugData, parent) {
     parent: '', // for overwrite
     subscribers: [],
   };
+  if (elmName) { // getComponent() by name possible
+    instances[crInst.id][elmName] = instances[crInst.id][name];
+  }
   instance = inst.instance =
     getInstance(Klass, element, crInst, id++, plugData, defData, inst, parent);
   Object.defineProperty(instance, '__cr-id', { value: crInst.id + ':' + name });

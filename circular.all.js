@@ -1845,6 +1845,12 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                 return data && data.instance;
             }
         },
+        sendToComponent: {
+            value: function(name, data) {
+                var component = this.getComponent(name);
+                if (component && component.onSend) component.onSend(data);
+            }
+        },
         destroyComponents: {
             value: function(insts) {
                 var _this = this;
@@ -1934,8 +1940,9 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         var models = [];
         var templates = component.templates;
         var elmId = element.getAttribute("cr-id");
+        var elmName = element.getAttribute("cr-name");
         if (elmId && !plugData) {
-            return instances[crInst.id + ":" + (element.getAttribute("cr-name") || elmId)];
+            return instances[crInst.id + ":" + elmId];
         }
         [ "partials", "helpers", "decorators", "attributes" ].forEach(function(key) {
             if (!defData[key]) defData[key] = crInst.options[key];
@@ -1957,6 +1964,9 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
             parent: "",
             subscribers: []
         };
+        if (elmName) {
+            instances[crInst.id][elmName] = instances[crInst.id][name];
+        }
         instance = inst.instance = getInstance(Klass, element, crInst, id++, plugData, defData, inst, parent);
         Object.defineProperty(instance, "__cr-id", {
             value: crInst.id + ":" + name
