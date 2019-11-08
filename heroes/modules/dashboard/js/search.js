@@ -6,9 +6,10 @@ define('app-search', ['circular', 'data-provider'],
       <h4>Hero Search</h4>
       <input id="search-box" cr-view="search" cr-event="keyup: search" />
       <ul class="search-result" cr-event="click: select">
-        <li cr-for="searchList"><a href="#/detail/{{id}}">{{name}}</a></li>
+        <li cr-for="searchList"><a href="#/detail/{{%id}}">{{%name}}</a></li>
       </ul>
     </section>`,
+  subscribe$: { searchList: ['*'] },
 }, class AppSearch {
   searchList = [];
   searchInput = {};
