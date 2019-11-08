@@ -1,44 +1,44 @@
 define('app-heroes', ['circular', 'data-provider'],
-function(Circular, heroService) {
+  (Circular, heroService) => {
     'use strict';
 
     var circular = new Circular();
     var heroList = null;
 
     circular.component('heroes', {
-        model: [{}],
-        eventListeners: { addHero: addHero }
+      model: [{}],
+      eventListeners: { addHero: addHero }
     });
 
     function addHero(e, element, item) {
-        var name = element.hero.value.trim();
+      var name = element.hero.value.trim();
 
-        e.preventDefault(); // don't submit form
-        name && heroList && heroService.addHero(name)
-        .then(function(model) {
-            heroList.appendChild(model);
-            element.hero.value = '';
+      e.preventDefault(); // don't submit form
+      name && heroList && heroService.addHero(name)
+        .then(function (model) {
+          heroList.appendChild(model);
+          element.hero.value = '';
         });
     }
 
     function deleteHero(e, element, item) {
-        heroService.deleteHero(item.id)
-        .then(function() {
-            heroList.removeChild(item);
+      heroService.deleteHero(item.id)
+        .then(function () {
+          heroList.removeChild(item);
         });
     }
 
     return function init(data, path) {
-        heroService.getHeroes()
-        .then(function(model) {
-            if (heroList) {
-                heroList.model = model;
-                return;
-            }
-            heroList = circular.component('heroes-list', {
-                model: model,
-                eventListeners: { deleteHero: deleteHero }
-            });
+      heroService.getHeroes()
+        .then(function (model) {
+          if (heroList) {
+            heroList.model = model;
+            return;
+          }
+          heroList = circular.component('heroes-list', {
+            model: model,
+            eventListeners: { deleteHero: deleteHero }
+          });
         });
     };
-});
+  });

@@ -18,15 +18,8 @@
 	<script type="text/javascript" src="js/amd.config.js"></script>
 	<title>Tour of Heroes</title>
 </head>
-<body cr-component="app" cr-container>
-	<section cr-template class="app-{{%currentApp}}">
-		<h1>{{title}}{{#%currentApp}} - {{.}}{{/%currentApp}}</h1>
-		<nav class="app-nav">
-			<a href="#/dashboard" class="dashboard">Dashboard</a>
-			<a href="#/heroes" class="heroes">Heroes</a>
-		</nav>
-		<div cr-view="app-modules"></div>
-	</section>
+<body>
+	<app-main></app-main>
 
 	<script type="text/javascript" src="js/app.js"></script>
 </body>

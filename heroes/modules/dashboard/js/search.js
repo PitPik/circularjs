@@ -1,43 +1,34 @@
 define('app-search', ['circular', 'data-provider'],
-function(Circular, heroService) {
-    'use strict';
+({ Component }, heroService) => Component({
+  selector: 'app-search',
+  template: `
+    <section>
+      <h4>Hero Search</h4>
+      <input id="search-box" cr-view="search" cr-event="keyup: search" />
+      <ul class="search-result" cr-event="click: select">
+        <li cr-for="searchList"><a href="#/detail/{{id}}">{{name}}</a></li>
+      </ul>
+    </section>`,
+}, class AppSearch {
+  searchList = [];
+  searchInput = {};
+  debounce;
 
-    var circular = new Circular(),
-        searchModel = {},
-        heroesList = null;
+  onInit(elm, items) {
+    this.searchInput = items.views.search;
+  }
 
-    circular.component('heroes-search', {
-        model: [searchModel],
-        eventListeners: {
-            search: function(e, element, item) {
-                clearTimeout(this.debounce);
-                this.debounce = setTimeout(function(value) {
-                    search(value);
-                }, 300, element.value);
-            }
-        },
-        onInit: function() {
-            setupList();
-        }
-    });
+  search(e, elm) {
+    clearTimeout(this.debounce);
+    this.debounce = setTimeout(value => this.searchHero(value), 300, elm.value);
+  }
 
-    function search(text) {
-        heroService.searchHeroes(text).then(setupList);
-    }
+  select() {
+    this.searchInput.value = '';
+    this.searchList = [];
+  }
 
-    function setupList(model) {
-        if (heroesList) {
-            heroesList.model = model;
-            return;
-        }
-        heroesList = circular.component('heroes-search-list', {
-            model: model,
-            eventListeners: { select: resetSearch }
-        });
-    }
-
-    function resetSearch() {
-        searchModel.views.search.value = '';
-        setupList([]);
-    }
-});
+  searchHero(value) {
+    heroService.searchHeroes(value).then(data => this.searchList = data);
+  }
+}));

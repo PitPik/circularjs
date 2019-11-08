@@ -1,19 +1,27 @@
-define('app-dashboard', ['circular', 'data-provider'],
-function(Circular, heroService) {
-    'use strict';
+define('app-dashboard', [
+  'circular',
+  '!modules/dashboard/css/index.css',
+  'app-search',
+  'data-provider'
+], ({ Component }, styles, search, heroService) => Component({
+  selector: 'app-dashboard',
+  styles,
+  template: `
+    <div class="module">
+      <h2>Top Heroes</h2>
+      <div class="grid grid-pad clearfix">
+        <a  cr-for="heroes" class="col-1-4" href="#/detail/{{id}}">
+          <div class="module hero">
+            <h4>{{name}}</h4>
+          </div>
+        </a>
+      </div>
+      <app-search></app-search>
+    </div>`,
+}, class Dashboard {
+  heroes = [];
 
-    var circular = new Circular();
-    var dashboard = null;
-
-    return function init(data, path) {
-        heroService.getHeroes().then(function(model) {
-            if (dashboard) {
-                dashboard.model = model.splice(0, 4);
-                return;
-            }
-            dashboard = circular.component('heroes-dashboard', {
-                model: model.splice(0, 4)
-            });
-        });
-    }
-});
+  constructor() {
+    heroService.getHeroes().then(model => this.heroes = model.splice(0, 4));
+  }
+}));
