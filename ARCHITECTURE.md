@@ -1,10 +1,10 @@
 # Architecture Overview
 
-Circular is a framework for building client applications in HTML and JavaScript.
+**CircularJS** is a framework for building client applications in HTML and JavaScript.
 
-CircularJS is at this time the smallest and probably fastest MVC framework for SPAs there is although there is no rendering optimization implemented yet. The framework consists of several libraries, all combined to a single minified file.
+**CircularJS** is at this time the smallest and very performant MVC framework for SPAs there is although there is no rendering optimization implemented yet. The framework consists of several libraries, all combined to a single minified file.
 
-You write Circular applications by composing HTML Modules with Circularized templates, writing components to manage those templates, adding application logic in services, and boxing components and services in modules.
+You write Circular applications by composing HTML **Modules** or **Components** with **Circularized** templates, adding application logic in services, and boxing components and services in modules.
 
 Circular presents your application content in a browser and responds to user interactions according to the instructions you've provided.
 
@@ -12,27 +12,26 @@ Of course, there is more to it than this. You'll learn the details in the pages 
 
 {{PICTURE}}
 
-If you are familiar with the concepts of the DOM-API, AMD module loaders like requireJS, Promise, PubSub, Mustage or Handlebars, jQuery ajax and simple routing patterns then you are already familiar with more than half of what you need to know to use circularJS.
-The intention to build circularJS was to get a powerful MVC framework that can abstract and handle HTML as it is (without making it what it isn't: markup with magic functionality), build blasting fast SPAs by using patterns one is used to and familiar with. Write less code for powerful and fast interactions with code that is least possible opinionated and logically structured.
+If you are familiar with the concepts of the **DOM-API**, **AMD module loaders** like requireJS, **Promise**, **PubSub**, **Mustage** or **Handlebars**, **jQuery ajax** and simple **routing patterns** then you are already familiar with more than half of what you need to know to use **CircularJS**.
+The intention to build CircularJS was to get a powerful **MVC framework** that can abstract and handle HTML as it is (without making it what it isn't: markup with magic functionality), build blasting fast SPAs by using patterns one is used to and familiar with. Write less code for powerful and fast interactions with code that is least possible opinionated and logically structured.
 
-## Modules
+## Modules / Components
 
 Circular apps are modular. Every module can be developed standalone taking care of its own dependencies and components and therefore being independent from other modules.
 
-You basically set up a HTML page preferable with all the `<link>` and `<script>` tags/resources defined and use components to build the desired functionality. If you need resources for development only (mocks, css, etc.) you just need to add "cr-dev" to the resource and it will be ignored when being injected.
+You basically set up a HTML page preferable with all the `<link>` and `<script>` tags/resources defined and use components to build the desired functionality.
 
-This page with all its dependencies/resources/templates can then later be injected into the main app by calling circular.renderModule(). This method returns a Promise() that returns the main dependency that was defined in circular.renderModule() that can be a class, a function or anything else you need it to be to start it up. There are actually more methods to inject modules (insertModule, insertResources or loadResource), but this one is the most convenient way.
+This page with all its dependencies/resources/templates can then later be injected into the main app by calling **circular.renderModule()**. This method returns a Promise(). If the **Modules/Components** are not loaded before, they will be **lazy-loaded**.
 
-If there is a previous module defined when calling circular.renderModule() then this module will be detached from the app but still present outside the document so when called again it will be re-rendered faster as all the necessary DOM-Elements are still present and don't need to be re-rendered and re-initialized. You just need to trigger a re-render by passing a new model to the previously mentioned startup component.
+If there is a previous module defined when calling circular.renderModule() then this module will be detached from the app but still present outside the document so when called again it will be re-rendered faster as all the necessary DOM-Elements are still present and don't need to be re-rendered and re-initialized.
 
 With this standard approach you achieve lazy loading of modules which is in most cases the preferred behavior. This means that modules get loaded when you need them but will stay in memory and re-render faster when needed again without re-loading dependencies again.
-You can though easily set up a functionality to preload parts or all the modules, components and/or dependencies right after the first appearance of the app screen while the user is still receiving the first impressions of the rendering. This way the user will not experience any waiting time at all right from the beginning.
 
 There is even a "look-ahead" functionality to faster load dependencies of dependencies.
 
 You'll be using define() and require() from amd.js as you're probably already familiar with by previously already having been used requireJS or other AMD resource loaders. This is a very convenient way to modularize and reuse code. Packing and minifying code to big junks is the logic consequence and very easy to do with amd.js if you need to speed up download times without the need to change all your setups.
 
-## Components / Services
+## Modules / Components / Services
 
 A component controls a patch of screen called a view.
 For example, the following views are controlled by components:
@@ -43,21 +42,11 @@ For example, the following views are controlled by components:
  - The hero editor.
 
 You define a component's application logic—what it does to support the view—with the circular method component(). This method interacts with the view by listening to the properties of a model that was passed to it. You can define which properties should be listened to and subscribe to it with a callback function.
-CircularJS finds the component representation in your HTML document by names defined with the attribute "cr-component".
+CircularJS finds the component representation in your HTML document by the tag-name of an HTMLElement.
 
 This is driven by VOM (virtual object model) that is also easily managing nested models like you would find in a tree. VOM, and therefore also the component, has a lot of methods you alredy know by working with the DOM-API. Methods like appendChild(), prependChild(), insertBefore() and removeChild() are probably already very familiar to you. Using those methods also takes care of nested model structures and circular will render them automatically right after receiving the model.
 
-component() receives a lot of mandatory and optional properties with those you can set up your component in a very flexible and easy way. Some options are taken from the options passed when instanciating Circular() if not defined in component().
-See the API documentation for details.
-
 A component also keeps track of (automatically installed) event-listeners defined with "cr-event" and pointers to DOM-Elements defined with "cr-view" attributes inside the templates to easily realize one or two way data binding in combination with the subscribers mentioned earlier.
-
-There are two kinds of components:
-
-  - The regular component that typically has a container for Schnauzer templates that reflect the model one to one and
-  - the one that has a model with only one element in it (just like a state model) but no direct template reflecting it. You can still use Schnauzer templates to render parts of its view but there is no auto-trigger to use it. Those components can also be nested with others.
-  
-You can also use components with containers to nest other components unless the nesting doesn't happen inside the container.
 
 ## VOM (Virtual Object Model)
 
@@ -76,20 +65,17 @@ You can use VOM inside Circular in three ways:
 Given you have the following template:
 
 ```HTML
-<ul cr-component="tree" cr-container="">
-    <script type="text/template" cr-template-for="tree">
-    <li cr-id="{{cr-id}}">
+<ul cr-component="tree">
+    <li cr-for="tree">
         <a href="{{root}}{{link}}" cr-event="click: listLink">{{text}}</a>
         <ul cr-mount></ul>
     </li>
-    </script>
 </ul>
 ```
 and a model for the component like this:
 
 ```JS
-var circular = new Circular(),
-    model = [{
+var model = [{
         "id": "0",
         "link": "root-0",
         "text": "Root item 0",
@@ -117,25 +103,27 @@ var circular = new Circular(),
         "text": "Root item 2"
     }];
 
-circular.component('tree', {
-    model: model,
-    extraModel: {root: '#/tree/'},
-    listeners: ['text'],
-    subscribe: function(property, item, value, oldValue) {
+Component({
+    selector: 'tree-example'
+    subscribe: { tree: ['text'] },
+    extraModel: { root: '#/tree/' },
+}, class TreeExampe {
+    tree: model;
+    
+    tree$(property, item, value, oldValue) {
         if (property === 'text') {
             item.views.text.textContent = value;
         }
-    },
-    eventListeners: {
-        listLink: function(e, element, item) {
-            console.log(element);
-        }
+    }
+    
+    listLink(e, element, item) {
+        console.log(element);
     }
 });
 ```
 You would get a perfectly rendered tree where you can change the link's visual text by just changing the .text property or reshuffle the children by using the VOM's API. If you would appendChild() an new model even with children in it, Circular would render the whole depth of the structure in one go.
 
-Maybe you noticed that `circular.component('tree', {...` and `<ul cr-component="tree"` in the template are coupled. That's how `circular.component()` knows wich part of the template to use. Names are like IDs and can be used only once per instance of `new Circular()`. If you would call `circular.component('tree', {...` with the same name again than it works like a reset. It empties the current view and re-renders this component completely according to the new model passed.
+Maybe you noticed that `this.tree` and `cr-for="tree"` in the template are coupled. That's how **Components** or **Modules** knows wich part of the template to use.
 
 You can also see that the `extraModel` in the component helps rendering things with Schnauzer. The extra model is always present in the model structure processed by Schnauzer.
 
@@ -143,29 +131,10 @@ You can also see that the `extraModel` in the component helps rendering things w
 
 You define a component's view with its companion template. A template is a form of HTML that tells Circular how to render the component or parts of it.
 
-A template looks like regular HTML (can also be wrapped in <script> tags) except for a few differences. Some attributes in tags are circular related, they always begin with a "cr-" if not other defined in the options, and some schnauzer.js related parts (only inside <script> tags) have curly brackets like {{heroes}}. Schnauzer.js is a fast and tiny template rendering engine using templates similar to Mustage or Handlebars.
-The "cr-" attributes (cr-component, cr-template, cr-event, cr-view, ...) have direct influence to the component model and it's internal setup whereas Schnauzer templates are only used to render views.
+A template looks like regular HTML except for a few differences. Some attributes in tags are circular related, they always begin with a "cr-" if not other defined in the options, and some schnauzer.js related parts have curly brackets like {{heroes}}. Schnauzer.js is a fast and tiny template rendering engine using templates similar to Mustage or Handlebars.
+The "cr-" attributes (cr-event, cr-view, ...) have direct influence to the component model and it's internal setup whereas Schnauzer templates are only used to render views.
 
-```HTML
-<h2>Hero List</h2>
-
-<p><i>Pick a hero from the list</i></p>
-<ul class="heroes" cr-component="heroes-list" cr-container>
-    <script type="text/template" cr-template-for="heroes-list">
-    <li cr-id={{cr-id}}>
-        <a href="#/detail/{{id}}">
-            <span class="badge">{{id}}</span> {{name}}
-        </a>
-        <button class="delete" title="delete hero" cr-event="click: deleteHero">x</button>
-    </li>
-    </script>
-</ul>
-
-<div cr-view="app-details"></div>
-```
-Although this template uses typical HTML elements like `<h2>` and `<p>`, it also has some differences. Code like cr-component, cr-id, cr-event, uses Circular's template syntax and {{cr-id}}, {{name}} uses Schnauzer's syntax.
-
-In the last line of the template, the `<div cr-view="app-details">` tag is a regular element that represents a view element in the model of a component. This reference can be used to easily tell circular.renderModule() where to render the details-view module.
+In a template, the `<div cr-view="app-details">` tag is a regular element that represents a view element in the model of a component. This reference can be used to easily tell circular.renderModule() where to render the details-view module.
 
 
 ## Data binding
@@ -176,17 +145,15 @@ Circular supports data binding, a mechanism for coordinating parts of a template
 Use "cr-event" to listen to onchange, onsubmit, onkeyup, onclick etc. that will be automatically be picked up by the component. Use "cr-view" to change the DOM-Element pointed to or update the model to re-render the view.
 
 ```HTML
-<h2><span cr-view="name">{{name}}</span> Details</h2>
+<h2>{{%name}} Details</h2>
 ...
 <label>name:
-    <input cr-event="keyup: updateName" placeholder="name" value="{{name}}" />
+    <input cr-event="keyup: updateName" placeholder="name" value="{{%name}}" />
 </label>
 ```
-On keyup on the input field the component's listener callback "updateName" gets called where you then can update the `<span cr-view="name">` view by setting the model's views.name.textContent.
-The initial rendering through {{name}} happens when passing the model to the component.
+On keyup on the input field the component's listener callback "updateName" gets called where you then can update the `this.name` which again updates the `{{%name}}` part in the template.
 
-Data binding, 1-way or 2-way, can be realized in many ways. It needs some manual work but therefore you have more control over what happens in your component.
-Data binding plays an important role in communication between a template and its component.
+Data binding, 1-way or 2-way, can be realized in many ways. Data binding plays an important role in communication between a template and its component.
 
 ## Services
 Service is a broad category encompassing any value, function, or feature that your application needs.
