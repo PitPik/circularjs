@@ -1848,7 +1848,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         sendToComponent: {
             value: function(name, data) {
                 var component = this.getComponent(name);
-                if (component && component.onSend) component.onSend(data);
+                if (component && component.onSend) return component.onSend(data);
             }
         },
         destroyComponents: {
