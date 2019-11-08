@@ -40,9 +40,7 @@ Component({
         cr-child
         class="{{%mark
           }}{{#if %%isProcessed}}
-              {{#if surrounding}}color-{{surrounding}}
-              {{else}}
-              {{/if}}
+              color-{{surrounding}}
             {{else}} hidden
             {{/if}}"
       >
