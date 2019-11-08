@@ -2232,6 +2232,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         var id = item["cr-id"];
         var template = !item.childNodes && data.childTemplate || data.template || null;
         var collector = template ? template.collector : {};
+        var intern = property === "childNodes" || !!VOM.prototype[property];
         if (property === "removeChild") {
             render(element, property, element.parentElement);
             destroyCollector(collector, id);
@@ -2245,7 +2246,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                     siblPar: sibling,
                     data: data
                 });
-            } else if (property !== "replaceChild" && element) {
+            } else if (property !== "replaceChild" && element && intern) {
                 render(element, property, parentElement, sibling.elements && sibling.elements.element);
             }
         }

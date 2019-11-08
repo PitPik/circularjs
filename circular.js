@@ -452,6 +452,7 @@ function changeItem(vomInstance, property, item, value, oldValue, sibling, data)
   var id = item['cr-id'];
   var template = !item.childNodes && data.childTemplate || data.template || null;
   var collector = template ? template.collector : {};
+  var intern = property === 'childNodes' || !!VOM.prototype[property];
 
   if (property === 'removeChild') {
     render(element, property, element.parentElement);
@@ -461,7 +462,7 @@ function changeItem(vomInstance, property, item, value, oldValue, sibling, data)
   } else if (vomInstance[property]) {
     if (item === sibling) { // replaceChild by itself;
       setNewItem(vomInstance, { item: item, type: property, siblPar: sibling, data: data });
-    } else if (property !== 'replaceChild' && element) {
+    } else if (property !== 'replaceChild' && element && intern) {
       render(element, property, parentElement, sibling.elements && sibling.elements.element);
     }
   }
