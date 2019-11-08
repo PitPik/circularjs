@@ -1532,11 +1532,8 @@
 
 define("api", [ "VOM", "blick", "toolbox" ], function(VOM, Blick, Toolbox) {
     return function addCircularAPI(inbound, Circular) {
-        var $ = Toolbox.$;
-        var $$ = Toolbox.$$;
         var pubsub = {};
         var modulesMap = {};
-        var DOC = null;
         var prototype = {};
         prototype.model = function(model, options) {
             return new VOM(model, options);
@@ -1675,7 +1672,7 @@ define("api", [ "VOM", "blick", "toolbox" ], function(VOM, Blick, Toolbox) {
         };
         prototype.renderModule = function(data) {
             var isValid = data.selector && data.container;
-            var container = isValid && typeof data.container === "string" ? $(data.container) : data.container;
+            var container = isValid && typeof data.container === "string" ? Toolbox.$(data.container) : data.container;
             var componentElm = {};
             var item = modulesMap[data.context + data.selector];
             var _this = this;

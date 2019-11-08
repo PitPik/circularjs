@@ -2,11 +2,8 @@
 define('api', ['VOM', 'blick', 'toolbox'], function(VOM, Blick, Toolbox) {
 return function addCircularAPI(inbound, Circular) {
 
-var $ = Toolbox.$;
-var $$ = Toolbox.$$;
 var pubsub = {}; // general data holder
 var modulesMap = {}; // list of modules for module switching
-var DOC = null; // createHTMLDocument for resorce loader
 var prototype = {};
 
 prototype.model = function(model, options) {
@@ -191,7 +188,7 @@ prototype.template = function(template, options) {
 prototype.renderModule = function(data) {
   var isValid = data.selector && data.container;
   var container = isValid && typeof data.container === 'string' ?
-    $(data.container) : data.container;
+    Toolbox.$(data.container) : data.container;
   var componentElm = {};
   var item = modulesMap[data.context + data.selector];
   var _this = this;
