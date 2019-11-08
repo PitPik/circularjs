@@ -16,9 +16,9 @@ Component({
     board: ['isProcessed', 'mark'],
   },
 }, class Board {
-  board = gameSrv.createBoard(this.rowCol, this.mines);
-  rowCol = [];
+  rowCol = [9, 9];
   mines = 0;
+  board = gameSrv.createBoard(this.rowCol, this.mines);
 })
 ```
 
