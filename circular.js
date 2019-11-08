@@ -1,4 +1,4 @@
-/**! @license CircularJS v1.0.0; Copyright (C) 2019 by Peter Dematté */
+/**! @license CircularJS ● v1.0.0; Copyright (C) 2019 by Peter Dematté */
 define('circular', ['toolbox', 'blick', 'VOM', 'api', 'controller'],
 function(Toolbox, Blick, VOM, mixinAPI, Controller) { 'use strict';
 
@@ -54,7 +54,7 @@ Object.defineProperties(Circular.prototype, mixinAPI({
     insts.forEach(function(inst) {  _this.destroyComponent(inst) });
   }},
   destroyComponent: { value: function(inst) {
-    var id = inst['__cr-id'].split(':'); // TODO: __cr-id
+    var id = inst['__cr-id'].split(':');
     var data = instances[id[0]][id[1]];
     var instance = data.instance;
 
@@ -170,7 +170,7 @@ function initComponent(element, defData, Klass, plugData, parent) {
   .sort(function(a) { return a === 'this' ? -1 : 0 })
   .map(function(key) {
     if (!key) return;
-    return applyModel({ // TODO: only send ids only (instance, ...);
+    return applyModel({
       instance: instance,
       items: items,
       defData: defData,
@@ -228,7 +228,7 @@ function installEvents(parent, scope, defData) {
   }
 }
 
-function processInput(input, parent) { // TODO: enable static 'vars'
+function processInput(input, parent) {
   var vars = input && input.split(/\s*,\s*/) || [];
   var name = [];
   var out = { vars: {}, origin: {}, names: {}, static: {} };
@@ -306,7 +306,7 @@ function applyModel(data) {
     get: function() { return vom.model },
     set: function(newModel) {
       // window.requestAnimationFrame(function() {
-        injectNewModel(vom, vom.model, newModel, newModel.isDelta); // TODO: document
+        injectNewModel(vom, vom.model, newModel, newModel.isDelta);
       // });
     },
   });
