@@ -1852,6 +1852,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                 var id = inst["__cr-id"].split(":");
                 var data = instances[id[0]][id[1]];
                 var instance = data.instance;
+                instance.onDestroy && instance.onDestroy();
                 for (var key in instance) if (instance[key] && instance.hasOwnProperty(key) && isArray(instance[key])) instance[key] = [];
                 data.controller.removeEvents(keys(data.controller.events));
                 data.models.forEach(function(model) {

@@ -53,6 +53,7 @@ Object.defineProperties(Circular.prototype, mixinAPI({
     var data = instances[id[0]][id[1]];
     var instance = data.instance;
 
+    instance.onDestroy && instance.onDestroy();
     for (var key in instance) if ( // removes collectors, rendering, ...
       instance[key] &&
       instance.hasOwnProperty(key) &&
@@ -269,7 +270,6 @@ function initPlugins(key, value, element, inst) {
     all[n].removeAttribute('cr-plugin');
   }
 }
-
 
 /* ---------------------------------------------------------- */
 
