@@ -33,11 +33,11 @@ define('app-detail', ['circular', 'data-provider', '!modules/detail/css/index.cs
     this.name = element.value.trim();
   }
 
-  save(e, element, item) {
-    (item.id === undefined ?
-      heroService.addHero(item.name) :
+  save() {
+    (this.id === undefined ?
+      heroService.addHero(this.name) :
       heroService
-        .updateHero(item.id, item.name))
+        .updateHero(this.id, this.name))
         .then(this.goBack);
   }
 

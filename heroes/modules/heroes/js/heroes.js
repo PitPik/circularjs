@@ -1,44 +1,42 @@
-define('app-heroes', ['circular', 'data-provider'],
-  (Circular, heroService) => {
-    'use strict';
+define('app-heroes', ['circular', 'data-provider', '!modules/heroes/css/index.css'],
+({ Component }, heroService, styles) => Component({
+  selector: 'app-heroes-list',
+  styles,
+  template: `
+    <div>
+      <h2>My Heroes</h2>
+      <form cr-event="submit: addHero">
+        <label>Hero name: <input name="hero" type="text" /></label>
+        <button type="submit">add</button>
+      </form>
+      <ul>
+        <li cr-for="heroList">
+          <a href="#/detail/{{id}}">
+            <span class="badge">{{id}}</span> {{%name}}
+          </a>
+          <button class="delete" title="delete hero" cr-event="click: deleteHero">x</button>
+        </li>
+      </ul>
+    </div>`,
+  subscribe$: { heroList: ['name'] },
+}, class HeroList {
+  heroList = [];
 
-    var circular = new Circular();
-    var heroList = null;
+  onLoad() {
+    heroService.getHeroes().then(model => this.heroList = model);
+  }
 
-    circular.component('heroes', {
-      model: [{}],
-      eventListeners: { addHero: addHero }
+  addHero(e, element, item) {
+    const name = element.hero.value.trim();
+
+    e.preventDefault(); // don't submit form
+    name && heroService.addHero(name).then(model => {
+      this.heroList.appendChild(model);
+      element.hero.value = '';
     });
+  }
 
-    function addHero(e, element, item) {
-      var name = element.hero.value.trim();
-
-      e.preventDefault(); // don't submit form
-      name && heroList && heroService.addHero(name)
-        .then(function (model) {
-          heroList.appendChild(model);
-          element.hero.value = '';
-        });
-    }
-
-    function deleteHero(e, element, item) {
-      heroService.deleteHero(item.id)
-        .then(function () {
-          heroList.removeChild(item);
-        });
-    }
-
-    return function init(data, path) {
-      heroService.getHeroes()
-        .then(function (model) {
-          if (heroList) {
-            heroList.model = model;
-            return;
-          }
-          heroList = circular.component('heroes-list', {
-            model: model,
-            eventListeners: { deleteHero: deleteHero }
-          });
-        });
-    };
-  });
+  deleteHero(e, element, item) {
+    heroService.deleteHero(item.id).then(() => this.heroList.removeChild(item));
+  }
+}));

@@ -1,6 +1,6 @@
 # Tutorial: Tour of Heroes
 
-**!!!!!** This demo wasn't yet updated to the new version of CircularJS. It doesn't work. **!!!!!** 
+**!!!!!** The description wasn't yet updated to the new version of CircularJS. **!!!!!** 
 
 The Tour of Heroes tutorial covers the fundamentals of Circular.
 In this tutorial you will build an app that helps a staffing agency manage its stable of heroes. See a [live demo here](https://pitpik.github.io/circularjs/heroes)

@@ -17,7 +17,7 @@ define('app', ['circular'], ({ Module }) => Module({
   currentApp = '';
   title = 'Tour of Heroes';
 
-  onInit(elm, items, crInst) {
+  onInit(elm, crInst, items) {
     this.crInst = crInst;
     this.container = items.views['app-modules'];
 

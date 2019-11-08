@@ -14,21 +14,19 @@ define('app-search', ['circular', 'data-provider'],
   searchInput = {};
   debounce;
 
-  onInit(elm, items) {
+  onInit(elm, crInst, items) {
     this.searchInput = items.views.search;
   }
 
   search(e, elm) {
     clearTimeout(this.debounce);
-    this.debounce = setTimeout(value => this.searchHero(value), 300, elm.value);
+    this.debounce = setTimeout(value =>
+      heroService.searchHeroes(value).then(data => this.searchList = data),
+    300, elm.value);
   }
 
   select() {
     this.searchInput.value = '';
     this.searchList = [];
-  }
-
-  searchHero(value) {
-    heroService.searchHeroes(value).then(data => this.searchList = data);
   }
 }));
