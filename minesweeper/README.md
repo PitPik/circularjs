@@ -38,12 +38,7 @@ Component({
     <tr cr-for="board">
       <td
         cr-child
-        class="{{%mark
-          }}{{#if %%isProcessed}}
-              color-{{surrounding}}
-            {{else}} hidden
-            {{/if}}"
-      >
+        class="{{%mark}}{{#if %%isProcessed}} color-{{surrounding}}{{else}} hidden{{/if}}">
         {{#if %%isProcessed}}
           {{#if surrounding}}
             {{surrounding}}
