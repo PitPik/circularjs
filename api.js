@@ -206,15 +206,16 @@ prototype.renderModule = function(data) {
   componentElm = document.createElement(data.selector);
   data.input && componentElm.setAttribute('cr-input', data.input);
   data.event && componentElm.setAttribute('cr-event', data.event);
-  appendChildToContainer(componentElm, container, data.transition);
+  container.appendChild(componentElm);
 
   return new Toolbox.Promise(function(resolve) {
     require([data.path || data.selector], function(module) {
-      var instance = data.init && module.init(componentElm, null, data.data);
+      var instance = !module.instance && module.init(componentElm, null, data.data);
       var item = module.instance || instance;
 
+      appendChildToContainer(componentElm, container, data.transition);
       if (item && item.onLoad) item.onLoad(componentElm, _this);
-      resolve(modulesMap[data.context + data.selector] = data.init ? {
+      resolve(modulesMap[data.context + data.selector] = !module.instance ? {
         element: componentElm,
         instance: instance,
       } : module);

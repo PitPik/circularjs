@@ -1687,13 +1687,14 @@ define("api", [ "VOM", "blick", "toolbox" ], function(VOM, Blick, Toolbox) {
             componentElm = document.createElement(data.selector);
             data.input && componentElm.setAttribute("cr-input", data.input);
             data.event && componentElm.setAttribute("cr-event", data.event);
-            appendChildToContainer(componentElm, container, data.transition);
+            container.appendChild(componentElm);
             return new Toolbox.Promise(function(resolve) {
                 require([ data.path || data.selector ], function(module) {
-                    var instance = data.init && module.init(componentElm, null, data.data);
+                    var instance = !module.instance && module.init(componentElm, null, data.data);
                     var item = module.instance || instance;
+                    appendChildToContainer(componentElm, container, data.transition);
                     if (item && item.onLoad) item.onLoad(componentElm, _this);
-                    resolve(modulesMap[data.context + data.selector] = data.init ? {
+                    resolve(modulesMap[data.context + data.selector] = !module.instance ? {
                         element: componentElm,
                         instance: instance
                     } : module);
@@ -2054,9 +2055,10 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         return out;
     }
     function getParentComponent(elm) {
-        var parent = elm.closest('[cr-id^="cr_"]');
+        var parent = elm.closest('[cr-id|="cr_"]');
         var ids = parent && parent.getAttribute("cr-id").substr(3).split(":");
-        return ids && instances["cr_" + ids[0]][ids[1]];
+        var out = ids && instances["cr_" + ids[0]][ids[1]];
+        return out && out.instance || out;
     }
     function preparePluginInTemplate(element, defData) {
         var events = element.getAttribute("cr-event");

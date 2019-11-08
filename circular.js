@@ -251,10 +251,11 @@ function processInput(input, parent) {
 }
 
 function getParentComponent(elm) {
-  var parent = elm.closest('[cr-id^="cr_"]');
+  var parent = elm.closest('[cr-id|="cr_"]');
   var ids = parent && parent.getAttribute('cr-id').substr(3).split(':');
+  var out = ids && instances['cr_' + ids[0]][ids[1]];
 
-  return ids && instances['cr_' + ids[0]][ids[1]];
+  return out && out.instance || out;
 }
 
 /* -------------- plugins ------------ */
