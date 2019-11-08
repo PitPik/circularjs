@@ -24,7 +24,6 @@ Component({
   won;
   
   reveal(e, elm, item) {
-    if (this.won !== undefined) return;
     this.won = gameCtrl.checkItem(this.board, item, e.type === 'contextmenu');
   }
 })
