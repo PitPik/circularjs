@@ -1,9 +1,9 @@
 define('app-home', ['circular', 'replacer', '!index.js', '!index.html', '!home.html'],
-({ Component }, replacer, indexTxt, indexHTMLTxt, template) => Component({
+({ Module }, replacer, indexTxt, indexHTMLTxt, template) => Module({
   selector: 'app-home',
   template,
 }, class Home {
-  onInit() {
+  onLoad() {
     replacer('.demo', indexTxt, indexHTMLTxt);
   }
 }));

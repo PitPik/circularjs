@@ -1,6 +1,6 @@
 require(['circular', 'replacer'], function({ Component, Toolbox: { $ } }, replacer) {
   var elm = $('demo-nav');
-  var templateElm = elm.removeChild(elm.firstElementChild);
+  var template = elm.removeChild(elm.firstElementChild).outerHTML;
   var model = [
     { title: 'Demo home', action: 'home', active: false },
     { title: 'Data binding', action: 'binding', active: false },
@@ -10,7 +10,7 @@ require(['circular', 'replacer'], function({ Component, Toolbox: { $ } }, replac
 
   Component({
     selector: 'demo-nav',
-    template: templateElm.outerHTML,
+    template,
     subscribe$: {
       this: ['state'],
       menu: ['active'],
