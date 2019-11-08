@@ -19,7 +19,7 @@ Component({
   rowCol = [];
   mines = 0;
 
-  onInit(element, { views: { levels }}) {
+  onInit(element, crInst, { views: { levels }}) {
     this.reset(levels.value.split(','));
   }
 
