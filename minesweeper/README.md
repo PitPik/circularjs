@@ -13,36 +13,49 @@ Component({
   selector: 'body',
   template: template,
   subscribe$: {
+    this: ['won'],
     board: ['isProcessed', 'mark'],
   },
 }, class Board {
   rowCol = [9, 9];
   mines = 0;
   board = gameSrv.createBoard(this.rowCol, this.mines);
+  
+  won;
+  
+  reveal(e, elm, item) {
+    if (this.won !== undefined) return;
+    this.won = gameCtrl.checkItem(this.board, item, e.type === 'contextmenu');
+  }
 })
 ```
 
 ```Handlebars
-<tbody>
-  <tr cr-for="board">
-    <td
-      cr-child
-      class="{{%mark
-        }}{{#if %%isProcessed}}
-            {{#if surrounding}}color-{{surrounding}}
-            {{else}}
-            {{/if}}
-          {{else}} hidden
-          {{/if}}"
-    >
-      {{#if %%isProcessed}}
-        {{#if surrounding}}
-          {{surrounding}}
+<table
+  class="board"
+  cr-event="click: reveal; contextmenu: reveal"
+>
+  <tbody>
+    <tr cr-for="board">
+      <td
+        cr-child
+        class="{{%mark
+          }}{{#if %%isProcessed}}
+              {{#if surrounding}}color-{{surrounding}}
+              {{else}}
+              {{/if}}
+            {{else}} hidden
+            {{/if}}"
+      >
+        {{#if %%isProcessed}}
+          {{#if surrounding}}
+            {{surrounding}}
+          {{/if}}
         {{/if}}
-      {{/if}}
-    </td>
-  </tr>
-</tbody>
+      </td>
+    </tr>
+  </tbody>
+</table>
 ```
 
 Have fun =)
