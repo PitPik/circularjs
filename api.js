@@ -210,10 +210,10 @@ prototype.renderModule = function(data) {
   componentElm = document.createElement(data.selector);
   data.input && componentElm.setAttribute('cr-input', data.input);
   data.event && componentElm.setAttribute('cr-event', data.event);
+  appendChildToContainer(componentElm, container, data.transition);
 
   return new Toolbox.Promise(function(resolve, decline) {
     require([data.path || data.selector], function(module) {
-      appendChildToContainer(componentElm, container, data.transition);
       if (data.init) module.init(componentElm, null, data.data);
       resolve(modulesMap[data.context + data.selector] = data.init ? {
         element: componentElm,
