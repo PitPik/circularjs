@@ -177,7 +177,7 @@ function initComponent(element, defData, Klass, plugData, parent) {
   });
 
   element.removeAttribute('cr-cloak');
-  instance.onInit && instance.onInit(element, items, crInst);
+  instance.onInit && instance.onInit(element, crInst, items);
 
   return instance;
 }

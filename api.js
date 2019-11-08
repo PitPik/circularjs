@@ -193,17 +193,16 @@ prototype.renderModule = function(data) {
   var container = isValid && typeof data.container === 'string' ?
     $(data.container) : data.container;
   var componentElm = {};
+  var item = modulesMap[data.context + data.selector];
+  var _this = this;
 
   if (!isValid) return;
 
-  if (modulesMap[data.context + data.selector]) {
-    return new Toolbox.Promise(function(resolve, decline) {
-      appendChildToContainer(
-        modulesMap[data.context + data.selector].element,
-        container,
-        data.transition
-      );
-      resolve(modulesMap[data.context + data.selector]);
+  if (item) {
+    return new Toolbox.Promise(function(resolve) {
+      appendChildToContainer(item.element, container, data.transition);
+      if (item.instance && item.instance.onLoad) item.instance.onLoad(item.element, _this);
+      resolve(item);
     });
   }
 
@@ -212,11 +211,15 @@ prototype.renderModule = function(data) {
   data.event && componentElm.setAttribute('cr-event', data.event);
   appendChildToContainer(componentElm, container, data.transition);
 
-  return new Toolbox.Promise(function(resolve, decline) {
+  return new Toolbox.Promise(function(resolve) {
     require([data.path || data.selector], function(module) {
-      if (data.init) module.init(componentElm, null, data.data);
+      var instance = data.init && module.init(componentElm, null, data.data);
+      var item = module.instance || instance;
+
+      if (item && item.onLoad) item.onLoad(componentElm, _this);
       resolve(modulesMap[data.context + data.selector] = data.init ? {
         element: componentElm,
+        instance: instance,
       } : module);
     });
   });
