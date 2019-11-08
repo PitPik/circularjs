@@ -9,21 +9,40 @@ There is ```game.ctrl.js```, a controller that only manipulates the model or, th
 And there is app.js that sets up the view. The following snippets show how little code is necessary to combine those components and build the view:
 
 ```javascript
-var gameBoard = circular.component('game-bord', {
-  model: gameSrv.createBoard(rowcol, mines),
-  listeners: ['*'],
-  eventListeners: {
-    reveal: function(e, elm, item) {
-      gameCtrl.checkItem(this, item, e.type === 'contextmenu');
-    },
+Component({
+  selector: 'body',
+  template: template,
+  subscribe$: {
+    board: ['isProcessed', 'mark'],
   },
-});
+}, class Board {
+  board = gameSrv.createBoard(this.rowCol, this.mines);
+  rowCol = [];
+  mines = 0;
+})
 ```
 
 ```Handlebars
-<tr cr-mount="parent" cr-template-for="game-bord">
-  <td class="{{%mark}}{{#if %isProcessed}} color-{{surroundingMines}}{{else}} hidden{{/if}}" cr-event="click: reveal; contextmenu: reveal">{{#if %isProcessed}}{{surroundingMines}}{{/if}}</td>
-</tr>
+<tbody>
+  <tr cr-for="board">
+    <td
+      cr-child
+      class="{{%mark
+        }}{{#if %%isProcessed}}
+            {{#if surrounding}}color-{{surrounding}}
+            {{else}}
+            {{/if}}
+          {{else}} hidden
+          {{/if}}"
+    >
+      {{#if %%isProcessed}}
+        {{#if surrounding}}
+          {{surrounding}}
+        {{/if}}
+      {{/if}}
+    </td>
+  </tr>
+</tbody>
 ```
 
 Have fun =)
