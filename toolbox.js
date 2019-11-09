@@ -245,7 +245,7 @@ var Toolbox = {
   Promise: Promise,
 }
 
-window.Event = window.Event || function Event(event, params) {
+function Event(event, params) {
   var evt = document.createEvent('CustomEvent');
 
   params = params || {};
@@ -253,6 +253,9 @@ window.Event = window.Event || function Event(event, params) {
     params.bubbles || false, params.cancelable || false, params.detail);
   return evt;
 }
+
+window.Event = window.Event || Event;
+window.CustomEvent = window.CustomEvent || Event;
 
 /* --------- AJAX ---------- */
 
