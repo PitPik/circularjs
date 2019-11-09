@@ -10,6 +10,29 @@ prototype.model = function(model, options) {
   return new VOM(model, options);
 };
 
+prototype.sendToComponent = function(name, data) {
+  var component = this.getComponent(name);
+
+  if (component && component.onSend) return component.onSend(data);
+};
+
+prototype.subscribeToComponent = function(name, prop, fn, trigger) {
+  var component = this.getComponent(name);
+  var id = component && component['__cr-id'];
+
+  if (component) {
+    this.subscribe(this.id, id, prop, fn, trigger);
+
+    return function unsubscribe() { this.unsubscribe(this.id, id, prop, fn) };
+  }
+};
+
+prototype.destroyComponents = function(insts) {
+  var _this = this;
+
+  insts.forEach(function(inst) {  _this.destroyComponent(inst) });
+};
+
   /* --------------------  pubsub  ----------------------- */
 
 prototype.subscribe = function(inst, comp, attr, callback, trigger) {

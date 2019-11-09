@@ -1538,6 +1538,26 @@ define("api", [ "VOM", "blick", "toolbox" ], function(VOM, Blick, Toolbox) {
         prototype.model = function(model, options) {
             return new VOM(model, options);
         };
+        prototype.sendToComponent = function(name, data) {
+            var component = this.getComponent(name);
+            if (component && component.onSend) return component.onSend(data);
+        };
+        prototype.subscribeToComponent = function(name, prop, fn, trigger) {
+            var component = this.getComponent(name);
+            var id = component && component["__cr-id"];
+            if (component) {
+                this.subscribe(this.id, id, prop, fn, trigger);
+                return function unsubscribe() {
+                    this.unsubscribe(this.id, id, prop, fn);
+                };
+            }
+        };
+        prototype.destroyComponents = function(insts) {
+            var _this = this;
+            insts.forEach(function(inst) {
+                _this.destroyComponent(inst);
+            });
+        };
         prototype.subscribe = function(inst, comp, attr, callback, trigger) {
             var _this = this;
             inst = inst ? inst.name || inst.components && inst.components[comp] || inst : this.name;
@@ -1844,32 +1864,6 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
             value: function(name) {
                 var data = instances[this.id][name];
                 return data && data.instance;
-            }
-        },
-        sendToComponent: {
-            value: function(name, data) {
-                var component = this.getComponent(name);
-                if (component && component.onSend) return component.onSend(data);
-            }
-        },
-        subscribeToComponent: {
-            value: function(name, prop, fn, trigger) {
-                var component = this.getComponent(name);
-                var id = component && component["__cr-id"];
-                if (component) {
-                    this.subscribe(this.id, id, prop, fn, trigger);
-                    return function unsubscribe() {
-                        this.unsubscribe(this.id, id, prop, fn);
-                    };
-                }
-            }
-        },
-        destroyComponents: {
-            value: function(insts) {
-                var _this = this;
-                insts.forEach(function(inst) {
-                    _this.destroyComponent(inst);
-                });
             }
         },
         destroyComponent: {
