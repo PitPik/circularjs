@@ -6,7 +6,7 @@ app-heroes button {
 	padding: 2px 8px;
 }
 
-app-heroes {
+app-heroes ul {
 	padding: 0;
 	margin: 0;
 }
