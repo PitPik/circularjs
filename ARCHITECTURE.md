@@ -155,6 +155,18 @@ On keyup on the input field the component's listener callback "updateName" gets 
 
 Data binding, 1-way or 2-way, can be realized in many ways. Data binding plays an important role in communication between a template and its component.
 
+## Data binding (communication) between components
+
+Components should be autonomous and therefore not be coupled to any other component. Well, this is a theoretical approach.
+It happens quite often that components are somehow dependent on each other. Therefore the is several ways to build a connection to eachother (loosly coupled to tighly coupled, although, all are save to use).
+
+- **Routing** is one way to send information from one component to all others. It's very loose as the information being broadcasted is not dependent to/on a specific component.
+- **`subscribe`** is internally pubsub-like, and probably the best known way to pass data along.
+- **`subscribeToComponent`** uses internally also pubsub but is dependend on a component's cr-name. It is save to use as it fails silently if the component (cr-name) can not be found.
+- **`cr-input`** is a way to pass data from one component to its child. The child knows about it's parent and expects some data being passed on to it. The parent might not provide the data though if expected variable name doesn't match the parent ones.
+- **`cr-plugin`** does the same as `cr-input`, the child is though a plugin (directive).
+- **`sendToComponent`** is the most coupled (but still save) way to pass data from one component to another and back. It also needs a cr-name of a component to establish the connection and a `onSend()` callback on the named component. The sender can receive data back immediately after sending data.
+
 ## Services
 Service is a broad category encompassing any value, function, or feature that your application needs.
 
