@@ -1544,15 +1544,15 @@ define("api", [ "VOM", "blick", "toolbox" ], function(VOM, Blick, Toolbox) {
             var component = this.getComponent(name);
             if (component && component.onSend) return component.onSend(data);
         };
-        prototype.triggerEvent = function(name, data, params) {
+        prototype.triggerEvent = function(type, data, params) {
             var event = {};
             var _params = params || {};
             _params.detail = data;
-            event = new CustomEvent(name, _params);
+            event = new CustomEvent(type, _params);
             (_params.element || window).dispatchEvent(event, data);
         };
-        prototype.installEvent = function(name, func, cap) {
-            return Toolbox.addEvent(window, name, func, cap);
+        prototype.installEvent = function(element, type, func, cap) {
+            return Toolbox.addEvent(element || window, type, func, cap);
         };
         prototype.subscribeToComponent = function(name, prop, fn, trigger) {
             var _this = this;
