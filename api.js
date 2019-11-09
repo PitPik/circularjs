@@ -16,14 +16,28 @@ prototype.sendToComponent = function(name, data) {
   if (component && component.onSend) return component.onSend(data);
 };
 
+prototype.triggerEvent = function(name, data, params) {
+  var event = {};
+  var _params = params || {};
+  
+  _params.detail = data;
+  event = new CustomEvent(name, _params);
+  (_params.element || window).dispatchEvent(event, data);
+}
+
+prototype.installEvent = function(name, func, cap) {
+  return Toolbox.addEvent(window, name, func, cap);
+}
+
 prototype.subscribeToComponent = function(name, prop, fn, trigger) {
+  var _this = this;
   var component = this.getComponent(name);
   var id = component && component['__cr-id'];
 
   if (component) {
     this.subscribe(this.id, id, prop, fn, trigger);
 
-    return function unsubscribe() { this.unsubscribe(this.id, id, prop, fn) };
+    return function unsubscribe() { _this.unsubscribe(_this.id, id, prop, fn) };
   }
   return function(){};
 };

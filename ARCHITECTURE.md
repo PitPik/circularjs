@@ -161,6 +161,7 @@ Components should be autonomous and therefore not be coupled to any other compon
 It happens quite often that components are somehow dependent on each other. Therefore the is several ways to build a connection to eachother (loosly coupled to tighly coupled, although, all are save to use).
 
 - **Routing** is one way to send information from one component to all others. It's very loose as the information being broadcasted is not dependent to/on a specific component.
+- **`triggerEvent`** can be used to triggered from any component and be signed up to by any other component by using **`installEvent`**. The events are scopless but can be scoped by naming conventions, but can be triggered from a HTMLElement.
 - **`subscribe`** is internally pubsub-like, and probably the best known way to pass data along.
 - **Store** can be realised by using a VOM instance, providing it as a service and hook up to event changes by `subscribe`.
 - **`subscribeToComponent`** uses internally also pubsub but is dependend on a component's cr-name. It is save to use as it fails silently if the component (cr-name) can not be found.
