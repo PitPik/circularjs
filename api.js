@@ -235,6 +235,7 @@ prototype.renderModule = function(data) {
   componentElm = document.createElement(data.selector);
   data.input && componentElm.setAttribute('cr-input', data.input);
   data.event && componentElm.setAttribute('cr-event', data.event);
+  data.name && componentElm.setAttribute('cr-name', data.name);
   container.appendChild(componentElm);
 
   return new Toolbox.Promise(function(resolve) {

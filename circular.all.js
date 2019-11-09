@@ -1711,6 +1711,7 @@ define("api", [ "VOM", "blick", "toolbox" ], function(VOM, Blick, Toolbox) {
             componentElm = document.createElement(data.selector);
             data.input && componentElm.setAttribute("cr-input", data.input);
             data.event && componentElm.setAttribute("cr-event", data.event);
+            data.name && componentElm.setAttribute("cr-name", data.name);
             container.appendChild(componentElm);
             return new Toolbox.Promise(function(resolve) {
                 require([ data.path || data.selector ], function(module) {
