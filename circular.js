@@ -154,6 +154,12 @@ function initComponent(element, defData, Klass, plugData, parent) {
   instance = inst.instance =
     getInstance(Klass, element, crInst, id++, plugData, defData, inst, parent);
   Object.defineProperty(instance, '__cr-id', { value: crInst.id + ':' + name });
+  !plugData && getAttrMap(element, 'cr-plugin', function(key, value, element) {
+    if (components[key]) {
+      components[key].preparePlugin(element, defData, {});
+      components[key].init(element, value, instance);
+    }
+  });
   controller = inst.controller = new Controller({ element: element });
   models = keys(templates).concat(keys(defData.subscribe$));
   inst.models = models.filter(function(item, idx) { return models.indexOf(item) === idx })

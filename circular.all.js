@@ -1994,6 +1994,12 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         Object.defineProperty(instance, "__cr-id", {
             value: crInst.id + ":" + name
         });
+        !plugData && getAttrMap(element, "cr-plugin", function(key, value, element) {
+            if (components[key]) {
+                components[key].preparePlugin(element, defData, {});
+                components[key].init(element, value, instance);
+            }
+        });
         controller = inst.controller = new Controller({
             element: element
         });
