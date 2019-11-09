@@ -164,7 +164,7 @@ It happens quite often that components are somehow dependent on each other. Ther
 - **`subscribe`** is internally pubsub-like, and probably the best known way to pass data along.
 - **Store** can be realised by using a VOM instance, providing it as a service and hook up to event changes by `subscribe`.
 - **`subscribeToComponent`** uses internally also pubsub but is dependend on a component's cr-name. It is save to use as it fails silently if the component (cr-name) can not be found.
-- **`cr-input`** is a way to pass data from one component to its child. The child knows about it's parent and expects some data being passed on to it. The parent might not provide the data though if expected variable name doesn't match the parent ones.
+- **`cr-input`** is a way to pass data from one component to its child. The child knows about it's parent and expects some data being passed on to it. The parent might not provide the data though if expected variable name doesn't match the parent ones. After calling `input(this)` in the child's constructor, the child automatically listens to changes of the source data provided by its parent. Changes can be tracked programmatically or automatically in the template.
 - **`cr-plugin`** does the same as `cr-input`, the child is though a plugin (directive).
 - **`sendToComponent`** is the most coupled (but still save) way to pass data from one component to another and back. It also needs a cr-name of a component to establish the connection and a `onSend()` callback on the named component. The sender can receive data back immediately after sending data.
 
