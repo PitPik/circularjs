@@ -2027,10 +2027,10 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         var parentId = parentComp && parentComp["__cr-id"].split(":")[1];
         element.removeAttribute("cr-input");
         return new Klass(element, crInst, function(scope, subscribe) {
-            for (var key in parentValues.vars) scope[key] = parentValues.vars[key];
+            for (var key in parentValues.vars) key !== "null" && (scope[key] = parentValues.vars[key]);
             if (subscribe !== false) {
                 for (var key in parentValues.origin) {
-                    if (parentValues.static[key]) continue;
+                    if (parentValues.static[key] || key === "null") continue;
                     instances[crInst.id][instId].subscribers.push(function(names, key) {
                         return crInst.subscribeToComponent(parentId, key, function(value) {
                             scope[names[key]] = value;
@@ -2317,7 +2317,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                 data.crInstance.destroyComponents(components);
                 blickItem.components = null;
             }
-            if (elm && elm.length && data.defData.autoInit !== false) {
+            if (elm && elm.length) {
                 for (var x = 0, y = elm.length; x < y; x++) {
                     blickItem.components = initComponentsAndPlugins(elm[x].parentNode, data.defData, data.modelName, false, data.instance);
                 }
@@ -2381,7 +2381,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
             components[key] && components[key].preparePlugin(element, defData, {
                 where: where,
                 modelName: modelName,
-                value: value
+                value: value || "null"
             });
         });
         getInnerComponents(keys(components), [], template, function(element, key) {

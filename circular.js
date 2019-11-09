@@ -191,10 +191,10 @@ function getInstance(Klass, element, crInst, instId, plugData, defData, inst, pa
   element.removeAttribute('cr-input');
 
   return new Klass(element, crInst, function(scope, subscribe) {
-    for (var key in parentValues.vars) scope[key] = parentValues.vars[key];
+    for (var key in parentValues.vars) key !== 'null' && (scope[key] = parentValues.vars[key]);
     if (subscribe !== false) {
       for (var key in parentValues.origin) {
-        if (parentValues.static[key]) continue;
+        if (parentValues.static[key] || key === 'null') continue;
         instances[crInst.id][instId].subscribers.push((function(names, key) {
           return crInst.subscribeToComponent(parentId, key, function(value) {
             scope[names[key]] = value;
@@ -508,7 +508,7 @@ function blickItems(data, item, collector, id, property, value, oldValue) {
       data.crInstance.destroyComponents(components);
       blickItem.components = null;
     }
-    if (elm && elm.length && data.defData.autoInit !== false) {
+    if (elm && elm.length) {
       for (var x = 0, y = elm.length; x < y; x++) {
         blickItem.components = initComponentsAndPlugins(
           elm[x].parentNode, // TODO: not parentNode...
@@ -594,7 +594,7 @@ function getTemplate(template, defData, where, modelName) {
     components[key] && components[key].preparePlugin(element, defData, {
       where: where,
       modelName: modelName,
-      value: value,
+      value: value || 'null',
     });
   });
 
