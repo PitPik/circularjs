@@ -1590,9 +1590,9 @@ define("api", [ "VOM", "blick", "toolbox" ], function(VOM, Blick, Toolbox) {
             }
         }
         prototype.addRoute = function(data, trigger, hash) {
-            var path = typeof data.path === "object" ? {
+            var _this = this, path = typeof data.path === "object" ? {
                 regexp: data.path
-            } : routeToRegExp(data.path), _hash = hash || this.options.hash, parts = extractRouteParameters(path, getPath(_hash)), routers = pubsub[this.name] && pubsub[this.name].__router;
+            } : routeToRegExp(data.path), _hash = hash || this.options.hash, parts = extractRouteParameters(path, getPath(_hash)), routers = pubsub[this.name] && pubsub[this.name].__router, uninstall = {};
             this.subscribe(null, "__router", data.path, {
                 callback: data.callback,
                 names: path.names,
@@ -1601,8 +1601,11 @@ define("api", [ "VOM", "blick", "toolbox" ], function(VOM, Blick, Toolbox) {
             if (trigger && parts) {
                 data.callback.call(this, parts);
             }
-            !routers && installRouter(pubsub[this.name].__router, this, _hash);
-            return data;
+            uninstall = !routers && installRouter(pubsub[this.name].__router, this, _hash);
+            return function() {
+                _this.removedRoute(data);
+                !routers && uninstall();
+            };
         };
         prototype.removedRoute = function(data) {
             return this.unsubscribe(null, "__router", data.path, data.callback);
@@ -1614,7 +1617,7 @@ define("api", [ "VOM", "blick", "toolbox" ], function(VOM, Blick, Toolbox) {
         };
         function installRouter(routes, _this, hash) {
             var event = window.onpopstate !== undefined ? "popstate" : "hashchange";
-            Toolbox.addEvent(window, event, function(e) {
+            return Toolbox.addEvent(window, event, function(e) {
                 var parts = {};
                 for (var route in routes) {
                     parts = extractRouteParameters(routes[route], getPath(hash));
@@ -1847,6 +1850,18 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
             value: function(name, data) {
                 var component = this.getComponent(name);
                 if (component && component.onSend) return component.onSend(data);
+            }
+        },
+        subscribeToComponent: {
+            value: function(name, prop, fn, trigger) {
+                var component = this.getComponent(name);
+                var id = component && component["__cr-id"];
+                if (component) {
+                    this.subscribe(this.id, id, prop, fn, trigger);
+                    return function unsubscribe() {
+                        this.unsubscribe(this.id, id, prop, fn);
+                    };
+                }
             }
         },
         destroyComponents: {

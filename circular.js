@@ -48,6 +48,16 @@ Object.defineProperties(Circular.prototype, mixinAPI({
 
     if (component && component.onSend) return component.onSend(data);
   }},
+  subscribeToComponent: { value: function(name, prop, fn, trigger) {
+    var component = this.getComponent(name);
+    var id = component && component['__cr-id'];
+
+    if (component) {
+      this.subscribe(this.id, id, prop, fn, trigger);
+
+      return function unsubscribe() { this.unsubscribe(this.id, id, prop, fn) };
+    }
+  }},
   destroyComponents: { value: function(insts) {
     var _this = this;
 

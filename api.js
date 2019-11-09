@@ -73,11 +73,13 @@ function publish(_this, pubsubs, data) {
 /* ----------------------- routing -------------------------- */
 
 prototype.addRoute = function(data, trigger, hash) {
-  var path = typeof data.path === 'object' ?
+  var _this = this,
+    path = typeof data.path === 'object' ?
       {regexp: data.path} : routeToRegExp(data.path),
     _hash = hash || this.options.hash,
     parts = extractRouteParameters(path, getPath(_hash)),
-    routers = pubsub[this.name] && pubsub[this.name].__router;
+    routers = pubsub[this.name] && pubsub[this.name].__router,
+    uninstall = {};
 
   this.subscribe(null, '__router', data.path, {
     callback: data.callback,
@@ -88,15 +90,18 @@ prototype.addRoute = function(data, trigger, hash) {
   if (trigger && parts) {
     data.callback.call(this, parts);
   }
-  !routers && installRouter(pubsub[this.name].__router, this, _hash);
-  return data;
+  uninstall = !routers && installRouter(pubsub[this.name].__router, this, _hash);
+  return function() {
+    _this.removedRoute(data);
+    !routers && uninstall();
+  };
 };
 
 prototype.removedRoute = function(data) {
   return this.unsubscribe(null, '__router', data.path, data.callback);
 };
 
-prototype.toggleRoute = function(data, isOn) { // TODO
+prototype.toggleRoute = function(data, isOn) {
   var router = pubsub[this.name].__router,
     callbacks = router[data.path].paused || router[data.path];
 
@@ -107,7 +112,7 @@ prototype.toggleRoute = function(data, isOn) { // TODO
 function installRouter(routes, _this, hash) {
   var event = window.onpopstate !== undefined ? 'popstate' : 'hashchange';
 
-  Toolbox.addEvent(window, event, function(e) { // TODO: store uninstall
+  return Toolbox.addEvent(window, event, function(e) {
     var parts = {};
 
     for (var route in routes) {
