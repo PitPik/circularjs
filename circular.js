@@ -459,6 +459,9 @@ function changeItem(vomInstance, property, item, value, oldValue, sibling, data)
   }
 
   blickItems(data, item, collector, id, property, value, oldValue);
+  for (var key in data.defData.helpers) {
+    blickItems(data, item, collector, id, key, value, oldValue);
+  }
 }
 
 function destroyCollector(collector, id, keep) {

@@ -152,6 +152,7 @@ function findData(data, key, keys, pathDepth) {
   var helpers = data.helpers[pathDepth] || {};
   var value = check(helpers[key], helpers, keys);
 
+  if (key === 'this' || key === '.') return data.path[0];
   if (value === undefined) {
     value = crawlObjectUp(_data, keys);
   }

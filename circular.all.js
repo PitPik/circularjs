@@ -674,6 +674,7 @@
         var _data = data.path[pathDepth] || {};
         var helpers = data.helpers[pathDepth] || {};
         var value = check(helpers[key], helpers, keys);
+        if (key === "this" || key === ".") return data.path[0];
         if (value === undefined) {
             value = crawlObjectUp(_data, keys);
         }
@@ -1066,7 +1067,7 @@
     }
     function renderHook(data) {
         var index = dump.length;
-        if (!data.fn || !data.name || !data.isActive || data.partial || data.type === "decorator" || data.type === "helper" || data.name.charAt(0) === "@") {
+        if (!data.fn || !data.name || !data.isActive || data.partial || data.name.charAt(0) === "@") {
             return data.text + data.value;
         }
         data.isSection = checkSection(data);
@@ -2274,6 +2275,9 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
             }
         }
         blickItems(data, item, collector, id, property, value, oldValue);
+        for (var key in data.defData.helpers) {
+            blickItems(data, item, collector, id, key, value, oldValue);
+        }
     }
     function destroyCollector(collector, id, keep) {
         if (!collector[id]) return;

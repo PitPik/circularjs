@@ -37,8 +37,7 @@ require(['circular', 'replacer'], function({ Component, Toolbox: { $ } }, replac
 
       this.cr.renderModule({
         selector: 'app-' + value,
-        container: $('.module-outlet'),
-        init: true,
+        container: '.module-outlet',
       }).then(() => value === 'home' ? null : require([
         '!' + value + '.html',
         '!' + value + '.js'

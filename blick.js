@@ -112,7 +112,7 @@ function renderHook(data) {
   var index = dump.length;
 
   if (!data.fn || !data.name || !data.isActive || data.partial ||
-      data.type === 'decorator' || data.type === 'helper' ||
+      // data.type === 'decorator' || data.type === 'helper' ||
       data.name.charAt(0) === '@') {
     return data.text + data.value;
   }
@@ -226,7 +226,7 @@ function resolveReferences(_this, memory, html, container, fragment) {
           }));
       }
       part.replacer = (function(elm, ownerElement, name, search, orig, item, _n) { // TODO: no part.replacer...
-        return function updateAttribute(keys, _value) { // TODO: !!!! check again; respect attributes' behaviours
+        return function updateAttribute(keys, _value) {
           var value = _value || item.fn(item.data, keys);
           if (value === undefined) value = '';
           if (options.attributes[name]) {
