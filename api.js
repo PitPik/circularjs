@@ -25,6 +25,7 @@ prototype.subscribeToComponent = function(name, prop, fn, trigger) {
 
     return function unsubscribe() { this.unsubscribe(this.id, id, prop, fn) };
   }
+  return function(){};
 };
 
 prototype.destroyComponents = function(insts) {

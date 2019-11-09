@@ -196,7 +196,7 @@ function getInstance(Klass, element, crInst, instId, plugData, defData, inst, pa
       for (var key in parentValues.origin) {
         if (parentValues.static[key]) continue;
         instances[crInst.id][instId].subscribers.push((function(names, key) {
-          crInst.subscribeToComponent(parentId, key, function(value) {
+          return crInst.subscribeToComponent(parentId, key, function(value) {
             scope[names[key]] = value;
           }, true);
         })(parentValues.names, key));

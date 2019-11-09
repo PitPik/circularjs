@@ -1551,6 +1551,7 @@ define("api", [ "VOM", "blick", "toolbox" ], function(VOM, Blick, Toolbox) {
                     this.unsubscribe(this.id, id, prop, fn);
                 };
             }
+            return function() {};
         };
         prototype.destroyComponents = function(insts) {
             var _this = this;
@@ -2016,7 +2017,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                 for (var key in parentValues.origin) {
                     if (parentValues.static[key]) continue;
                     instances[crInst.id][instId].subscribers.push(function(names, key) {
-                        crInst.subscribeToComponent(parentId, key, function(value) {
+                        return crInst.subscribeToComponent(parentId, key, function(value) {
                             scope[names[key]] = value;
                         }, true);
                     }(parentValues.names, key));
