@@ -4,12 +4,13 @@ function(Toolbox, Blick, VOM, mixinAPI, Controller) { 'use strict';
 
 var $ = Toolbox.$;
 var $$ = Toolbox.$$;
+var $create = Toolbox.$create;
 var isArray = Toolbox.isArray;
 var keys = Toolbox.keys;
 var id = 0;
 var components = {};
 var instances = {};
-var templateWrapper = document.createElement('div');
+var templateWrapper = $create('div');
 
 function Circular(name, options) {
   this.options = {
@@ -563,7 +564,7 @@ function render(html, operator, parentNode, sibling, created) { // TODO: created
 function installStyles(selector, options) {
   if (!options.styles) return;
 
-  var link = document.createElement('style');
+  var link = $create('style');
   link.setAttribute('name', selector);
   link.innerHTML = '\n' + options.styles + '\n'; // TODO: sourceURL
   document.head.appendChild(link);
@@ -662,7 +663,7 @@ function processTemplate(element, defData) {
 }
 
 function createPlaceHolder(elm, idx) {
-  var placeHolder = document.createElement('script'); // TODO: match to parent
+  var placeHolder = $create('script'); // TODO: match to parent
 
   placeHolder.setAttribute('type', 'placeholder/tmpl');
   placeHolder.setAttribute('data-idx', idx);

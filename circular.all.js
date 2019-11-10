@@ -216,6 +216,13 @@
             }
             return Toolbox.closest(element, selector, root);
         },
+        $create: function(tag, className) {
+            var elm = document.createElement(tag);
+            if (className) {
+                Toolbox.addClass(elm, className);
+            }
+            return elm;
+        },
         $: function(selector, root) {
             return (root || document).querySelector(selector);
         },
@@ -1847,12 +1854,13 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
     "use strict";
     var $ = Toolbox.$;
     var $$ = Toolbox.$$;
+    var $create = Toolbox.$create;
     var isArray = Toolbox.isArray;
     var keys = Toolbox.keys;
     var id = 0;
     var components = {};
     var instances = {};
-    var templateWrapper = document.createElement("div");
+    var templateWrapper = $create("div");
     function Circular(name, options) {
         this.options = {
             hash: "#",
@@ -2358,7 +2366,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
     }
     function installStyles(selector, options) {
         if (!options.styles) return;
-        var link = document.createElement("style");
+        var link = $create("style");
         link.setAttribute("name", selector);
         link.innerHTML = "\n" + options.styles + "\n";
         document.head.appendChild(link);
@@ -2438,7 +2446,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         return result;
     }
     function createPlaceHolder(elm, idx) {
-        var placeHolder = document.createElement("script");
+        var placeHolder = $create("script");
         placeHolder.setAttribute("type", "placeholder/tmpl");
         placeHolder.setAttribute("data-idx", idx);
         return elm.parentNode.replaceChild(placeHolder, elm);

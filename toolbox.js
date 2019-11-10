@@ -50,6 +50,14 @@ var Toolbox = {
   //     elm.isConnected || context.contains(elm) :
   //     context.contains(elm);
   // },
+  $create: function(tag, className) {
+    var elm = document.createElement(tag);
+
+    if (className) {
+      Toolbox.addClass(elm, className);
+    }
+    return elm;
+  },
   $: function(selector, root) {
     return (root || document).querySelector(selector);
   },
