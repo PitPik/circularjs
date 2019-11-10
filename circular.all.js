@@ -2215,7 +2215,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         var define = vomInstance.reinforceProperty;
         var isChild = !item.childNodes && !!data.childTemplate;
         var template = isChild ? data.childTemplate : data.template;
-        var extraModel = (data.defData.extraModel || []).concat(getHelperData(item));
+        var extraModel = (data.defData.extraModel || []).concat(getHelperData(item), data.instance);
         var fragment = template && template.renderHTML(item, extraModel);
         var parentElements = item.parentNode && item.parentNode.elements;
         var tmpParent = parentElements && parentElements.container || instContainer;
