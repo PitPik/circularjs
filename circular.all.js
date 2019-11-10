@@ -2080,10 +2080,10 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         for (var n = vars.length; n--; ) {
             name = vars[n].split(/\s+as\s+/);
             isStatic = name[0].charAt(0) === "'";
-            staticValue = isStatic ? name[0].replace(/'/g, "") : "";
-            key = staticValue || name[0];
-            out.vars[name[1] || key] = staticValue || parent[key];
-            out.origin[key] = staticValue || parent[key];
+            staticValue = isStatic ? Toolbox.convertToType(name[0].replace(/'/g, "")) : "";
+            key = isStatic ? staticValue : name[0];
+            out.vars[name[1] || key] = isStatic ? staticValue : parent[key];
+            out.origin[key] = isStatic ? staticValue : parent[key];
             out.names[key] = name[1] || key;
             out.static[key] = isStatic;
         }
