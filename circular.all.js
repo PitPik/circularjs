@@ -2032,25 +2032,32 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         return instance;
     }
     function getInstance(Klass, element, crInst, instId, plugData, defData, inst, parentComp) {
+        var rootItem = isArray(parentComp) ? parentComp[0] : parentComp;
+        var loopItem = parentComp && parentComp[1];
+        var isLoop = false;
         var data = plugData || element.getAttribute("cr-input");
-        var parentValues = processInput(data, inst.parent = parentComp) || {};
-        var parentId = parentComp && parentComp["__cr-id"].split(":")[1];
+        var parentValues = processInput(data, inst.parent = rootItem) || {};
+        var parentId = rootItem && rootItem["__cr-id"].split(":")[1];
         element.removeAttribute("cr-input");
         return new Klass(element, crInst, function(scope, subscribe) {
             for (var key in parentValues.vars) key !== "null" && (scope[key] = parentValues.vars[key]);
             if (subscribe !== false) {
                 for (var key in parentValues.origin) {
                     if (parentValues.static[key] || key === "null") continue;
+                    isLoop = key === "this" || key === ".";
+                    if (isLoop) {
+                        scope[parentValues.names[key]] = loopItem;
+                    }
                     instances[crInst.id][instId].subscribers.push(function(names, key) {
-                        return crInst.subscribeToComponent(parentId, key, function(value) {
+                        return crInst.subscribeToComponent(isLoop ? loopItem["cr-id"] : parentId, key, function(value) {
                             scope[names[key]] = value;
                         }, true);
                     }(parentValues.names, key));
                 }
             }
-            plugData && installEvents(parentComp, scope, defData);
+            plugData && installEvents(rootItem, scope, defData);
         }, function() {
-            return parentComp;
+            return rootItem;
         });
     }
     function installEvents(parent, scope, defData) {
@@ -2235,7 +2242,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                 data.controller.installEvent(data.instance, rootElement, eventName, data.items);
             });
         }
-        initComponentsAndPlugins(element, data.defData, data.modelName, isChild, data.instance);
+        initComponentsAndPlugins(element, data.defData, data.modelName, isChild, [ data.instance, item ]);
         return element;
     }
     function initComponentsAndPlugins(element, defData, modelName, isChild, instance) {
@@ -2329,7 +2336,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
             }
             if (elm && elm.length) {
                 for (var x = 0, y = elm.length; x < y; x++) {
-                    blickItem.components = initComponentsAndPlugins(elm[x].parentNode, data.defData, data.modelName, false, data.instance);
+                    blickItem.components = initComponentsAndPlugins(elm[x].parentNode, data.defData, data.modelName, false, [ data.instance, item ]);
                 }
             }
         }

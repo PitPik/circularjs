@@ -194,9 +194,12 @@ function initComponent(element, defData, Klass, plugData, parent) {
 /* -------------- scoping ------------ */
 
 function getInstance(Klass, element, crInst, instId, plugData, defData, inst, parentComp) {
+  var rootItem = isArray(parentComp) ? parentComp[0] : parentComp;
+  var loopItem = parentComp && parentComp[1];
+  var isLoop = false;
   var data = plugData || element.getAttribute('cr-input');
-  var parentValues = processInput(data, inst.parent = parentComp) || {};
-  var parentId = parentComp && parentComp['__cr-id'].split(':')[1];
+  var parentValues = processInput(data, inst.parent = rootItem) || {};
+  var parentId = rootItem && rootItem['__cr-id'].split(':')[1];
 
   element.removeAttribute('cr-input');
 
@@ -205,15 +208,23 @@ function getInstance(Klass, element, crInst, instId, plugData, defData, inst, pa
     if (subscribe !== false) {
       for (var key in parentValues.origin) {
         if (parentValues.static[key] || key === 'null') continue;
+        isLoop = key === 'this' || key === '.';
+        if (isLoop) {
+          scope[parentValues.names[key]] = loopItem;
+          // continue; // TODO: check if subscription is possible
+        }
         instances[crInst.id][instId].subscribers.push((function(names, key) {
-          return crInst.subscribeToComponent(parentId, key, function(value) {
-            scope[names[key]] = value;
-          }, true);
+          return crInst.subscribeToComponent(
+            isLoop ? loopItem['cr-id'] : parentId,
+            key,
+            function(value) { scope[names[key]] = value },
+            true
+          );
         })(parentValues.names, key));
       }
     }
-    plugData && installEvents(parentComp, scope, defData);
-  }, function() { return parentComp });
+    plugData && installEvents(rootItem, scope, defData);
+  }, function() { return rootItem });
 }
 
 function installEvents(parent, scope, defData) {
@@ -416,7 +427,7 @@ function setNewItem(vomInstance, param) {
       data.controller.installEvent(data.instance, rootElement, eventName, data.items);
     });
   }
-  initComponentsAndPlugins(element, data.defData, data.modelName, isChild, data.instance);
+  initComponentsAndPlugins(element, data.defData, data.modelName, isChild, [data.instance, item]);
 
   return element;
 }
@@ -525,7 +536,7 @@ function blickItems(data, item, collector, id, property, value, oldValue) {
           data.defData,
           data.modelName,
           false, // TODO: isChild,
-          data.instance
+          [data.instance, item]
         );
       }
     } 
