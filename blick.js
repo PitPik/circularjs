@@ -127,7 +127,7 @@ function textNodeSplitter(node, first, last) {
 }
 
 function checkSection(part, node) {
-  return part.section && !part.type &&
+  return part.section && (!part.type || part.type === 'helper' || part.type === 'decorator') &&
     (part.value.indexOf('{{#') !== -1 || (node && node.textContent.indexOf('{{#') !== -1));
 }
 

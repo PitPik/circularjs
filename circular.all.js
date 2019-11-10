@@ -1079,7 +1079,7 @@
         return node.splitText(node.textContent.indexOf(first));
     }
     function checkSection(part, node) {
-        return part.section && !part.type && (part.value.indexOf("{{#") !== -1 || node && node.textContent.indexOf("{{#") !== -1);
+        return part.section && (!part.type || part.type === "helper" || part.type === "decorator") && (part.value.indexOf("{{#") !== -1 || node && node.textContent.indexOf("{{#") !== -1);
     }
     function clearMemory(array) {
         var a = true;
@@ -1996,7 +1996,11 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         });
         !plugData && getAttrMap(element, "cr-plugin", function(key, value, element) {
             if (components[key]) {
-                components[key].preparePlugin(element, defData, {});
+                components[key].preparePlugin(element, defData, {
+                    where: name,
+                    modelName: "this",
+                    value: value || "null"
+                });
                 components[key].init(element, value, instance);
             }
         });

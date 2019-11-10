@@ -156,7 +156,11 @@ function initComponent(element, defData, Klass, plugData, parent) {
   Object.defineProperty(instance, '__cr-id', { value: crInst.id + ':' + name });
   !plugData && getAttrMap(element, 'cr-plugin', function(key, value, element) {
     if (components[key]) {
-      components[key].preparePlugin(element, defData, {});
+      components[key].preparePlugin(element, defData, {
+        where: name,
+        modelName: 'this',
+        value: value || 'null',
+      });
       components[key].init(element, value, instance);
     }
   });
