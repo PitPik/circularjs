@@ -88,7 +88,7 @@ return Object.defineProperties(Circular, {
     return components[defData.selector] || (components[defData.selector] = {
       Klass: Klass,
       selector: defData.selector,
-      templates: processTemplate(templateWrapper, defData),
+      templates: defData.template && processTemplate(templateWrapper, defData),
       styles: installStyles(defData.selector, defData),
       name: defData.name || Klass.name,
       init: function init(element, plugData, parent) {
@@ -155,16 +155,23 @@ function initComponent(element, defData, Klass, plugData, parent) {
   instance = inst.instance =
     getInstance(Klass, element, crInst, id++, plugData, defData, inst, parent);
   Object.defineProperty(instance, '__cr-id', { value: crInst.id + ':' + name });
-  !plugData && getAttrMap(element, 'cr-plugin', function(key, value, element) {
-    if (components[key]) {
-      components[key].preparePlugin(element, defData, {
-        where: name,
-        modelName: 'this',
-        value: value || 'null',
-      });
-      components[key].init(element, value, instance);
-    }
-  });
+  if (!plugData) {
+    getAttrMap(element, 'cr-plugin', function(key, value, element) {
+      if (components[key]) {
+        components[key].preparePlugin(element, defData, {
+          where: name,
+          modelName: 'this',
+          value: value || 'null',
+        });
+        components[key].init(element, value, instance);
+      }
+    });
+    for (var n = element.children.length, tag = '', child = {}; n--; ) {
+      child = element.children[n];
+      tag = child.tagName.toLowerCase();
+      components[tag] && components[tag].init(child, null, instance);
+    };
+  }
   controller = inst.controller = new Controller({ element: element });
   models = keys(templates).concat(keys(defData.subscribe$));
   inst.models = models.filter(function(item, idx) { return models.indexOf(item) === idx })
@@ -205,7 +212,10 @@ function getInstance(Klass, element, crInst, instId, plugData, defData, inst, pa
   element.removeAttribute('cr-input');
 
   return new Klass(element, crInst, function(scope, subscribe) {
-    for (var key in parentValues.vars) key !== 'null' && (scope[key] = parentValues.vars[key]);
+    for (var key in parentValues.vars) if (key !== 'null') {
+      scope[key] = typeof parentValues.vars[key] === 'function' ?
+        parentValues.vars[key].bind(rootItem) : parentValues.vars[key];
+    }
     if (subscribe !== false) {
       for (var key in parentValues.origin) {
         if (parentValues.static[key] || key === 'null') continue;
@@ -640,7 +650,7 @@ function getTemplate(template, defData, where, modelName) {
 
 
 function processTemplate(element, defData) {
-  var _ = element.innerHTML = defData.template; // TODO: fragment...
+  var _ = element.innerHTML = defData.template || ''; // TODO: fragment...
   var templates = element.querySelectorAll('[cr-for]');
   var result = {};
 

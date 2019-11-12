@@ -219,7 +219,7 @@
         $create: function(tag, className) {
             var elm = document.createElement(tag);
             if (className) {
-                Toolbox.addClass(elm, className);
+                elm.className = className;
             }
             return elm;
         },
@@ -1936,7 +1936,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                 return components[defData.selector] || (components[defData.selector] = {
                     Klass: Klass,
                     selector: defData.selector,
-                    templates: processTemplate(templateWrapper, defData),
+                    templates: defData.template && processTemplate(templateWrapper, defData),
                     styles: installStyles(defData.selector, defData),
                     name: defData.name || Klass.name,
                     init: function init(element, plugData, parent) {
@@ -2002,16 +2002,23 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         Object.defineProperty(instance, "__cr-id", {
             value: crInst.id + ":" + name
         });
-        !plugData && getAttrMap(element, "cr-plugin", function(key, value, element) {
-            if (components[key]) {
-                components[key].preparePlugin(element, defData, {
-                    where: name,
-                    modelName: "this",
-                    value: value || "null"
-                });
-                components[key].init(element, value, instance);
+        if (!plugData) {
+            getAttrMap(element, "cr-plugin", function(key, value, element) {
+                if (components[key]) {
+                    components[key].preparePlugin(element, defData, {
+                        where: name,
+                        modelName: "this",
+                        value: value || "null"
+                    });
+                    components[key].init(element, value, instance);
+                }
+            });
+            for (var n = element.children.length, tag = "", child = {}; n--; ) {
+                child = element.children[n];
+                tag = child.tagName.toLowerCase();
+                components[tag] && components[tag].init(child, null, instance);
             }
-        });
+        }
         controller = inst.controller = new Controller({
             element: element
         });
@@ -2048,7 +2055,9 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         var parentId = rootItem && rootItem["__cr-id"].split(":")[1];
         element.removeAttribute("cr-input");
         return new Klass(element, crInst, function(scope, subscribe) {
-            for (var key in parentValues.vars) key !== "null" && (scope[key] = parentValues.vars[key]);
+            for (var key in parentValues.vars) if (key !== "null") {
+                scope[key] = typeof parentValues.vars[key] === "function" ? parentValues.vars[key].bind(rootItem) : parentValues.vars[key];
+            }
             if (subscribe !== false) {
                 for (var key in parentValues.origin) {
                     if (parentValues.static[key] || key === "null") continue;
@@ -2428,7 +2437,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         });
     }
     function processTemplate(element, defData) {
-        var _ = element.innerHTML = defData.template;
+        var _ = element.innerHTML = defData.template || "";
         var templates = element.querySelectorAll("[cr-for]");
         var result = {};
         templates.forEach(function(elm, idx) {

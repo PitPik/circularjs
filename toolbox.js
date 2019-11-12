@@ -54,7 +54,7 @@ var Toolbox = {
     var elm = document.createElement(tag);
 
     if (className) {
-      Toolbox.addClass(elm, className);
+      elm.className = className;
     }
     return elm;
   },
