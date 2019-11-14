@@ -42,7 +42,8 @@ require(['circular', 'tree-helper'], ({ Component }, getHelpers) => Component({
       line-height: 1.8em;
     }
     .tree-search input { opacity: 0; transition: opacity .14s; outline: none; }
-    .tree-search:hover input { opacity: 1; }`,
+    .tree-search:hover input { opacity: 1; }
+    b { color: #4faeff; font-weight: normal; }`,
   helpers: getHelpers(['i18n']),
   subscribe$: { this: ['searchValue'] },
 }, class TreeControl {
@@ -53,6 +54,7 @@ require(['circular', 'tree-helper'], ({ Component }, getHelpers) => Component({
   debounce = 0;
   delay = 300;
   foundItems = [];
+  RegExp = {};
 
   searchValue = '';
 
@@ -68,15 +70,20 @@ require(['circular', 'tree-helper'], ({ Component }, getHelpers) => Component({
     this.debounce = setTimeout(() => {
       this.mark(false);
   
-      const search = new RegExp(this.searchValue, 'i');
+      this.RegExp = new RegExp(this.searchValue, 'i');
       this.foundItems = this.searchValue === '' ? [] :
-        this.tree.getElementsByProperty('properties.title', search);
+        this.tree.getElementsByProperty('properties.title', this.RegExp);
       this.mark(true);
     }, this.delay);
   }
 
   mark(toggle) {
-    this.foundItems.forEach(item => item.selected = toggle);
+    this.foundItems.forEach(item => {
+      item.selected = toggle;
+      item.title = toggle ?
+        item.properties.title.replace(this.RegExp, $1 => `<b>${$1}</b>`) :
+        item.properties.title;
+    });
   }
 
   clear(e, elm, item) {
