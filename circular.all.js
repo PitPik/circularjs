@@ -1311,10 +1311,10 @@
             return NODES[this.id][id];
         },
         getElementsByProperty: function(property, value) {
-            var result = [], hasValue = undefined !== value, hasProperty = undefined !== property, keys = [], propValue = null, node = NODES[this.id];
+            var result = [], isFn = typeof value === "function", hasValue = undefined !== value, hasProperty = undefined !== property, keys = [], propValue = null, node = NODES[this.id];
             for (var id in node) {
                 propValue = undefined !== node[id][property] ? node[id][property] : crawlObject(node[id], keys[0] ? keys : keys = hasProperty && property.split(pathSplit));
-                if (hasValue && propValue === value || !hasValue && undefined !== propValue || !hasValue && !hasProperty) {
+                if (hasValue && propValue === value || isFn && value(propValue) || !hasValue && undefined !== propValue || !hasValue && !hasProperty) {
                     result.push(node[id]);
                 }
             }
@@ -1822,7 +1822,7 @@ define("controller", [ "toolbox", "VOM" ], function(Toolbox, VOM) {
     };
     return Controller;
     function triggerEvent(instance, events, model, key, e, stopPropagation) {
-        if (!instance[key]) return console.warn('No event handler "' + key + '" on instance:', instance);
+        if (!instance[key]) return;
         events[e.type][key].forEach(function(eventElement) {
             if (!stopPropagation._ && eventElement.contains(e.target)) {
                 stopPropagation._ = instance[key](e, eventElement, model) === false;
@@ -1892,6 +1892,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         },
         destroyComponent: {
             value: function(inst) {
+                if (!inst) return;
                 var id = inst["__cr-id"].split(":");
                 var data = instances[id[0]][id[1]];
                 var instance = data.instance;

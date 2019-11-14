@@ -58,6 +58,7 @@ VOM.prototype = {
   },
   getElementsByProperty: function(property, value) {
     var result = [],
+      isFn = typeof value === 'function',
       hasValue = undefined !== value,
       hasProperty = undefined !== property,
       keys = [],
@@ -68,7 +69,7 @@ VOM.prototype = {
       propValue = undefined !== node[id][property] ?
         node[id][property] : crawlObject(node[id], (keys[0] ?
         keys : (keys = hasProperty && property.split(pathSplit))));
-      if ((hasValue && propValue === value) ||
+      if ((hasValue && propValue === value || (isFn && value(propValue))) ||
           (!hasValue && undefined !== propValue) ||
           (!hasValue && !hasProperty)) {
         result.push(node[id]);

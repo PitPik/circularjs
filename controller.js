@@ -46,10 +46,11 @@ Controller.prototype = {
 return Controller;
 
 function triggerEvent(instance, events, model, key, e, stopPropagation) {
-  if (!instance[key]) return console.warn(
-    'No event handler "' + key + '" on instance:',
-    instance
-  );
+  // if (!instance[key]) return console.warn(
+  //   'No event handler "' + key + '" on instance:',
+  //   instance
+  // );
+  if (!instance[key]) return;
   events[e.type][key].forEach(function(eventElement) {
     if (!stopPropagation._ && eventElement.contains(e.target)) {
       stopPropagation._ = instance[key](e, eventElement, model) === false;

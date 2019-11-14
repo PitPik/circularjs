@@ -45,6 +45,7 @@ Object.defineProperties(Circular.prototype, mixinAPI({
     return data && data.instance;
   }},
   destroyComponent: { value: function(inst) {
+    if (!inst) return; // TODO: check why...
     var id = inst['__cr-id'].split(':');
     var data = instances[id[0]][id[1]];
     var instance = data.instance;
