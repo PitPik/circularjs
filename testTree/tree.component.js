@@ -1,6 +1,6 @@
 require([
   'circular',
-  '!./tree.html',
+  '!./tree.component.html',
   'tree-helper',
   'data-provider',
   'dnd.plugin',
@@ -10,13 +10,6 @@ require([
 ], ({ Module }, template, getHelpers, dataProvider, dnd) => Module({
   selector: 'tree',
   template,
-  styles: `
-    tree {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      background: #2B2B2B;
-    }`,
   helpers: getHelpers(),
   subscribe$: {
     tree: ['title', 'isOpen', 'hovered', 'selected', 'active', 'linkClass', 'class'],
@@ -44,15 +37,13 @@ require([
     if (prop === 'active') {
       this.activeItem.active = false;
       this.activeItem = item;
-      value && this.openParents(item);
     } else if (prop === 'isOpen') {
       dataProvider.storeToggle(item, this.name);
-    } else if (prop = 'hovered') {
-      value && this.openParents(item);
-    } else if (prop = 'selected') {
-      value && this.openParents(item);
     }
-}
+    if (value && prop.match(/active|selected|hovered/)) {
+      this.openParents(item);
+    }
+  }
 
   treeToggle(toggle) {
     const leaveOpen = {};
@@ -79,8 +70,6 @@ require([
       while (item = item.parentNode) if (!item.isOpen) item.isOpen = true;
     });
   }
-
-
 
   hover(e, elm, item) {
     return e.target === elm && !this.noHover.toggle ?

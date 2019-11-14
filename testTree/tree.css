@@ -1,3 +1,10 @@
+tree {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #2B2B2B;
+}
+
 .link-tree {
   padding: 0;
   margin: 0;

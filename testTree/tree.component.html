@@ -1,0 +1,22 @@
+<ul class="link-tree toolbox">
+  <li
+    class="link-tree-leaf {{#if %isOpen}}is-open{{/if}} {{%hasChildren}} {{%class}}"
+    cr-for="tree"
+  >
+    <a href="#page/{{name}}"
+      class="link flex-row {{%linkClass}}{{#if
+        %hovered}} hover{{/if}}{{#if
+        %active}} active{{/if}}{{#if
+        %selected}} selected{{/if}}"
+      draggable="true"
+      cr-view="link"
+      cr-event="mouseenter: hover; mouseleave: blur; dblclick: getProps; click: select;"
+    >
+      <em class="toggle" cr-event="click: toggle"></em>
+      {{#if icon}}<em class="material-icons icon">{{icon}}</em>{{/if}}
+      {{#if %title}}<span class="link-title">{{{title}}}</span>{{/if}}
+      <tree-actions class="actions" cr-input="hasActions, tree, this as item"></tree-actions>
+    </a>
+    <ul cr-mount class="link-tree-branch"></ul>
+  </li>
+</ul>

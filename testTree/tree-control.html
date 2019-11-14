@@ -1,0 +1,21 @@
+<div class="toolbox">
+  <div class="context-menu extra">
+    <span cr-event="click: expand" title="{{i18n Expand}} {{name}}">
+      {{i18n Expand all}}
+    </span>
+    <span cr-event="click: collapse" title="{{i18n Collapse}} {{name}}">
+      {{i18n Collapse}}
+    </span>
+  </div>
+  <div class="tree-search">
+    <input
+      placeholder="{{i18n Select by search}}"
+      cr-event="keyup: clear; input: input; blur: blurInput"
+      value="{{%searchValue}}"
+    >
+    <i class="counter">{{%counter}}{{#if %counter}}/{{all}}{{/if}}</i>
+    {{#unless %searchValue}}
+      <i class="material-icons search-icon">search</i>
+    {{/unless}}
+  </div>
+</div>
