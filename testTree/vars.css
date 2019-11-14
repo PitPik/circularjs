@@ -1,0 +1,35 @@
+:root {
+  --main-dim-s: 45px;
+  --main-dim-xs: 30px;
+  --main-dim-m: 300px;
+
+  --main-size-icon-font: 24px;
+
+  --main-font-style: "Trebuchet MS", Helvetica, sans-serif;
+
+  --bb-color: #b22727;
+  --bb-color-lighter: #d43a3a;
+  --bb-color-darker: #8a1e1e;
+  --main-color: #ddd;
+  --main-color-lighter: #aaa;
+  --main-color-hover: #fff;
+  --main-color-dark: #333;
+  --main-color-dark-lighter: #555;
+  --main-color-darker: #222;
+
+  --main-hover-transition: background .2s, color .1s;
+
+  --main-bg-color: #463e37;
+  --main-bg-color-darker: #39332d;
+  --main-bg-color-lighter: #64594f;
+  --main-bg-color-light: #ddd;
+  --main-bg-color-light-darker: #ccc;
+  --main-bg-color-dark: #333;
+
+  --main-border-width: 1px;
+  --main-border-width-icons: var(--main-border-width);
+  --main-border: var(--main-border-width) solid var(--main-color-darker);
+  --main-border-lighter: var(--main-border-width) solid var(--main-color-dark);
+  --main-border-light: var(--main-border-width) solid rgba(255, 255, 255, .2);
+  --main-border-light-v1: var(--main-border-width) solid #aaa;
+}

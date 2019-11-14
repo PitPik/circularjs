@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en" data-framework="circularJS">
+<head>
+  <meta charset="utf-8">
+  <title>CircularJS • tree</title>
+
+  <link cr-dev rel="stylesheet" type="text/css" href="app.css">
+  <link cr-dev rel="stylesheet" type="text/css" href="tree.css">
+  <link cr-dev rel="stylesheet" type="text/css" href="assets/iconfont/material-icons.css">
+  <link cr-dev rel="stylesheet" type="text/css" href="vars.css">
+  <link rel="stylesheet" type="text/css" href="main.css">
+
+  <script cr-dev type="text/javascript" src="../amd.js"></script>
+  <script cr-dev type="text/javascript" src="../toolbox.js"></script>
+  <script cr-dev type="text/javascript" src="../VOM.js"></script>
+  <script cr-dev type="text/javascript" src="../schnauzer.js"></script>
+  <script cr-dev type="text/javascript" src="../blick.js"></script>
+  <script cr-dev type="text/javascript" src="../api.js"></script>
+  <script cr-dev type="text/javascript" src="../controller.js"></script>
+  <script cr-dev type="text/javascript" src="../circular.js"></script>
+  <!-- <script cr-dev type="text/javascript" src="../circular.min.js"></script> -->
+</head>
+<body>
+  <div class="app-bar-right">
+    <tree
+      cr-input="'false' as isOpen, 'true' as hasActions, 'Page items' as name"
+      cr-plugin="treeDndPlugin: tree, noHover"
+      cr-cloak
+    >
+      <control-box class="toolbox" cr-input="name, 'tree' as icon"></control-box>
+      <tree-control class="tree-control" cr-input="name, treeToggle, tree"></tree-control>
+    </tree>
+  </div>
+</body>
+<script type="text/javascript">
+  require(['circular', 'tree.component']);
+</script>
+</html>
