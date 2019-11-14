@@ -82,9 +82,10 @@ require(['circular', 'tree-helper'], ({ Component }, getHelpers) => Component({
     this.foundItems.forEach(item => {
       item.selected = toggle;
       item.title = toggle ?
-        item.properties.title.replace(this.RegExp, (_, $1, $2, $3, $4) => {
-          console.log(_, $1, $2, $3, $4);
-          return `<b>${$1 || $2}</b>`;
+        item.properties.title.replace(this.RegExp, function(_) {
+          const args = [].slice.call(arguments, 1, arguments.length - 2);
+          args.forEach(finding => _ = _.replace(finding, ($1 => `<b>${$1}</b>`)));
+          return _;
         }) :
         item.properties.title;
     });
