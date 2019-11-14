@@ -19,7 +19,7 @@ require([
     }`,
   helpers: getHelpers(),
   subscribe$: {
-    tree: ['isOpen', 'hovered', 'selected', 'active', 'linkClass', 'class'],
+    tree: ['title', 'isOpen', 'hovered', 'selected', 'active', 'linkClass', 'class'],
   },
 }, class Tree {
   tree = [];
@@ -39,7 +39,7 @@ require([
     });
   }
 
-  tree$$(prop, item, value, oldValue, internal) {
+  tree$(prop, item, value, oldValue, internal) {
     if (value === oldValue) return;
     if (prop === 'active') {
       this.activeItem.active = false;
@@ -75,8 +75,12 @@ require([
   }
 
   openParents(item) {
-    while (item = item.parentNode) if (!item.isOpen) item.isOpen = true;
+    setTimeout(() => {
+      while (item = item.parentNode) if (!item.isOpen) item.isOpen = true;
+    });
   }
+
+
 
   hover(e, elm, item) {
     return e.target === elm && !this.noHover.toggle ?
