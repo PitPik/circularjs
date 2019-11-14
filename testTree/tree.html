@@ -14,7 +14,7 @@
     >
       <em class="toggle" cr-event="click: toggle"></em>
       {{#if icon}}<em class="material-icons icon">{{icon}}</em>{{/if}}
-      <span class="link-title">{{%properties.title}}</span>
+      {{#if %title}}<span class="link-title">{{{title}}}</span>{{/if}}
       <tree-actions class="actions" cr-input="hasActions, tree, this as item"></tree-actions>
     </a>
     <ul cr-mount class="link-tree-branch"></ul>
