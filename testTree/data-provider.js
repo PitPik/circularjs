@@ -16,6 +16,7 @@ define('data-provider', ['toolbox'], ({ ajax, storageHelper }) => {
       active: false,
       class: '',
       linkClass: '',
+      title: item.properties.title,
     }));
   };
   const getIcon = kind => ({ // TODO: move to more generic service
