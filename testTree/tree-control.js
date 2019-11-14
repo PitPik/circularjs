@@ -70,7 +70,8 @@ require(['circular', 'tree-helper'], ({ Component }, getHelpers) => Component({
     this.debounce = setTimeout(() => {
       this.mark(false);
   
-      this.RegExp = new RegExp(this.searchValue, 'i');
+      this.RegExp = new RegExp('(?=.*(' + this.searchValue
+        .split(/\s+/).filter((_ => _)).join('))(?=.*(') + ')).*', 'i');
       this.foundItems = this.searchValue === '' ? [] :
         this.tree.getElementsByProperty('properties.title', this.RegExp);
       this.mark(true);
@@ -81,7 +82,10 @@ require(['circular', 'tree-helper'], ({ Component }, getHelpers) => Component({
     this.foundItems.forEach(item => {
       item.selected = toggle;
       item.title = toggle ?
-        item.properties.title.replace(this.RegExp, $1 => `<b>${$1}</b>`) :
+        item.properties.title.replace(this.RegExp, (_, $1, $2, $3, $4) => {
+          console.log(_, $1, $2, $3, $4);
+          return `<b>${$1 || $2}</b>`;
+        }) :
         item.properties.title;
     });
   }
