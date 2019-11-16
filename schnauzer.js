@@ -238,7 +238,7 @@ function apply(_this, fn, name, params, data, parts, body, altBody) {
       getBody: function() {
         return body && body(data) || '';
       },
-      gatAltBody: function() {
+      getAltBody: function() {
         return altBody && altBody(data) || '';
       },
       // data: data.path[0]

@@ -45,7 +45,6 @@ Object.defineProperties(Circular.prototype, mixinAPI({
     return data && data.instance;
   }},
   destroyComponent: { value: function(inst) {
-    if (!inst) return; // TODO: check why...
     var id = inst['__cr-id'].split(':');
     var data = instances[id[0]][id[1]];
     var instance = data.instance;
@@ -236,7 +235,7 @@ function getInstance(Klass, element, crInst, instId, plugData, defData, inst, pa
       }
     }
     plugData && installEvents(rootItem, scope, defData);
-  }, function() { return rootItem });
+  }, function() { return rootItem || loopItem });
 }
 
 function installEvents(parent, scope, defData) {
@@ -451,11 +450,13 @@ function initComponentsAndPlugins(element, defData, modelName, isChild, instance
   var isLoop = !isMain && !isChild;
   var what = isMain ? 'main' : isLoop ? 'loop' : isChild ? 'child' : '';
   var insts = [];
+  var inst = {};
   // components
   for (var key in componentsDefs) {
     if (what && componentsDefs[key][what][modelName]) {
       [].slice.call($$(key, element)).forEach(function(elm) {
-        insts.push(components[key].init(elm, null, instance));
+        inst = components[key].init(elm, null, instance);
+        inst && insts.push(inst);
       });
     }
   }

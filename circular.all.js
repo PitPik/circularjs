@@ -761,7 +761,7 @@
             getBody: function() {
                 return body && body(data) || "";
             },
-            gatAltBody: function() {
+            getAltBody: function() {
                 return altBody && altBody(data) || "";
             }
         }, parts.isInline ? [ function() {
@@ -1892,7 +1892,6 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         },
         destroyComponent: {
             value: function(inst) {
-                if (!inst) return;
                 var id = inst["__cr-id"].split(":");
                 var data = instances[id[0]][id[1]];
                 var instance = data.instance;
@@ -2075,7 +2074,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
             }
             plugData && installEvents(rootItem, scope, defData);
         }, function() {
-            return rootItem;
+            return rootItem || loopItem;
         });
     }
     function installEvents(parent, scope, defData) {
@@ -2270,10 +2269,12 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         var isLoop = !isMain && !isChild;
         var what = isMain ? "main" : isLoop ? "loop" : isChild ? "child" : "";
         var insts = [];
+        var inst = {};
         for (var key in componentsDefs) {
             if (what && componentsDefs[key][what][modelName]) {
                 [].slice.call($$(key, element)).forEach(function(elm) {
-                    insts.push(components[key].init(elm, null, instance));
+                    inst = components[key].init(elm, null, instance);
+                    inst && insts.push(inst);
                 });
             }
         }
