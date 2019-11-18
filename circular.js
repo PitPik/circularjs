@@ -383,9 +383,7 @@ function getVOMInstance(data) {
 
       data.template && changeItem(this, property, item, value, oldValue, sibling, data);
       inst[name$] &&  !intern && inst[name$](property, item, value, oldValue);
-      inst[name$$] && setTimeout(function() {
-        inst[name$$](property, item, value, oldValue, intern);
-      });
+      inst[name$$] && inst[name$$](property, item, value, oldValue, intern);
       !intern && data.crInstance.publish(data.crInstance.id, inst['__cr-id'], property, value);
     },
   });
