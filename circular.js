@@ -585,15 +585,12 @@ function installStyles(selector, options) {
 }
 
 function getInnerComponents(selectors, result, context, fn) {
-  var join = selectors.join('|.//');
-  var wishList = (join ? './/' + join + '|' : '') + './/*[@cr-component]';
-  var elms = selectors.length ? document.evaluate(wishList,
-    context || document, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null) : [];
+  var wishList = selectors.join(',');
+  var elms = wishList ? (context || document).querySelectorAll(wishList) : [];
 
-  for (var n = elms.snapshotLength, item = {}; n--; ) {
-    item = elms.snapshotItem(n);
-    result.push(item);
-    if (fn) fn(item, item.tagName.toLowerCase());
+  for (var n = elms.length; n--; ) {
+    result.push(elms[n]);
+    if (fn) fn(elms[n], elms[n].tagName.toLowerCase());
   }
 
   return result;
