@@ -589,6 +589,7 @@ function getInnerComponents(selectors, result, context, fn) {
   var elms = wishList ? [].slice.call((context || document).querySelectorAll(wishList)) : [];
 
   for (var n = elms.length, elm = {}; n--; ) {
+    if (!elms[n]) continue;
     elm = elms[n];
     for (var m = elms.length; m--; ) {
       if (elm !== elms[m] && elm.contains(elms[m])) {
