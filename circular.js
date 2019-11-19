@@ -234,7 +234,7 @@ function getInstance(Klass, element, crInst, instId, plugData, defData, inst, pa
         })(parentValues.names, key));
       }
     }
-    plugData && installEvents(rootItem, scope, defData);
+    plugData && rootItem !== loopItem && installEvents(rootItem, scope, defData);
   }, function() { return rootItem || loopItem });
 }
 
