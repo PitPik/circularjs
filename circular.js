@@ -586,12 +586,19 @@ function installStyles(selector, options) {
 
 function getInnerComponents(selectors, result, context, fn) {
   var wishList = selectors.join(',');
-  var elms = wishList ? (context || document).querySelectorAll(wishList) : [];
+  var elms = wishList ? [].slice.call((context || document).querySelectorAll(wishList)) : [];
 
-  for (var n = elms.length; n--; ) {
-    result.push(elms[n]);
-    if (fn) fn(elms[n], elms[n].tagName.toLowerCase());
-  }
+  elms.filter(function(elm) {
+    return elms.filter(function(outer, idx) {
+      if (outer.contains(elm)) {
+        elms.splice(idx, 1);
+        return true;
+      }
+    }).length;
+  }).forEach(function(elm) {
+    result.push(elm);
+    if (fn) fn(elm, elm.tagName.toLowerCase());
+  });
 
   return result;
 }
