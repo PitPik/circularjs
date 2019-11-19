@@ -598,8 +598,8 @@ function getInnerComponents(selectors, result, context, fn) {
     }
   }
   for (var n = elms.length; n--; ) {
-    result.push(elm);
-    if (fn) fn(elm, elm.tagName.toLowerCase());
+    result.push(elms[n]);
+    if (fn) fn(elms[n], elms[n].tagName.toLowerCase());
   }
 
   return result;

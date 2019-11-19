@@ -2072,7 +2072,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                     }(parentValues.names, key));
                 }
             }
-            plugData && installEvents(rootItem, scope, defData);
+            plugData && rootItem !== loopItem && installEvents(rootItem, scope, defData);
         }, function() {
             return rootItem || loopItem;
         });
@@ -2385,7 +2385,16 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
     }
     function getInnerComponents(selectors, result, context, fn) {
         var wishList = selectors.join(",");
-        var elms = wishList ? (context || document).querySelectorAll(wishList) : [];
+        var elms = wishList ? [].slice.call((context || document).querySelectorAll(wishList)) : [];
+        for (var n = elms.length, elm = {}; n--; ) {
+            if (!elms[n]) continue;
+            elm = elms[n];
+            for (var m = elms.length; m--; ) {
+                if (elm !== elms[m] && elm.contains(elms[m])) {
+                    elms.splice(m, 1);
+                }
+            }
+        }
         for (var n = elms.length; n--; ) {
             result.push(elms[n]);
             if (fn) fn(elms[n], elms[n].tagName.toLowerCase());
