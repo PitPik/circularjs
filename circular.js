@@ -588,17 +588,18 @@ function getInnerComponents(selectors, result, context, fn) {
   var wishList = selectors.join(',');
   var elms = wishList ? [].slice.call((context || document).querySelectorAll(wishList)) : [];
 
-  elms.filter(function(elm) {
-    return elms.filter(function(outer, idx) {
-      if (outer.contains(elm)) {
-        elms.splice(idx, 1);
-        return true;
+  for (var n = elms.length, elm = {}; n--; ) {
+    elm = elms[n];
+    for (var m = elms.length; m--; ) {
+      if (elm !== elms[m] && elm.contains(elms[m])) {
+        elms.splice(m, 1);
       }
-    }).length;
-  }).forEach(function(elm) {
+    }
+  }
+  for (var n = elms.length; n--; ) {
     result.push(elm);
     if (fn) fn(elm, elm.tagName.toLowerCase());
-  });
+  }
 
   return result;
 }
