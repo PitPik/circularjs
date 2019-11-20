@@ -1,7 +1,7 @@
 require(['circular', 'game-controller', 'game-service'],
-function({ Component }, gameCtrl, gameSrv) {
+function({ Module }, gameCtrl, gameSrv) {
 
-Component({
+Module({
   selector: 'body',
   template: document.body.innerHTML + (document.body.innerHTML = '', ''),
   subscribe$: {
@@ -63,6 +63,6 @@ Component({
   restart() {
     this.reset(this.rowCol.concat(this.mines));
   }
-}).init(document.body);
+});
 
 });
