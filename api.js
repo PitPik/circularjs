@@ -233,7 +233,7 @@ prototype.renderModule = function(data) {
   var container = isValid && typeof data.container === 'string' ?
     Toolbox.$(data.container) : data.container;
   var componentElm = {};
-  var item = modulesMap[data.context + data.selector];
+  var item = modulesMap[(data.context || '') + data.selector];
   var _this = this;
 
   if (!isValid) return;
@@ -259,7 +259,7 @@ prototype.renderModule = function(data) {
 
       appendChildToContainer(componentElm, container, data.transition);
       if (item && item.onLoad) item.onLoad(componentElm, _this);
-      resolve(modulesMap[data.context + data.selector] = !module.instance ? {
+      resolve(modulesMap[(data.context || '') + data.selector] = !module.instance ? {
         element: componentElm,
         instance: instance,
       } : module);

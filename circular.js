@@ -123,7 +123,7 @@ function initComponent(element, defData, Klass, plugData, parent) {
   var crInst = defData.circular || Circular.instance;
   var controller = {};
   var models = [];
-  var templates = component.templates;
+  var templates = component.templates || {};
   var elmId = element.getAttribute('cr-id');
   var elmName = element.getAttribute('cr-name');
 
@@ -192,6 +192,7 @@ function initComponent(element, defData, Klass, plugData, parent) {
       controller: controller,
     });
   });
+  if (!plugData && !defData.template) processStandalone(element, defData, items, inst);
 
   element.removeAttribute('cr-cloak');
   instance.onInit && instance.onInit(element, crInst, items);
@@ -260,8 +261,8 @@ function processInput(input, parent) {
 
   for (var n = vars.length; n--; ) {
     name = vars[n].split(/\s+as\s+/);
-    isStatic = name[0].charAt(0) === '\'';
-    staticValue = isStatic ? Toolbox.convertToType(name[0].replace(/'/g, '')) : '';
+    isStatic = name[0].charAt(0) === '\'' || name[0].charAt(0) === '"';
+    staticValue = isStatic ? Toolbox.convertToType(name[0].replace(/'|"/g, '')) : '';
     key = isStatic ? staticValue : name[0];
 
     out.vars[name[1] || key] = isStatic ? staticValue : parent[key];
@@ -304,6 +305,18 @@ function initPlugins(key, value, element, inst) {
 }
 
 /* ---------------------------------------------------------- */
+
+function processStandalone(element, defData, items, inst) {
+  var selectors = keys(defData.components).join(',');
+  var inner = selectors ? $$(selectors, element) : [];
+  var restore = inner.length ? removeInnerComponents(inner, element) : function(){};
+
+  items.views = getViewMap(element, function(elm) {});
+  items.events = getAttrMap(element, 'cr-event', function(eventName) {
+    inst.controller.installEvent(inst.instance, element, eventName, items);
+  });
+  restore();
+}
 
 function getPlaceHolder(element, idx) {
   var placeholder = idx && element.querySelector('script[data-idx="' + idx + '"]');
@@ -433,9 +446,9 @@ function setNewItem(vomInstance, param) {
       data.controller.installEvent(data.instance, rootElement, eventName);
     }));
   } else {
-    data.items.views = getViewMap(element, function(elm) {});
-    data.items.events = getAttrMap(rootElement, 'cr-event', function(eventName) {
-      data.controller.installEvent(data.instance, rootElement, eventName, data.items);
+    processStandalone(rootElement, data.defData, data.items, {
+      instance: data.instance,
+      controller: data.controller,
     });
   }
   initComponentsAndPlugins(element, data.defData, data.modelName, isChild, [data.instance, item]);
@@ -711,10 +724,38 @@ function getAttrMap(element, attr, fn) {
       }
       fn && fn(type, value, elements[n]);
     }
-    // elements[n].removeAttribute('cr-event');
+    // elements[n].removeAttribute(attr);
   }
 
   return data;
+}
+
+function restoreInnerComponents(items, component) {
+  for (var n = items.length, cache = []; n--; ) { // TODO: maybe $$('')
+    var tmpElm = $('[cr-replace="' + items[n].index + '"]', component);
+
+    if (tmpElm) {
+      tmpElm.parentNode.replaceChild(items[n].element, tmpElm);
+    } else {
+      cache.push(items[n]);
+    }
+  }
+  if (cache.length) restoreInnerComponents(cache, component);
+}
+
+function removeInnerComponents(elements, component) {
+  var items = [].slice.call(elements).map(function(element, idx) {
+    var tmpElm = document.createElement(element.tagName);
+    
+    element.parentNode.replaceChild(tmpElm, element);
+    tmpElm.setAttribute('cr-replace', idx);
+
+    return { index: idx, element: element };
+  });
+
+  return function() {
+    restoreInnerComponents(items, component);
+  }
 }
 
 function getViewMap(element, fn) {
