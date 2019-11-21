@@ -599,7 +599,7 @@ function installStyles(selector, options) {
 
 function getInnerComponents(selectors, result, context, fn) {
   var wishList = selectors.join(',');
-  var elms = wishList ? [].slice.call((context || document).querySelectorAll(wishList)) : [];
+  var elms = wishList ? [].slice.call($$(wishList, context || document)) : [];
 
   for (var n = elms.length, elm = {}; n--; ) {
     if (!elms[n]) continue;
