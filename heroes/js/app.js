@@ -29,7 +29,7 @@ define('app', ['circular'], ({ Module }) => Module({
 
   this$(property, item, value) {
     value && this.crInst.renderModule({
-      selector: 'app-' + value,
+      require: 'app-' + value,
       container: this.container,
       init: true,
     });

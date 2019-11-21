@@ -229,14 +229,13 @@ prototype.template = function(template, options) {
 /* ------------------- resource loader -------------------- */
 
 prototype.renderModule = function(data) {
-  var isValid = data.selector && data.container;
+  var isValid = data.require && data.container;
   var container = isValid && typeof data.container === 'string' ?
     Toolbox.$(data.container) : data.container;
-  var componentElm = {};
-  var item = modulesMap[(data.context || '') + data.selector];
+  var item = modulesMap[(data.context || '') + data.require];
   var _this = this;
 
-  if (!isValid) return;
+  if (!isValid) return new Promise(function(){});
 
   if (item) {
     return new Toolbox.Promise(function(resolve) {
@@ -246,20 +245,19 @@ prototype.renderModule = function(data) {
     });
   }
 
-  componentElm = document.createElement(data.selector);
-  data.input && componentElm.setAttribute('cr-input', data.input);
-  data.event && componentElm.setAttribute('cr-event', data.event);
-  data.name && componentElm.setAttribute('cr-name', data.name);
-  container.appendChild(componentElm);
-
   return new Toolbox.Promise(function(resolve) {
-    require([data.path || data.selector], function(module) {
+    require([data.path || data.require], function(module) {
+      var componentElm = document.createElement(module.selector);
       var instance = !module.instance && module.init(componentElm, null, data.data);
       var item = module.instance || instance;
+      var setAttribute = componentElm.setAttribute.bind(componentElm);
 
+      data.input && setAttribute('cr-input', data.input);
+      data.event && setAttribute('cr-event', data.event);
+      data.name && setAttribute('cr-name', data.name);
       appendChildToContainer(componentElm, container, data.transition);
       if (item && item.onLoad) item.onLoad(componentElm, _this);
-      resolve(modulesMap[(data.context || '') + data.selector] = !module.instance ? {
+      resolve(modulesMap[(data.context || '') + data.require] = !module.instance ? {
         element: componentElm,
         instance: instance,
       } : module);
