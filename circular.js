@@ -185,7 +185,7 @@ function initComponent(element, defData, Klass, plugData, parent) {
       template: !plugData && templates[key] && templates[key].template,
       childTemplate: !plugData && templates[key] && templates[key].child,
       templateContainer: !plugData && templates[key] ?
-        getPlaceHolder(element, templates[key].container + '') : element,
+        getPlaceHolder(element, templates[key].container) : element,
       modelName: key,
       listeners: defData.subscribe$ && defData.subscribe$[key],
       crInstance: crInst,
@@ -319,7 +319,7 @@ function processStandalone(element, defData, items, inst) {
 }
 
 function getPlaceHolder(element, idx) {
-  var placeholder = idx && element.querySelector('script[data-idx="' + idx + '"]');
+  var placeholder = idx !== undefined && $('cr-placeholder-' + idx, element);
   var parent = placeholder && placeholder.parentNode;
 
   if (placeholder) {
@@ -672,7 +672,7 @@ function getTemplate(template, defData, where, modelName) {
 
 function processTemplate(element, defData) {
   var _ = element.innerHTML = defData.template || ''; // TODO: fragment...
-  var templates = element.querySelectorAll('[cr-for]');
+  var templates = $$('[cr-for]', element);
   var result = {};
 
   templates.forEach(function(elm, idx) {
@@ -694,12 +694,7 @@ function processTemplate(element, defData) {
 }
 
 function createPlaceHolder(elm, idx) {
-  var placeHolder = $create('script'); // TODO: match to parent
-
-  placeHolder.setAttribute('type', 'placeholder/tmpl');
-  placeHolder.setAttribute('data-idx', idx);
-
-  return elm.parentNode.replaceChild(placeHolder, elm);
+  return elm.parentNode.replaceChild($create('cr-placeholder-' + idx), elm);
 }
 
 function getAttrMap(element, attr, fn) {

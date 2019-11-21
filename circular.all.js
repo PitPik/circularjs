@@ -2034,7 +2034,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                 defData: defData,
                 template: !plugData && templates[key] && templates[key].template,
                 childTemplate: !plugData && templates[key] && templates[key].child,
-                templateContainer: !plugData && templates[key] ? getPlaceHolder(element, templates[key].container + "") : element,
+                templateContainer: !plugData && templates[key] ? getPlaceHolder(element, templates[key].container) : element,
                 modelName: key,
                 listeners: defData.subscribe$ && defData.subscribe$[key],
                 crInstance: crInst,
@@ -2147,7 +2147,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         restore();
     }
     function getPlaceHolder(element, idx) {
-        var placeholder = idx && element.querySelector('script[data-idx="' + idx + '"]');
+        var placeholder = idx !== undefined && $("cr-placeholder-" + idx, element);
         var parent = placeholder && placeholder.parentNode;
         if (placeholder) {
             parent.removeChild(placeholder);
@@ -2457,7 +2457,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
     }
     function processTemplate(element, defData) {
         var _ = element.innerHTML = defData.template || "";
-        var templates = element.querySelectorAll("[cr-for]");
+        var templates = $$("[cr-for]", element);
         var result = {};
         templates.forEach(function(elm, idx) {
             var child = $("[cr-child]", elm);
@@ -2474,10 +2474,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         return result;
     }
     function createPlaceHolder(elm, idx) {
-        var placeHolder = $create("script");
-        placeHolder.setAttribute("type", "placeholder/tmpl");
-        placeHolder.setAttribute("data-idx", idx);
-        return elm.parentNode.replaceChild(placeHolder, elm);
+        return elm.parentNode.replaceChild($create("cr-placeholder-" + idx), elm);
     }
     function getAttrMap(element, attr, fn) {
         var data = {};
