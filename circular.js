@@ -151,7 +151,6 @@ function initComponent(element, defData, Klass, plugData, parent) {
   if (elmName) { // getComponent() by name possible
     instances[crInst.id][elmName] = instances[crInst.id][name];
   }
-
   instance = inst.instance =
     getInstance(Klass, element, crInst, id++, plugData, defData, inst, parent);
   Object.defineProperty(instance, '__cr-id', { value: crInst.id + ':' + name });
@@ -161,20 +160,20 @@ function initComponent(element, defData, Klass, plugData, parent) {
   inst.models = models.filter(function(item, idx) { return models.indexOf(item) === idx })
   .sort(function(a) { return a === 'this' ? -1 : 1 })
   .map(function(key) {
-    if (!key) return;
-    return applyModel({
+    var tmpl = templates[key];
+    return key ? applyModel({
       instance: instance,
       items: items,
       defData: defData,
-      template: !plugData && templates[key] && templates[key].template,
-      childTemplate: !plugData && templates[key] && templates[key].child,
-      templateContainer: !plugData && key !== 'this' && templates[key] ?
-        getParent(element, templates[key].container, key) : element,
+      template: !plugData && tmpl && tmpl.template,
+      childTemplate: !plugData && tmpl && tmpl.child,
+      templateContainer: !plugData && key !== 'this' && tmpl ?
+        getParent(element, tmpl.container) : element,
       modelName: key,
       listeners: defData.subscribe$ && defData.subscribe$[key],
       crInstance: crInst,
       controller: controller,
-    });
+    }) : null;
   });
   if (!plugData && !defData.template) processStandalone(element, defData, items, inst);
 
@@ -320,14 +319,12 @@ function processStandalone(element, defData, items, inst) {
   restore();
 }
 
-function getParent(element, idx, modelName) {
-  var parent = idx !== undefined &&
-    $('[cr-parent-container="' + modelName + idx + '"]', element);
+function getParent(element, attr) {
+  var parent = attr !== undefined && $('[cr-parent-container="' + attr + '"]', element);
 
   if (parent) {
     parent.removeAttribute('cr-parent-container');
   }
-
   return parent || element;
 }
 
@@ -679,11 +676,12 @@ function processTemplate(element, defData) {
   templates.forEach(function(elm, idx) {
     var child = $('[cr-child]', elm);
     var modelName = elm.getAttribute('cr-for');
+    var attr = modelName + idx;
 
     result[modelName] = {
-      container: idx,
+      container: attr,
       child: child ? getTemplate(child, defData, 'child', modelName) : null,
-      template: getTemplate(createPlaceHolder(elm, idx, modelName), defData, 'loop', modelName),
+      template: getTemplate(createPlaceHolder(elm, attr), defData, 'loop', modelName),
     };
   });
 
@@ -694,8 +692,8 @@ function processTemplate(element, defData) {
   return result;
 }
 
-function createPlaceHolder(elm, idx, modelName) {
-  elm.parentNode.setAttribute('cr-parent-container', modelName + idx);
+function createPlaceHolder(elm, attr) {
+  elm.parentNode.setAttribute('cr-parent-container', attr);
   return elm;
 }
 

@@ -2011,19 +2011,19 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         }).sort(function(a) {
             return a === "this" ? -1 : 1;
         }).map(function(key) {
-            if (!key) return;
-            return applyModel({
+            var tmpl = templates[key];
+            return key ? applyModel({
                 instance: instance,
                 items: items,
                 defData: defData,
-                template: !plugData && templates[key] && templates[key].template,
-                childTemplate: !plugData && templates[key] && templates[key].child,
-                templateContainer: !plugData && key !== "this" && templates[key] ? getParent(element, templates[key].container, key) : element,
+                template: !plugData && tmpl && tmpl.template,
+                childTemplate: !plugData && tmpl && tmpl.child,
+                templateContainer: !plugData && key !== "this" && tmpl ? getParent(element, tmpl.container) : element,
                 modelName: key,
                 listeners: defData.subscribe$ && defData.subscribe$[key],
                 crInstance: crInst,
                 controller: controller
-            });
+            }) : null;
         });
         if (!plugData && !defData.template) processStandalone(element, defData, items, inst);
         element.removeAttribute("cr-cloak");
@@ -2147,8 +2147,8 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         });
         restore();
     }
-    function getParent(element, idx, modelName) {
-        var parent = idx !== undefined && $('[cr-parent-container="' + modelName + idx + '"]', element);
+    function getParent(element, attr) {
+        var parent = attr !== undefined && $('[cr-parent-container="' + attr + '"]', element);
         if (parent) {
             parent.removeAttribute("cr-parent-container");
         }
@@ -2462,10 +2462,11 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         templates.forEach(function(elm, idx) {
             var child = $("[cr-child]", elm);
             var modelName = elm.getAttribute("cr-for");
+            var attr = modelName + idx;
             result[modelName] = {
-                container: idx,
+                container: attr,
                 child: child ? getTemplate(child, defData, "child", modelName) : null,
-                template: getTemplate(createPlaceHolder(elm, idx, modelName), defData, "loop", modelName)
+                template: getTemplate(createPlaceHolder(elm, attr), defData, "loop", modelName)
             };
         });
         result["this"] = {
@@ -2473,8 +2474,8 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         };
         return result;
     }
-    function createPlaceHolder(elm, idx, modelName) {
-        elm.parentNode.setAttribute("cr-parent-container", modelName + idx);
+    function createPlaceHolder(elm, attr) {
+        elm.parentNode.setAttribute("cr-parent-container", attr);
         return elm;
     }
     function getAttrMap(element, attr, fn) {
