@@ -2001,23 +2001,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         Object.defineProperty(instance, "__cr-id", {
             value: crInst.id + ":" + name
         });
-        if (!plugData) {
-            getAttrMap(element, "cr-plugin", function(key, value, element) {
-                if (components[key]) {
-                    components[key].preparePlugin(element, defData, {
-                        where: name,
-                        modelName: "this",
-                        value: value || "null"
-                    });
-                    components[key].init(element, value, instance);
-                }
-            });
-            for (var n = element.children.length, tag = "", child = {}; n--; ) {
-                child = element.children[n];
-                tag = child.tagName.toLowerCase();
-                components[tag] && components[tag].init(child, null, instance);
-            }
-        }
+        !plugData && initInner(element, instance, defData, name);
         controller = inst.controller = new Controller({
             element: element
         });
@@ -2025,7 +2009,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         inst.models = models.filter(function(item, idx) {
             return models.indexOf(item) === idx;
         }).sort(function(a) {
-            return a === "this" ? -1 : 0;
+            return a === "this" ? -1 : 1;
         }).map(function(key) {
             if (!key) return;
             return applyModel({
@@ -2034,7 +2018,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                 defData: defData,
                 template: !plugData && templates[key] && templates[key].template,
                 childTemplate: !plugData && templates[key] && templates[key].child,
-                templateContainer: !plugData && templates[key] ? getPlaceHolder(element, templates[key].container) : element,
+                templateContainer: !plugData && key !== "this" && templates[key] ? getParent(element, templates[key].container, key) : element,
                 modelName: key,
                 listeners: defData.subscribe$ && defData.subscribe$[key],
                 crInstance: crInst,
@@ -2045,6 +2029,23 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         element.removeAttribute("cr-cloak");
         instance.onInit && instance.onInit(element, crInst, items);
         return instance;
+    }
+    function initInner(element, instance, defData, name) {
+        getAttrMap(element, "cr-plugin", function(key, value, element) {
+            if (components[key]) {
+                components[key].preparePlugin(element, defData, {
+                    where: name,
+                    modelName: "this",
+                    value: value || "null"
+                });
+                components[key].init(element, value, instance);
+            }
+        });
+        for (var n = element.children.length, tag = "", child = {}; n--; ) {
+            child = element.children[n];
+            tag = child.tagName.toLowerCase();
+            components[tag] && components[tag].init(child, null, instance);
+        }
     }
     function getInstance(Klass, element, crInst, instId, plugData, defData, inst, parentComp) {
         var rootItem = isArray(parentComp) ? parentComp[0] : parentComp;
@@ -2146,11 +2147,10 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         });
         restore();
     }
-    function getPlaceHolder(element, idx) {
-        var placeholder = idx !== undefined && $("cr-placeholder-" + idx, element);
-        var parent = placeholder && placeholder.parentNode;
-        if (placeholder) {
-            parent.removeChild(placeholder);
+    function getParent(element, idx, modelName) {
+        var parent = idx !== undefined && $('[cr-parent-container="' + modelName + idx + '"]', element);
+        if (parent) {
+            parent.removeAttribute("cr-parent-container");
         }
         return parent || element;
     }
@@ -2465,7 +2465,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
             result[modelName] = {
                 container: idx,
                 child: child ? getTemplate(child, defData, "child", modelName) : null,
-                template: getTemplate(createPlaceHolder(elm, idx), defData, "loop", modelName)
+                template: getTemplate(createPlaceHolder(elm, idx, modelName), defData, "loop", modelName)
             };
         });
         result["this"] = {
@@ -2473,8 +2473,9 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         };
         return result;
     }
-    function createPlaceHolder(elm, idx) {
-        return elm.parentNode.replaceChild($create("cr-placeholder-" + idx), elm);
+    function createPlaceHolder(elm, idx, modelName) {
+        elm.parentNode.setAttribute("cr-parent-container", modelName + idx);
+        return elm;
     }
     function getAttrMap(element, attr, fn) {
         var data = {};

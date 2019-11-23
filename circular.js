@@ -130,7 +130,6 @@ function initComponent(element, defData, Klass, plugData, parent) {
   if (elmId && !plugData) {
     return instances[crInst.id + ':' + elmId];
   }
-
   ['partials', 'helpers', 'decorators', 'attributes'].forEach(function(key) {
     if (!defData[key]) defData[key] = crInst.options[key];
   });
@@ -152,30 +151,15 @@ function initComponent(element, defData, Klass, plugData, parent) {
   if (elmName) { // getComponent() by name possible
     instances[crInst.id][elmName] = instances[crInst.id][name];
   }
+
   instance = inst.instance =
     getInstance(Klass, element, crInst, id++, plugData, defData, inst, parent);
   Object.defineProperty(instance, '__cr-id', { value: crInst.id + ':' + name });
-  if (!plugData) {
-    getAttrMap(element, 'cr-plugin', function(key, value, element) {
-      if (components[key]) {
-        components[key].preparePlugin(element, defData, {
-          where: name,
-          modelName: 'this',
-          value: value || 'null',
-        });
-        components[key].init(element, value, instance);
-      }
-    });
-    for (var n = element.children.length, tag = '', child = {}; n--; ) {
-      child = element.children[n];
-      tag = child.tagName.toLowerCase();
-      components[tag] && components[tag].init(child, null, instance);
-    };
-  }
+  !plugData && initInner(element, instance, defData, name);
   controller = inst.controller = new Controller({ element: element });
   models = keys(templates).concat(keys(defData.subscribe$));
   inst.models = models.filter(function(item, idx) { return models.indexOf(item) === idx })
-  .sort(function(a) { return a === 'this' ? -1 : 0 })
+  .sort(function(a) { return a === 'this' ? -1 : 1 })
   .map(function(key) {
     if (!key) return;
     return applyModel({
@@ -184,8 +168,8 @@ function initComponent(element, defData, Klass, plugData, parent) {
       defData: defData,
       template: !plugData && templates[key] && templates[key].template,
       childTemplate: !plugData && templates[key] && templates[key].child,
-      templateContainer: !plugData && templates[key] ?
-        getPlaceHolder(element, templates[key].container) : element,
+      templateContainer: !plugData && key !== 'this' && templates[key] ?
+        getParent(element, templates[key].container, key) : element,
       modelName: key,
       listeners: defData.subscribe$ && defData.subscribe$[key],
       crInstance: crInst,
@@ -198,6 +182,24 @@ function initComponent(element, defData, Klass, plugData, parent) {
   instance.onInit && instance.onInit(element, crInst, items);
 
   return instance;
+}
+
+function initInner(element, instance, defData, name) {
+  getAttrMap(element, 'cr-plugin', function(key, value, element) {
+    if (components[key]) {
+      components[key].preparePlugin(element, defData, {
+        where: name,
+        modelName: 'this',
+        value: value || 'null',
+      });
+      components[key].init(element, value, instance);
+    }
+  });
+  for (var n = element.children.length, tag = '', child = {}; n--; ) {
+    child = element.children[n];
+    tag = child.tagName.toLowerCase();
+    components[tag] && components[tag].init(child, null, instance);
+  };
 }
 
 /* -------------- scoping ------------ */
@@ -318,12 +320,12 @@ function processStandalone(element, defData, items, inst) {
   restore();
 }
 
-function getPlaceHolder(element, idx) {
-  var placeholder = idx !== undefined && $('cr-placeholder-' + idx, element);
-  var parent = placeholder && placeholder.parentNode;
+function getParent(element, idx, modelName) {
+  var parent = idx !== undefined &&
+    $('[cr-parent-container="' + modelName + idx + '"]', element);
 
-  if (placeholder) {
-    parent.removeChild(placeholder);
+  if (parent) {
+    parent.removeAttribute('cr-parent-container');
   }
 
   return parent || element;
@@ -669,7 +671,6 @@ function getTemplate(template, defData, where, modelName) {
   });
 }
 
-
 function processTemplate(element, defData) {
   var _ = element.innerHTML = defData.template || ''; // TODO: fragment...
   var templates = $$('[cr-for]', element);
@@ -682,7 +683,7 @@ function processTemplate(element, defData) {
     result[modelName] = {
       container: idx,
       child: child ? getTemplate(child, defData, 'child', modelName) : null,
-      template: getTemplate(createPlaceHolder(elm, idx), defData, 'loop', modelName),
+      template: getTemplate(createPlaceHolder(elm, idx, modelName), defData, 'loop', modelName),
     };
   });
 
@@ -693,8 +694,9 @@ function processTemplate(element, defData) {
   return result;
 }
 
-function createPlaceHolder(elm, idx) {
-  return elm.parentNode.replaceChild($create('cr-placeholder-' + idx), elm);
+function createPlaceHolder(elm, idx, modelName) {
+  elm.parentNode.setAttribute('cr-parent-container', modelName + idx);
+  return elm;
 }
 
 function getAttrMap(element, attr, fn) {
