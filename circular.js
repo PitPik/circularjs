@@ -68,6 +68,7 @@ Object.defineProperties(Circular.prototype, mixinAPI({
       return insts[key].instance;
     }));
   }},
+  getAttributeData: { value: getAttrMap },
 }, Circular));
 
 return Object.defineProperties(Circular, {
@@ -445,10 +446,16 @@ function setNewItem(vomInstance, param) {
       data.controller.installEvent(data.instance, rootElement, eventName);
     }));
   } else {
-    processStandalone(rootElement, data.defData, data.items, {
-      instance: data.instance,
-      controller: data.controller,
-    });
+    var component = components[element.tagName.toLowerCase()];
+    if (component) {
+      element.removeAttribute('cr-id');
+      component.init(element, null, data.instance);
+    } else {
+      processStandalone(rootElement, data.defData, data.items, {
+        instance: data.instance,
+        controller: data.controller,
+      });
+    }
   }
   initComponentsAndPlugins(element, data.defData, data.modelName, isChild, [data.instance, item]);
 
