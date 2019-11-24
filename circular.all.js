@@ -2446,14 +2446,16 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                 value: value || "null"
             });
         });
-        getInnerComponents(keys(components), [], template, function(element, key) {
-            var component = defData.components[key] = defData.components[key] || {
-                main: {},
-                loop: {},
-                child: {}
-            };
-            component[where][modelName] = true;
-        });
+        if (!components[template.tagName.toLowerCase()]) {
+            getInnerComponents(keys(components), [], template, function(element, key) {
+                var component = defData.components[key] = defData.components[key] || {
+                    main: {},
+                    loop: {},
+                    child: {}
+                };
+                component[where][modelName] = true;
+            });
+        }
         return new Blick(template.outerHTML.replace(/(?:{{&gt;|cr-src=)/g, function($1) {
             return $1.charAt(0) === "{" ? "{{>" : "src=";
         }), {
