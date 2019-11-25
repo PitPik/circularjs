@@ -1,4 +1,4 @@
-require(['circular', 'replacer'], function({ Component, Toolbox: { $ } }, replacer) {
+require(['circular', 'replacer'], function({ Module, Toolbox: { $ } }, replacer) {
   var elm = $('demo-nav');
   var template = elm.removeChild(elm.firstElementChild).outerHTML;
   var model = [
@@ -8,7 +8,7 @@ require(['circular', 'replacer'], function({ Component, Toolbox: { $ } }, replac
     { title: 'GitHub Commits', action: 'git', active: false }
   ];
 
-  Component({
+  Module({
     selector: 'demo-nav',
     template,
     subscribe$: {
@@ -36,12 +36,12 @@ require(['circular', 'replacer'], function({ Component, Toolbox: { $ } }, replac
       this.menu.forEach(item => item.active = item.action === this.state);
 
       this.cr.renderModule({
-        selector: 'app-' + value,
+        require: 'app-' + value,
         container: '.module-outlet',
       }).then(() => value === 'home' ? null : require([
         '!' + value + '.html',
         '!' + value + '.js'
       ], (html, js) => replacer('.demo', js, html)));
     }
-  }).init('demo-nav');
+  });
 });
