@@ -1933,6 +1933,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         },
         Component: {
             value: function(defData, Klass) {
+                defData.plugins = {};
                 defData.components = {};
                 return components[defData.selector] || (components[defData.selector] = {
                     Klass: Klass,
@@ -1945,6 +1946,10 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                         return initComponent(elm, defData, Klass, plugData, parent);
                     },
                     preparePlugin: function preparePlugin(element, pData, values) {
+                        var plug = pData.plugins[defData.selector] = pData.plugins[defData.selector] || {};
+                        var where = plug[values.where] = plug[values.where] || {};
+                        var model = where[values.modelName] = where[values.modelName] || [];
+                        model.push(values.value);
                         preparePluginInTemplate(element, defData);
                     }
                 });
@@ -2036,7 +2041,6 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                     modelName: "this",
                     value: value || "null"
                 });
-                element.removeAttribute("cr-plugin");
                 components[key].init(element, value, instance);
             }
         });
@@ -2126,6 +2130,15 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
             all.push(key + ": pl-" + defData.events[key]);
         }
         element.setAttribute("cr-event", all.join("; "));
+    }
+    function initPlugins(key, value, element, inst) {
+        var self = (element.getAttribute("cr-plugin") || "").indexOf(key) !== -1;
+        var elms = [].slice.call($$('[cr-plugin*="' + key + '"]', element));
+        var all = self ? [ element ].concat(elms) : elms;
+        for (var n = 0, m = all.length; n < m; n++) {
+            components[key].init(all[n], value[n], inst);
+            all[n].removeAttribute("cr-plugin");
+        }
     }
     function processStandalone(element, defData, items, inst) {
         var selectors = keys(defData.components).join(",");
@@ -2270,6 +2283,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
     }
     function initComponentsAndPlugins(element, defData, modelName, isChild, instance) {
         var componentsDefs = defData.components;
+        var plugins = defData.plugins;
         var isMain = modelName === "this";
         var isLoop = !isMain && !isChild;
         var what = isMain ? "main" : isLoop ? "loop" : isChild ? "child" : "";
@@ -2281,6 +2295,11 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                     inst = components[key].init(elm, null, instance);
                     inst && insts.push(inst);
                 });
+            }
+        }
+        for (var key in plugins) {
+            if (what && plugins[key][what] && plugins[key][what][modelName]) {
+                initPlugins(key, plugins[key][what][modelName], element, instance);
             }
         }
         return insts;
@@ -2420,6 +2439,13 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         template.parentNode && template.parentNode.removeChild(template);
         template.removeAttribute("cr-for");
         template.removeAttribute("cr-child");
+        getAttrMap(template, "cr-plugin", function(key, value, element) {
+            components[key] && components[key].preparePlugin(element, defData, {
+                where: where,
+                modelName: modelName,
+                value: value || "null"
+            });
+        });
         if (!components[template.tagName.toLowerCase()]) {
             getInnerComponents(keys(components), [], template, function(element, key) {
                 var component = defData.components[key] = defData.components[key] || {
