@@ -193,6 +193,7 @@ function initInner(element, instance, defData, name) {
         value: value || 'null',
       });
       components[key].init(element, value, instance);
+      element.removeAttribute('cr-plugin')
     }
   });
   for (var n = element.children.length, tag = '', child = {}; n--; ) {
