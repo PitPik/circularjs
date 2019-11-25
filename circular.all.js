@@ -2265,10 +2265,10 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
                 });
             }
         }
-        initComponentsAndPlugins(element, data.defData, data.modelName, isChild, [ data.instance, item ]);
+        initComponents(element, data.defData, data.modelName, isChild, [ data.instance, item ]);
         return element;
     }
-    function initComponentsAndPlugins(element, defData, modelName, isChild, instance) {
+    function initComponents(element, defData, modelName, isChild, instance) {
         var componentsDefs = defData.components;
         var isMain = modelName === "this";
         var isLoop = !isMain && !isChild;
@@ -2355,7 +2355,7 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
             }
             if (elm && elm.length) {
                 for (var x = 0, y = elm.length; x < y; x++) {
-                    blickItem.components = initComponentsAndPlugins(elm[x].parentNode, data.defData, data.modelName, false, [ data.instance, item ]);
+                    blickItem.components = initComponents(elm[x].parentNode, data.defData, data.modelName, false, [ data.instance, item ]);
                 }
             }
         }
