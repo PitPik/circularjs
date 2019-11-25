@@ -2036,11 +2036,6 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
     function initInner(element, instance, defData, name) {
         getAttrMap(element, "cr-plugin", function(key, value, element) {
             if (components[key]) {
-                components[key].preparePlugin(element, defData, {
-                    where: name,
-                    modelName: "this",
-                    value: value || "null"
-                });
                 components[key].init(element, value, instance);
                 delete defData.plugins[key];
                 element.removeAttribute("cr-plugin");
@@ -2134,12 +2129,10 @@ define("circular", [ "toolbox", "blick", "VOM", "api", "controller" ], function(
         element.setAttribute("cr-event", all.join("; "));
     }
     function initPlugins(key, value, element, inst) {
-        var self = (element.getAttribute("cr-plugin") || "").indexOf(key) !== -1;
         var elms = [].slice.call($$('[cr-plugin*="' + key + '"]', element));
-        var all = self ? [ element ].concat(elms) : elms;
-        for (var n = 0, m = all.length; n < m; n++) {
-            components[key].init(all[n], value[n], inst);
-            all[n].removeAttribute("cr-plugin");
+        for (var n = 0, m = elms.length; n < m; n++) {
+            components[key].init(elms[n], value.join(","), inst[0] || inst[1]);
+            elms[n].removeAttribute("cr-plugin");
         }
     }
     function processStandalone(element, defData, items, inst) {

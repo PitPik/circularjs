@@ -155,7 +155,7 @@ function initComponent(element, defData, Klass, plugData, parent) {
   instance = inst.instance =
     getInstance(Klass, element, crInst, id++, plugData, defData, inst, parent);
   Object.defineProperty(instance, '__cr-id', { value: crInst.id + ':' + name });
-  !plugData && initInner(element, instance, defData, name);
+  !plugData && initInner(element, instance, defData, name); // TODO: check setNewItem
   controller = inst.controller = new Controller({ element: element });
   models = keys(templates).concat(keys(defData.subscribe$));
   inst.models = models.filter(function(item, idx) { return models.indexOf(item) === idx })
@@ -187,11 +187,6 @@ function initComponent(element, defData, Klass, plugData, parent) {
 function initInner(element, instance, defData, name) {
   getAttrMap(element, 'cr-plugin', function(key, value, element) {
     if (components[key]) {
-      components[key].preparePlugin(element, defData, {
-        where: name,
-        modelName: 'this',
-        value: value || 'null',
-      });
       components[key].init(element, value, instance);
       delete defData.plugins[key];
       element.removeAttribute('cr-plugin');
@@ -298,13 +293,11 @@ function preparePluginInTemplate(element, defData) {
 }
 
 function initPlugins(key, value, element, inst) {
-  var self = (element.getAttribute('cr-plugin') || '').indexOf(key) !== -1;
   var elms = [].slice.call($$('[cr-plugin*="' + key + '"]', element));
-  var all = self ? [element].concat(elms) : elms;
 
-  for (var n = 0, m = all.length; n < m; n++) {
-    components[key].init(all[n], value[n], inst);
-    all[n].removeAttribute('cr-plugin');
+  for (var n = 0, m = elms.length; n < m; n++) {
+    components[key].init(elms[n], value.join(','), inst[0] || inst[1]);
+    elms[n].removeAttribute('cr-plugin');
   }
 }
 
