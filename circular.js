@@ -83,6 +83,7 @@ return Object.defineProperties(Circular, {
     };
   }},
   Component: { value: function(defData, Klass) {
+    // defData.plugins = {};
     defData.components = {};
 
     return components[defData.selector] || (components[defData.selector] = {
@@ -97,6 +98,11 @@ return Object.defineProperties(Circular, {
         return initComponent(elm, defData, Klass, plugData, parent);
       },
       preparePlugin: function preparePlugin(element, pData, values) {
+        // var plug = pData.plugins[defData.selector] = pData.plugins[defData.selector] || {};
+        // var where = plug[values.where] = plug[values.where] || {};
+        // var model = where[values.modelName] = where[values.modelName] || [];
+
+        // model.push(values.value);
         preparePluginInTemplate(element, defData);
       },
     });
@@ -290,6 +296,17 @@ function preparePluginInTemplate(element, defData) {
   element.setAttribute('cr-event', all.join('; '));
 }
 
+// function initPlugins(key, value, element, inst) {
+//   var self = (element.getAttribute('cr-plugin') || '').indexOf(key) !== -1;
+//   var elms = [].slice.call($$('[cr-plugin*="' + key + '"]', element));
+//   var all = self ? [element].concat(elms) : elms;
+
+//   for (var n = 0, m = all.length; n < m; n++) {
+//     components[key].init(all[n], value[n], inst);
+//     all[n].removeAttribute('cr-plugin');
+//   }
+// }
+
 /* ---------------------------------------------------------- */
 
 function processStandalone(element, defData, items, inst) {
@@ -441,13 +458,14 @@ function setNewItem(vomInstance, param) {
       });
     }
   }
-  initComponents(element, data.defData, data.modelName, isChild, [data.instance, item]);
+  initComponentsAndPlugins(element, data.defData, data.modelName, isChild, [data.instance, item]);
 
   return element;
 }
 
-function initComponents(element, defData, modelName, isChild, instance) {
+function initComponentsAndPlugins(element, defData, modelName, isChild, instance) {
   var componentsDefs = defData.components;
+  // var plugins = defData.plugins;
   var isMain = modelName === 'this';
   var isLoop = !isMain && !isChild;
   var what = isMain ? 'main' : isLoop ? 'loop' : isChild ? 'child' : '';
@@ -462,6 +480,12 @@ function initComponents(element, defData, modelName, isChild, instance) {
       });
     }
   }
+  // plugins
+  // for (var key in plugins) {
+  //   if (what && plugins[key][what] && plugins[key][what][modelName]) {
+  //     initPlugins(key, plugins[key][what][modelName], element, instance);
+  //   }
+  // }
   return insts;
 }
 
@@ -540,7 +564,7 @@ function blickItems(data, item, collector, id, property, value, oldValue) {
     }
     if (elm && elm.length) {
       for (var x = 0, y = elm.length; x < y; x++) {
-        blickItem.components = initComponents(
+        blickItem.components = initComponentsAndPlugins(
           elm[x].parentNode, // TODO: not parentNode...
           data.defData,
           data.modelName,
@@ -625,6 +649,14 @@ function getTemplate(template, defData, where, modelName) {
   template.parentNode && template.parentNode.removeChild(template);
   template.removeAttribute('cr-for');
   template.removeAttribute('cr-child');
+
+  // getAttrMap(template, 'cr-plugin', function(key, value, element) {
+  //   components[key] && components[key].preparePlugin(element, defData, {
+  //     where: where,
+  //     modelName: modelName,
+  //     value: value || 'null',
+  //   });
+  // });
 
   if (!components[template.tagName.toLowerCase()]) {
     getInnerComponents(keys(components), [], template, function(element, key) {
