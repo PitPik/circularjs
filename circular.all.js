@@ -1731,12 +1731,12 @@ define("api", [ "VOM", "blick", "toolbox" ], function(VOM, Blick, Toolbox) {
             return new Toolbox.Promise(function(resolve) {
                 require([ data.path || data.require ], function(module) {
                     var componentElm = document.createElement(module.selector);
-                    var instance = !module.instance && module.init(componentElm, null, data.data);
-                    var item = module.instance || instance;
                     var setAttribute = componentElm.setAttribute.bind(componentElm);
                     data.input && setAttribute("cr-input", data.input);
                     data.event && setAttribute("cr-event", data.event);
                     data.name && setAttribute("cr-name", data.name);
+                    var instance = !module.instance && module.init(componentElm, null, data.data);
+                    var item = module.instance || instance;
                     appendChildToContainer(componentElm, container, data.transition);
                     if (item && item.onLoad) item.onLoad(componentElm, _this);
                     resolve(modulesMap[(data.context || "") + data.require] = !module.instance ? {
