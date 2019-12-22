@@ -198,7 +198,7 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
 
     css.forEach(htmlData => {
       promises.push(compressor.minify({
-        compressor: 'sqwish',
+        compressor: 'crass',
         input: options.path + htmlData.path,
         output: outputPath,
         sync: true,
