@@ -182,6 +182,8 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
     let textOut = '';
     let promises = [];
 
+    promises.push(Promise.resolve('/* HTML */'));
+
     html.forEach(htmlData => {
       promises.push(compressor.minify({
         compressor: 'html-minifier',
@@ -203,7 +205,7 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
       }));
     });
 
-    promises.push(Promise.resolve('---newPackageSection---'));
+    promises.push(Promise.resolve('/* CSS */'));
 
     css.forEach(htmlData => {
       promises.push(compressor.minify({
@@ -217,16 +219,14 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
       }));
     });
 
-    promises.push(Promise.resolve('---newPackageSection---'));
+    promises.push(Promise.resolve('/* javaScript */'));
 
     Promise.all(promises).then(data => {
       data.push(minJS);
       textOut = data.join('\n');
       fs.writeFile(
         outputPath,
-        textOut
-          .replace(/---newPackageSection---/g, '')
-          .replace(/\\n\s+/g, "\\n"),
+        textOut.replace(/\\n\s+/g, "\\n"),
         (err) => {
           if (err) throw err;
         }

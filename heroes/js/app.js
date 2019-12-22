@@ -11,11 +11,13 @@ define('app', ['circular'], ({ Module }) => Module({
     </section>`,
   subscribe$: { this: ['currentApp'] },
 }, class AppMain {
-  crInst = {};
-  container = {};
+  constructor() {
+    this.crInst = {};
+    this.container = {};
 
-  currentApp = '';
-  title = 'Tour of Heroes';
+    this.currentApp = '';
+    this.title = 'Tour of Heroes';
+  }
 
   onInit(elm, crInst, items) {
     this.crInst = crInst;

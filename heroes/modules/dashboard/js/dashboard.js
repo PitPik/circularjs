@@ -20,7 +20,9 @@ define('app-dashboard', [
     </div>`,
   subscribe$: { heroes: ['*'] },
 }, class Dashboard {
-  heroes = [];
+  constructor() {
+    this.heroes = [];
+  }
 
   onLoad() {
     heroService.getHeroes().then(model => this.heroes = model.splice(0, 4));

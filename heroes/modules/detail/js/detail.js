@@ -14,12 +14,12 @@ define('app-detail', ['circular', 'data-provider', '!modules/detail/css/index.cs
     </div>`,
   subscribe$: { this: ['name', 'id', 'dirty'] },
 }, class Details {
-  name = '';
-  initialName = '';
-  id = '';
-  dirty = false;
-
   constructor(elm, crInst) {
+    this.name = '';
+    this.initialName = '';
+    this.id = '';
+    this.dirty = false;
+  
     crInst.addRoute({
       path: '/detail(/:heroId)',
       callback: data => heroService

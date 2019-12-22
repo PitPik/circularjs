@@ -11,9 +11,11 @@ define('app-search', ['circular', 'data-provider'],
     </section>`,
   subscribe$: { searchList: ['*'] },
 }, class AppSearch {
-  searchList = [];
-  searchInput = {};
-  debounce;
+  constructor() {
+    this.searchList = [];
+    this.searchInput = {};
+    this.debounce;
+  }
 
   onInit(elm, crInst, items) {
     this.searchInput = items.views.search;

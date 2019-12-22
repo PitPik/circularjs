@@ -20,7 +20,9 @@ define('app-heroes', ['circular', 'data-provider', '!modules/heroes/css/index.cs
     </div>`,
   subscribe$: { heroList: ['name'] },
 }, class HeroList {
-  heroList = [];
+  constructor() {
+    this.heroList = [];
+  }
 
   onLoad() {
     heroService.getHeroes().then(model => this.heroList = model);
