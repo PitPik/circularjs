@@ -1,3 +1,9 @@
+// How to use:
+// node package.js -p ./myProject/ -c ./myProject/js/amd.cfg.js -o js/all.min.js
+// --path | -p: path of project
+// --cfg | -c: path to amd configuration file: amd.cfg.js
+// --output | -o: path (relative to --path) to output file (or just name)
+
 const fs = require('fs');
 const compressor = require('node-minify');
 
@@ -132,7 +138,6 @@ const writeMinJSFile = (data, outputName, type) => {
   });
 }
 
-// node package.js -p ./testTree/ -c ./testTree/js/amd.cfg.js -o all.min.js
 const params = process.argv.slice(2);
 const options = {
   path: '',
@@ -172,8 +177,8 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
   eval(data);
   sortOutput(arr);
 
-  
-  writeMinJSFile(js, options.path + options.output, 'uglify-es').then(minJS => {
+  const outputPath = options.path + options.output;
+  writeMinJSFile(js, outputPath, 'uglify-es').then(minJS => {
     let textOut = '';
     let promises = [];
 
@@ -181,10 +186,11 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
       promises.push(compressor.minify({
         compressor: 'html-minifier',
         input: options.path + htmlData.path,
-        output: options.path + options.output,
+        output: outputPath,
         sync: true,
       }).then(function(min) {
-        return 'define("' + htmlData.key + '",[],function(){return \'' + min.replace(/\'/g, "\\'") + '\'});';
+        return 'define("' + htmlData.key + '",[],function(){return \'' +
+          min.replace(/\'/g, "\\'") + '\'});';
       }));
     });
 
@@ -194,10 +200,11 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
       promises.push(compressor.minify({
         compressor: 'sqwish',
         input: options.path + htmlData.path,
-        output: options.path + options.output,
+        output: outputPath,
         sync: true,
       }).then(function(min) {
-        return 'define("' + htmlData.key + '",[],function(){return \'' + min.replace(/\'/g, "\\'") + '\'});';
+        return 'define("' + htmlData.key + '",[],function(){return \'' +
+          min.replace(/\'/g, "\\'") + '\'});';
       }));
     });
 
@@ -207,8 +214,10 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
       data.push(minJS);
       textOut = data.join('\n');
       fs.writeFile(
-        options.path + options.output,
-        textOut.replace(/---newPackageSection---/g, '').replace(/\\n\s+/g, "\\n "),
+        outputPath,
+        textOut
+          .replace(/---newPackageSection---/g, '')
+          .replace(/\\n\s+/g, "\\n "),
         (err) => {
           if (err) throw err;
         }
