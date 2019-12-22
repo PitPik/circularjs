@@ -188,9 +188,18 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
         input: options.path + htmlData.path,
         output: outputPath,
         sync: true,
+        options: {
+          minifyJS: false,
+          removeTagWhitespace: true,
+          removeComments: true,
+          preserveLineBreaks: true,
+          collapseInlineTagWhitespace: true,
+          collapseWhitespace: true,
+          conservativeCollapse: true,
+        }
       }).then(function(min) {
         return 'define("' + htmlData.key + '",[],function(){return \'' +
-          min.replace(/\'/g, "\\'") + '\'});';
+          min.replace(/\'/g, "\\'").replace(/\n/g, "\\n") + '\'});';
       }));
     });
 
@@ -217,7 +226,7 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
         outputPath,
         textOut
           .replace(/---newPackageSection---/g, '')
-          .replace(/\\n\s+/g, "\\n "),
+          .replace(/\\n\s+/g, "\\n"),
         (err) => {
           if (err) throw err;
         }
