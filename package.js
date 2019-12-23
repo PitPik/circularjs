@@ -155,6 +155,7 @@ const options = {
   path: '',
   cfg: '',
   output: 'output.min.js', // TODO: also combine with options.path
+  updateLookahead: false,
 };
 for (let j = 0; j < params.length; j++) {
   if (params[j] === '--path' || params[j] === '-p') {
@@ -166,6 +167,9 @@ for (let j = 0; j < params.length; j++) {
   if (params[j] === '--output' || params[j] === '-o') {
     options.output = params[j + 1];
   }
+  if (params[j] === '--update' || params[j] === '-u') {
+    options.updateLookahead = params[j + 1] === 'true';
+  }
 }
 if (!options.cfg) {
   throw 'No cfg defined';
@@ -174,19 +178,73 @@ options.path = options.path || './';
 options.cfg = (options.path + '/' + options.cfg).replace('//', '/');
 options.output = (options.path + '/' + options.output).replace('//', '/');
 
+const updateLookahead = (lookaheadMap, data) => {
+  if (!options.updateLookahead) return;
+  const require = { // overwrite global function
+    config: (innerData) => {
+      innerData.lookaheadMap = lookaheadMap;
+      const output = JSON.stringify(innerData).replace(/"/g, "'");
+
+      fs.writeFile(
+        options.cfg,
+        'require.config(' + output
+          .replace(/,/g, ",\n")
+          .replace(/\{'/g, "{\n'")
+          .replace(/'\]/g, "'\n]")
+          .replace(/\['/g, "[\n'") + ');',
+        (err) => {
+          if (err) throw err;
+          console.log(options.cfg + ' successfully saved!');
+        }
+      );
+      compressor.minify({
+        compressor: 'terser',
+        input: options.cfg,
+        output: options.cfg,
+        options: {
+          output: {
+            beautify: true,
+            quote_style: 1,
+            indent_level: 2,
+            indent_start: 0,
+            width: 80,
+            max_line_len: 80,
+          },
+        },
+        callback: function(err, min) {
+          console.log(err);
+          console.log(options.cfg + ' successfully formatted and saved!');
+        }
+      });
+    }
+  };
+  eval(data);
+};
+
 fs.readFile(options.cfg, 'utf-8', (err, data) => {
   if(err) { throw err; }
   const arr = [];
+  let lookaheadMap = {};
   const require = { // local overwrite...
-    config: (data) => {
-      Object.keys(data.paths).forEach(item => {
+    config: (cfgData) => {
+      Object.keys(cfgData.paths).forEach(item => {
         arr.push({
           key: item,
-          path: data.paths[item],
+          path: cfgData.paths[item],
         });
       });
   
       collectDeps(arr, options.path);
+      for (var key in collection) {
+        if (!collection[key].deps || !collection[key].deps.length) continue;
+        let goFurther = false;
+        collection[key].deps.forEach(dep => {
+          if (collection[dep]) goFurther = true;
+        });
+        if (!goFurther) continue;
+        lookaheadMap[key] = collection[key].deps;
+      }
+      updateLookahead(lookaheadMap, data);
     },
   };
   eval(data);
