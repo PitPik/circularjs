@@ -4,9 +4,11 @@
  * Example:
  * node package.js -p ./myProject -c js/amd.cfg.js -o js/all.min.js
  * 
- * This will package the project in "./myProject" to a single file "js/all.min.js"
- * inside "./myProject" (so: ./myProject/js/all.min.js) using the
- * amd-configuration file "js/amd.cfg.js"
+ * This will package the project inside the folder "./myProject" to a
+ * single file "js/all.min.js" inside the folder "./myProject"
+ * (./myProject/js/all.min.js) using the amd-configuration file "js/amd.cfg.js".
+ * package.js combines and minifies all template html/css and script files
+ * to this one file.
  * 
  * Options:
  * --path | -p: path of project
@@ -212,7 +214,7 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
           conservativeCollapse: true,
         }
       }).then(function(min) {
-        return 'define("' + htmlData.key + '",[],function(){return \'' +
+        return 'define("' + htmlData.key + '",[],function(){return\'' +
           min.replace(/\'/g, "\\'").replace(/\n/g, "\\n") + '\'});';
       }));
     });
@@ -226,7 +228,7 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
         output: options.output,
         sync: true,
       }).then(function(min) {
-        return 'define("' + cssData.key + '",[],function(){return \'' +
+        return 'define("' + cssData.key + '",[],function(){return\'' +
           min.replace(/\'/g, "\\'") + '\'});';
       }));
     });
