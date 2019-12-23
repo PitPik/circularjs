@@ -187,35 +187,34 @@ const updateLookahead = (lookaheadMap, data) => {
 
       fs.writeFile(
         options.cfg,
-        'require.config(' + output
-          .replace(/,/g, ",\n")
-          .replace(/\{'/g, "{\n'")
-          .replace(/'\]/g, "'\n]")
-          .replace(/\['/g, "[\n'") + ');',
+        'require.config(' + output + ');',
         (err) => {
           if (err) throw err;
           console.log(options.cfg + ' successfully saved!');
+
+          compressor.minify({
+            compressor: 'terser',
+            input: options.cfg,
+            output: options.cfg,
+            options: {
+              output: {
+                beautify: true,
+                quote_style: 1,
+                indent_level: 2,
+                indent_start: 0,
+                width: 80,
+                max_line_len: 80,
+              },
+            },
+            callback: function(err, min) {
+              console.log(err);
+              console.log(options.cfg + ' successfully formatted and saved!');
+            }
+          });
+
+          
         }
       );
-      compressor.minify({
-        compressor: 'terser',
-        input: options.cfg,
-        output: options.cfg,
-        options: {
-          output: {
-            beautify: true,
-            quote_style: 1,
-            indent_level: 2,
-            indent_start: 0,
-            width: 80,
-            max_line_len: 80,
-          },
-        },
-        callback: function(err, min) {
-          console.log(err);
-          console.log(options.cfg + ' successfully formatted and saved!');
-        }
-      });
     }
   };
   eval(data);
