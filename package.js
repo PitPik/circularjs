@@ -52,7 +52,7 @@ const collectDeps = (data, rootPath) => {
       path += '.js';
     }
     const content = fs.readFileSync(path, 'utf-8', (err) => {
-      if(err) { throw err; }
+      if (err) { throw err; }
     });
     if (!path.match(/\.js$/)) {
       item.deps = [];
@@ -70,13 +70,13 @@ const collectDeps = (data, rootPath) => {
 };
 
 
-const depsSorter = (dependencies) => {
+const depsSorter = dependencies => {
   let keys = Object.keys(dependencies);
   const used = new Set();
   const result = [];
   let items = [];
   let length = 0;
-  
+
   do {
     length = keys.length;
     items = [];
@@ -128,7 +128,7 @@ const writeMinJSFile = (data, outputName, type) => {
     input: output,
     output: outputName,
     // sync: true,
-  }).then(function(min) {
+  }).then(min => {
     let index = 0;
 
     min = min.replace(/,(require|define)/g, (_, $1) => {
@@ -141,11 +141,11 @@ const writeMinJSFile = (data, outputName, type) => {
       let out = "";
 
       if ($1 === 'require(') {
-        out =  'define("' + data[index].key + '",';
+        out = 'define("' + data[index].key + '",';
       } else if ($2 === '""') {
-        out =  'define("' + data[index].key + '",';
+        out = 'define("' + data[index].key + '",';
       } else {
-        out =  'define(' + $2 + ',';
+        out = 'define(' + $2 + ',';
       }
       index++;
       return out;
@@ -185,14 +185,14 @@ options.output = (options.path + '/' + options.output).replace('//', '/');
 const updateLookahead = (lookaheadMap, data) => {
   if (!options.updateLookahead) return;
   const require = { // overwrite global function
-    config: (innerData) => {
+    config: innerData => {
       innerData.lookaheadMap = lookaheadMap;
       const output = JSON.stringify(innerData).replace(/"/g, "'");
 
       fs.writeFile(
         options.cfg,
         'require.config(' + output + ');',
-        (err) => {
+        err => {
           if (err) throw err;
           console.log(options.cfg + ' successfully saved!');
 
@@ -210,7 +210,7 @@ const updateLookahead = (lookaheadMap, data) => {
                 max_line_len: 80,
               },
             },
-            callback: function(err, min) {
+            callback: (err, min) => {
               if (err) throw err;
               console.log(options.cfg + ' successfully formatted and saved!');
             }
@@ -223,18 +223,18 @@ const updateLookahead = (lookaheadMap, data) => {
 };
 
 fs.readFile(options.cfg, 'utf-8', (err, data) => {
-  if(err) { throw err; }
+  if (err) { throw err; }
   const arr = [];
   let lookaheadMap = {};
   const require = { // local overwrite...
-    config: (cfgData) => {
+    config: cfgData => {
       Object.keys(cfgData.paths).forEach(item => {
         arr.push({
           key: item,
           path: cfgData.paths[item],
         });
       });
-  
+
       collectDeps(arr, options.path);
       for (var key in collection) {
         if (!collection[key].deps || !collection[key].deps.length) continue;
@@ -257,40 +257,32 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
 
     html.length && promises.push(Promise.resolve('/* HTML */'));
 
-    html.forEach(htmlData => {
-      promises.push(compressor.minify({
-        compressor: 'html-minifier',
-        input: (options.path + '/' + htmlData.path).replace('//', '/'),
-        output: options.output,
-        sync: true,
-        options: {
-          minifyJS: false,
-          removeTagWhitespace: true,
-          removeComments: true,
-          preserveLineBreaks: true,
-          collapseInlineTagWhitespace: true,
-          collapseWhitespace: true,
-          conservativeCollapse: true,
-        }
-      }).then(function(min) {
-        return 'define("' + htmlData.key + '",[],function(){return\'' +
-          min.replace(/\'/g, "\\'").replace(/\n/g, "\\n") + '\'});';
-      }));
-    });
+    html.forEach(htmlData => promises.push(compressor.minify({
+      compressor: 'html-minifier',
+      input: (options.path + '/' + htmlData.path).replace('//', '/'),
+      output: options.output,
+      sync: true,
+      options: {
+        minifyJS: false,
+        removeTagWhitespace: true,
+        removeComments: true,
+        preserveLineBreaks: true,
+        collapseInlineTagWhitespace: true,
+        collapseWhitespace: true,
+        conservativeCollapse: true,
+      }
+    }).then(min => 'define("' + htmlData.key + '",[],function(){return\'' +
+      min.replace(/\'/g, "\\'").replace(/\n/g, "\\n") + '\'});')));
 
     css.length && promises.push(Promise.resolve('/* CSS */'));
 
-    css.forEach(cssData => {
-      promises.push(compressor.minify({
-        compressor: 'crass',
-        input: (options.path + '/' + cssData.path).replace('//', '/'),
-        output: options.output,
-        sync: true,
-      }).then(function(min) {
-        return 'define("' + cssData.key + '",[],function(){return\'' +
-          min.replace(/\'/g, "\\'") + '\'});';
-      }));
-    });
+    css.forEach(cssData => promises.push(compressor.minify({
+      compressor: 'crass',
+      input: (options.path + '/' + cssData.path).replace('//', '/'),
+      output: options.output,
+      sync: true,
+    }).then(min => 'define("' + cssData.key + '",[],function(){return\'' +
+      min.replace(/\'/g, "\\'") + '\'});')));
 
     promises.push(Promise.resolve('/* javaScript */'));
 
@@ -300,7 +292,7 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
       fs.writeFile(
         options.output,
         textOut.replace(/\\n\s+/g, "\\n"),
-        (err) => {
+        err => {
           if (err) throw err;
           console.log(options.output + ' successfully saved!');
         }
