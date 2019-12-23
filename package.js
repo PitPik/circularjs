@@ -14,6 +14,7 @@
  * --path | -p: path of project
  * --cfg | -c: path to amd configuration file (relative to --path)
  * --output | -o: path (relative to --path) to output file
+ * --update | -u: update the lookahedMap of configuration defined by --cfg
  */
 
 const fs = require('fs');
