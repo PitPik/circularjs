@@ -3,7 +3,7 @@
 # What is CircularJS
 
 CircularJS is a tiny, progressive **MV\* like framework** with its goal to help building **web-pages** and **single-page-web-apps** in a **model-oriented** easy way with the help of powerful tools:
- - **amd**: a powerful module loader with look-ahead for even faster resource loading.
+ - **amd**: a powerful module loader with look-ahead (auto generateable) for even faster resource loading.
  - **ajax**: resource loader with cache, timed cache and auto XSRF returning a promise.
  - **promise**: also used by ajax. A well known design pattern, easy to use (cacheable and cancelable).
  - **resource/module loader**: A convenient widget loader with powerful options.

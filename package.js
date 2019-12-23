@@ -192,7 +192,7 @@ const updateLookahead = (lookaheadMap, data) => {
           if (err) throw err;
           console.log(options.cfg + ' successfully saved!');
 
-          compressor.minify({
+          compressor.minify({ // beatify
             compressor: 'terser',
             input: options.cfg,
             output: options.cfg,
@@ -207,12 +207,10 @@ const updateLookahead = (lookaheadMap, data) => {
               },
             },
             callback: function(err, min) {
-              console.log(err);
+              if (err) throw err;
               console.log(options.cfg + ' successfully formatted and saved!');
             }
           });
-
-          
         }
       );
     }
