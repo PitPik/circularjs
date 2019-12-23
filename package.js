@@ -1,8 +1,18 @@
-// How to use:
-// node package.js -p ./myProject/ -c ./myProject/js/amd.cfg.js -o js/all.min.js
-// --path | -p: path of project
-// --cfg | -c: path to amd configuration file: amd.cfg.js
-// --output | -o: path (relative to --path) to output file (or just name)
+/**
+ * How to use package.js
+ * 
+ * Example:
+ * node package.js -p ./myProject -c js/amd.cfg.js -o js/all.min.js
+ * 
+ * This will package the project in "./myProject" to a single file "js/all.min.js"
+ * inside "./myProject" (so: ./myProject/js/all.min.js) using the
+ * amd-configuration file "js/amd.cfg.js"
+ * 
+ * Options:
+ * --path | -p: path of project
+ * --cfg | -c: path to amd configuration file (relative to --path)
+ * --output | -o: path (relative to --path) to output file
+ */
 
 const fs = require('fs');
 const compressor = require('node-minify');
@@ -31,7 +41,7 @@ const collectDeps = (data, rootPath) => {
     const define = require; // needed...
     define.amd = true; // needed...
 
-    let path = rootPath + item.path;
+    let path = (rootPath + '/' + item.path).replace('//', '/');
     if (!path.match(fileRegexp)) {
       path += '.js';
     }
@@ -104,7 +114,7 @@ const writeMinJSFile = (data, outputName, type) => {
     if (!item.path.match(fileRegexp)) {
       item.path += '.js';
     }
-    output.push(options.path + item.path);
+    output.push((options.path + '/' + item.path).replace('//', '/'));
   });
 
   return compressor.minify({
@@ -158,6 +168,9 @@ for (let j = 0; j < params.length; j++) {
 if (!options.cfg) {
   throw 'No cfg defined';
 }
+options.path = options.path || './';
+options.cfg = (options.path + '/' + options.cfg).replace('//', '/');
+options.output = (options.path + '/' + options.output).replace('//', '/');
 
 fs.readFile(options.cfg, 'utf-8', (err, data) => {
   if(err) { throw err; }
@@ -177,18 +190,17 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
   eval(data);
   sortOutput(arr);
 
-  const outputPath = options.path + options.output;
-  writeMinJSFile(js, outputPath, 'uglify-es').then(minJS => {
+  writeMinJSFile(js, options.output, 'uglify-es').then(minJS => {
     let textOut = '';
     let promises = [];
 
-    promises.push(Promise.resolve('/* HTML */'));
+    html.length && promises.push(Promise.resolve('/* HTML */'));
 
     html.forEach(htmlData => {
       promises.push(compressor.minify({
         compressor: 'html-minifier',
-        input: options.path + htmlData.path,
-        output: outputPath,
+        input: (options.path + '/' + htmlData.path).replace('//', '/'),
+        output: options.output,
         sync: true,
         options: {
           minifyJS: false,
@@ -205,16 +217,16 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
       }));
     });
 
-    promises.push(Promise.resolve('/* CSS */'));
+    css.length && promises.push(Promise.resolve('/* CSS */'));
 
-    css.forEach(htmlData => {
+    css.forEach(cssData => {
       promises.push(compressor.minify({
         compressor: 'crass',
-        input: options.path + htmlData.path,
-        output: outputPath,
+        input: (options.path + '/' + cssData.path).replace('//', '/'),
+        output: options.output,
         sync: true,
       }).then(function(min) {
-        return 'define("' + htmlData.key + '",[],function(){return \'' +
+        return 'define("' + cssData.key + '",[],function(){return \'' +
           min.replace(/\'/g, "\\'") + '\'});';
       }));
     });
@@ -225,10 +237,11 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
       data.push(minJS);
       textOut = data.join('\n');
       fs.writeFile(
-        outputPath,
+        options.output,
         textOut.replace(/\\n\s+/g, "\\n"),
         (err) => {
           if (err) throw err;
+          console.log(options.output + ' successfully saved!');
         }
       );
     });
