@@ -5,8 +5,8 @@
   "main": "circular.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "uglify": "uglifyjs amd.js toolbox.js schnauzer.js blick.js VOM.js api.js controller.js circular.js -o circular.min.js --source-map 'url=circular.min.js.map' -c -m",
-    "combine": "uglifyjs amd.js toolbox.js schnauzer.js blick.js VOM.js api.js controller.js circular.js -o circular.all.js -b"
+    "uglify": "node-minify --compressor uglify-es --input amd.js,toolbox.js,schnauzer.js,blick.js,VOM.js,api.js,controller.js,circular.js -o circular.min.js --option '{\"sourceMap\": { \"url\" : \"circular.min.js.map\"}}'",
+    "combine": "node-minify --compressor no-compress --input amd.js,toolbox.js,schnauzer.js,blick.js,VOM.js,api.js,controller.js,circular.js -o circular.all.js"
   },
   "repository": {
     "type": "git",
@@ -38,10 +38,6 @@
   },
   "homepage": "https://github.com/PitPik/circularjs#readme",
   "devDependencies": {
-    "uglify-es": "~3.3.9",
     "node-minify": "3.6.0"
-  },
-  "dependencies": {
-    "node-static": "^0.7.11"
   }
 }
