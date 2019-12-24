@@ -158,8 +158,9 @@ const params = process.argv.slice(2);
 const options = {
   path: '',
   cfg: '',
-  output: 'output.min.js', // TODO: also combine with options.path
+  output: 'output.min.js',
   updateLookahead: false,
+  help: false
 };
 for (let j = 0; j < params.length; j++) {
   if (params[j] === '--path' || params[j] === '-p') {
@@ -174,9 +175,31 @@ for (let j = 0; j < params.length; j++) {
   if (params[j] === '--update' || params[j] === '-u') {
     options.updateLookahead = params[j + 1] === 'true';
   }
+  if (params[j] === '--help' || params[j] === '-h') {
+    options.help = true;
+  }
+}
+if (!params.length || options.help) {
+  console.log(`How to use package.js
+
+Example:
+node package.js -p ./myProject -c js/amd.cfg.js -o js/all.min.js
+
+This will package the project inside the folder "./myProject" to a
+single file "js/all.min.js" inside the folder "./myProject"
+(./myProject/js/all.min.js) using the amd-configuration file "js/amd.cfg.js".
+package.js combines and minifies all template html/css and script files
+to this one file.
+
+Options:
+--path | -p: path of project
+--cfg | -c: path to amd configuration file (relative to --path)
+--output | -o: path (relative to --path) to output file
+--update | -u: update the lookahedMap of configuration defined by --cfg`);
+  return;
 }
 if (!options.cfg) {
-  throw 'No cfg defined';
+  throw 'No configuration (--cfg) defined';
 }
 options.path = options.path || './';
 options.cfg = (options.path + '/' + options.cfg).replace('//', '/');
