@@ -14,12 +14,16 @@ function Controller(options) {
 Controller.prototype = {
   installEvent: function(instance, element, eventName, items) {
     var componentElement = this.options.element;
+    var parts = eventName.split('!');
+    var name = parts[2] || parts[1] || parts[0];
+    var useCapture = parts[2] ? true : parts[1] ? false :
+      /(?:focus|blur|mouseenter|mouseleave)/.test(name) ? true : false;
 
-    if (this.events[eventName]) return;
+    if (this.events[name]) return;
 
-    this.events[eventName] = Toolbox.addEvent(element, eventName, function(e) {
+    this.events[name] = Toolbox.addEvent(element, name, function(e) {
       eventDelegator(e, instance, items, componentElement, VOM.getElementById);
-    }, /(?:focus|blur|mouseenter|mouseleave)/.test(eventName) ? true : false);
+    }, useCapture);
   },
   installEvents: function(instance, element, events, items) {
     var _this = this;
