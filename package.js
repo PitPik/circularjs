@@ -121,6 +121,7 @@ const writeMinJSFile = (data, outputName, type) => {
       item.path += '.js';
     }
     output.push((options.path + '/' + item.path).replace('//', '/'));
+    options.echo && console.log(`[Compressing] ${item.path}`);
   });
 
   return compressor.minify({
@@ -160,7 +161,8 @@ const options = {
   cfg: '',
   output: 'output.min.js',
   updateLookahead: false,
-  help: false
+  help: false,
+  echo: false,
 };
 for (let j = 0; j < params.length; j++) {
   if (params[j] === '--path' || params[j] === '-p') {
@@ -177,6 +179,9 @@ for (let j = 0; j < params.length; j++) {
   }
   if (params[j] === '--help' || params[j] === '-h') {
     options.help = true;
+  }
+  if (params[j] === '--echo' || params[j] === '-e') {
+    options.echo = true;
   }
 }
 if (!params.length || options.help) {
@@ -195,7 +200,8 @@ Options:
 --path | -p: path of project
 --cfg | -c: path to amd configuration file (relative to --path)
 --output | -o: path (relative to --path) to output file
---update | -u: update the lookahedMap of configuration defined by --cfg`);
+--update | -u: update the lookahedMap of configuration defined by --cfg
+--echo | -e: more details about compressed files`);
   return;
 }
 if (!options.cfg) {
@@ -217,7 +223,7 @@ const updateLookahead = (lookaheadMap, data) => {
         'require.config(' + output + ');',
         err => {
           if (err) throw err;
-          console.log(options.cfg + ' successfully saved!');
+          console.log('\n' + options.cfg + ' successfully saved!');
 
           compressor.minify({ // beatify
             compressor: 'terser',
@@ -235,7 +241,7 @@ const updateLookahead = (lookaheadMap, data) => {
             },
             callback: (err, min) => {
               if (err) throw err;
-              console.log(options.cfg + ' successfully formatted and saved!');
+              console.log('\n' + options.cfg + ' successfully formatted and saved!');
             }
           });
         }
@@ -294,8 +300,12 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
         collapseWhitespace: true,
         conservativeCollapse: true,
       }
-    }).then(min => 'define("' + htmlData.key + '",[],function(){return\'' +
-      min.replace(/\'/g, "\\'").replace(/\n/g, "\\n") + '\'});')));
+    }).then(min => {
+      options.echo && console.log(`[Compressing] ${htmlData.path}`);
+
+      return 'define("' + htmlData.key + '",[],function(){return\'' +
+        min.replace(/\'/g, "\\'").replace(/\n/g, "\\n") + '\'});';
+    })));
 
     css.length && promises.push(Promise.resolve('/* CSS */'));
 
@@ -304,8 +314,12 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
       input: (options.path + '/' + cssData.path).replace('//', '/'),
       output: options.output,
       sync: true,
-    }).then(min => 'define("' + cssData.key + '",[],function(){return\'' +
-      min.replace(/\'/g, "\\'") + '\'});')));
+    }).then(min => {
+      options.echo && console.log(`[Compressing] ${cssData.path}`);
+  
+      return 'define("' + cssData.key + '",[],function(){return\'' +
+        min.replace(/\'/g, "\\'") + '\'});'
+    })));
 
     promises.push(Promise.resolve('/* javaScript */'));
 
@@ -317,7 +331,7 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
         textOut.replace(/\\n\s+/g, "\\n"),
         err => {
           if (err) throw err;
-          console.log(options.output + ' successfully saved!');
+          console.log('\n' + options.output + ' successfully saved!');
         }
       );
     });
