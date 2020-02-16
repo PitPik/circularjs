@@ -29,6 +29,14 @@ const html = [];
 const css = [];
 const js = [];
 
+const getRealPath = itemPath => {
+  let path = (options.path + '/' + itemPath).replace('//', '/');
+  if (!path.match(fileRegexp)) {
+    path += '.js';
+  }
+  return path;
+};
+
 const collectDeps = (data, rootPath) => {
   data.forEach(item => {
     // make UMD go for define()...
@@ -47,10 +55,7 @@ const collectDeps = (data, rootPath) => {
     const define = require; // needed...
     define.amd = true; // needed...
 
-    let path = (rootPath + '/' + item.path).replace('//', '/');
-    if (!path.match(fileRegexp)) {
-      path += '.js';
-    }
+    const path = getRealPath(item.path);
     const content = fs.readFileSync(path, 'utf-8', (err) => {
       if (err) { throw err; }
     });
@@ -258,12 +263,7 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
   const require = { // local overwrite...
     config: cfgData => {
       Object.keys(cfgData.paths).forEach((item, idx) => {
-        
-        let path = (options.path + '/' + cfgData.paths[item]).replace('//', '/');
-        if (!path.match(fileRegexp)) {
-          path += '.js';
-        }
-
+        const path = getRealPath(cfgData.paths[item]);
         if (fs.existsSync(path)) {
           arr.push({
             key: item,
