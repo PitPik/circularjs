@@ -257,11 +257,23 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
   let lookaheadMap = {};
   const require = { // local overwrite...
     config: cfgData => {
-      Object.keys(cfgData.paths).forEach(item => {
-        arr.push({
-          key: item,
-          path: cfgData.paths[item],
-        });
+      Object.keys(cfgData.paths).forEach((item, idx) => {
+        
+        let path = (options.path + '/' + cfgData.paths[item]).replace('//', '/');
+        if (!path.match(fileRegexp)) {
+          path += '.js';
+        }
+
+        if (fs.existsSync(path)) {
+          arr.push({
+            key: item,
+            path: cfgData.paths[item],
+          });
+        } else {
+          console.log(`[SKIP] ${path}`);
+          // TODO: necessary??
+          // delete cfgData.paths[item];
+        }
       });
 
       collectDeps(arr, options.path);
@@ -279,8 +291,7 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
   };
   eval(data);
   sortOutput(arr);
-
-  writeMinJSFile(js, options.output, 'uglify-es').then(minJS => {
+  writeMinJSFile(js.filter(item => item), options.output, 'uglify-es').then(minJS => {
     let textOut = '';
     let promises = [];
 
