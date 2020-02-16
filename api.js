@@ -252,7 +252,7 @@ prototype.renderModule = function(data) {
       data.input && setAttribute('cr-input', data.input);
       data.event && setAttribute('cr-event', data.event);
       data.name && setAttribute('cr-name', data.name);
-      var instance = !module.instance && module.init(componentElm, null, data.data);
+      var instance = !module.instance && module.init(componentElm, null, data.this);
       var item = module.instance || instance;
 
       appendChildToContainer(componentElm, container, data.transition);
