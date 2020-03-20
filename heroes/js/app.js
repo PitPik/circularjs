@@ -2,7 +2,7 @@ define('app', ['circular'], ({ Module }) => Module({
   selector: 'app-main',
   template: `
     <section class="app-{{%currentApp}}">
-      <h1>{{title}}{{#%currentApp}} - {{.}}{{/%currentApp}}</h1>
+      <h1>{{title}}{{#if %currentApp}} - {{%currentApp}}{{/if}}</h1>
       <nav class="app-nav">
         <a href="#/dashboard" class="dashboard">Dashboard</a>
         <a href="#/heroes" class="heroes">Heroes</a>

@@ -1,4 +1,4 @@
-/**! @license CircularJS ● v1.0.0; Copyright (C) 2019 by Peter Dematté */
+/**! @license CircularJS ● v1.3.0; Copyright (C) 2019 by Peter Dematté */
 define('circular', ['toolbox', 'blick', 'VOM', 'api', 'controller'],
 function(Toolbox, Blick, VOM, mixinAPI, Controller) { 'use strict';
 
@@ -32,7 +32,7 @@ function initCircular(_this, name, options) {
   for (var option in options) {
     _this.options[option] = options[option];
   }
-  _this.version = '1.0.0';
+  _this.version = '1.3.0';
   _this.id = 'cr_' + id++;
   _this.name = isName ? name : _this.id;
   instances[_this.id] = {};
@@ -357,14 +357,28 @@ function injectNewModel(vom, model, newModel, deltaOnly) {
   while (model.length > newModel.length) vom.removeChild(model[model.length - 1]);
 }
 
+function setDeepObj(item, newItem, key) {
+  if (Object.getOwnPropertyDescriptor(item, key).get) {
+    for (var n in item[key]) {
+      item[key][n] = typeof newItem[key][n] === 'object' ?
+        setDeepObj(item[key], newItem[key], n) :
+        newItem[key][n];
+    }
+    return item[key];
+} else {
+    return newItem[key];
+  }
+}
+
 function updateModelItem(vom, item, newItem) {
   for (var key in newItem) {
-    if (key !== 'childNodes') { //  && newItem[key] !== item[key]) { // force update
-      item[key] = newItem[key];
+    if (key !== 'childNodes') {
+      item[key] = typeof item[key] === 'object' ?
+        setDeepObj(item, newItem, key, vom) : newItem[key];
     }
   }
   if (newItem.childNodes) {
-   injectNewModel(vom, item.childNodes, newItem.childNodes);
+    injectNewModel(vom, item.childNodes, newItem.childNodes);
   }
 }
 
@@ -381,10 +395,9 @@ function getVOMInstance(data) {
     enrichModelCallback: inst[name + '$Enrich'] || function() {},
     listeners: data.listeners,
     preRecursionCallback: function(item, type, siblPar) {
-      var element = data.template &&
+      inst[name$PR] && inst[name$PR](this, item);
+      data.template &&
         setNewItem(this, { item: item, type: type, siblPar: siblPar, data: data });
-
-      inst[name$PR] && inst[name$PR](this, item, element);
     },
     subscribe: function(property, item, value, oldValue, sibling) {
       var intern = property === 'childNodes' || !!VOM.prototype[property];
@@ -488,9 +501,9 @@ function changeItem(vomInstance, property, item, value, oldValue, sibling, data)
   var parentElements = item.parentNode && item.parentNode.elements || null;
   var parentElement = parentElements ? // TODO: check again
     parentElements.container || parentElements.element : data.templateContainer;
-  var id = item['cr-id'];
+  var id = item['__cr-id'] || item['cr-id'];
   var template = !item.childNodes && data.childTemplate || data.template || null;
-  var collector = template ? template.collector : {};
+  var collector = template ? template.options.collector : {};
   var intern = property === 'childNodes' || !!VOM.prototype[property];
 
   if (property === 'removeChild') {
@@ -506,20 +519,25 @@ function changeItem(vomInstance, property, item, value, oldValue, sibling, data)
     }
   }
 
-  blickItems(data, item, collector, id, property, value, oldValue);
-  for (var key in data.defData.helpers) {
-    blickItems(data, item, collector, id, key, value, oldValue);
-  }
+  changeBlickItems(data, item, collector, id, property, value, oldValue);
+  // TODO: check if following line is ever needed
+  // for (var key in data.defData.helpers) {
+  //   changeBlickItems(data, item, collector, id, key, value, oldValue);
+  // }
 }
 
 function destroyCollector(collector, id, keep) {
-  if (!collector[id]) return;
-  for (var item in collector[id]) delete collector[id][item];
-  if (!keep) delete collector[id];
+  var fn = function(item) { collector[id][item] = null };
+
+  if (!collector || !collector[id]) return;
+  // for (var item in collector[id]) delete collector[id][item];
+  // if (!keep) delete collector[id];
+  for (var item in collector[id]) fn(item);
+  if (!keep) collector[id] = null;
 }
 
-function blickItems(data, item, collector, id, property, value, oldValue) {
-  var blickItems = collector[id] && collector[id][property];
+function changeBlickItems(data, item, collector, id, property, value, oldValue) {
+  var blickItems = collector && collector[id] && collector[id][property];
   var blickItem = {};
   var components = {};
 
@@ -528,11 +546,11 @@ function blickItems(data, item, collector, id, property, value, oldValue) {
   for (var n = blickItems.length, elm; n--; ) {
     blickItem = blickItems[n];
     components = blickItem.components;
-
     if (value === oldValue && !blickItem.forceUpdate) continue;
+    elm = blickItem.fn(value);
 
-    elm = blickItem.fn(blickItem.parent);
     if (data.controller && elm) for (var m = elm.length; m--; ) {
+      if (elm[m].nodeType !== 1) continue;
       getAttrMap(elm[m], 'cr-event', function(eventName, fnName) {
         var elms = (item.events || data.items.events)[eventName];
 
@@ -557,7 +575,10 @@ function blickItems(data, item, collector, id, property, value, oldValue) {
       blickItem.components = null;
     }
     if (elm && elm.length) {
+      // TODO: check what this really does...
       for (var x = 0, y = elm.length; x < y; x++) {
+        // TODO: remove !elm[x].isConnected elements; IE...
+        if (elm[x].nodeType !== 1) continue;
         blickItem.components = initComponentsAndPlugins(
           elm[x].parentNode, // TODO: not parentNode...
           data.defData,
@@ -619,23 +640,13 @@ function getInnerComponents(selectors, result, context, fn) {
   return result;
 }
 
-function registerBlickProperty(name, fn, data, active, parent, foundNode, collector) {
-  var noGetter = parent && data[parent[0]] &&
-    !Object.getOwnPropertyDescriptor(data[parent[0]], '0').get;
-  var _parent = parent ? parent.slice(0) : parent;
-  var blickItem = collector[data['cr-id']] = collector[data['cr-id']] || {};
-  var _name = '';
+function registerBlickProperty(fn, key, parent, active) {
+  var collector = this.collector || {};
+  var id = parent['__cr-id'] || parent['cr-id'];
+  var blickItem = collector[id] = collector[id] || {};
 
-  parent && noGetter && _parent.push(name);
-  _name = _parent && _parent.join('.') || name;
-
-  blickItem[_name] = blickItem[_name] || [];
-  blickItem[_name].push({
-    fn: fn,
-    forceUpdate: active === 2,
-    parent: parent && (name !== 'this' && name !== '.' ?
-      parent.concat(name.split('.')) : parent),
-  });
+  blickItem[key] = blickItem[key] || [];
+  blickItem[key].push({ fn: fn, forceUpdate: active === 2 });
 }
 
 function getTemplate(template, defData, where, modelName) {
@@ -665,9 +676,8 @@ function getTemplate(template, defData, where, modelName) {
     return $1.charAt(0) === '{' ? '{{>' : 'src=';
   }), {
     helpers: defData.helpers || {},
-    decorators: defData.decorators,
-    partials: defData.partials,
-    attributes: defData.attributes,
+    partials: defData.partials || {},
+    attributes: defData.attributes || {},
     registerProperty: registerBlickProperty,
   });
 }

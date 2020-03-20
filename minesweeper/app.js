@@ -6,7 +6,7 @@ Module({
   template: document.body.innerHTML + (document.body.innerHTML = '', ''),
   subscribe$: {
     this: ['won', 'counter', 'time', 'class'],
-    board: ['isProcessed', 'mark'],
+    board: ['isProcessed', 'mark', 'surrounding', 'isMine']
   },
 }, class Minesweeper {
   counter = 0;

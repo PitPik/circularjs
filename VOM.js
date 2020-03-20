@@ -282,6 +282,7 @@ function enhanceModel(_this, model, listeners, recPath, recModel) {
       restPos = wildcardPos + 1;
 
       for (var item in deepModel) {
+        if (item === 'childNodes') continue; // __index, parentNode
         if (restPos === listener.length) {
           addProperty(_this, item, { current: deepModel, root: model },
             path.replace('*', item));
