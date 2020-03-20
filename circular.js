@@ -410,19 +410,19 @@ function getVOMInstance(data) {
   });
 }
 
-// function getHelperData(item) {
-//   var parent = item.parentNode;
-//   var index = item.index;
-//   var isLast = parent && parent.childNodes.length - 1 === item.index;
-//   var isFirst = index === 0;
+function getHelperData(item) {
+  var parent = item.parentNode;
+  var index = item.index;
+  var isLast = parent && parent.childNodes.length - 1 === item.index;
+  var isFirst = index === 0;
 
-//   return parent ? {
-//     '@last': isLast,
-//     '@first': isFirst,
-//     '@index': index,
-//     '@counter': index + 1,
-//   } : {};
-// }
+  return parent ? {
+    '@last': isLast,
+    '@first': isFirst,
+    '@index': index,
+    '@counter': index + 1,
+  } : {};
+}
 
 function setNewItem(vomInstance, param) {
   var item = param.item;
@@ -432,7 +432,7 @@ function setNewItem(vomInstance, param) {
   var define = vomInstance.reinforceProperty;
   var isChild = !item.childNodes && !!data.childTemplate;
   var template = isChild ? data.childTemplate : data.template;
-  var extraModel = (data.defData.extraModel || {}); //.concat(getHelperData(item), data.instance); // TODO
+  var extraModel = (data.defData.extraModel || getHelperData(item)); //.concat(getHelperData(item), data.instance); // TODO
   var fragment = template && template.renderHTML(item, extraModel);
   var parentElements = item.parentNode && item.parentNode.elements;
   var tmpParent = parentElements && parentElements.container || instContainer;
