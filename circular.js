@@ -539,7 +539,7 @@ function registerBlickProperty(fn, key, parent, active, collector) {
   var blickItem = collector[id] = collector[id] || {};
 
   blickItem[key] = blickItem[key] || [];
-  blickItem[key].push({ fn: fn, forceUpdate: active === 2 });
+  blickItem[key].push({ fn: fn, forceUpdate: active === 2, components: null });
 }
 
 function registerEventsForBlickItem(data, item, eventName, fnName) {
@@ -561,43 +561,45 @@ function registerEventsForBlickItem(data, item, eventName, fnName) {
   }
 }
 
+function changeBlickItem(blickItem, data, item, value, oldValue) {
+  var components = blickItem.components;
+  var elm = null;
+
+  if (value === oldValue && !blickItem.forceUpdate) return;
+  elm = blickItem.fn(value);
+
+  if (data.controller && elm) for (var m = elm.length; m--; ) {
+    if (elm[m].nodeType !== 1) continue;
+    getAttrMap(elm[m], 'cr-event', function(eventName, fnName) {
+      registerEventsForBlickItem(data, item, eventName, fnName);
+    });
+  }
+  if (components) {
+    data.crInstance.destroyComponents(components);
+    blickItem.components = null;
+  }
+  if (elm) {
+    for (var x = 0, y = elm.length; x < y; x++) {
+      // TODO: remove !elm[x].isConnected elements; IE...
+      if (elm[x].nodeType !== 1) continue;
+      blickItem.components = initComponentsAndPlugins(
+        elm[x].parentNode, // TODO: not parentNode...
+        data.defData,
+        data.modelName,
+        false, // TODO: isChild,
+        [data.instance, item]
+      );
+    }
+  } 
+}
+
 function changeBlickItems(data, item, collector, id, property, value, oldValue) {
   var blickItems = collector && collector[id] && collector[id][property];
-  var blickItem = {};
-  var components = {};
 
   if (!blickItems) return;
 
-  for (var n = blickItems.length, elm; n--; ) {
-    blickItem = blickItems[n];
-    components = blickItem.components;
-    if (value === oldValue && !blickItem.forceUpdate) continue;
-    elm = blickItem.fn(value);
-
-    if (data.controller && elm) for (var m = elm.length; m--; ) {
-      if (elm[m].nodeType !== 1) continue;
-      getAttrMap(elm[m], 'cr-event', function(eventName, fnName) {
-        registerEventsForBlickItem(data, item, eventName, fnName);
-      });
-    }
-    if (components) {
-      data.crInstance.destroyComponents(components);
-      blickItem.components = null;
-    }
-    if (elm) {
-      for (var x = 0, y = elm.length; x < y; x++) {
-        // TODO: remove !elm[x].isConnected elements; IE...
-        if (elm[x].nodeType !== 1) continue;
-        blickItem.components = initComponentsAndPlugins(
-          elm[x].parentNode, // TODO: not parentNode...
-          data.defData,
-          data.modelName,
-          false, // TODO: isChild,
-          [data.instance, item]
-        );
-      }
-    } 
-  }
+  for (var n = blickItems.length, elm; n--; )
+    changeBlickItem(blickItems[n], data, item, value, oldValue);
 }
 
 // --------------
