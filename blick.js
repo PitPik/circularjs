@@ -32,7 +32,7 @@ var saveWrapHtml = (function(search, tags) {
 var Blick = function(template, options) {
   this.version = '0.1.0';
   this.options = {
-    registerProperty: function(){},
+    registerProperty: function(fn, key, obj, active){},
     forceUpdate: false,
     attributes: {
       value: setValue,
@@ -44,6 +44,10 @@ var Blick = function(template, options) {
       required: setAttribute,
       selected: setAttribute,
     },
+    renderHook: renderHook,
+    isDynamic: function(obj, key) {
+      return obj ? (Object.getOwnPropertyDescriptor(obj, key) || {}).get : null;
+    }
   };
   this.schnauzer = {};
   this.dataDump = [];
@@ -58,9 +62,7 @@ var initBlick = function(_this, options, template) {
     _this.options[option] = options[option];
   }
   _this.options.collector = {}; // cr
-  options.renderHook = renderHook;
-  options.forceUpdate = _this.options.forceUpdate;
-  _this.schnauzer = new Schnauzer(template, options);
+  _this.schnauzer = new Schnauzer(template, _this.options);
   _this.schnauzer.dataDump = [];
 };
 
@@ -133,11 +135,10 @@ function findSatrtNode(node, start$) {
 function renderHook(out, tagData, model, isBlock, track, key, parent, bodyFn) {
   var index = this.dataDump.length;
   var longKey = tagData.root ? tagData.root.variable.path.join('.') + key : '';
-  var obj = parent ? Object.getOwnPropertyDescriptor(parent, key) : null;
   var doScan = !!tagData.active || this.options.forceUpdate;
-  var hasGetter = !!key && doScan && !!obj ? !!obj.get : false;
+  var isDynamic = !!key && doScan && !!this.options.isDynamic(parent, key);
 
-  if (!hasGetter) return out;
+  if (!isDynamic) return out;
   this.dataDump.push({
     out: out, isBlock: isBlock, parent: parent, track: track, key: longKey,
     bodyFn: bodyFn, active: tagData.active, helper: tagData.helper,
