@@ -147,22 +147,22 @@ function renderHook(out, tagData, model, isBlock, track, key, parent, bodyFn) {
   return '{{#' + index + '}}' + out + '{{/'+ index +'}}';
 }
 
-function resolveReferences(_this, dataDump, html) {
+function resolveReferences(_this, dataDump, html, update) {
   var start$ = '';
   var end$ = '';
-  var foundNode = null;
+  var node = null;
   var renderFn = null;
 
   for (var n = dataDump.length, dump = {}; n--; ) { // must revers
     dump = dataDump.pop();
     start$ = '{{#' + n + '}}';
     end$ = '{{/' + n + '}}';
-    foundNode = findNode(html, start$);
-    renderFn = !foundNode ? null : foundNode.ownerElement ?
+    node = findNode(html, start$);
+    renderFn = !node ? null : node.ownerElement ?
       attributeFn : !dump.isBlock ?
       inlineFn :
       blockFn;
-    renderFn && renderFn(_this, foundNode, start$, end$, dump, dataDump);
+    renderFn && renderFn(_this, node, start$, end$, dump, dataDump, update);
   }
   return html;
 }
@@ -265,7 +265,7 @@ function replaceBlock(
     }
     if (!wasEverRendered[fnIdx]) {
       trackDF[fnIdx] = trackDF[fnIdx] || document.createDocumentFragment();
-      html = resolveReferences(_this, dataDump, saveWrapHtml(body));
+      html = resolveReferences(_this, dataDump, saveWrapHtml(body), update);
       while (node = html.childNodes[0]) {
         outContainer.push(trackDF[fnIdx].appendChild(node));
       }
