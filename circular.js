@@ -542,7 +542,7 @@ function registerBlickProperty(fn, key, parent, active, collector) {
   blickItem[key].push({ fn: fn, forceUpdate: active === 2, components: null });
 }
 
-function registerEventsForBlickItem(data, item, eventName, fnName) {
+function registerEventsForBlickItem(data, item, element, eventName, fnName) {
   var elms = (item.events || data.items.events)[eventName];
 
   if (!elms) {
@@ -550,14 +550,14 @@ function registerEventsForBlickItem(data, item, eventName, fnName) {
     data.controller.installEvent(data.instance, data.instance.element, eventName);
   }
   if (!elms[fnName]) {
-    elms[fnName] = [elm[m]];
+    elms[fnName] = [element];
   } else {
     elms[fnName].filter(function(elm, idx) {
       if (!data.items.elements.element.contains(elm)) {
         elms[fnName].splice(idx, 1);
       }
     });
-    elms[fnName].push(elm[m]);
+    elms[fnName].push(element);
   }
 }
 
@@ -571,7 +571,7 @@ function changeBlickItem(blickItem, data, item, value, oldValue) {
   if (data.controller) for (var m = elm.length; m--; ) {
     if (elm[m].nodeType !== 1) continue;
     getAttrMap(elm[m], 'cr-event', function(eventName, fnName) {
-      registerEventsForBlickItem(data, item, eventName, fnName);
+      registerEventsForBlickItem(data, item, elm[m], eventName, fnName);
     });
   }
   if (components) {
