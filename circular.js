@@ -524,14 +524,22 @@ function changeItem(vomInstance, property, item, value, oldValue, sibling, data)
   // }
 }
 
+// --- blick stuff
+
 function destroyCollector(collector, id, keep) {
-  var fn = function(item) { collector[id][item] = null };
+  var fn = function(item) { delete collector[id][item] };
 
   if (!collector || !collector[id]) return;
-  // for (var item in collector[id]) delete collector[id][item];
-  // if (!keep) delete collector[id];
   for (var item in collector[id]) fn(item);
-  if (!keep) collector[id] = null;
+  if (!keep) delete collector[id];
+}
+
+function registerBlickProperty(fn, key, parent, active, collector) {
+  var id = parent['__cr-id'] || parent['cr-id'];
+  var blickItem = collector[id] = collector[id] || {};
+
+  blickItem[key] = blickItem[key] || [];
+  blickItem[key].push({ fn: fn, forceUpdate: active === 2 });
 }
 
 function changeBlickItems(data, item, collector, id, property, value, oldValue) {
@@ -589,6 +597,8 @@ function changeBlickItems(data, item, collector, id, property, value, oldValue) 
   }
 }
 
+// --------------
+
 function render(html, operator, parentNode, sibling, created) { // TODO: created
   if (operator === 'prependChild') {
     operator = 'insertBefore';
@@ -636,14 +646,6 @@ function getInnerComponents(selectors, result, context, fn) {
   }
 
   return result;
-}
-
-function registerBlickProperty(fn, key, parent, active, collector) {
-  var id = parent['__cr-id'] || parent['cr-id'];
-  var blickItem = collector[id] = collector[id] || {};
-
-  blickItem[key] = blickItem[key] || [];
-  blickItem[key].push({ fn: fn, forceUpdate: active === 2 });
 }
 
 function getTemplate(template, defData, where, modelName) {
