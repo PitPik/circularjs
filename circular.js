@@ -542,6 +542,25 @@ function registerBlickProperty(fn, key, parent, active, collector) {
   blickItem[key].push({ fn: fn, forceUpdate: active === 2 });
 }
 
+function registerEventsForBlickItem(data, item, eventName, fnName) {
+  var elms = (item.events || data.items.events)[eventName];
+
+  if (!elms) {
+    elms = item.events[eventName] = {};
+    data.controller.installEvent(data.instance, data.instance.element, eventName);
+  }
+  if (!elms[fnName]) {
+    elms[fnName] = [elm[m]];
+  } else {
+    elms[fnName].filter(function(elm, idx) {
+      if (!data.items.elements.element.contains(elm)) {
+        elms[fnName].splice(idx, 1);
+      }
+    });
+    elms[fnName].push(elm[m]);
+  }
+}
+
 function changeBlickItems(data, item, collector, id, property, value, oldValue) {
   var blickItems = collector && collector[id] && collector[id][property];
   var blickItem = {};
@@ -558,30 +577,14 @@ function changeBlickItems(data, item, collector, id, property, value, oldValue) 
     if (data.controller && elm) for (var m = elm.length; m--; ) {
       if (elm[m].nodeType !== 1) continue;
       getAttrMap(elm[m], 'cr-event', function(eventName, fnName) {
-        var elms = (item.events || data.items.events)[eventName];
-
-        if (!elms) {
-          elms = item.events[eventName] = {};
-          data.controller.installEvent(data.instance, data.instance.element, eventName);
-        }
-        if (!elms[fnName]) {
-          elms[fnName] = [elm[m]];
-        } else {
-          elms[fnName].filter(function(elm, idx) {
-            if (!data.items.elements.element.contains(elm)) {
-              elms[fnName].splice(idx, 1);
-            }
-          });
-          elms[fnName].push(elm[m]);
-        }
+        registerEventsForBlickItem(data, item, eventName, fnName);
       });
     }
     if (components) {
       data.crInstance.destroyComponents(components);
       blickItem.components = null;
     }
-    if (elm && elm.length) {
-      // TODO: check what this really does...
+    if (elm) {
       for (var x = 0, y = elm.length; x < y; x++) {
         // TODO: remove !elm[x].isConnected elements; IE...
         if (elm[x].nodeType !== 1) continue;
