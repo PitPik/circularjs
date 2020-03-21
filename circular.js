@@ -360,6 +360,7 @@ function injectNewModel(vom, model, newModel, deltaOnly) {
 function setDeepObj(item, newItem, key) {
   if (Object.getOwnPropertyDescriptor(item, key).get) {
     for (var n in item[key]) {
+      if (!item[key][n]) continue;
       item[key][n] = typeof newItem[key][n] === 'object' ?
         setDeepObj(item[key], newItem[key], n) :
         newItem[key][n];

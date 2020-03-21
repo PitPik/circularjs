@@ -274,8 +274,8 @@ function renderWith(_this, data, model, tagData, bodyFns) {
 function render(_this, model, tagData, isBlock, out, renderFn, bodyFns, track) {
   return _this.options.renderHook ? _this.options.renderHook.call(
     _this, out, tagData, model, isBlock, track,
-    tagData.root ? tagData.root.variable.value : '',
-    model.scopes[0].level['@parent'] || model.scopes[0].scope,
+    tagData.root ? tagData.root.variable.value : '', model.scopes[0] &&
+    (model.scopes[0].level['@parent'] || model.scopes[0].scope) || {},
     function() { return renderFn(_this, tagData, model,
       bodyFns || getData(_this, model, tagData), track)
     }) : out;
