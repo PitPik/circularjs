@@ -501,7 +501,7 @@ function changeItem(vomInstance, property, item, value, oldValue, sibling, data)
     parentElements.container || parentElements.element : data.templateContainer;
   var id = item['__cr-id'] || item['cr-id'];
   var template = !item.childNodes && data.childTemplate || data.template || null;
-  var collector = template ? template.options.collector : {};
+  var collector = template ? template.collector : {};
   var intern = property === 'childNodes' || !!VOM.prototype[property];
 
   if (property === 'removeChild') {
@@ -638,8 +638,7 @@ function getInnerComponents(selectors, result, context, fn) {
   return result;
 }
 
-function registerBlickProperty(fn, key, parent, active) {
-  var collector = this.collector || {};
+function registerBlickProperty(fn, key, parent, active, collector) {
   var id = parent['__cr-id'] || parent['cr-id'];
   var blickItem = collector[id] = collector[id] || {};
 

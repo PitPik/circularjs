@@ -32,7 +32,7 @@ var saveWrapHtml = (function(search, tags) {
 var Blick = function(template, options) {
   this.version = '0.1.0';
   this.options = {
-    registerProperty: function(fn, key, obj, active){},
+    registerProperty: function(fn, key, obj, active, collector){},
     forceUpdate: false,
     attributes: {
       value: setValue,
@@ -49,6 +49,7 @@ var Blick = function(template, options) {
       return obj ? (Object.getOwnPropertyDescriptor(obj, key) || {}).get : null;
     }
   };
+  this.collector = {};
   this.schnauzer = {};
   this.dataDump = [];
 
@@ -61,7 +62,6 @@ var initBlick = function(_this, options, template) {
   } else {
     _this.options[option] = options[option];
   }
-  _this.options.collector = {}; // cr
   _this.schnauzer = new Schnauzer(template, _this.options);
   _this.schnauzer.dataDump = [];
 };
@@ -200,7 +200,7 @@ function inlineFn(_this, node, start$, end$, dump, dataDump, update) {
 
   _this.options.registerProperty(replaceInline(node, node.previousSibling,
       findEndNode(node, end$), dump.isEscaped, update),
-    dump.key, dump.parent, dump.active
+    dump.key, dump.parent, dump.active, _this.collector
   );
   return node;
 }
@@ -238,7 +238,8 @@ function blockFn(_this, node, start$, end$, dump, dataDump, update) {
       dump.bodyFn, dump.track, dump.out, dataDump, update),
     dump.key,
     dump.parent,
-    dump.active
+    dump.active,
+    _this.collector
   );
   return node;
 }
