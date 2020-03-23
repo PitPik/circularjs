@@ -246,6 +246,7 @@ function enrichModel(_this, model, parent, type, sibling) {
         addProperty(_this, 'index', { current: item }, null, true);
         addProperty(_this, 'parentNode', { current: item }, null, true);
       }
+      if (options.interseptor) options.interseptor(_this, item);
       enhanceModel(_this, item, _this.options.listeners);
     }
 

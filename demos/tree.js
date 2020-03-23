@@ -30,9 +30,8 @@ define('app-tree', ['circular', '!tree.html'],
   }, class Tree {
     tree = [data];
 
-    tree$PR(vomInst, item, elm) {
+    tree$Intersept(vomInst, item) {
       item.open = item.open || false;
-      vomInst.addProperty('open', item);
       item.childNodes && item.childNodes.push({ name: '+' });
     }
 

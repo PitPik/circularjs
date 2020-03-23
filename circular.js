@@ -389,12 +389,16 @@ function getVOMInstance(data) {
   var name$ =  name + '$';
   var name$$ = name + '$$';
   var name$PR = name + '$PR';
+  var name$Intersept = name + '$Intersept';
 
   return new VOM(name === 'this' ? inst : inst[name] || [], {
     idProperty: 'cr-id',
     moveCallback: inst[name + '$Move'] || function() {},
     enrichModelCallback: inst[name + '$Enrich'] || function() {},
     listeners: data.listeners,
+    interseptor: function(vom, item) {
+      inst[name$Intersept] && inst[name$Intersept](vom, item);
+    },
     preRecursionCallback: function(item, type, siblPar) {
       inst[name$PR] && inst[name$PR](this, item);
       data.template &&
