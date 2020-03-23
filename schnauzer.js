@@ -275,7 +275,7 @@ function render(_this, model, tagData, isBlock, out, renderFn, bodyFns, track) {
   return _this.options.renderHook ? _this.options.renderHook.call(
     _this, out, tagData, model, isBlock, track,
     tagData.root ? tagData.root.variable.value : '', model.scopes[0] &&
-    (model.scopes[0].level['@parent'] || model.scopes[0].scope) || {},
+      getDeepData(model.scopes[0].scope, tagData.root.variable, true) || {},
     function() { return renderFn(_this, tagData, model,
       bodyFns || getData(_this, model, tagData), track)
     }) : out;

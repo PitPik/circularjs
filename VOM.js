@@ -234,7 +234,7 @@ function enrichModel(_this, model, parent, type, sibling) {
       hasOwnId = false;
     }
 
-    NODES[_this.id][item[idProperty]] = item; // push to flat index model
+    !_this.standalone && (NODES[_this.id][item[idProperty]] = item);
     isNew = !item.parentNode;
     if (!_this.standalone) {
       item.parentNode = parent || _this.model.root;

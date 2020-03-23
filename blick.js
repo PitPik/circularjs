@@ -134,7 +134,6 @@ function findSatrtNode(node, start$) {
 
 function renderHook(out, tagData, model, isBlock, track, key, parent, bodyFn) {
   var index = this.dataDump.length;
-  var longKey = tagData.root ? tagData.root.variable.path.join('.') + key : '';
   var doScan = !!tagData.active || this.options.forceUpdate;
   var isDynamic = !!key && doScan && !!this.options.isDynamic(parent, key);
   var start = '';
@@ -144,7 +143,7 @@ function renderHook(out, tagData, model, isBlock, track, key, parent, bodyFn) {
   start = '{{#' + index + '}}';
   end = '{{/' + index + '}}';
   this.dataDump.push({
-    out: out, isBlock: isBlock, parent: parent, track: track, key: longKey,
+    out: out, isBlock: isBlock, parent: parent, track: track, key: key,
     bodyFn: bodyFn, active: tagData.active, helper: tagData.helper,
     isEscaped: tagData.isEscaped, start$: start, end$: end,
   });
