@@ -137,33 +137,34 @@ function renderHook(out, tagData, model, isBlock, track, key, parent, bodyFn) {
   var longKey = tagData.root ? tagData.root.variable.path.join('.') + key : '';
   var doScan = !!tagData.active || this.options.forceUpdate;
   var isDynamic = !!key && doScan && !!this.options.isDynamic(parent, key);
+  var start = '';
+  var end = '';
 
   if (!isDynamic) return out;
+  start = '{{#' + index + '}}';
+  end = '{{/' + index + '}}';
   this.dataDump.push({
     out: out, isBlock: isBlock, parent: parent, track: track, key: longKey,
     bodyFn: bodyFn, active: tagData.active, helper: tagData.helper,
-    isEscaped: tagData.isEscaped, 
+    isEscaped: tagData.isEscaped, start$: start, end$: end,
   });
 
-  return '{{#' + index + '}}' + out + '{{/'+ index +'}}';
+  return start + out + end;
 }
 
 function resolveReferences(_this, dataDump, html, update) {
-  var start$ = '';
-  var end$ = '';
   var node = null;
   var renderFn = null;
 
   for (var n = dataDump.length, dump = {}; n--; ) { // must revers
     dump = dataDump.pop();
-    start$ = '{{#' + n + '}}';
-    end$ = '{{/' + n + '}}';
-    node = findNode(html, start$);
+    node = findNode(html, dump.start$);
     renderFn = !node ? null : node.ownerElement ?
       attributeFn : !dump.isBlock ?
       inlineFn :
       blockFn;
-    renderFn && renderFn(_this, node, start$, end$, dump, dataDump, update);
+    renderFn &&
+      renderFn(_this, node, dump.start$, dump.end$, dump, dataDump, update);
   }
   return html;
 }

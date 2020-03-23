@@ -349,7 +349,7 @@ function cleanText(text, obj) {
 }
 
 function getActiveState(text) {
-  return text.charAt(1) === '%' ? 2 : text.charAt(0) === '%' ? 1 : 0;
+  return text.lastIndexOf('%') + 1;
 }
 
 function splitVars(text, out) {
