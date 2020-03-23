@@ -6,75 +6,67 @@
   } else { root.VOM = factory(root) }
 }(this, function(window, undefined) { 'use strict';
 
+var pathSplit = /\.|\//;
+var NODES = []; // node maps for fast access
+var idCounter = 0; // item id counter (if items have no own id)
+
 var VOM = function(model, options) {
-    this.options = {
-      parentCheck: false,
-      idProperty: 'id',
-      subscribe: function() {},
-      enrichModelCallback: function() {},
-      preRecursionCallback: function() {},
-      moveCallback: function() {},
-      listeners: [],
-      forceEnhance: false,
-      childNodes: 'childNodes',
-      throwErrors: false
-    };
-    this.model = model || [];
+  this.options = {
+    parentCheck: false,
+    idProperty: 'id',
+    subscribe: function() {},
+    enrichModelCallback: function() {},
+    preRecursionCallback: function() {},
+    moveCallback: function() {},
+    listeners: [],
+    forceEnhance: false,
+    childNodes: 'childNodes',
+    throwErrors: false
+  };
+  this.model = model || [];
 
-    init(this, options || {});
-  },
-  init = function(_this, options) {
-    var rootItem = {},
-      _options = _this.options;
+  init(this, options || {});
+};
+var init = function(_this, options) {
+  var rootItem = {};
+  var _options = _this.options;
+  var fn = function(key) { _options[key] = options[key] };
 
-    NODES.push({}); // new access map for current instance
-    reinforceProperty(_this, 'id', NODES.length - 1);
+  NODES.push({}); // new access map for current instance
+  reinforceProperty(_this, 'id', NODES.length - 1);
 
-    for (var option in options) { // extend options
-      _options[option] = options[option];
-    }
-    _options.listeners = [];
-    for (var n = (options.listeners || []).length; n--; ) {
-      if (!options.listeners[n]) continue;
-      _options.listeners[n] = options.listeners[n].split(pathSplit);
-    }
-    if (_this.model.constructor !== Array) {
-      _this.model = [_this.model];
-      _this.standalone = true;
-    }
-    rootItem[_options.childNodes] = _this.model;
-    if (!_this.standalone) {
-      reinforceProperty(_this.model, 'root', rootItem);
-    }
-    enrichModel(_this, _this.model);
-  },
-  pathSplit = /\.|\//,
-  NODES = [], // node maps for fast access
-  idCounter = 0; // item id counter (if items have no own id)
+  for (var option in options) fn(option);
+  _options.listeners = [];
+  for (var n = (options.listeners || []).length; n--; ) {
+    if (!options.listeners[n]) continue;
+    _options.listeners[n] = options.listeners[n].split(pathSplit);
+  }
+  if (_this.model.constructor !== Array) {
+    _this.model = [_this.model];
+    _this.standalone = true;
+  }
+  rootItem[_options.childNodes] = _this.model;
+  if (!_this.standalone) {
+    reinforceProperty(_this.model, 'root', rootItem);
+  }
+  enrichModel(_this, _this.model);
+};
 
 VOM.prototype = {
   getElementById: function(id) {
     return NODES[this.id][id];
   },
   getElementsByProperty: function(property, value) {
-    var result = [],
-      isFn = typeof value === 'function',
-      hasValue = undefined !== value,
-      hasProperty = undefined !== property,
-      keys = [],
-      propValue = null,
-      node = NODES[this.id];
+    var result = [];
+    var isFn = typeof value === 'function';
+    var hasValue = undefined !== value;
+    var hasProperty = undefined !== property;
+    var keys = [];
+    var node = NODES[this.id];
 
-    for (var id in node) {
-      propValue = undefined !== node[id][property] ?
-        node[id][property] : crawlObject(node[id], (keys[0] ?
-        keys : (keys = hasProperty && property.split(pathSplit))));
-      if ((hasValue && propValue === value || (isFn && value(propValue))) ||
-          (!hasValue && undefined !== propValue) ||
-          (!hasValue && !hasProperty)) {
-        result.push(node[id]);
-      }
-    }
+    for (var id in node) findProperty(
+      node, id, property, value, result, isFn, hasValue, hasProperty, keys
+    );
     return result;
   },
   appendChild: function(item, parent) {
@@ -95,8 +87,8 @@ VOM.prototype = {
       'insertAfter', sibling);
   },
   replaceChild: function(newItem, item) {
-    var index = item.index,
-      parentNode = item.parentNode;
+    var index = item.index;
+    var parentNode = item.parentNode;
 
     newItem !== item && removeChild(this, item);
     moveItem(this, newItem, parentNode, index, 'replaceChild', item);
@@ -139,6 +131,18 @@ VOM.getElementById = function(id) {
 };
 
 return VOM;
+
+function findProperty(node, id, prop, val, result, isFn, hasVal, hasProp, keys) {
+  var propValue = undefined !== node[id][prop] ?
+    node[id][prop] : crawlObject(node[id], (keys[0] ?
+    keys : (keys = hasProp && prop.split(pathSplit))));
+
+  if ((hasVal && propValue === val || (isFn && val(propValue))) ||
+      (!hasVal && undefined !== propValue) ||
+      (!hasVal && !hasProp)) {
+    result.push(node[id]);
+  }
+}
 
 function crawlObject(data, keys) { // faster than while
   for (var n = 0, m = keys.length; n < m; n++) {
@@ -216,11 +220,11 @@ function parentCheck(item, parent, options) {
 };
 
 function enrichModel(_this, model, parent, type, sibling) {
-  var options = _this.options,
-    isNew = false,
-    hasOwnId = true,
-    idProperty = options.idProperty,
-    item = {};
+  var options = _this.options;
+  var isNew = false;
+  var hasOwnId = true;
+  var idProperty = options.idProperty;
+  var item = {};
 
   for (var n = 0, l = model.length; n < l; n++) {
     item = model[n];
@@ -264,13 +268,27 @@ function addProperty(_this, property, item, path, readonly) {
   return defineProperty(_this, property, item, cache, !readonly, path);
 }
 
+function goDeep(_this, item, deepModel, model, restPos, listener, path) {
+  var deepListener = [];
+
+  if (item === 'childNodes') return; // __index, parentNode
+  if (restPos === listener.length) {
+    addProperty(_this, item, { current: deepModel, root: model },
+      path.replace('*', item));
+  } else {
+    deepListener = listener.slice(restPos);
+    enhanceModel(_this, model, [listener.slice(restPos)],
+      path.split('*')[0] + item + '.', crawlObject(deepModel[item],
+        deepListener.slice(0, deepListener.length - 1)));
+  }
+}
+
 function enhanceModel(_this, model, listeners, recPath, recModel) {
-  var listener = [],
-    wildcardPos = 0,
-    restPos = 0,
-    path = '',
-    deepModel = {},
-    deepListener = [];
+  var listener = [];
+  var wildcardPos = 0;
+  var restPos = 0;
+  var path = '';
+  var deepModel = {};
 
   for (var n = listeners.length; n--; ) {
     listener = listeners[n]; // array of strings
@@ -280,19 +298,9 @@ function enhanceModel(_this, model, listeners, recPath, recModel) {
 
     if (wildcardPos !== -1) {
       restPos = wildcardPos + 1;
-
-      for (var item in deepModel) {
-        if (item === 'childNodes') continue; // __index, parentNode
-        if (restPos === listener.length) {
-          addProperty(_this, item, { current: deepModel, root: model },
-            path.replace('*', item));
-        } else {
-          deepListener = listener.slice(restPos);
-          enhanceModel(_this, model, [listener.slice(restPos)],
-            path.split('*')[0] + item + '.', crawlObject(deepModel[item],
-              deepListener.slice(0, deepListener.length - 1)));
-        }
-      }
+      for (var item in deepModel) goDeep(
+        _this, item, deepModel, model, restPos, listener, path
+      );
     } else {
       deepModel = listener.length !== 1 ?
         crawlObject(recModel || model, listener.slice(0, -1)) : model;
