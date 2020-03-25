@@ -25,9 +25,9 @@ var VOM = function(model, options) {
   };
   this.model = model || [];
 
-  init(this, options || {});
+  init(this, options || {}, this.model);
 };
-var init = function(_this, options) {
+var init = function(_this, options, model) {
   var rootItem = {};
   var _options = _this.options;
   var fn = function(key) { _options[key] = options[key] };
@@ -41,15 +41,15 @@ var init = function(_this, options) {
     if (!options.listeners[n]) continue;
     _options.listeners[n] = options.listeners[n].split(pathSplit);
   }
-  if (_this.model.constructor !== Array) {
-    _this.model = [_this.model];
+  if (model.constructor !== Array) {
+    _this.model = model = [model];
     _this.standalone = true;
   }
-  rootItem[_options.childNodes] = _this.model;
+  rootItem[_options.childNodes] = model;
   if (!_this.standalone) {
-    reinforceProperty(_this.model, 'root', rootItem);
+    reinforceProperty(model, 'root', rootItem);
   }
-  enrichModel(_this, _this.model);
+  enrichModel(_this, model);
 };
 
 VOM.prototype = {
@@ -269,47 +269,34 @@ function addProperty(_this, property, item, path, readonly) {
   return defineProperty(_this, property, item, cache, !readonly, path);
 }
 
-function goDeep(_this, item, deepModel, model, restPos, listener, path) {
-  var deepListener = [];
-
-  if (item === 'childNodes') return; // __index, parentNode
-  if (restPos === listener.length) {
-    addProperty(_this, item, { current: deepModel, root: model },
-      path.replace('*', item));
-  } else {
-    deepListener = listener.slice(restPos);
-    enhanceModel(_this, model, [listener.slice(restPos)],
-      path.split('*')[0] + item + '.', crawlObject(deepModel[item],
-        deepListener.slice(0, deepListener.length - 1)));
-  }
+function enhanceModel(_this, model, listeners) {
+  for (var n = listeners.length; n--; ) detect(_this, model, listeners[n], []);
 }
 
-function enhanceModel(_this, model, listeners, recPath, recModel) {
-  var listener = [];
-  var wildcardPos = 0;
-  var restPos = 0;
-  var path = '';
-  var deepModel = {};
+function detect(_this, model, listeners, path, idx, _key, _parent) {
+  var key = '';
+  var root = model;
+  var parent = model;
+  var modelPart = model;
 
-  for (var n = listeners.length; n--; ) {
-    listener = listeners[n]; // array of strings
-    wildcardPos = listener.indexOf('*');
-    path = (recPath || '') + listener.join('.');
-    deepModel = recModel || crawlObject(model, listener);
-
-    if (wildcardPos !== -1) {
-      restPos = wildcardPos + 1;
-      for (var item in deepModel) goDeep(
-        _this, item, deepModel, model, restPos, listener, path
-      );
-    } else {
-      deepModel = listener.length !== 1 ?
-        crawlObject(recModel || model, listener.slice(0, -1)) : model;
-      addProperty(_this, listener[listener.length - 1],
-        { current: recModel ? recModel : deepModel, root: model }, path);
+  for (var n = idx || 0, l = listeners.length; n < l; n++) {
+    key = listeners[n];
+    modelPart = parent;
+    if (key === 'childNodes') return; // __index, parentNode
+    if (key === '*') {
+      for (var m in parent) {
+        detect(listeners, parent[m], path.concat(m), n + 1, m, parent);
+      }
+      return;
     }
+    path.push(key || _key);
+    parent = parent[key];
   }
-  return model;
+
+  addProperty(_this, key || _key || '', {
+    current: modelPart[key] !== undefined ? modelPart : _parent || modelPart,
+    root: root
+  }, path.join('.'));
 }
 
 function reinforceProperty(model, item, value, writeable, enumable) {

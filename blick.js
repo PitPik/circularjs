@@ -138,6 +138,7 @@ function renderHook(out, tagData, model, isBlock, track, key, parent, bodyFn) {
   var isDynamic = !!key && doScan && !!this.options.isDynamic(parent, key);
   var start = '';
   var end = '';
+  var noCache = tagData.helper === 'each' || tagData.active > 2;
 
   if (!isDynamic) return out;
   start = '{{#' + index + '}}';
@@ -145,7 +146,7 @@ function renderHook(out, tagData, model, isBlock, track, key, parent, bodyFn) {
   this.dataDump.push({
     out: out, isBlock: isBlock, parent: parent, track: track, key: key,
     bodyFn: bodyFn, active: tagData.active, helper: tagData.helper,
-    isEscaped: tagData.isEscaped, start$: start, end$: end,
+    isEscaped: tagData.isEscaped, start$: start, end$: end, noCache: noCache,
   });
 
   return start + out + end;
@@ -235,7 +236,7 @@ function blockFn(_this, node, start$, end$, dump, dataDump, update) {
 
   _this.options.registerProperty(
     replaceBlock(_this, node, findEndNode(node, end$),
-      dump.bodyFn, dump.track, dump.out, dataDump, update),
+      dump.bodyFn, dump.track, dump.out, dataDump, update, dump.noCache),
     dump.key,
     dump.parent,
     dump.active,
@@ -245,15 +246,14 @@ function blockFn(_this, node, start$, end$, dump, dataDump, update) {
 }
 
 function replaceBlock(
-  _this, firstNode, lastNode, bodyFn, track, out, dataDump, update
+  _this, firstNode, lastNode, bodyFn, track, out, dataDump, update, noCache
 ) {
   var wasEverRendered = [];
   var fnIdx = track.fnIdx;
   var trackDF = [];
 
   trackDF[fnIdx] = document.createDocumentFragment();
-  wasEverRendered[fnIdx] = out.length > 0;
-
+  wasEverRendered[fnIdx] = !noCache && out.length > 0;
   return function updateBlock(data) {
     var outContainer = [];
     var body = bodyFn(); // need for track.fnIdx
@@ -263,9 +263,10 @@ function replaceBlock(
 
     fnIdx = track.fnIdx;
     while ((node = firstNode.nextSibling) && node !== lastNode) {
-      trackDF[prevFnIdx].appendChild(node);
+      noCache ? node.parentNode.removeChild(node) :
+        trackDF[prevFnIdx].appendChild(node);
     }
-    if (!wasEverRendered[fnIdx]) {
+    if (!wasEverRendered[fnIdx] || noCache) {
       trackDF[fnIdx] = trackDF[fnIdx] || document.createDocumentFragment();
       html = resolveReferences(_this, dataDump, saveWrapHtml(body), update);
       while (node = html.childNodes[0]) {

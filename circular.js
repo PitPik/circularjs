@@ -410,7 +410,12 @@ function getVOMInstance(data) {
       data.template && changeItem(this, property, item, value, oldValue, sibling, data);
       inst[name$] &&  !intern && inst[name$](property, item, value, oldValue);
       inst[name$$] && inst[name$$](property, item, value, oldValue, intern);
-      !intern && data.crInstance.publish(data.crInstance.id, inst['__cr-id'], property, value);
+      if (intern) return;
+      if (item.parentNode === undefined && item.childNodes === undefined) {
+        data.crInstance.publish(data.crInstance.id, inst['__cr-id'], property, value);
+      } else if (item['cr-id']) {
+        data.crInstance.publish(data.crInstance.id, item['cr-id'], property, value);
+      }
     },
   });
 }
@@ -544,7 +549,7 @@ function registerBlickProperty(fn, key, parent, active, collector) {
   var blickItem = collector[id] = collector[id] || {};
 
   blickItem[key] = blickItem[key] || [];
-  blickItem[key].push({ fn: fn, forceUpdate: active === 2, components: null });
+  blickItem[key].push({ fn: fn, forceUpdate: active > 1, components: null });
 }
 
 function registerEventsForBlickItem(data, item, element, eventName, fnName) {
