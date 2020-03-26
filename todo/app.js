@@ -1,5 +1,5 @@
 // Full spec-compliant TodoMVC with localStorage persistence
-// and hash-based routing in ~80 effective lines of JavaScript.
+// and hash-based routing in ~76 effective lines of JavaScript.
 require(['circular'], ({ Component, Toolbox, instance: crI }) => {
 
 const ENTER_KEY = 13;
@@ -12,20 +12,17 @@ const storage = Toolbox.storageHelper;
 Component({
   selector: 'body',
   template: document.body.innerHTML,
-  subscribe$: {
-    this: ['*'],
-    list: ['*'],
-  },
+  subscribe$: { this: ['*'], list: ['*'] },
 }, class TodoApp {
-  filter = 'all';
-  left = 0;
-  plural = false;
-  all = false;
-  none = false;
-  hide = true;
-  list = storage.fetch(STORAGE_KEY) || [];
-
   constructor() {
+    this.filter = 'all';
+    this.left = 0;
+    this.plural = false;
+    this.all = false;
+    this.none = false;
+    this.hide = true;
+    this.list = storage.fetch(STORAGE_KEY) || [];
+  
     document.body.innerHTML = '';
   }
 
