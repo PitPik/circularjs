@@ -277,11 +277,9 @@ function enhanceModel(_this, model, listeners) {
 function detect(_this, root, model, listeners, path, idx, _key, _parent) {
   var key = '';
   var parent = model;
-  var modelPart = model;
 
   for (var n = idx || 0, l = listeners.length; n < l; n++) {
     key = listeners[n];
-    modelPart = parent;
     if (key === 'childNodes') return; // __index, parentNode
     if (key === '*') {
       for (var m in parent) detect(
@@ -289,15 +287,15 @@ function detect(_this, root, model, listeners, path, idx, _key, _parent) {
       );
       return;
     }
-    path.push(key || _key);
-    parent = parent[key];
+    path.push(key);
+    if (n < l - 1) parent = parent[key];
     _parent = _key = null;
   }
 
-  addProperty(
+  (_parent || parent).hasOwnProperty(_key || key) && addProperty(
     _this,
     _key || key || '',
-    { current: _parent || modelPart, root: root },
+    { current: _parent || parent, root: root },
     path.join('.')
   );
 }
