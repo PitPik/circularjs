@@ -1,13 +1,11 @@
 // Full spec-compliant TodoMVC with localStorage persistence
 // and hash-based routing in ~76 effective lines of JavaScript.
-require(['circular'], ({ Module, Toolbox }) => {
+require(['circular'], ({ Module, Toolbox: { storageHelper: storage, lazy } }) => {
 
 const ENTER_KEY = 13;
 const ESCAPE_KEY = 27;
 const STORAGE_KEY = 'todos-circularjs-1.3.0';
 const get = 'getElementsByProperty';
-
-const storage = Toolbox.storageHelper;
 
 Module({
   selector: 'body',
@@ -63,7 +61,7 @@ Module({
   }
 
   list$$(prop, item) {
-    prop === 'text' ? item.editable = '' : Toolbox.lazy(this.updateUI.bind(this), this.list);
+    prop === 'text' ? item.editable = '' : lazy(this.updateUI.bind(this), this.list);
     if (prop !== 'editable') storage.saveLazy(this.list, STORAGE_KEY);
   }
 
