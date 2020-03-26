@@ -270,12 +270,12 @@ function addProperty(_this, property, item, path, readonly) {
 }
 
 function enhanceModel(_this, model, listeners) {
-  for (var n = listeners.length; n--; ) detect(_this, model, listeners[n], []);
+  for (var n = listeners.length; n--; )
+    detect(_this, model, model, listeners[n], []);
 }
 
-function detect(_this, model, listeners, path, idx, _key, _parent) {
+function detect(_this, root, model, listeners, path, idx, _key, _parent) {
   var key = '';
-  var root = model;
   var parent = model;
   var modelPart = model;
 
@@ -284,19 +284,22 @@ function detect(_this, model, listeners, path, idx, _key, _parent) {
     modelPart = parent;
     if (key === 'childNodes') return; // __index, parentNode
     if (key === '*') {
-      for (var m in parent) {
-        detect(listeners, parent[m], path.concat(m), n + 1, m, parent);
-      }
+      for (var m in parent) detect(
+        _this, root, parent[m], listeners, path.concat(m), n + 1, m, parent
+      );
       return;
     }
     path.push(key || _key);
     parent = parent[key];
+    _parent = _key = null;
   }
 
-  addProperty(_this, key || _key || '', {
-    current: modelPart[key] !== undefined ? modelPart : _parent || modelPart,
-    root: root
-  }, path.join('.'));
+  addProperty(
+    _this,
+    _key || key || '',
+    { current: _parent || modelPart, root: root },
+    path.join('.')
+  );
 }
 
 function reinforceProperty(model, item, value, writeable, enumable) {
