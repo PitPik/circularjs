@@ -219,6 +219,16 @@ function parentCheck(item, parent, options) {
   }
 };
 
+function reinforceProperty(model, item, value, writeable, enumable) {
+  delete model[item]; // in case it is set already...
+  return Object.defineProperty(model, item, {
+    enumerable: !!enumable,
+    configurable: false,
+    writable: writeable === undefined ? true : !!writeable,
+    value: value
+  });
+}
+
 function enrichModel(_this, model, parent, type, sibling) {
   var options = _this.options;
   var isNew = false;
@@ -260,15 +270,6 @@ function enrichModel(_this, model, parent, type, sibling) {
   return model;
 }
 
-function addProperty(_this, property, item, path, readonly) {
-  var cache = {};
-
-  if (!_this.options.forceEnhance &&
-    !item.current.hasOwnProperty(property)) return;
-  cache[property] = item.current[property];
-  return defineProperty(_this, property, item, cache, !readonly, path);
-}
-
 function enhanceModel(_this, model, listeners) {
   for (var n = listeners.length; n--; )
     detect(_this, model, model, listeners[n], []);
@@ -300,14 +301,13 @@ function detect(_this, root, model, listeners, path, idx, _key, _parent) {
   );
 }
 
-function reinforceProperty(model, item, value, writeable, enumable) {
-  delete model[item]; // in case it is set already...
-  return Object.defineProperty(model, item, {
-    enumerable: !!enumable,
-    configurable: false,
-    writable: writeable === undefined ? true : !!writeable,
-    value: value
-  });
+function addProperty(_this, property, item, path, readonly) {
+  var cache = {};
+
+  if (!_this.options.forceEnhance &&
+    !item.current.hasOwnProperty(property)) return;
+  cache[property] = item.current[property];
+  return defineProperty(_this, property, item, cache, !readonly, path);
 }
 
 function defineProperty(_this, prop, obj, cache, enumable, path) {
