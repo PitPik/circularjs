@@ -310,6 +310,7 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
         collapseInlineTagWhitespace: true,
         collapseWhitespace: true,
         conservativeCollapse: true,
+        ignoreCustomFragments: [/{{[\s\S]*?}}/],
       }
     }).then(min => {
       options.echo && console.log(`[Compressing] ${htmlData.path}`);
