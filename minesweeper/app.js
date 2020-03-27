@@ -9,15 +9,17 @@ Module({
     board: ['isProcessed', 'mark', 'surrounding', 'isMine']
   },
 }, class Minesweeper {
-  counter = 0;
-  time = 0;
-  class = '';
-  interval;
-  won;
-
-  board = [];
-  rowCol = [];
-  mines = 0;
+  constructor() {
+    this.counter = 0;
+    this.time = 0;
+    this.class = '';
+    this.interval;
+    this.won = false;
+  
+    this.board = [];
+    this.rowCol = [];
+    this.mines = 0;
+  }
 
   onInit(element, crInst, { views: { levels }}) {
     this.reset(levels.value.split(','));
