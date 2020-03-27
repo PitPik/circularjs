@@ -317,7 +317,7 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
 
       return 'define("' + htmlData.key + '",[],function(){return\'' +
         min.replace(/\'/g, "\\'").replace(/\n/g, "\\n") + '\'});';
-    })));
+    }).catch(e => { console.error(e); throw new Error('Error parsing HTML'); })));
 
     css.length && promises.push(Promise.resolve('/* CSS */'));
 
@@ -331,7 +331,7 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
   
       return 'define("' + cssData.key + '",[],function(){return\'' +
         min.replace(/\'/g, "\\'") + '\'});'
-    })));
+    }).catch(e => { console.error(e); throw new Error('Error parsing CSS'); })));
 
     promises.push(Promise.resolve('/* javaScript */'));
 
@@ -346,6 +346,6 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
           console.log('\n' + options.output + ' successfully saved!');
         }
       );
-    });
+    }).catch(e => { console.error(e); throw new Error('Error parsing JS'); });
   });
 });
