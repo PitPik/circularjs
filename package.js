@@ -15,6 +15,7 @@
  * --cfg | -c: path to amd configuration file (relative to --path)
  * --output | -o: path (relative to --path) to output file
  * --update | -u: update the lookahedMap of configuration defined by --cfg
+ * --echo | -e: more details about compressed files
  */
 
 const fs = require('fs');
@@ -162,12 +163,12 @@ const writeMinJSFile = (data, outputName, type) => {
 
 const params = process.argv.slice(2);
 const options = {
-  path: '',
-  cfg: '',
-  output: 'output.min.js',
+  path: './',
+  cfg: 'js/amd.cfg.js',
+  output: 'js/all.min.js',
   updateLookahead: false,
   help: false,
-  echo: false,
+  echo: true,
 };
 for (let j = 0; j < params.length; j++) {
   if (params[j] === '--path' || params[j] === '-p') {
@@ -186,7 +187,7 @@ for (let j = 0; j < params.length; j++) {
     options.help = true;
   }
   if (params[j] === '--echo' || params[j] === '-e') {
-    options.echo = true;
+    options.echo = params[j + 1] === 'false' ? false : true;
   }
 }
 if (!params.length || options.help) {
