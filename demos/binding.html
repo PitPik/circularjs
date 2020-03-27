@@ -3,13 +3,11 @@
   <p>Focus the input field and type something: The paragraph before gets filled with the data from the input. Click on 'clear' to delete the value. Both, the paragraph and the input field get empty.</p>
   <p>This demo also shows a modern way of working with CircularJS. It shows how to make reusable and extendable components.</p>
     <input-test class="demo binding">
-      <div cr-template>
-        <p>Text: {{%value}}</p>
-        <input placeholder="type some text" cr-event="input: input" value="{{%value}}">
-        <button cr-event="click: clear" disabled="{{%value}}">
-          {{#if %value}}Clear{{else}}Please write first{{/if}}
-        </button>
-      </div>
+      <p>Text: {{%value}}</p>
+      <input placeholder="type some text" cr-event="input: input" value="{{%value}}">
+      <button cr-event="click: clear" disabled="{{%value}}">
+        {{#if %value}}Clear{{else}}Please write first{{/if}}
+      </button>
     </input-test>
   <pre><code class="language-javascript code">ss</code></pre>
   The HTML:
