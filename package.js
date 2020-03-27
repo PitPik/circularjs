@@ -158,7 +158,7 @@ const writeMinJSFile = (data, outputName, type) => {
       return out;
     });
     return min;
-  });
+  }).catch(e => console.error(e));
 }
 
 const params = process.argv.slice(2);
@@ -339,6 +339,7 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
     Promise.all(promises).then(data => {
       data.push(minJS);
       textOut = data.join('\n');
+      console.log(`[*Packaging*] ${options.output}`);
       fs.writeFile(
         options.output,
         textOut.replace(/\\n\s+/g, "\\n"),
