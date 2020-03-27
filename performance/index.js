@@ -8,27 +8,25 @@ return Component({
     this: ['levelRaster', 'levelSpeed', 'refresh', 'raster'],
   }
 }, class Speed {
-  levelRaster = 10;
-  levelSpeed = 400;
-  refresh;
-  raster;
-  model = initModel(10, []);
-
   constructor() {
+    this.levelRaster = 10;
+    this.levelSpeed = 400;
+    this.refresh = null;
+    this.raster = null;
+    this.model = initModel(10, []);
+  
     document.body.firstElementChild.innerHTML = '';
   }
 
   onInit() {
-    this.levelRaster = 10;
-    this.levelSpeed = 400;
+    this.levelRaster = this.levelRaster;
   }
 
   this$(propName, item, value) {
     if (propName === 'levelRaster') {
       this.model = initModel(value, []);
       this.levelSpeed = this.levelSpeed;
-      this.raster = 
-        value + ' x ' + value + ' = ' + (value * value) + ' x 2 items';
+      this.raster = value + ' x ' + value + ' = ' + (value * value) + ' x 2 items';
       update(this.model, this.levelSpeed);
     } else if (propName === 'levelSpeed') {
       this.refresh = 
@@ -60,19 +58,17 @@ function initModel(raster, data) {
 }
 
 function update(model, levelSpeed) {
-  clearTimeout(model._timeout);
-  model._timeout = setTimeout(function render() {
-    // window.requestAnimationFrame(function() {
-      for (var n = 0, m = model.length, newData = 0; n < m; n++) {
-        for (var x = 0, y = model[n].childNodes.length; x < y; x++) {
-          newData = Math.round(Math.random() * 1000) % 100;
-          
-          model[n].childNodes[x].value = newData;
-          model[n].childNodes[x].max = newData > 90 ? 'max' : '';
-        }
+  clearTimeout(update.timeout);
+  update.timeout = setTimeout(function render() {
+    for (var n = 0, m = model.length, newData = 0; n < m; n++) {
+      for (var x = 0, y = model[n].childNodes.length; x < y; x++) {
+        newData = Math.round(Math.random() * 1000) % 100;
+        
+        model[n].childNodes[x].value = newData;
+        model[n].childNodes[x].max = newData > 90 ? 'max' : '';
       }
-      update(model, levelSpeed);
-    // })
+    }
+    update(model, levelSpeed);
   }, levelSpeed);
 }
 
