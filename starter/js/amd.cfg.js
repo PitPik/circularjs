@@ -7,6 +7,6 @@ require.config({
     'app-starter.component': 'components/app-starter/app-starter.component',
     '!app-starter.component.html': 'components/app-starter/app-starter.component.html',
     '!app-starter.component.css': 'components/app-starter/app-starter.component.css',
-    'test.component': 'components/test/test.component',
+    'demo.component': 'components/demo/demo.component',
   }
 });

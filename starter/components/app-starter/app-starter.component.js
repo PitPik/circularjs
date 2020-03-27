@@ -2,7 +2,7 @@ require([
   'circular',
   '!app-starter.component.html',
   '!app-starter.component.css',
-  'test.component', // only for demo
+  'demo.component', // only for demo
 ], ({ Module }, template, styles) => 
 Module({
   selector: 'app-starter',
