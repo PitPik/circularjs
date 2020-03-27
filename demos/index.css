@@ -64,7 +64,7 @@ section {
 
 demo-nav {
 	display: block;
-  margin: 0 -1em;
+  margin: -0.9em -1em 0;
 	border-bottom: 1px solid #aaa;
 	padding: 0.75em;
 }
