@@ -1,4 +1,5 @@
 app-starter {
-  font: normal normal normal .90em/1.6em  "Trebuchet MS", Arial, Helvetica, sans-serif;
+  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+  font-size: .90em/1.6em  ;
   color: #333;
 }
