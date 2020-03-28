@@ -59,3 +59,27 @@ my-project
   index.html
   package.js
 ```
+
+To make mor eclear that app-starter.component is the starting point of a SPA, you might put those files to the root of your folder.
+
+```
+my-project
+  ├─ components
+     ...
+  ├─ plugins
+      ...
+  ├─ services
+      ...
+  ├─ js
+      amd.cfg.js
+      circular.min.js
+  ├─ css
+      ...
+  app.module.css
+  app.module.html
+  app.module.js
+  index.html
+  package.js
+```
+
+In CircularJS `Module`s and `Component`s are basically the same except that Modules don't need to be triggered to start. They will scan the DOM for an appropriate selector and initialise themselfs with the found Element.
