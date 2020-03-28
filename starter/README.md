@@ -1,4 +1,4 @@
-# Starte kit or, how to structure your projects
+# Starter kit or, how to structure your projects
 
 This demo should show how projects can be structured. The component `app-starter` can be used as a blue-print for new components.
 
