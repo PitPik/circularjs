@@ -141,11 +141,11 @@ function renderHook(out, tagData, model, isBlock, track, key, parent, bodyFn) {
   var start = '';
   var end = '';
   var noCache = tagData.helper === 'each' || tagData.active > 2;
-  var longKey = tagData.root.variable.path.join('.');
-
-  longKey += (longKey ? '.' : '') + tagData.root.variable.value;
+  var longKey = '';
 
   if (!isDynamic) return out;
+  longKey = tagData.root.variable.path.join('.');
+  longKey += (longKey ? '.' : '') + tagData.root.variable.value;
   start = '{{#' + index + '}}';
   end = '{{/' + index + '}}';
   this.dataDump.push({
