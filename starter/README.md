@@ -48,11 +48,14 @@ my-project
          app-starter.component.html
          app-starter.component.js
   ├─ plugins
+      ...
   ├─ services
+      ...
   ├─ js
       amd.cfg.js
       circular.min.js
   ├─ css
+      ...
   index.html
   package.js
 ```
