@@ -137,7 +137,6 @@ function renderHook(out, tagData, model, isBlock, track, key, parent, bodyFn) {
   var doScan = !!tagData.active || this.options.forceUpdate;
   var isDynamic = !!key && doScan && !!this.options.isDynamic(parent, key);
   var scope = model.scopes[0].scope || {};
-  var id = scope['__cr-id'] || scope['cr-id'];
   var start = '';
   var end = '';
   var noCache = tagData.helper === 'each' || tagData.active > 2;
@@ -149,8 +148,8 @@ function renderHook(out, tagData, model, isBlock, track, key, parent, bodyFn) {
   start = '{{#' + index + '}}';
   end = '{{/' + index + '}}';
   this.dataDump.push({
-    out: out, isBlock: isBlock, parent: parent, track: track, key: longKey,
-    bodyFn: bodyFn, active: tagData.active, helper: tagData.helper, id: id,
+    isBlock: isBlock, parent: parent, track: track, key: longKey, scope: scope,
+    bodyFn: bodyFn, active: tagData.active, helper: tagData.helper, out: out,
     isEscaped: tagData.isEscaped, start$: start, end$: end, noCache: noCache,
   });
 
@@ -206,7 +205,7 @@ function inlineFn(_this, node, start$, end$, dump, dataDump, update) {
 
   _this.options.registerProperty(replaceInline(node, node.previousSibling,
       findEndNode(node, end$), dump.isEscaped, update),
-    dump.key, dump.parent, dump.id, dump.active, _this.collector
+    dump.key, dump.parent, dump.scope, dump.id, dump.active, _this.collector
   );
   return node;
 }
@@ -244,6 +243,7 @@ function blockFn(_this, node, start$, end$, dump, dataDump, update) {
       dump.bodyFn, dump.track, dump.out, dataDump, update, dump.noCache),
     dump.key,
     dump.parent,
+    dump.scope,
     dump.id,
     dump.active,
     _this.collector
