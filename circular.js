@@ -544,8 +544,7 @@ function destroyCollector(collector, id, keep) {
   if (!keep) delete collector[id];
 }
 
-function registerBlickProperty(fn, key, parent, active, collector) {
-  var id = parent['__cr-id'] || parent['cr-id'];
+function registerBlickProperty(fn, key, parent, id, active, collector) {
   var blickItem = collector[id] = collector[id] || {};
 
   blickItem[key] = blickItem[key] || [];
