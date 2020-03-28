@@ -369,12 +369,21 @@ Returns the ```callback```.
 ### Circular.addRoute(data, trigger, hash)
 Circular routers use ```Circular.publish``` internally. So ```trigger``` is used just like in ```Circular.subscribe()```. With ```hash``` you can overwrite the global setting for the delimiter in the URL.
 
+The modern approach of using routes in front-end is in my oppinion an attempt to copy the concept of back-end routing to the front-end world. This concept is more complex than needed and comes with a huge responsibility.
+
+CircularJS thinks of routes in a simpler way: A URL change is an event like defined by javaScript itself. It shouldn't be more than that as it would just cover this simple approach with complex magic.
+
+You can "listen" to those events and act on them. Those events also get fead to a pubSub system.
+In the callback of your `Circular.addRoute()` listener you can make decissions to change your state-model for other components to react on those changes. This serves the same purpose in a simpler, more understandable way.
+
+
 Circular.removedRoute
 Circular.toggleRoute
 
 Circular.loadResource
 Circular.insertResources
 Circular.insertComponent
+
 #### renderModule(options)
 
 This is probably one of the most powerful methods in circularJS.
