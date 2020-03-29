@@ -12,6 +12,7 @@ CircularJS is a tiny, progressive **MV\* like framework** with its goal to help 
  - **VOM**: a fast and convenient object-model manager. Works like the DOM-API to abstract components from the DOM, also using pubsub for manipulation event handling. The heart of CircularJS.
  - **Schnauzer**: tiny an fast rendering engine (like Handlebars but smaller than Mustache) to reflect VOM models on the fly in combination with the internal **rendering module**. (Replaces Angular like ng-if, ng-class, etc.)
  - **blick**: a layer in between Schnauzer and VOM to keep templates dynamic and reactive so they can not only serve at initial rendering but also in the live cycle of components.
+ It is compareable to Amber's glimmer.js. Amber uses Handlebars to render templates, but Handlebars templates only render once, so glimmer.js kicks in to keep Handlebars templates reactive. Blick does the same as glimmer.js and Schnauzer is basically Handlebars. blick.js combines trackable data and its correspondent HTMLNodes for blasting fast updates.
  - **rendering module**: internal module syncing VOM model, using Schnauzer templates, with the DOM-model, including change-detection, so when models get updated, the DOM gets only updated (and not re-rendered; delta update supported).
  - **automatic event management**.
  - **automatic DOM-Element reference management**.
