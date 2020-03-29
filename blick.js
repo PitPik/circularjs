@@ -212,6 +212,7 @@ function inlineFn(_this, node, start$, end$, dump, dataDump, update) {
 
 function replaceInline(node, firstNode, lastNode, isEscaped, update) {
   var fragment = !isEscaped ? document.createDocumentFragment() : null;
+  var outContainer = [];
 
   return function updateInline(data) {
     var childNodes = [];
@@ -221,15 +222,16 @@ function replaceInline(node, firstNode, lastNode, isEscaped, update) {
       update && update(node);
       return [];
     }
+    outContainer = [];
     childNodes = saveWrapHtml(data + '').childNodes;
     while(lastNode.previousSibling !== firstNode) {
       lastNode.parentNode.removeChild(lastNode.previousSibling);
     }
     while (childNodes.length) {
-      fragment.appendChild(childNodes[0]);
+      outContainer.push(fragment.appendChild(childNodes[0]));
     }
     lastNode.parentNode.insertBefore(fragment, lastNode);
-    return [];
+    return outContainer;
   }
 }
 
