@@ -211,6 +211,8 @@ function inlineFn(_this, node, start$, end$, dump, dataDump, update) {
 }
 
 function replaceInline(node, firstNode, lastNode, isEscaped, update) {
+  var fragment = !isEscaped ? document.createDocumentFragment() : null;
+
   return function updateInline(data) {
     var childNodes = [];
 
@@ -223,9 +225,10 @@ function replaceInline(node, firstNode, lastNode, isEscaped, update) {
     while(lastNode.previousSibling !== firstNode) {
       lastNode.parentNode.removeChild(lastNode.previousSibling);
     }
-    for (var n = 0, l = childNodes.length; n < l; n++) {
-      lastNode.parentNode.insertBefore(childNodes[0], lastNode);
+    while (childNodes.length) {
+      fragment.appendChild(childNodes[0]);
     }
+    lastNode.parentNode.insertBefore(fragment, lastNode);
     return [];
   }
 }
@@ -260,6 +263,7 @@ function replaceBlock(
 
   trackDF[fnIdx] = document.createDocumentFragment();
   wasEverRendered[fnIdx] = !noCache && out.length > 0;
+
   return function updateBlock(data) {
     var outContainer = [];
     var body = bodyFn(); // need for track.fnIdx
