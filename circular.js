@@ -489,7 +489,7 @@ function initComponentsAndPlugins(element, defData, modelName, isChild, instance
   // components
   for (var key in componentsDefs) {
     if (what && componentsDefs[key][what][modelName]) {
-      [].slice.call($$(key, element)).forEach(function(elm) {
+      [].slice.call($$(key + ', [cr-name="' + key + '"]', element)).forEach(function(elm) {
         inst = components[key].init(elm, null, instance);
         inst && insts.push(inst);
       });
@@ -641,7 +641,8 @@ function installStyles(selector, options) {
 }
 
 function getInnerComponents(selectors, result, context, fn) {
-  var wishList = selectors.join(',');
+  var wishList = selectors.join(',') +
+    (selectors.length ? ', [cr-name="' + selectors.join('"], [cr-name="') + '"]': '');
   var elms = wishList ? [].slice.call($$(wishList, context || document)) : [];
 
   for (var n = elms.length, elm = {}; n--; ) {
@@ -655,7 +656,7 @@ function getInnerComponents(selectors, result, context, fn) {
   }
   for (var n = elms.length; n--; ) {
     result.push(elms[n]);
-    if (fn) fn(elms[n], elms[n].tagName.toLowerCase());
+    if (fn) fn(elms[n], elms[n].getAttribute('cr-name') || elms[n].tagName.toLowerCase());
   }
 
   return result;
