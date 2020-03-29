@@ -45,9 +45,7 @@ var Blick = function(template, options) {
       selected: setAttribute,
     },
     renderHook: renderHook,
-    isDynamic: function(obj, key) {
-      return obj ? (Object.getOwnPropertyDescriptor(obj, key) || {}).get : null;
-    }
+    isDynamic: function(obj, key) { return true; }
   };
   this.collector = {};
   this.schnauzer = {};

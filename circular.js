@@ -692,6 +692,9 @@ function getTemplate(template, defData, where, modelName) {
     partials: defData.partials || {},
     attributes: defData.attributes || {},
     registerProperty: registerBlickProperty,
+    isDynamic: function(obj, key) {
+      return obj ? (Object.getOwnPropertyDescriptor(obj, key) || {}).get : null;
+    }
   });
 }
 
