@@ -357,30 +357,18 @@ function injectNewModel(vom, model, newModel, deltaOnly) {
   while (model.length > newModel.length) vom.removeChild(model[model.length - 1]);
 }
 
-function setDeepObj(item, newItem, key) {
-  if (Object.getOwnPropertyDescriptor(item, key).get) {
-    for (var n in item[key]) {
-      if (!item[key][n]) continue;
-      item[key][n] = typeof newItem[key][n] === 'object' ?
-        setDeepObj(item[key], newItem[key], n) :
-        newItem[key][n];
-    }
-    return item[key];
-} else {
-    return newItem[key];
-  }
+function updateModelItemLoop(vom, item, newItem, key) {
+  if (key === 'childNodes') return;
+  item[key] = typeof item[key] === 'object' || isArray(item[key]) ?
+    updateModelItem(vom, item[key], newItem[key] || {}) : newItem[key];
 }
 
 function updateModelItem(vom, item, newItem) {
-  for (var key in newItem) {
-    if (key !== 'childNodes') {
-      item[key] = typeof item[key] === 'object' ?
-        setDeepObj(item, newItem, key, vom) : newItem[key];
-    }
-  }
+  for (var key in newItem) updateModelItemLoop(vom, item, newItem, key);
   if (newItem.childNodes) {
     injectNewModel(vom, item.childNodes, newItem.childNodes);
   }
+  return item;
 }
 
 function getVOMInstance(data) {
@@ -544,12 +532,12 @@ function destroyCollector(collector, id, keep) {
   if (!keep) delete collector[id];
 }
 
-function registerBlickProperty(fn, key, parent, scope, id, active, collector) {
-  var id = scope['__cr-id'] || scope['cr-id'];
+function registerBlickProperty(fn, key, path, parent, scope, root, active, collector) {
+  var id = root['__cr-id'] || root['cr-id'];
   var blickItem = collector[id] = collector[id] || {};
 
-  blickItem[key] = blickItem[key] || [];
-  blickItem[key].push({ fn: fn, forceUpdate: active > 1, components: null });
+  blickItem[path] = blickItem[path] || [];
+  blickItem[path].push({ fn: fn, forceUpdate: active > 1, components: null });
 }
 
 function registerEventsForBlickItem(data, item, element, eventName, fnName) {

@@ -101,6 +101,12 @@ function switchTags(_this, tags) {
 
 // ---- render data helpers
 
+function renderPath(path, variable) {
+  var _path = path.join('.');
+
+  return _path ? path + '.' + variable : variable;
+}
+
 function escapeHtml(string, _this, doEscape) {
   return doEscape && _this.options.escapeHTML ?
     String(string).replace(_this.entityRegExp, function(char) {
@@ -121,15 +127,16 @@ function createHelper(idx, key, len, value, parent) {
   };
 }
 
-function shiftScope(scopes, data, helpers, level, replace) {
-  data = { scope: data, helpers: helpers, level: level };
+function shiftScope(scopes, path, data, helpers, level, replace, key) {
+  replace ? path.splice(path.length - 2, 2, key, '') : path.push(key, '');
+  data = { scope: data, helpers: helpers, level: level, path: path };
   return replace ? (scopes[0] = data, scopes) : concatArrays(scopes, [data]);
 }
 
 function getScope(data, extra) {
   return {
     extra: extra,
-    scopes: [{ scope: data, helpers: {}, level: { '@root': data } }],
+    scopes: [{ scope: data, helpers: {}, level: { '@root': data }, path: [] }],
   };
 }
 
@@ -166,6 +173,9 @@ function getData(_this, model, tagData) {
     root.isString ? key : getDeepData(model.extra, variable));
   var type = value === undefined || value === null ? '' : helper ? 'helper' :
     partial ? 'partial' : value.constructor === Array ? 'array' : typeof value;
+  var path = model.scopes[0].path;
+
+  path.splice(path.length - 1, 1, renderPath(variable.path, variable.value));
 
   return { value: value, type: type };
 }
@@ -247,33 +257,39 @@ function renderEach(_this, data, model, tagData, bodyFns) {
     key = isArr ? n : _data[n];
     model.scopes = shiftScope(
       model.scopes,
+      model.scopes[0].path,
       data.value[key],
       createHelper(n, key, l, isArr ? _data[n] : data.value[key], data.value),
       pushAlias(tagData, tagData.root.variable, {}, key, data.value[key]),
-      !!n
+      !!n,
+      n
     );
     out += bodyFns[0].bodyFn(model);
   }
   model.scopes.shift();
+  model.scopes[0].path.pop();
   return out;
 }
 
 function renderWith(_this, data, model, tagData, bodyFns) {
   var variable = tagData.root.variable;
   var scope0 = model.scopes[0];
+  var value = variable.value;
   var level = cloneObject({'.': data.value, 'this': data.value}, scope0.level);
 
-  model.scopes = shiftScope(model.scopes, data.value, {
+  model.scopes = shiftScope(model.scopes, model.scopes[0].path, data.value, {
     '@parent': getDeepData(model.scopes[variable.parentDepth], variable, true),
-  }, pushAlias(tagData, variable, level, undefined, data.value), false);
-  return [bodyFns[0].bodyFn(model), model.scopes.shift()][0];
+  }, pushAlias(tagData, variable, level, undefined, data.value), false, value);
+  return [
+    bodyFns[0].bodyFn(model), model.scopes.shift(), model.scopes[0].path.pop()
+  ][0];
 }
 
 // ---- render blocks and inlines; delegations only
 
 function render(_this, model, tagData, isBlock, out, renderFn, bodyFns, track) {
   return _this.options.renderHook ? _this.options.renderHook.call(
-    _this, out, tagData, model, isBlock, track,
+    _this, out, tagData, model, isBlock, track, model.scopes[0].path.join('.'),
     tagData.root ? tagData.root.variable.value : '', model.scopes[0] &&
       getDeepData(model.scopes[0].scope, tagData.root.variable, true) || {},
     function() { return renderFn(_this, tagData, model,

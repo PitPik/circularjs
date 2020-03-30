@@ -65,16 +65,13 @@ var initBlick = function(_this, options, template) {
 };
 
 Blick.prototype = {
-  render: function(data, extra) {
-    return this.schnauzer.render(data, extra);
-  },
   renderHTML: function(data, extra) {
     return resolveReferences(
       this,
       this.schnauzer.dataDump,
       saveWrapHtml(this.schnauzer.render(data, extra))
     );
-  }
+  },
 };
 
 return Blick;
@@ -130,14 +127,14 @@ function findSatrtNode(node, start$) {
   return node;
 }
 
-function renderHook(out, tagData, model, isBlock, track, key, parent, bodyFn) {
+function renderHook(
+  out, tagData, model, isBlock, track, path, key, parent, bodyFn
+) {
   var index = this.dataDump.length;
   var doScan = !!tagData.active || this.options.forceUpdate;
   var isDynamic = !!key && doScan && !!this.options.isDynamic(parent, key);
-  var scope = model.scopes[0].scope || {};
   var start = '';
   var end = '';
-  var noCache = tagData.helper === 'each' || tagData.active > 2;
   var longKey = '';
 
   if (!isDynamic) return out;
@@ -146,9 +143,11 @@ function renderHook(out, tagData, model, isBlock, track, key, parent, bodyFn) {
   start = '{{#' + index + '}}';
   end = '{{/' + index + '}}';
   this.dataDump.push({
-    isBlock: isBlock, parent: parent, track: track, key: longKey, scope: scope,
-    bodyFn: bodyFn, active: tagData.active, helper: tagData.helper, out: out,
-    isEscaped: tagData.isEscaped, start$: start, end$: end, noCache: noCache,
+    isBlock: isBlock, track: track, bodyFn: bodyFn, active: tagData.active,
+    isEscaped: tagData.isEscaped, start$: start, end$: end, path: path,
+    noCache: tagData.helper === 'each' || tagData.active > 2,
+    root: model.scopes[model.scopes.length - 1].scope, helper: tagData.helper,
+    scope: model.scopes[0].scope || {}, parent: parent, key: longKey, out: out,
   });
 
   return start + out + end;
@@ -203,7 +202,8 @@ function inlineFn(_this, node, start$, end$, dump, dataDump, update) {
 
   _this.options.registerProperty(replaceInline(node, node.previousSibling,
       findEndNode(node, end$), dump.isEscaped, update),
-    dump.key, dump.parent, dump.scope, dump.id, dump.active, _this.collector
+    dump.key, dump.path, dump.parent, dump.scope,
+    dump.root, dump.active, _this.collector
   );
   return node;
 }
@@ -245,9 +245,10 @@ function blockFn(_this, node, start$, end$, dump, dataDump, update) {
     replaceBlock(_this, node, findEndNode(node, end$),
       dump.bodyFn, dump.track, dump.out, dataDump, update, dump.noCache),
     dump.key,
+    dump.path,
     dump.parent,
     dump.scope,
-    dump.id,
+    dump.root,
     dump.active,
     _this.collector
   );
