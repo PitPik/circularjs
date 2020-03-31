@@ -16,20 +16,17 @@ require(['circular', 'replacer'], function({ Module, Toolbox: { $ } }, replacer)
       menu: ['active'],
     },
   }, class DemoNav {
-    state = '';
-    menu = model;
-    cr;
-
     constructor(rootElement, crInst) {
+      this.state = '';
+      this.menu = model;
       this.cr = crInst;
+    }
+
+    onInit() {
       this.cr.addRoute({
         path: '(/:state)',
         callback: data => this.state = data.parameters.state || this.menu[0].action,
       }, true);
-    }
-
-    onInit() {
-      this.state = this.state; // triggers this$()
     }
 
     this$(propName, item, value, oldValue) {

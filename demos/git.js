@@ -4,10 +4,10 @@ define('app-git', ['circular', 'template-helpers', '!git.html'],
   template,
   helpers: helpers({}),
 }, class Git {
-  data = [];
-  apiURL = 'https://api.github.com/repos/PitPik/circularjs/commits?per_page=3';
-
   constructor() {
+    this.data = [];
+    this.apiURL = 'https://api.github.com/repos/PitPik/circularjs/commits?per_page=3';
+  
     ajax(this.apiURL, { dataType: 'json' }).then(data => this.data = data);
   }
 }));

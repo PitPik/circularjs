@@ -28,7 +28,9 @@ define('app-tree', ['circular', '!tree.html'],
     template,
     subscribe$: { tree: ['open'] },
   }, class Tree {
-    tree = [data];
+    constructor() {
+      this.tree = [data];
+    }
 
     tree$Intersept(vomInst, item) {
       item.open = item.open || false;

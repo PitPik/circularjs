@@ -4,7 +4,9 @@ define('app-binding', ['circular', '!binding.html'],
   template,
   subscribe$: { this: ['value'] },
 }, class Binding {
-  value = '';
+  constructor() {
+    this.value = '';
+  }
 
   input(e, elm) {
     this.value = elm.value;
