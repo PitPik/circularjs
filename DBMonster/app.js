@@ -36,12 +36,9 @@ require(['circular'], ({ Module }) => Module({
 }, class App {
   constructor() {
     this.data = ENV.generateData().toArray();
-    this.perfMonitor = perfMonitor;
+
     this._update = this.update.bind(this);
-  
-    this.perfMonitor.startFPSMonitor();
-    this.perfMonitor.startMemMonitor();
-    this.perfMonitor.initProfiler("render");
+    this.Monitoring = Monitoring;
 
     this.update();
   }
@@ -49,10 +46,7 @@ require(['circular'], ({ Module }) => Module({
   update() {
     setTimeout(this._update);
     
-    const data = ENV.generateData().toArray();
-
-    this.perfMonitor.startProfile("render");
-    this.data = data;
-    this.perfMonitor.endProfile("render");
+    this.data = ENV.generateData().toArray();
+    this.Monitoring.renderRate.ping();
   }
 }));
