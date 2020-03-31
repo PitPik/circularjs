@@ -266,8 +266,10 @@ function renderEach(_this, data, model, tagData, bodyFns) {
     );
     out += bodyFns[0].bodyFn(model);
   }
-  model.scopes.shift();
-  model.scopes[0].path.pop();
+  if (_data.length) {
+    model.scopes.shift();
+    model.scopes[0].path.pop();
+  }
   return out;
 }
 

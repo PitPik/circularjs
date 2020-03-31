@@ -357,7 +357,7 @@ function injectNewModel(vom, model, newModel, deltaOnly) {
   while (model.length > newModel.length) vom.removeChild(model[model.length - 1]);
 }
 
-function updateModelItemLoop(vom, item, newItem, key) {
+function updateModelItemLoop(vom, item, newItem, key) { // TODO: performance
   if (key === 'childNodes') return;
   item[key] = typeof item[key] === 'object' || isArray(item[key]) ?
     updateModelItem(vom, item[key], newItem[key] || {}) : newItem[key];
