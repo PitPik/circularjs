@@ -10,22 +10,21 @@ require(['circular'], ({ Component }) => {
       dots: ['text', 'hover'],
     }
   }, class Dots {
-    style = '';
-    sierpinski = {
-      elapsed: 0,
-      scale: 1,
-      seconds: 0,
-      start: null,
-    };
-    dots = buildDotsModel([], {
-      x: 0,
-      y: 0,
-      s: 1000,
-      seconds: 0,
-    }, targetSize);
-
     constructor(elm) {
       elm.innerHTML = '';
+      this.style = '';
+      this.sierpinski = {
+        elapsed: 0,
+        scale: 1,
+        seconds: 0,
+        start: null,
+      };
+      this.dots = buildDotsModel([], {
+        x: 0,
+        y: 0,
+        s: 1000,
+        seconds: 0,
+      }, targetSize);
     }
 
     dots$(propName, item, value) {
