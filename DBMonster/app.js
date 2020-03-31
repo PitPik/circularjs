@@ -47,12 +47,12 @@ require(['circular'], ({ Module }) => Module({
   }
 
   update() {
+    setTimeout(this._update);
+    
     const data = ENV.generateData().toArray();
 
     this.perfMonitor.startProfile("render");
     this.data = data;
     this.perfMonitor.endProfile("render");
-
-    setTimeout(this._update);
   }
 }));
