@@ -239,7 +239,7 @@
         if (performance.memory !== void 0) {
             (function () {
                 var update = function update() {
-                    data.addSample(Math.round(mem.usedJSHeapSize / (1024 * 1024)));
+                    data.addSample(performance.memory.usedJSHeapSize / (1024*1024));
                     w.addResult(data.calc());
                     setTimeout(update, 30);
                 };
@@ -247,7 +247,6 @@
                 var data = new Data();
                 var w = new MonitorWidget("Memory", "MB", 1 /* HideMin */ | 4 /* HideMean */);
                 container.appendChild(w.element);
-                var mem = performance.memory;
 
                 update();
             })();
