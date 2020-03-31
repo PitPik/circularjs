@@ -102,7 +102,7 @@ function switchTags(_this, tags) {
 // ---- render data helpers
 
 function renderPath(path, variable) {
-  var _path = path.join('.');
+  var _path = !path.length ? '' : path.length > 1 ? path.join('.') : path[0];
 
   return _path ? path + '.' + variable : variable;
 }
