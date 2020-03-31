@@ -116,7 +116,7 @@ return Object.defineProperties(Circular, {
 
 function initComponent(element, defData, Klass, plugData, parent) {
   var selector = defData.selector;
-  var component = components[selector];
+  var component = components[selector]; // TODO: Klass.name
   var items = {};
   var name = '';
   var instance = {};
@@ -594,6 +594,7 @@ function changeBlickItems(data, item, collector, id, property, value, oldValue) 
 
   if (!blickItems) return;
 
+  // TODO: for performance we need to link updated directly, no array...
   for (var n = blickItems.length, elm; n--; )
     changeBlickItem(blickItems[n], data, item, value, oldValue);
 }

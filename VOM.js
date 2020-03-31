@@ -331,8 +331,8 @@ function validate(prop, obj, oldValue, value, cache, _this) {
       error('ERROR: Cannot set property "' + prop + '" to "' +
         value + '"', _this.options);
   }
-  delete _this.type;
-  delete _this.sibling;
+  _this.type = null;
+  _this.sibling = null;
 }
 
 function error(txt, options) {
