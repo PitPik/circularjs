@@ -15,10 +15,13 @@ return Component({
     this.raster = null;
     this.model = initModel(10, []);
 
-    this.perfMonitor = perfMonitor;
-    this.perfMonitor.startFPSMonitor();
-    this.perfMonitor.startMemMonitor();
-    this.perfMonitor.initProfiler("render");
+    this._update = update.bind(this);
+
+    // this.perfMonitor = perfMonitor;
+    // this.perfMonitor.startFPSMonitor();
+    // this.perfMonitor.startMemMonitor();
+    // this.perfMonitor.initProfiler("render");
+
 
     document.body.firstElementChild.innerHTML = '';
   }
@@ -32,13 +35,15 @@ return Component({
       this.model = initModel(value, []);
       this.levelSpeed = this.levelSpeed;
       this.raster = value + ' x ' + value + ' = ' + (value * value) + ' x 2 items';
-      update(this.model, this.levelSpeed);
+      clearTimeout(update.timeout);
+      this._update();
     } else if (propName === 'levelSpeed') {
       this.refresh = 
         value + 'ms (' + (Math.round(1000 / value * 100) / 100) + '/s): ' +
         (Math.round(this.levelRaster * this.levelRaster *
         (1000 / value) * 2) + '').replace(/(\d+)(\d{3})$/g, "$1.$2") + ' updates/s';
-      update(this.model, this.levelSpeed);
+      clearTimeout(update.timeout);
+      this._update();
     }
   }
 
@@ -62,21 +67,20 @@ function initModel(raster, data) {
   return data;
 }
 
-function update(model, levelSpeed) {
-  clearTimeout(update.timeout);
-  update.timeout = setTimeout(function render(_this) {
-    _this.perfMonitor.startProfile("render");
-    for (var n = 0, m = model.length, newData = 0; n < m; n++) {
-      for (var x = 0, y = model[n].childNodes.length; x < y; x++) {
-        newData = Math.round(Math.random() * 1000) % 100;
-        
-        model[n].childNodes[x].value = newData;
-        model[n].childNodes[x].max = newData > 90 ? 'max' : '';
-      }
+function update() {
+  update.timeout = setTimeout(this._update, this.levelSpeed);
+
+  // this.perfMonitor.startProfile("render");
+  for (var n = 0, m = this.model.length, newData = 0; n < m; n++) {
+    for (var x = 0, y = this.model[n].childNodes.length, child = {}; x < y; x++) {
+      child = this.model[n].childNodes[x];
+      newData = Math.round(Math.random() * 1000) % 100;
+      
+      child.value = newData;
+      child.max = newData > 90 ? 'max' : '';
     }
-    _this.perfMonitor.endProfile("render");
-    update(model, levelSpeed);
-  }, levelSpeed, this);
+  }
+  // this.perfMonitor.endProfile("render");
 }
 
 });
