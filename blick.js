@@ -137,7 +137,7 @@ function renderHook(
   var end = '';
   var longKey = '';
 
-  if (!isDynamic) return out;
+  if (!isDynamic && tagData.active < 2) return out;
   longKey = tagData.root.variable.path.join('.');
   longKey += (longKey ? '.' : '') + tagData.root.variable.value;
   start = '{{#' + index + '}}';

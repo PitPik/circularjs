@@ -358,7 +358,7 @@ function injectNewModel(vom, model, newModel, deltaOnly) {
 }
 
 function updateModelItemLoop(vom, item, newItem, key) { // TODO: performance
-  if (key === 'childNodes') return;
+  if (key === 'childNodes' || !item) return;
   item[key] = typeof item[key] === 'object' || isArray(item[key]) ?
     updateModelItem(vom, item[key], newItem[key] || {}) : newItem[key];
 }
@@ -595,7 +595,7 @@ function changeBlickItems(data, item, collector, id, property, value, oldValue) 
   if (!blickItems) return;
 
   // TODO: for performance we need to link updated directly, no array...
-  for (var n = blickItems.length, elm; n--; )
+  for (var n = blickItems.length; n--; )
     changeBlickItem(blickItems[n], data, item, value, oldValue);
 }
 
