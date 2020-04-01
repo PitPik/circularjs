@@ -35,10 +35,13 @@ require(['circular'], ({ Module }) => Module({
   },
 }, class App {
   constructor() {
-    this.data = ENV.generateData().toArray();
+    const generateData = ENV.generateData;
 
+    this.getData = () => generateData().toArray();
+    this.pingRenderRate = Monitoring.renderRate.ping;
     this.$update = this.update.bind(this);
-    this.getRenderRate = Monitoring.renderRate.ping;
+
+    this.data = this.getData();
 
     this.update();
   }
@@ -46,7 +49,7 @@ require(['circular'], ({ Module }) => Module({
   update() {
     setTimeout(this.$update);
     
-    this.data = ENV.generateData().toArray();
-    this.getRenderRate();
+    this.data = this.getData();
+    this.pingRenderRate();
   }
 }));
