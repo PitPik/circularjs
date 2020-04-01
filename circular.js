@@ -384,9 +384,7 @@ function getVOMInstance(data) {
     moveCallback: inst[name + '$Move'] || function() {},
     enrichModelCallback: inst[name + '$Enrich'] || function() {},
     listeners: data.listeners,
-    interseptor: function(vom, item) {
-      inst[name$Intersept] && inst[name$Intersept](vom, item);
-    },
+    interseptor: inst[name$Intersept],
     preRecursionCallback: function(item, type, siblPar) {
       inst[name$PR] && inst[name$PR](this, item);
       data.template &&

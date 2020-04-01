@@ -292,7 +292,7 @@ function detect(_this, root, model, listeners, path, idx, _key, _parent) {
     if (n < l - 1) parent = parent[key];
     _parent = _key = null;
   }
-
+  if (!parent && !_parent) return;
   (_parent || parent).hasOwnProperty(_key || key) && addProperty(
     _this,
     _key || key || '',

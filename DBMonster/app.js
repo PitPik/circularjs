@@ -48,7 +48,7 @@ require(['circular'], ({ Module }) => Module({
 
   update() {
     setTimeout(this.$update);
-    
+
     this.data = this.getData();
     this.pingRenderRate();
   }

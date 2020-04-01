@@ -1,8 +1,9 @@
 html {
-   width: 100%;
-   height: 100%;
-   overflow: hidden;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
+
 body {
   background: #fff;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -47,6 +48,7 @@ button {
   height: 10px;
   background: #eee;
 }
+
 .dot {
   position: absolute;
   font: normal 15px sans-serif;
