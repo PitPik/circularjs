@@ -14,7 +14,12 @@ return Component({
     this.refresh = null;
     this.raster = null;
     this.model = initModel(10, []);
-  
+
+    this.perfMonitor = perfMonitor;
+    this.perfMonitor.startFPSMonitor();
+    this.perfMonitor.startMemMonitor();
+    this.perfMonitor.initProfiler("render");
+
     document.body.firstElementChild.innerHTML = '';
   }
 
@@ -59,7 +64,8 @@ function initModel(raster, data) {
 
 function update(model, levelSpeed) {
   clearTimeout(update.timeout);
-  update.timeout = setTimeout(function render() {
+  update.timeout = setTimeout(function render(_this) {
+    _this.perfMonitor.startProfile("render");
     for (var n = 0, m = model.length, newData = 0; n < m; n++) {
       for (var x = 0, y = model[n].childNodes.length; x < y; x++) {
         newData = Math.round(Math.random() * 1000) % 100;
@@ -68,8 +74,9 @@ function update(model, levelSpeed) {
         model[n].childNodes[x].max = newData > 90 ? 'max' : '';
       }
     }
+    _this.perfMonitor.endProfile("render");
     update(model, levelSpeed);
-  }, levelSpeed);
+  }, levelSpeed, this);
 }
 
 });
