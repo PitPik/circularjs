@@ -156,16 +156,17 @@ function renderHook(
 function resolveReferences(_this, dataDump, html, update) {
   var node = null;
   var renderFn = null;
+  var dump = {};
 
-  for (var n = dataDump.length, dump = {}; n--; ) { // must revers
-    dump = dataDump.pop();
+  while (dump = dataDump.pop()) { // must revers
     node = findNode(html, dump.start$);
     renderFn = !node ? null : node.ownerElement ?
       attributeFn : !dump.isBlock ?
       inlineFn :
       blockFn;
-    renderFn &&
-      renderFn(_this, node, dump.start$, dump.end$, dump, dataDump, update);
+    if (renderFn) renderFn(
+      _this, node, dump.start$, dump.end$, dump, dataDump, update
+    );
   }
   return html;
 }
