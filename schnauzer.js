@@ -103,8 +103,7 @@ function switchTags(_this, tags) {
 
 function renderPath(path, variable) {
   var _path = !path.length ? '' : path.length > 1 ? path.join('.') : path[0];
-
-  return _path ? path + '.' + variable : variable;
+  return _path ? _path + '.' + variable : variable;
 }
 
 function escapeHtml(string, _this, doEscape) {
