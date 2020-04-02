@@ -31,8 +31,8 @@ The following explanations show the relevant HTML parts while describing the JS 
 <section class="app-{{%currentApp}}">
     <h1>{{title}}{{#if %currentApp}} - {{%currentApp}}{{/if}}</h1>
     <nav class="app-nav">
-    <a href="#/dashboard" class="dashboard">Dashboard</a>
-    <a href="#/heroes" class="heroes">Heroes</a>
+        <a href="#/dashboard" class="dashboard">Dashboard</a>
+        <a href="#/heroes" class="heroes">Heroes</a>
     </nav>
     <div cr-view="app-modules"></div>
 </section>
@@ -53,11 +53,11 @@ The router is triggered by the links in the HTML page and just re-defines the "a
 <div class="module">
     <h2>Top Heroes</h2>
     <div class="grid grid-pad clearfix">
-    <a cr-for="heroes" class="col-1-4" href="#/detail/{{%id}}">
-        <div class="module hero">
-        <h4>{{%name}}</h4>
-        </div>
-    </a>
+        <a cr-for="heroes" class="col-1-4" href="#/detail/{{%id}}">
+            <div class="module hero">
+                <h4>{{%name}}</h4>
+            </div>
+        </a>
     </div>
     <app-search></app-search>
 </div>
@@ -73,7 +73,9 @@ To be continued...
     <h4>Hero Search</h4>
     <input id="search-box" cr-view="search" cr-event="keyup: search" />
     <ul class="search-result" cr-event="click: select">
-    <li cr-for="searchList"><a href="#/detail/{{%id}}">{{%name}}</a></li>
+        <li cr-for="searchList">
+            <a href="#/detail/{{%id}}">{{%name}}</a>
+        </li>
     </ul>
 </section>
 ```
@@ -88,7 +90,7 @@ To be continued...
     <h2><span cr-view="name">{{%name}}</span> Details</h2>
     <div><span>id: </span>{{#if %id}}{{id}}{{else}}--{{/if}}</div>
     <label>name:
-    <input cr-event="input: updateName; keyup: cancel" placeholder="name" value="{{%name}}" />
+        <input cr-event="input: updateName; keyup: cancel" placeholder="name" value="{{%name}}" />
     </label>
     <button cr-event="click: goBack">go back</button>
     {{#if %dirty}}<button cr-event="click: save" disabled="{{%name}}">save</button>{{/if}}
@@ -104,16 +106,16 @@ To be continued...
 <div>
     <h2>My Heroes</h2>
     <form cr-event="submit: addHero">
-    <label>Hero name: <input name="hero" type="text" /></label>
-    <button type="submit">add</button>
+        <label>Hero name: <input name="hero" type="text" /></label>
+        <button type="submit">add</button>
     </form>
     <ul>
-    <li cr-for="heroList">
-        <a href="#/detail/{{%id}}">
-        <span class="badge">{{%id}}</span> {{%name}}
-        </a>
-        <button class="delete" title="delete hero" cr-event="click: deleteHero">x</button>
-    </li>
+        <li cr-for="heroList">
+            <a href="#/detail/{{%id}}">
+                <span class="badge">{{%id}}</span> {{%name}}
+            </a>
+            <button class="delete" title="delete hero" cr-event="click: deleteHero">x</button>
+        </li>
     </ul>
 </div>
 ```
