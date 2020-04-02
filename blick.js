@@ -137,7 +137,7 @@ function renderHook(
   var end = '';
   var longKey = '';
 
-  if (!isDynamic && tagData.active < 2) return out;
+  if (!isDynamic && tagData.active < 3) return out;
   longKey = tagData.root.variable.path.join('.');
   longKey += (longKey ? '.' : '') + tagData.root.variable.value;
   start = '{{#' + index + '}}';
@@ -156,9 +156,9 @@ function renderHook(
 function resolveReferences(_this, dataDump, html, update) {
   var node = null;
   var renderFn = null;
-  var dump = {};
 
-  while (dump = dataDump.pop()) { // must revers
+  for (var n = dataDump.length, dump = {}; n--; ) { // must revers
+    dump = dataDump.pop();
     node = findNode(html, dump.start$);
     renderFn = !node ? null : node.ownerElement ?
       attributeFn : !dump.isBlock ?
