@@ -5,7 +5,7 @@ define('app-detail', ['circular', 'data-provider', '!modules/detail/css/index.cs
   template: `
     <div cr-template>
       <h2><span cr-view="name">{{%name}}</span> Details</h2>
-      <div><span>id: </span>{{#if %id}}{{id}}{{else}}--{{/if}}</div>
+      <div><span>id: </span>{{#if %id}}{{%id}}{{else}}--{{/if}}</div>
       <label>name:
         <input cr-event="input: updateName; keyup: cancel" placeholder="name" value="{{%name}}" />
       </label>
