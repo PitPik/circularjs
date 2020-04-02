@@ -55,7 +55,7 @@ Module({
   }
 
   huh() {
-    this.class += ' huh';
+    if (this.won === undefined) this.class = 'huh';
   }
 
   level(e, elm) {
