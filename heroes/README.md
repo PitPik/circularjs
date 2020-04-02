@@ -9,7 +9,7 @@ This basic app has many of the features you'd expect to find in a data-driven ap
 
 By the end of the tutorial you will be able to do the following:
 
- - Use built-in Circular resource loader to show and hide modules and display lists of hero data.
+ - Use built-in Circular dynamic component loader to show and hide modules and display lists of hero data.
  - Create Circular components to display hero details and show an array of heroes.
  - Use one-way data binding for read-only data.
  - Add editable fields to update a model with two-way data binding.
@@ -28,115 +28,94 @@ The following explanations show the relevant HTML parts while describing the JS 
 ### app.js
 
 ```HTML
-<body cr-component="app" cr-container>
-    <section cr-template-for="app" class="app-{{%currentApp}}">
-        <h1>{{title}}{{#%currentApp}} - {{.}}{{/%currentApp}}</h1>
-        <nav class="app-nav">
-            <a href="#/dashboard" class="dashboard">Dashboard</a>
-            <a href="#/heroes" class="heroes">Heroes</a>
-        </nav>
-        <div cr-view="app-modules"></div>
-    </section>
-</body>
+<section class="app-{{%currentApp}}">
+    <h1>{{title}}{{#if %currentApp}} - {{%currentApp}}{{/if}}</h1>
+    <nav class="app-nav">
+    <a href="#/dashboard" class="dashboard">Dashboard</a>
+    <a href="#/heroes" class="heroes">Heroes</a>
+    </nav>
+    <div cr-view="app-modules"></div>
+</section>
 ```
 
-The component "app" `cr-component="app"` is created to keep track of the app's state. The according model holds `title` (won't change) and `currentApp`.
+The component "AppMain" is created to keep track of the app's state. The according model holds `title` (won't change) and `currentApp`.
 The component listens to the changes to `currentApp` and will then call `renderModule()` to append the module inside the set container `cr-view="app-modules"`. This change automatically re-renders the items in the template that use `%currentApp` as a dynamic palceholder.
-`renderModule()` also gets the `previousName`, the previous module that it then will hide from the view. There is also `require`, the js-module that will be loaded and executed to start the new module.
+`require` in `renderModule()` will load and execute the new module.
 
-`onInit` gets executed once to retrigger rendering for the headline and preloading the other apps.
+`onInit` gets executed once the component is rendered and sets up the router.
 
-The router is triggered by the links in the HTML page and just re-defines the "app" component's `currentApp`.
+The router is triggered by the links in the HTML page and just re-defines the "app" component's `currentApp` that again calls `this$` which executes `renderModule()`.
 
 
 ### dashbord.js
 
 ```HTML
-<div class="grid grid-pad clearfix" cr-component="heroes-dashboard" cr-container>
-    <a cr-template-for="heroes-dashboard" class="col-1-4" href="#/detail/{{id}}">
+<div class="module">
+    <h2>Top Heroes</h2>
+    <div class="grid grid-pad clearfix">
+    <a cr-for="heroes" class="col-1-4" href="#/detail/{{%id}}">
         <div class="module hero">
-            <h4>{{name}}</h4>
+        <h4>{{%name}}</h4>
         </div>
     </a>
+    </div>
+    <app-search></app-search>
 </div>
 ```
 
-This file is part of a module, the HTML and it's resources. This module returns a initialisation function `init`. The purpose of this component ```'heroes-dashboard'``` inside `init` is only to render the first 4 items in the hero list that we get via `heroService.getHeroes()`. The template ```cr-template-for="heroes-dashboard"``` gets rendered automatically according to the model in the component.
-
-The rest of the module is defined in the HTML file dashboard/index.html.
+To be continued...
 
 
 ### search.js
 
 ```HTML
-<div cr-component="heroes-search">
+<section>
     <h4>Hero Search</h4>
     <input id="search-box" cr-view="search" cr-event="keyup: search" />
-    <ul class="search-result" cr-component="heroes-search-list" cr-event="click: select" cr-container>
-        <li cr-template-for="heroes-search-list"><a href="#/detail/{{id}}">{{name}}</a></li>
+    <ul class="search-result" cr-event="click: select">
+    <li cr-for="searchList"><a href="#/detail/{{%id}}">{{%name}}</a></li>
     </ul>
-</div>
+</section>
 ```
 
-"heroes-search" is a component that has only one purpose. It holds a view "search" of an input field that listens to keyUp that triggers `search()`. This function tells `heroService` to look for heroes via `searchHeroes()` that again triggers `setupList()`.
-
-`setupList()` creates or updates the "heroes-search-list" component that gets rendered underneath the previous mentioned input field inside its container defined with ´cr-container´.
-The list also listens to click (triggers `select()`) so it can reset the view to an empty list and empty the input field via `resetSearch()`.
+To be continued...
 
 
 ### detail.js
 
 ```HTML
-<div cr-component="hero-detail" cr-container>
-    <div cr-template-for="hero-detail">
-        <h2><span cr-view="name">{{%name}}</span> Details</h2>
-        <div><span>id: </span>{{#if id}}{{id}}{{else}}--{{/if}}</div>
-        <label>name:
-            <input cr-event="keyup: updateName" placeholder="name" value="{{name}}" />
-        </label>
-        <button cr-event="click: goBack">go back</button>
-        <button cr-event="click: save" disabled="{{%name}}">save</button>
-    </div>
+<div cr-template>
+    <h2><span cr-view="name">{{%name}}</span> Details</h2>
+    <div><span>id: </span>{{#if %id}}{{id}}{{else}}--{{/if}}</div>
+    <label>name:
+    <input cr-event="input: updateName; keyup: cancel" placeholder="name" value="{{%name}}" />
+    </label>
+    <button cr-event="click: goBack">go back</button>
+    {{#if %dirty}}<button cr-event="click: save" disabled="{{%name}}">save</button>{{/if}}
 </div>
 ```
 
-Component "hero-detail", rendered by passing the model of the hero, is the component that listenes to mouse events of three different HTML-Elements: the input field for renaming the current hero triggereing `updateName()`, the 'save' button and the 'go back' button and referring to the according functions `goBack()` and `save()`.
-
-`updateName()` adds `name` to the model and updates the view `name` on key up, which is the headline, using the dynamic variable `{{%name}}`.
-
-`updateHero()` is called when the form is submitted and then adds a new hero or updates a hero via `heroService.updateHero()`. The save button has a dynamic disabled attribute driven by the variable `{{%name}}`.
-
-The router's callback gets according to 'detail/id' the hero model and then replaces the model of "hero-detail" so it can re-render automatically.
+To be continued...
 
 
 ### heroes.js
 
 ```HTML
-<div class="module" cr-component="heroes">
+<div>
     <h2>My Heroes</h2>
     <form cr-event="submit: addHero">
-        <label>Hero name:
-            <input name="hero" type="text" />
-        </label>
-        <button type="submit">add</button>
+    <label>Hero name: <input name="hero" type="text" /></label>
+    <button type="submit">add</button>
     </form>
-    <ul class="heroes" cr-component="heroes-list" cr-container>
-        <li cr-template-for="heroes-list">
-            <a href="#/detail/{{id}}">
-              <span class="badge">{{id}}</span> {{name}}
-            </a>
-            <button class="delete" title="delete hero" cr-event="click: deleteHero">x</button>
-        </li>
+    <ul>
+    <li cr-for="heroList">
+        <a href="#/detail/{{%id}}">
+        <span class="badge">{{%id}}</span> {{%name}}
+        </a>
+        <button class="delete" title="delete hero" cr-event="click: deleteHero">x</button>
+    </li>
     </ul>
 </div>
 ```
 
-"heroes" is the component that listens to the form for adding heroes by calling `addHero()`.
-`addHero()` tells `heroService` to add a hero and then clears the form and appends the new hero to the "heroes-list".
-
-"heroes-list" is created on init as its wrapped function is returned as an initiation function and gets called when the
-whole module is (re-)loaded.
-The items in the "heroes-list" have an eventListener on click to delete items with `deleteHero()`.
-
-`addHero()` and `deleteHero()` use VOM's API to manipulate the model in "heroes-list" to append and remove children that then triggers a re-rendering automatically.
-
+To be continued...
