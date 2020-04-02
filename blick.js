@@ -179,7 +179,6 @@ function attributeFn(_this, node, start$, end$, dump, dataDump) {
   var update = function(helper) {
     var parentNode = helper.parentNode;
 
-    if (node._cache) setTimeout(function() { node._cache = null; });
     if (parentNode.nodeType === 11) return;
     if (attrFn) {
       return attrFn(ownerElement, node.nodeName, parentNode.textContent);
