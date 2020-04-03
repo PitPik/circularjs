@@ -216,6 +216,7 @@ function renderPartial(_this, data, model, tagData) {
 }
 
 function renderHelper(_this, data, model, tagData, bodyFns) {
+  tagData.isHelper = true;
   return data.value.apply({
     name: tagData.root ? tagData.root.variable.value : '',
     scope: model.scopes[0].scope,
@@ -450,6 +451,7 @@ function getTagData(_this, root, vars, type, start, bodyFn) {
   return bodyFn && !_root ? { bodyFn: bodyFn } : {
     root: _root = getVar(_root.substr(active)),
     isPartial: type === '>',
+    isHelper: false, // updated on render
     isEscaped: start.lastIndexOf(_this.options.tags[0]) < 1,
     helper: type === '^' ? 'unless' : helper,
     vars: processVars(varsArr, [], _root),

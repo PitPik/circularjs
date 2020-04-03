@@ -131,23 +131,27 @@ function renderHook(
   out, tagData, model, isBlock, track, path, key, parent, bodyFn
 ) {
   var index = this.dataDump.length;
-  var doScan = !!tagData.active || this.options.forceUpdate;
-  var isDynamic = !!key && doScan && !!this.options.isDynamic(parent, key);
+  var var0 = tagData.vars[0] && (tagData.vars[0].root = tagData.vars[0]);
+  var data = var0 || tagData;
+  var _key = tagData.isHelper ? data.root.variable.value : key;
+  var doScan = !!data.active || this.options.forceUpdate;
+  var isDynamic = !!key && doScan && !!this.options.isDynamic(parent, _key);
   var start = '';
   var end = '';
   var longKey = '';
 
-  if (!isDynamic && tagData.active < 3) return out;
-  longKey = tagData.root.variable.path.join('.');
-  longKey += (longKey ? '.' : '') + tagData.root.variable.value;
+  if (!isDynamic && data.active < 3) return out;
+  longKey = data.root.variable.path.join('.');
+  longKey += (longKey ? '.' : '') + data.root.variable.value;
   start = '{{#' + index + '}}';
   end = '{{/' + index + '}}';
   this.dataDump.push({
-    isBlock: isBlock, track: track, bodyFn: bodyFn, active: tagData.active,
-    isEscaped: tagData.isEscaped, start$: start, end$: end, path: path,
-    noCache: tagData.helper === 'each' || tagData.active > 2,
-    root: model.scopes[model.scopes.length - 1].scope, helper: tagData.helper,
+    isBlock: isBlock, track: track, bodyFn: bodyFn, active: data.active,
+    isEscaped: data.isEscaped, start$: start, end$: end, path: path,
+    noCache: data.helper === 'each' || data.active > 2,
+    root: model.scopes[model.scopes.length - 1].scope, helper: data.helper,
     scope: model.scopes[0].scope || {}, parent: parent, key: longKey, out: out,
+    helperFn: tagData.isHelper ? bodyFn : null,
   });
 
   return start + out + end;
@@ -201,27 +205,28 @@ function inlineFn(_this, node, start$, end$, dump, dataDump, update) {
   node = findSatrtNode(node, start$);
 
   _this.options.registerProperty(replaceInline(node, node.previousSibling,
-      findEndNode(node, end$), dump.isEscaped, update),
+      findEndNode(node, end$), dump.isEscaped, update, dump.helperFn),
     dump.key, dump.path, dump.parent, dump.scope,
     dump.root, dump.active, _this.collector
   );
   return node;
 }
 
-function replaceInline(node, firstNode, lastNode, isEscaped, update) {
+function replaceInline(node, firstNode, lastNode, isEscaped, update, helperFn) {
   var fragment = !isEscaped ? document.createDocumentFragment() : null;
   var outContainer = [];
 
   return function updateInline(data) {
     var childNodes = [];
+    var _data = helperFn ? helperFn() : data;
 
     if (update || isEscaped) {
-      node.textContent = data;
+      node.textContent = _data;
       update && update(node);
       return [];
     }
     outContainer = [];
-    childNodes = saveWrapHtml(data + '').childNodes;
+    childNodes = saveWrapHtml(_data + '').childNodes;
     while(lastNode.previousSibling !== firstNode) {
       lastNode.parentNode.removeChild(lastNode.previousSibling);
     }
