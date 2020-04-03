@@ -136,21 +136,21 @@ function renderHook(
   var _key = tagData.isHelper ? data.root.variable.value : key;
   var doScan = !!data.active || this.options.forceUpdate;
   var isDynamic = !!key && doScan && !!this.options.isDynamic(parent, _key);
-  var start = '';
-  var end = '';
+  var helper = tagData.helper;
+  var scopes = model.scopes;
+  var start = '{{#' + index + '}}';
+  var end = '{{/' + index + '}}';
   var longKey = '';
 
   if (!isDynamic && data.active < 3) return out;
   longKey = data.root.variable.path.join('.');
   longKey += (longKey ? '.' : '') + data.root.variable.value;
-  start = '{{#' + index + '}}';
-  end = '{{/' + index + '}}';
   this.dataDump.push({
     isBlock: isBlock, track: track, bodyFn: bodyFn, active: data.active,
     isEscaped: data.isEscaped, start$: start, end$: end, path: path,
-    noCache: data.helper === 'each' || data.active > 2,
-    root: model.scopes[model.scopes.length - 1].scope, helper: data.helper,
-    scope: model.scopes[0].scope || {}, parent: parent, key: longKey, out: out,
+    noCache: /^[ew]/.test(helper) && data.active > 0 || data.active > 2,
+    root: scopes[scopes.length - 1].scope, helper: helper,
+    scope: scopes[0].scope || {}, parent: parent, key: longKey, out: out,
     helperFn: tagData.isHelper ? bodyFn : null,
   });
 
@@ -272,7 +272,7 @@ function replaceBlock(
 
   return function updateBlock(data) {
     var outContainer = [];
-    var body = bodyFn(); // need for track.fnIdx
+    var body = null; // need for track.fnIdx
     var html = {};
     var node = firstNode;
     var prevFnIdx = fnIdx;
@@ -284,7 +284,8 @@ function replaceBlock(
     }
     if (!wasEverRendered[fnIdx] || noCache) {
       trackDF[fnIdx] = trackDF[fnIdx] || document.createDocumentFragment();
-      html = resolveReferences(_this, dataDump, saveWrapHtml(body), update);
+      html = resolveReferences(_this, dataDump,
+        saveWrapHtml(body = bodyFn(data)), update);
       while (node = html.childNodes[0]) {
         outContainer.push(trackDF[fnIdx].appendChild(node));
       }

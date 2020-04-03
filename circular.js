@@ -358,8 +358,14 @@ function injectNewModel(vom, model, newModel, deltaOnly) {
 }
 
 function updateModelItemLoop(vom, item, newItem, key) { // TODO: performance
+  var isActiveArr = false;
+  var isArr = false;
+
   if (key === 'childNodes' || !item) return;
-  item[key] = typeof item[key] === 'object' || isArray(item[key]) ?
+  isArr = isArray(item[key]);
+  isActiveArr = isArr && Object.getOwnPropertyDescriptor(item, key).get;
+  item[key] = isActiveArr ? newItem[key] :
+    typeof item[key] === 'object' || isArray(item[key]) ?
     updateModelItem(vom, item[key], newItem[key] || {}) : newItem[key];
 }
 

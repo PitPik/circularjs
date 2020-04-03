@@ -295,8 +295,8 @@ function render(_this, model, tagData, isBlock, out, renderFn, bodyFns, track) {
     _this, out, tagData, model, isBlock, track, model.scopes[0].path.join('.'),
     tagData.root ? tagData.root.variable.value : '', model.scopes[0] &&
       getDeepData(model.scopes[0].scope, tagData.root.variable, true) || {},
-    function() { return renderFn(_this, tagData, model,
-      bodyFns || getData(_this, model, tagData), track)
+    function(data) { return renderFn(_this, tagData, model, bodyFns ||
+      data && { value: data } || getData(_this, model, tagData), track)
     }) : out;
 }
 
