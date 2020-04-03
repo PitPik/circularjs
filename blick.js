@@ -131,8 +131,8 @@ function renderHook(
   out, tagData, model, isBlock, track, path, key, parent, bodyFn
 ) {
   var index = this.dataDump.length;
-  var var0 = tagData.vars[0] && (tagData.vars[0].root = tagData.vars[0]);
-  var data = var0 || tagData;
+  var data = tagData.isHelper && tagData.vars[0] &&
+    (tagData.vars[0].root = tagData.vars[0]) || tagData;
   var _key = tagData.isHelper ? data.root.variable.value : key;
   var doScan = !!data.active || this.options.forceUpdate;
   var isDynamic = !!key && doScan && !!this.options.isDynamic(parent, _key);
@@ -206,7 +206,7 @@ function inlineFn(_this, node, start$, end$, dump, dataDump, update) {
 
   _this.options.registerProperty(replaceInline(node, node.previousSibling,
       findEndNode(node, end$), dump.isEscaped, update, dump.helperFn),
-    dump.key, dump.path, dump.parent, dump.scope,
+    dump.key, dump.path || dump.key, dump.parent, dump.scope,
     dump.root, dump.active, _this.collector
   );
   return node;
@@ -250,7 +250,7 @@ function blockFn(_this, node, start$, end$, dump, dataDump, update) {
     replaceBlock(_this, node, findEndNode(node, end$),
       dump.bodyFn, dump.track, dump.out, dataDump, update, dump.noCache),
     dump.key,
-    dump.path,
+    dump.path || dump.key,
     dump.parent,
     dump.scope,
     dump.root,

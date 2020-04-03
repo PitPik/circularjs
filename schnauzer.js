@@ -268,7 +268,7 @@ function renderEach(_this, data, model, tagData, bodyFns) {
   }
   if (_data.length) {
     model.scopes.shift();
-    model.scopes[0].path.splice(model.scopes[0].path.length - 2, 2);
+    model.scopes[0].path.splice(model.scopes[0].path.length - 3, 3);
   }
   return out;
 }
@@ -283,7 +283,8 @@ function renderWith(_this, data, model, tagData, bodyFns) {
     '@parent': getDeepData(model.scopes[variable.parentDepth], variable, true),
   }, pushAlias(tagData, variable, level, undefined, data.value), false, value);
   return [
-    bodyFns[0].bodyFn(model), model.scopes.shift(), model.scopes[0].path.pop()
+    bodyFns[0].bodyFn(model), model.scopes.shift(), model.scopes[0].path
+      .splice(model.scopes[0].path.length - 2, 2)
   ][0];
 }
 
