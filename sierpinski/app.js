@@ -25,7 +25,12 @@ require(['circular'], ({ Component }) => {
         s: 1000,
         seconds: 0,
       }, targetSize);
-    }
+
+      this.perfMonitor = perfMonitor;
+      this.perfMonitor.startFPSMonitor();
+      this.perfMonitor.startMemMonitor();
+      this.perfMonitor.initProfiler("render");
+  }
 
     dots$(propName, item, value) {
       if (propName === 'hover') {
@@ -135,7 +140,11 @@ require(['circular'], ({ Component }) => {
   function nextFrame(item) {
     item.elapsed = Date.now() - item.start;
     const t = (item.elapsed / 1000) % 10;
-    item.scale = 1 + (t > 5 ? 10 - t : t) / 10;
+    const scale = 1 + (t > 5 ? 10 - t : t) / 10;
+
+    this.perfMonitor.startProfile("render");
+    item.scale = scale;
+    this.perfMonitor.endProfile("render");
 
     window.requestAnimationFrame(() => {
       nextFrame(item);
