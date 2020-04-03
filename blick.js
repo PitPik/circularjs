@@ -272,7 +272,7 @@ function replaceBlock(
 
   return function updateBlock(data) {
     var outContainer = [];
-    var body = null; // need for track.fnIdx
+    var body = bodyFn(data); // need for track.fnIdx
     var html = {};
     var node = firstNode;
     var prevFnIdx = fnIdx;
@@ -284,8 +284,7 @@ function replaceBlock(
     }
     if (!wasEverRendered[fnIdx] || noCache) {
       trackDF[fnIdx] = trackDF[fnIdx] || document.createDocumentFragment();
-      html = resolveReferences(_this, dataDump,
-        saveWrapHtml(body = bodyFn(data)), update);
+      html = resolveReferences(_this, dataDump, saveWrapHtml(body), update);
       while (node = html.childNodes[0]) {
         outContainer.push(trackDF[fnIdx].appendChild(node));
       }
