@@ -267,7 +267,7 @@ function renderEach(_this, data, model, tagData, bodyFns) {
   }
   if (_data.length) {
     model.scopes.shift();
-    model.scopes[0].path.pop();
+    model.scopes[0].path.splice(model.scopes[0].path.length - 2, 2);
   }
   return out;
 }
