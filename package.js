@@ -48,6 +48,9 @@ const collectDeps = (data, rootPath) => {
       if (typeof name !== 'string') {
         deps = name;
       }
+      if (typeof deps === 'function') {
+        deps = [];
+      }
       item.deps = deps;
       item.type = 'js';
       collection[item.key] = item;
@@ -105,6 +108,10 @@ const sortOutput = items => {
   items.forEach(item => {
     if (item.type === 'css' || item.type === 'html') return;
     const deps = [];
+    if (!item.deps) {
+      console.log(`[SKIP-NONE] ${item.path}.js`);
+      return;
+    };
     (item.deps || []).forEach(dep => {
       if (jsCollection[dep]) deps.push(dep);
     });
