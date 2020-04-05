@@ -131,9 +131,10 @@ function renderHook(
   out, tagData, model, isBlock, track, path, key, parent, bodyFn
 ) {
   var index = this.dataDump.length;
-  var data = tagData.isHelper && tagData.vars[0] &&
+  var isOdd = tagData.isHelper || tagData.isPartial;
+  var data = isOdd && tagData.vars[0] &&
     (tagData.vars[0].root = tagData.vars[0]) || tagData;
-  var _key = tagData.isHelper ? data.root.variable.value : key;
+  var _key = isOdd ? data.root.variable.value : key;
   var doScan = !!data.active || this.options.forceUpdate;
   var isDynamic = !!key && doScan && !!this.options.isDynamic(parent, _key);
   var helper = tagData.helper;
@@ -148,10 +149,11 @@ function renderHook(
   this.dataDump.push({
     isBlock: isBlock, track: track, bodyFn: bodyFn, active: data.active,
     isEscaped: data.isEscaped, start$: start, end$: end, path: path,
-    noCache: /^[ew]/.test(helper) && data.active > 0 || data.active > 2,
+    noCache: (/^[ew]/.test(helper) || tagData.isPartial) &&
+      data.active > 0 || data.active > 2,
     root: scopes[scopes.length - 1].scope, helper: helper,
     scope: scopes[0].scope || {}, parent: parent, key: longKey, out: out,
-    helperFn: tagData.isHelper ? bodyFn : null,
+    helperFn: isOdd ? bodyFn : null,
   });
 
   return start + out + end;
