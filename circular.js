@@ -89,6 +89,7 @@ return Object.defineProperties(Circular, {
     return components[defData.selector] || (components[defData.selector] = {
       Klass: Klass,
       selector: defData.selector,
+      subscribe$: defData.subscribe$, // for extending only
       templates: defData.template && processTemplate(templateWrapper, defData),
       styles: installStyles(defData.selector, defData),
       name: defData.name || Klass.name,
