@@ -23,7 +23,7 @@ All the modules again use components to render the templates.
 
 There is a central data service ```js/api.service.js``` that provides all the REST calls needed for the modules for getting and setting data to and from the server.
 
-The "live" example is packed with CirculaJS `package.js` including the `circular.min.js` file (option -cr) and measures only 95k not compressed.
+The "live" example is packed with CirculaJS `package.js` including the `circular.min.js` file (option -cr) and measures only 95k not compressed (31k gZip).
 
 # Getting started
 
