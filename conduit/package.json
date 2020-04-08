@@ -1,0 +1,25 @@
+{
+  "name": "conduit",
+  "version": "1.0.0",
+  "description": "CircularJS codebase containing real world examples (CRUD, auth, advanced patterns, etc) that adheres to the RealWorld spec and API.",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "node scripts/package.js -p ./ -c js/amd.cfg.js -o js/main.min.js -e"
+  },
+  "keywords": [
+    "circularJS",
+    "real",
+    "world",
+    "conduit",
+    "SPA"
+  ],
+  "author": "Peter Dematté",
+  "license": "ISC",
+  "dependencies": {
+    "marked": "^0.8.0"
+  },
+  "devDependencies": {
+    "node-minify": "3.6.0"
+  }
+}

@@ -1,0 +1,10 @@
+<div class="feed-toggle">
+  <ul class="nav nav-pills outline-active">
+    <li class="nav-item" cr-for="model">
+      <a
+        class="nav-link{{#if %active}} active{{/if}}{{#if %disabled}} disabled{{/if}}"
+        cr-event="click: toggle"
+        href="#/{{%link}}">{{%title}}</a>
+    </li>
+  </ul>
+</div>

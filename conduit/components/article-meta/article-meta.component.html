@@ -1,0 +1,45 @@
+<div class="article-meta">
+  <div cr-for="model">
+    <a href="#/profile/{{%author.username}}"><img cr-src="{{%author.image}}" /></a>
+    <div class="info">
+      <a href="#/profile/{{%author.username}}" class="author">{{%author.username}}</a>
+      <span class="date">{{simple-date %createdAt}}</span>
+    </div>
+    {{#if isSingle}}
+    <button
+      cr-event="click: likeSingle"
+      class="btn btn{{#unless %favorited}}-outline{{/unless}}-primary btn-sm pull-xs-right"
+    >
+      <i class="ion-heart"></i>
+      {{%favoritesCount}}
+    </button>  
+    {{else}}
+      {{#if %isOwn}}
+      <a class="btn btn-outline-secondary btn-sm" href="#/new/{{slug}}">
+        <i class="ion-edit"></i> Edit Article
+      </a>
+      &nbsp;
+      <button class="btn btn-outline-danger btn-sm" cr-event="click: delete">
+        <i class="ion-trash-a"></i> Delete Article
+      </button>
+      {{else}}
+      <!-- <follow-button cr-input="profile, triggerProfile"></follow-button> -->
+      <button
+        cr-event="click: follow"
+        class="btn btn-sm btn{{#unless %author.following}}-outline{{/unless}}-secondary"
+      >
+        <i class="{{#if %author.following}}ion-minus-round{{else}}ion-plus-round{{/if}}"></i>
+        <span>{{#if %author.following}}Unfollow{{else}}Follow{{/if}} {{%author.username}}</span>
+      </button>
+      &nbsp;
+      <button
+        cr-event="click: like"
+        class="btn btn-sm btn{{#unless %favorited}}-outline{{/unless}}-primary"
+      >
+        <i class="ion-heart"></i>
+        Favorite Post <span class="counter">({{%favoritesCount}})</span>
+      </button>
+      {{/if}}
+    {{/if}}
+  </div>
+</div>

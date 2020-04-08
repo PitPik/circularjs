@@ -1,0 +1,41 @@
+<div class="profile-page">
+
+  <div class="user-info">
+    <div class="container">
+      <div class="row">
+
+        <div class="col-xs-12 col-md-10 offset-md-1" cr-for="profile">
+          <img cr-src="{{%image}}" class="user-img" />
+          <h4>{{%username}}</h4>
+          <p>{{%bio}}</p>
+          {{#if %isUser}}
+          <a class="btn btn-sm btn-outline-secondary action-btn" href="#/settings">
+            <i class="ion-gear-a"></i> Edit Profile Settings
+          </a>
+          {{else}}
+          <!-- <follow-button cr-input="profile, triggerProfile"></follow-button> -->
+          <button cr-event="click: follow" class="btn btn-sm btn-outline-secondary action-btn">
+            <i class="{{#if %following}}ion-minus-round{{else}}ion-plus-round{{/if}}"></i>
+            &nbsp;
+            {{#if %following}}Unfollow{{else}}Follow{{/if}} {{%username}}
+          </button>
+          {{/if}}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="row">
+
+      <div class="col-xs-12 col-md-10 offset-md-1">
+
+        <feed-menu class="articles-toggle" cr-input="tag, isLoggedIn, profileName, routeParams"></feed-menu>
+        <article-list cr-input="articles, pagination"></article-list>
+
+      </div>
+
+    </div>
+  </div>
+
+</div>

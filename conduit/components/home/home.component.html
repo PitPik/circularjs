@@ -1,0 +1,23 @@
+<div class="home-page">
+
+  {{#unless %isLoggedIn}}<banner></banner>{{/unless}}
+
+  <div class="container page">
+    <div class="row">
+
+      <div class="col-md-9">
+        <feed-menu cr-input="tag, isLoggedIn"></feed-menu>
+        <article-list cr-input="articles, pagination, routeParams, user"></article-list>
+      </div>
+
+      <div class="col-md-3">
+        <div class="sidebar">
+          <p>Popular Tags</p>
+          <tag-list cr-input="tags"></tag-list>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>

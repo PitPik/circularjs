@@ -1,0 +1,19 @@
+<div>
+  <div class="card" cr-for="comments">
+    <div class="card-block">
+      <p class="card-text">{{%body}}</p>
+    </div>
+    <div class="card-footer">
+      <a href="#/profile/{{%author.username}}" class="comment-author">
+        <img cr-src="{{%author.image}}" class="comment-author-img" />
+      </a>
+      &nbsp;
+      <a href="#/profile/{{%author.username}}" class="comment-author">{{%author.username}}</a>
+      <span class="date-posted">{{simple-date %createdAt}}</span>
+      {{#if %isUser}}<span class="mod-options">
+        <!-- <i cr-event="click: edit" class="ion-edit"></i> -->
+        <i cr-event="click: delete" class="ion-trash-a"></i>
+      </span>{{/if}}
+    </div>
+  </div>
+</div>

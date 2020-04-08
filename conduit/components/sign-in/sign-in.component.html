@@ -1,0 +1,55 @@
+<div class="auth-page">
+  <div class="container page">
+    <div class="row">
+
+      <div class="col-md-6 offset-md-3 col-xs-12">
+        <h1 class="text-xs-center">Sign {{#if %isSignIn}}in{{else}}up{{/if}}</h1>
+        {{#unless %isSignIn}}<p class="text-xs-center">
+          <a href="#/sign-in">Have an account?</a>
+        </p>{{/unless}}
+
+        <ul class="error-messages">
+          {{#each %errors}}<li>{{message}}</li>{{/each}}
+        </ul>
+
+        <form cr-event="submit: submit" cr-view="form">
+          <fieldset class="form-group">
+            {{#unless %isSignIn}}<input
+              class="form-control form-control-lg"
+              disabled="{{%formDisabled}}"
+              name="username"
+              type="text"
+              placeholder="Your Name"
+            >{{/unless}}
+          </fieldset>
+          <fieldset class="form-group">
+            <input
+              class="form-control form-control-lg"
+              disabled="{{%formDisabled}}"
+              name="email"
+              type="text"
+              placeholder="Email"
+            >
+          </fieldset>
+          <fieldset class="form-group">
+            <input
+              class="form-control form-control-lg"
+              disabled="{{%formDisabled}}"
+              name="password"
+              type="password"
+              placeholder="Password"
+            >
+          </fieldset>
+          <button
+            type="submit"
+            disabled="{{%formDisabled}}"
+            class="btn btn-lg btn-primary pull-xs-right"
+          >
+            Sign {{#if %isSignIn}}in{{else}}up{{/if}}
+          </button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>

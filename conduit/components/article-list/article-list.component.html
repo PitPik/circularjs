@@ -1,0 +1,21 @@
+<div>
+  <div>
+
+    {{#if %noItems}}<div class="article-preview">No articles available...</div>{{/if}}
+
+    <div class="article-preview" cr-for="articles">
+      <article-meta cr-input="metaData, '{{@index}}' as idx, articles, trigger, user"></article-meta>
+
+      <a href="#/article/{{%slug}}" class="preview-link">
+        <h1>{{%title}}</h1>
+        <p>{{%description}}</p>
+        <span>Read more...</span>
+      </a>
+      {{>tag-list %tagList}}
+    </div>
+
+  </div>
+
+  <article-list-pagination cr-input="pagination"></article-list-pagination>
+
+</div>
