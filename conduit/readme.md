@@ -33,6 +33,15 @@ The current setup is meant for performance, not for development which can be cha
 
  - Open ```index.html```, uncomment `<script type="text/javascript" src='../circular.min.js'></script>`, then go to the bottom and switch commenting to the 3 script tags. Voilá, you're ready to develop.
 
+# Conceptional mistake in this approach
+
+In this approach (was done quick and dirty) are fundamental mistakes in architecture.
+`main-app.component.js` is only delegating views according to the router and keeping track of the user and the active link. This way, the components get loaded before there is any data here. This way, we need to have api loaded in every component to get the current data. This looks also odd as we see the view (still old data),... and then it all of a sudden changes...
+
+A better approach would be to first get the data and `then()` switch with `renderModule()`, passing the retrived data to the components and let them only render them. `renderModule()` has nice options for making cool transitions.
+
+This way we also don't need to keep track of router parameter states in each and every component. The whole app would be shorter and easier maintainable. All other components only do rendering and event handling,... nothing else.
+
 
 # Some additions to the [original implementation](https://demo.realworld.io)
 
