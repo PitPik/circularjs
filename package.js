@@ -2,20 +2,9 @@
  * How to use package.js
  * 
  * Example:
- * node package.js -p ./myProject -c js/amd.cfg.js -o js/all.min.js
+ * node package.js
  * 
- * This will package the project inside the folder "./myProject" to a
- * single file "js/all.min.js" inside the folder "./myProject"
- * (./myProject/js/all.min.js) using the amd-configuration file "js/amd.cfg.js".
- * package.js combines and minifies all template html/css and script files
- * to this one file.
- * 
- * Options:
- * --path | -p: path of project
- * --cfg | -c: path to amd configuration file (relative to --path)
- * --output | -o: path (relative to --path) to output file
- * --update | -u: update the lookahedMap of configuration defined by --cfg
- * --echo | -e: more details about compressed files
+ * This will return further help
  */
 
 const fs = require('fs');
@@ -180,9 +169,10 @@ const params = process.argv.slice(2);
 const options = {
   path: './',
   cfg: 'js/amd.cfg.js',
-  output: 'js/all.min.js',
+  output: 'js/main.min.js',
   updateLookahead: false,
   help: false,
+  circularjs: '',
   echo: true,
 };
 for (let j = 0; j < params.length; j++) {
@@ -201,6 +191,9 @@ for (let j = 0; j < params.length; j++) {
   if (params[j] === '--help' || params[j] === '-h') {
     options.help = true;
   }
+  if (params[j] === '--circularjs' || params[j] === '-cr') {
+    options.circularjs = params[j + 1];
+  }
   if (params[j] === '--echo' || params[j] === '-e') {
     options.echo = params[j + 1] === 'false' ? false : true;
   }
@@ -218,10 +211,12 @@ package.js combines and minifies all template html/css and script files
 to this one file.
 
 Options:
+--help | -h: returns help; no arguments also returns help
 --path | -p: path of project
 --cfg | -c: path to amd configuration file (relative to --path)
 --output | -o: path (relative to --path) to output file
 --update | -u: update the lookahedMap of configuration defined by --cfg
+--circularjs | -cr: path to circular.min.j; includes circular.min.js to the file
 --echo | -e: more details about compressed files`);
   return;
 }
@@ -310,6 +305,11 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
   writeMinJSFile(js.filter(item => item), options.output, 'uglify-es').then(minJS => {
     let textOut = '';
     let promises = [];
+
+    if (options.circularjs) {
+      html.length && promises.push(Promise.resolve('/* CircularJS */'));
+      promises.push(fs.readFileSync(options.circularjs, 'utf-8'));
+    }
 
     html.length && promises.push(Promise.resolve('/* HTML */'));
 
