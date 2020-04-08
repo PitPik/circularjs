@@ -151,19 +151,27 @@ const writeMinJSFile = (data, outputName, type) => {
     min = min.replace(/\),!*function/g, (_, $1) => {
       return '),\nfunction';
     });
-    min = min.replace(/(require\(|define\((\".*?\"),)/g, (_, $1, $2) => {
-      let out = "";
 
-      if ($1 === 'require(') {
-        out = 'define("' + data[index].key + '",';
-      } else if ($2 === '""') {
-        out = 'define("' + data[index].key + '",';
-      } else {
-        out = 'define(' + $2 + ',';
-      }
-      index++;
-      return out;
-    });
+    min = min.split(/\n/).map(item => {
+      return item.replace(/((require|define)\((.*?)\))/, (_, $1, $2, $3) => {
+        let out = "";
+  
+        const params = $3.split(/\s*,\s*/);
+        const noName = params[0][0] !== '"';
+        let name = noName ? `"${data[index].key}",` : '';
+  
+        if (noName && params[0][0] !== '[') {
+          name += '[],';
+        }
+        
+        out = `define(${name}${$3})`;
+  
+        index++;
+        return out;
+      });
+    }).join('\n');
+
+
     return min;
   }).catch(e => console.error(e));
 }
@@ -318,7 +326,8 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
         collapseInlineTagWhitespace: true,
         collapseWhitespace: true,
         conservativeCollapse: true,
-        ignoreCustomFragments: [/{{[\s\S]*?}}/],
+        ignoreCustomFragments: [/{{2,}[\s\S]*?}{2,}/],
+        collapseBooleanAttributes: false,
       }
     }).then(min => {
       options.echo && console.log(`[Compressing] ${htmlData.path}`);
