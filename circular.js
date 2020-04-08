@@ -547,10 +547,11 @@ function registerBlickProperty(fn, key, path, parent, scope, root, active, colle
 
 function registerEventsForBlickItem(data, item, element, eventName, fnName) {
   var elms = (item.events || data.items.events)[eventName];
+  var rootElm = data.items && data.items.elements.element || data.instance.element;
 
   if (!elms) {
     elms = item.events[eventName] = {};
-    data.controller.installEvent(data.instance, data.instance.element, eventName);
+    data.controller.installEvent(data.instance, rootElm, eventName);
   }
   if (!elms[fnName]) {
     elms[fnName] = [element];
