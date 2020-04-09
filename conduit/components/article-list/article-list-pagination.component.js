@@ -4,8 +4,8 @@ require(['circular'], ({ Component }) => Component({
   <ul>
     <li class="page-item{{#if %active}} active{{/if}}" cr-for="pagination">
       <a class="page-link" href="#/{{#if author}}profile/{{%author}}{{else
-          }}articles{{/if}}/{{value}}{{#if %tag}}/{{%tag}}{{/if}}{{#if %favorited}}/favorites{{/if}}">
-        {{value}}
+          }}articles{{/if}}/{{index}}{{#if %tag}}/{{%tag}}{{/if}}{{#if %favorited}}/favorites{{/if}}">
+        {{@counter}}
       </a>
     </li>
   </ul>`,

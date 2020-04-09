@@ -20,8 +20,12 @@ require([
     this.articles = [];
     this.pagination = [];
     input(this);
-    this.noItems = true;
+    this.noItems = !this.articles.length;
     this.trigger = false;
+  }
+
+  onInit() {
+    this.articles.forEach(item => this.trigger = item.index);
   }
 
   articles$$(prop, item, value, oldValue) {

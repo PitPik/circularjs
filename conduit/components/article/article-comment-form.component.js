@@ -3,27 +3,27 @@ require([
   '!article-comment-form.component.html',
   'template-helpers',
   'api.service',
-], ({ Component }, template, helpers, api) => Component({
+  'forms.service',
+], ({ Component }, template, helpers, api, forms) => Component({
   selector: 'article-comment-form',
   template,
   helpers,
   subscribe$: { this: ['articleSlug'] },
 }, class ArticleCommentForm {
-  constructor(elm, crInst, input, getRoot) {
+  constructor(elm, crInst, input) {
     this.user = {};
     this.articleSlug = '';
     input(this);
-    this.rootApp = getRoot();
   }
 
   submit(e, elm, item) {
     e.preventDefault();
     api.postComment({
-      comment: { comment: api.getFormData(elm) },
+      comment: { comment: forms.getFormData(elm) },
       slug: this.articleSlug
     }).then(data => {
-      api.resetForm(elm);
-      this.rootApp.triggerLoadData();
+      forms.resetForm(elm);
+      window.location.href = `#/article/${this.articleSlug}`;
     });
   }
 }));

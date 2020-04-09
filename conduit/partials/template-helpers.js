@@ -6,16 +6,6 @@ require(['marked'], function(markdown) {
 
   return {
     // ----- block helpers... ----- //
-    'itsme' : function($1, $2) {
-      return $1 === $2 ?
-        this.getBody() : this.gatAltBody();
-    },
-    'my-comment': function($1, $2) {
-      return $1 === $2 ? this.getBody() : '';
-    },
-    // 'hasNoItems': function($1, $2) {console.log(999)
-    //   return !this.getData($1).length ? this.getBody() : '';
-    // },
     // ----- inline helpers... ----- //
     'simple-date': function($1, $2) { // too slow, so we cache
       const date = $1;

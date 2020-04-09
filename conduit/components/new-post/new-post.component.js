@@ -1,46 +1,36 @@
-require(['circular', '!new-post.component.html', 'api.service'],
-({ Component }, template, api) => Component({
+require(['circular', '!new-post.component.html', 'api.service', 'forms.service'],
+({ Component }, template, api, forms) => Component({
   selector: 'new-post',
   template,
   subscribe$: {
-    this: ['routeParams', 'formDisabled', 'title', 'description', 'body', 'tagList'],
+    this: ['article', 'articleSlug', 'formDisabled', 'title', 'description', 'body', 'tagList'],
   },
 }, class NewPost {
   constructor(elm, crInst, input, getRoot) {
-    this.routeParams = {};
-    this.setUser = () => {};
+    this.article = {};
+    this.articleSlug = '';
     input(this);
     this.formDisabled = false;
     this.errors = [];
-    this.model = [];
-    this.formElm = {};
 
-    this.title = ''; // single feald approach (no cr-for); experiment
+    this.title = ''; // single field approach (no cr-for); experiment
     this.description = '';
     this.body = '';
     this.tagList = '';
+    this.updateInstance(this.article);
   }
 
-  onInit(elm, crInst, inst) {
-    this.formElm = inst.views.form;
+  this$(prop) {
+    if (prop !== 'articleSlug') return;
+    this.updateInstance(this.article);
   }
 
-  this$(prop, item, value) {
-    if (prop === 'routeParams') {
-      if ((value.appName || '').indexOf('new') === -1) return;
-      this.errors = [];
-      if (value.var0) {
-        api.article({ article: value.var0 }).then(data => {
-          this.setUser(data.user);
-          this.title = data.article.title;
-          this.description = data.article.description;
-          this.body = data.article.body;
-          this.tagList = data.article.tagList.join(', ');
-        });
-      } else {
-        api.resetForm(this.formElm);
-      }
-    }
+  updateInstance(article) {
+    const slug = this.articleSlug;
+    this.title = slug ? article.title : '';
+    this.description = slug ? article.description : '';
+    this.body = slug ? article.body : '';
+    this.tagList = slug ? article.tagList : '';
   }
 
   submit(e, elm, item) {
@@ -48,17 +38,17 @@ require(['circular', '!new-post.component.html', 'api.service'],
     this.formDisabled = true;
     this.errors = [];
   
-    const data = api.getFormData(elm);
+    const data = forms.getFormData(elm);
     data.tagList = data.tagList.split(/,*\s(?:\s*,\s*)*\s*/);
 
-    api.postArticle({ article: data, slug: this.routeParams.var0 })
-    .then(data => {
-      this.formDisabled = false;
-      window.location.href = `#/article/${data.article.slug}`;
-    })
-    .catch(error => {
-      this.formDisabled = false;
-      this.errors = api.processErrors(error);
-    });
+    api.postArticle({ article: data, slug: this.articleSlug })
+      .then(data => {
+        this.formDisabled = false;
+        window.location.href = `#/article/${data.article.slug}`;
+      })
+      .catch(error => {
+        this.formDisabled = false;
+        this.errors = forms.processErrors(error);
+      });
   }
 }));

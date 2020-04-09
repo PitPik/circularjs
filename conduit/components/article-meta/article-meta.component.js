@@ -9,28 +9,29 @@ require([
   styles: 'article-meta img { overflow: hidden; }',
   helpers,
   subscribe$: {
-    this: ['metaData', 'trigger', 'routeParams', 'user'],
+    this: ['articleSlug', 'metaData', 'trigger', 'user'],
     model: ['*', 'author.*'],
   },
 }, class ArticleMeta {
   constructor(elm, crInst, input) {
-    this.metaData = {};
+    this.articleSlug = '';
+    this.metaData = [];
     this.user = {};
-    this.routeParams = {};
-    input(this);
     // if no metaData availabel then... take them from articles[idx];
     this.articles = {};
     this.trigger = false;
     this.idx = -1; // only for article list
-
     input(this);
-    this.model = [];
     this.crInst = crInst;
+    this.model = this.idx === -1 ? this.updateMeta(this.metaData) : [];
 
     this.idx === -1 && crInst.installEvent(null, 'meta-click', (data => {
       const item = this.model[0];
       const activeItem = data.detail.item;
       const type = data.detail.type;
+      const isLoggedIn = this.user && this.user.username;
+
+      if (!isLoggedIn) return window.location.href = '#/sign-up';
       if (!item || item === activeItem) return;
 
       if (type === 'follow') {
@@ -43,21 +44,24 @@ require([
         });
       } else if (type === 'like') {
         api.postLike({ slug: item.slug, favorited: item.favorited }).then(data => {
-          if (activeItem.favorited === item.favorited)
-            item.favorited = !item.favorited;
+          if (activeItem.favorited === item.favorited) item.favorited = !item.favorited;
           activeItem.favorited = !activeItem.favorited;
         });
       }
     }));
   }
 
+  updateMeta(item) {
+    return [{
+      isOwn: this.user && this.user.username === item.author.username,
+      slug: this.articleSlug, // too late...
+      ...JSON.parse(JSON.stringify(item))
+    }];
+  }
+
   this$(prop, item, value) {
-    if (prop === 'metaData') {
-      this.model = [{
-        isOwn: this.user && this.user.username === item.metaData.author.username,
-        slug: this.routeParams.var0,
-        ...item.model.getCleanModel(item.metaData),
-      }];
+    if (prop === 'articleSlug' && this.metaData) {
+      this.model = this.updateMeta(this.metaData);
     } else if (prop === 'trigger') {
       if (this.idx != value) return;
       const item = this.articles[this.idx];
@@ -87,7 +91,7 @@ require([
   }
 
   likeSingle(e, elm, item) {
-    if (this.user) {
+    if (this.user && this.user.username) {
       api.postLike({
         slug: this.articles[this.idx].slug,
         favorited: item.favorited,
@@ -96,7 +100,7 @@ require([
   }
 
   delete(e, elm, item) {
-    api.deleteArticle({ slug: this.routeParams.var0 })
+    api.deleteArticle({ slug: this.articleSlug })
       .then(data => window.location.href = '#/');
   }
 }));

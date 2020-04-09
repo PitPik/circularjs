@@ -4,7 +4,7 @@
     {{#if %noItems}}<div class="article-preview">No articles available...</div>{{/if}}
 
     <div class="article-preview" cr-for="articles">
-      <article-meta cr-input="metaData, '{{@index}}' as idx, articles, trigger, user"></article-meta>
+      <article-meta cr-input="'{{@index}}' as idx, articles, trigger, user"></article-meta>
 
       <a href="#/article/{{%slug}}" class="preview-link">
         <h1>{{%title}}</h1>

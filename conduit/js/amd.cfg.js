@@ -3,9 +3,10 @@ require.config({
 
   },
   paths: {
-    'data.service': 'js/data.service',
-    'api.service': 'js/api.service',
-    'template-helpers': 'js/template-helpers',
+    'data.service': 'services/data.service',
+    'api.service': 'services/api.service',
+    'forms.service': 'services/forms.service',
+    'template-helpers': 'partials/template-helpers',
     'marked': './node_modules/marked/lib/marked',
 
     'main-app.comp': 'components/main-app/main-app.comp',

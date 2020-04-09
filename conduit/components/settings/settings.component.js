@@ -1,25 +1,29 @@
-require(['circular', '!settings.component.html', 'api.service'],
-({ Component }, template, api) => Component({
+require(['circular', '!settings.component.html', 'api.service', 'forms.service'],
+({ Component }, template, api, forms) => Component({
   selector: 'settings',
   template,
   subscribe$: { this: ['errors'], model: ['*'] }
 }, class Settings {
   constructor(elm, crInst, input, getRoot) {
     this.user = {};
-    this.setUser = () => {};
+    // this.setUser = () => {};
     input(this);  
     this.model = [];
-    this.errors = []; // TODO: ...
+    this.errors = [];
+    this.rootApp = getRoot();
 
     api.user({ user: this.user.username ? this.user : undefined }).then(data => {
-      this.setUser(data);
       this.model = [{ errors: [], ...data }];
+      this.rootApp.user = data;
+      this.rootApp.isLoggedIn = true;
     })
   }
 
   logout() {
     api.userLogout().then(() => {
-      this.setUser(undefined);
+      console.log(this.rootApp);
+      this.rootApp.user = undefined;
+      this.rootApp.isLoggedIn = false;
       window.location.href = '#/';
     });
   }
@@ -27,14 +31,14 @@ require(['circular', '!settings.component.html', 'api.service'],
   submit(e, elm, item) {
     e.preventDefault();
 
-    const data = { ...api.getFormData(elm), id: this.user.id };
+    const data = { ...forms.getFormData(elm), id: this.user.id };
     if (!data.password) delete data.password;
-    api.toggleForm(elm, true);
+    forms.toggleForm(elm, true);
 
-    api.putSettings({ user: { ...api.getFormData(elm), id: this.user.id } })
-      .then(data => api.toggleForm(elm, false))
+    api.putSettings({ user: { ...forms.getFormData(elm), id: this.user.id } })
+      .then(data => forms.toggleForm(elm, false))
       .catch(error => {
-        this.errors = api.processErrors(error); // TODO: ...
+        this.errors = forms.processErrors(error); // TODO: ...
       });
   }
 }));

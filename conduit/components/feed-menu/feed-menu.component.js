@@ -9,16 +9,13 @@ require(['circular', '!feed-menu.component.html'],
     this.tag = '';
     this.isLoggedIn = false;
     this.profileName = '';
-    this.routeParams = {};
     input(this);
     this.model = []; // approach using full component...
     this.activeFeed = {};
     this.setLinks();
-    this.activeFeed.active = true;
   }
 
-  setLinks() { // TODO: this is confusing stuff; clean up...
-    const hasRouteParams = this.routeParams.appName !== undefined;
+  setLinks(prop) { // TODO: this is confusing stuff; clean up...
     const isProfile = !!this.profileName;
     const title0 = isProfile ? 'My Articles' : 'Your Feed';
     const title1 = isProfile ? 'Favorited Articles' : 'Global Feed';
@@ -34,13 +31,14 @@ require(['circular', '!feed-menu.component.html'],
       out.unshift({ link: root + myFeed, title: title0, active: false });
     if (this.tag && !isOwn)
       out.push({ link: root + this.tag, title: '#' + this.tag, active: true });
-    if (!hasRouteParams) {
+    if (!isProfile) {
       this.activeFeed = this.tag && !isOwn ? out[out.length - 1] :
-        isOwn || !this.isLoggedIn && !this.routeParams.var2 ? out[0] :
+        isOwn || !this.isLoggedIn && !this.tag ? out[0] :
         out[1];
     }
     this.model = out;
-    if (hasRouteParams) this.activeFeed = this.model[!this.routeParams.var2 ? 0 : 1];
+    if (isProfile) this.activeFeed = this.model[!this.tag ? 0 : 1];
+    this.activeFeed.active = true;
   }
 
   this$(prop, item, value, oldValue) {
@@ -49,11 +47,8 @@ require(['circular', '!feed-menu.component.html'],
       if (value) value.active = true;
     }
     if (value === oldValue) return;
-    if (prop === 'tag' || prop === 'isLoggedIn' && !this.profileName) this.setLinks();
-    if (prop === 'profileName') this.setLinks();
-    if (prop === 'routeParams' && value.appName === 'profile') {
-      this.activeFeed = this.model[!value.var2 ? 0 : 1];
-    }
+    if (prop === 'tag' || prop === 'isLoggedIn' && !this.profileName) this.setLinks(prop);
+    if (prop === 'profileName') this.setLinks(prop);
   }
 
   toggle(e, elm, item) {

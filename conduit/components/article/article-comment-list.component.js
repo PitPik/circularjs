@@ -10,16 +10,15 @@ require([
   styles: '',
   subscribe$: { this: ['comments', 'articleSlug'], comments: ['*', 'author.*'] },
 }, class ArticleCommentList {
-  constructor(elm, crInst, input, getRoot) {
+  constructor(elm, crInst, input) {
     this.comments = [];
     this.articleSlug = '';
     input(this);
-    this.rootApp = getRoot();
   }
 
   delete(e, elm, item) {
     api.deleteComment({ id: item.id, slug: this.articleSlug }).then(data => {
-      this.rootApp.triggerLoadData();
+      window.location.href = `#/article/${this.articleSlug}`;
     });
   }
 }));
