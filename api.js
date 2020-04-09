@@ -5,6 +5,7 @@ return function addCircularAPI(inbound, Circular) {
 var pubsub = {}; // general data holder
 var modulesMap = {}; // list of modules for module switching
 var prototype = {};
+var Promise = Toolbox.Promise;
 
 prototype.model = function(model, options) {
   return new VOM(model, options);
@@ -241,6 +242,7 @@ prototype.renderModule = function(data) {
     return new Toolbox.Promise(function(resolve) {
       appendChildToContainer(item.element, container, data.transition);
       if (item.instance && item.instance.onLoad) item.instance.onLoad(item.element, _this);
+      if (item.instance && item.instance.onRender) item.instance.onRender(data.data);
       resolve(item);
     });
   }
@@ -257,6 +259,7 @@ prototype.renderModule = function(data) {
 
       appendChildToContainer(componentElm, container, data.transition);
       if (item && item.onLoad) item.onLoad(componentElm, _this);
+      if (item && item.onRender) item.onRender(data.data);
       resolve(modulesMap[(data.context || '') + data.require] = !module.instance ? {
         element: componentElm,
         instance: instance,
