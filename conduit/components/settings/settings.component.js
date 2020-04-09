@@ -21,7 +21,6 @@ require(['circular', '!settings.component.html', 'api.service', 'forms.service']
 
   logout() {
     api.userLogout().then(() => {
-      console.log(this.rootApp);
       this.rootApp.user = undefined;
       this.rootApp.isLoggedIn = false;
       window.location.href = '#/';
