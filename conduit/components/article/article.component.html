@@ -30,6 +30,10 @@
         <div class="col-xs-12 col-md-8 offset-md-2">
           {{#if %isLoggedIn}}
           <article-comment-form cr-input="user, articleSlug"></article-comment-form>
+          {{else}}
+          <div>
+            <a href="#/sign-in">Sign in</a> or <a href="#/sign-up">sign up</a> to add comments on this article.
+          </div>
           {{/if}}
           <article-comment-list cr-input="comments, articleSlug"></article-comment-list>
         </div>
