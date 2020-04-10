@@ -174,7 +174,9 @@ function getData(_this, model, tagData) {
     partial ? 'partial' : value.constructor === Array ? 'array' : typeof value;
   var path = model.scopes[0].path;
 
-  path.splice(path.length - 1, 1, renderPath(variable.path, variable.value));
+  path.splice(path.length - 1, 1, renderPath(variable.path,
+    helper || partial ? tagData.vars[0].variable.value : variable.value));
+  variable._path = path.join('.');
 
   return { value: value, type: type };
 }
@@ -292,7 +294,7 @@ function renderWith(_this, data, model, tagData, bodyFns) {
 
 function render(_this, model, tagData, isBlock, out, renderFn, bodyFns, track) {
   return _this.options.renderHook ? _this.options.renderHook.call(
-    _this, out, tagData, model, isBlock, track, model.scopes[0].path.join('.'),
+    _this, out, tagData, model, isBlock, track, tagData.root.variable._path,
     tagData.root ? tagData.root.variable.value : '', model.scopes[0] &&
       getDeepData(model.scopes[0].scope, tagData.root.variable, true) || {},
     function(data) { return renderFn(_this, tagData, model, bodyFns ||
@@ -394,6 +396,7 @@ function parsePath(text, name, string) {
     value: pathParts.pop(),
     path: pathParts,
     parentDepth: parts.length,
+    _path: '',
   }
 }
 
