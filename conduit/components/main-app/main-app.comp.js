@@ -14,7 +14,7 @@ require([
   selector: '[main-app]',
   subscribe$: { this: ['*'] },
   styles: `
-    .loader { clear: both; padding: 1em 0; display: none; }
+    .loader { display: none; }
     .loading article-list { display: none }
     .loading .loader { display: block }`,
 }, class MainApp {
