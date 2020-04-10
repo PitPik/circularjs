@@ -13,15 +13,17 @@
         </ul>
 
         <form cr-event="submit: submit" cr-view="form">
+          {{#unless %isSignIn}}
           <fieldset class="form-group">
-            {{#unless %isSignIn}}<input
+            <input
               class="form-control form-control-lg"
               disabled="{{%formDisabled}}"
               name="username"
               type="text"
               placeholder="Your Name"
-            >{{/unless}}
+            >
           </fieldset>
+          {{/unless}}
           <fieldset class="form-group">
             <input
               class="form-control form-control-lg"

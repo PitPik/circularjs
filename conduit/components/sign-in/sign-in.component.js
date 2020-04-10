@@ -14,12 +14,11 @@ require([
     this.errors = [];
     this.formDisabled = false;
     this.formElm = {};
-    this.isSignIn = true;
+    this.isSignIn = this.activeLink.link === 'sign-in';
   }
 
   onInit(elm, crInst, inst) {
     this.formElm = inst.views.form;
-    this.isSignIn = this.activeLink.link === 'sign-in'; // blick bug...
   }
 
   this$(prop, item, value) {
