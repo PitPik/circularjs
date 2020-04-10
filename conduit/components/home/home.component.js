@@ -13,7 +13,7 @@ require([
     this: ['articles', 'tags', 'tag', 'pagination', 'user', 'isLoggedIn'],
   },
 }, class Home {
-  constructor(elm, crInst, input, getRoot, type) {
+  constructor(elm, crInst, input) {
     this.user = {};
     this.isLoggedIn = false;
     this.articles = [];

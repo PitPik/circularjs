@@ -27,6 +27,7 @@ require(['circular', '!feed-menu.component.html'],
       link:  isProfile ? root + '/favorites' : '', title: title1, active: false,
     }];
 
+    if (isProfile && this.tag || !isProfile && this.tag === '') return;
     if (this.isLoggedIn || isProfile)
       out.unshift({ link: root + myFeed, title: title0, active: false });
     if (this.tag && !isOwn)

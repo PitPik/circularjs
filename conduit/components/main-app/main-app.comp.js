@@ -13,6 +13,10 @@ require([
 ({ Module, Toolbox: { Promise } }, dataService, apiService) => Module({
   selector: '[main-app]',
   subscribe$: { this: ['*'] },
+  styles: `
+    .loader { clear: both; padding: 1em 0; display: none; }
+    .loading article-list { display: none }
+    .loading .loader { display: block }`,
 }, class MainApp {
   constructor() {
     this.activeLink = {};
@@ -40,11 +44,14 @@ require([
         const previousApp = this.activeLink.app;
         this.activeLink = dataService.getLink(params.appName) || {};
         const currentApp = this.activeLink.app || '';
+        items.views.outlet.className =
+          `loading${/^art/.test(currentApp) ? '-article' : ''}`;
 
         this.getData(currentApp, params.var0, params.var1, params.var2)
           .then(data => this.delegateData(data, params.appName, params.var0))
           .then(() => {
             this.articleSlug = params.var0 || '';
+            items.views.outlet.className = '';
             if (previousApp === currentApp) return;
             this.updateView(currentApp, items.views.outlet, crInst);
           });
@@ -121,10 +128,8 @@ require([
     const transition = (remove, append) => {
       remove(); // TODO: make nice transition
       append();
-      container.className = '';
     }
 
-    container.className = 'hide';
     crInst.renderModule({ require, container, input, this: this, transition })
       .then(items => {});
   }

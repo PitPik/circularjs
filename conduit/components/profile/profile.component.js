@@ -12,8 +12,8 @@ require([
     profile: ['*'],
   },
 }, class Profile extends Home.Klass {
-  constructor(elm, crInst, input, getRoot) {
-    super(elm, crInst, input, getRoot, 'profile');
+  constructor(elm, crInst, input) {
+    super(elm, crInst, input);
 
     this.profile = [];
     this.profileName = '';
