@@ -9,9 +9,7 @@ require([
 ], ({ Component }, template, api) => Component({
   selector: 'home',
   template,
-  subscribe$: {
-    this: ['articles', 'tags', 'tag', 'pagination', 'user', 'isLoggedIn'],
-  },
+  subscribe$: { this: ['*'] },
 }, class Home {
   constructor(elm, crInst, input) {
     this.user = {};

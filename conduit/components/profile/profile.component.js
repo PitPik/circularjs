@@ -7,10 +7,7 @@ require([
 ], ({ Component }, template, Home, api) => Component({
   selector: 'profile',
   template,
-  subscribe$: {
-    this: Home.subscribe$.this.concat('profileName'),
-    profile: ['*'],
-  },
+  subscribe$: { this: Home.subscribe$.this, profile: ['*'] },
 }, class Profile extends Home.Klass {
   constructor(elm, crInst, input) {
     super(elm, crInst, input);
