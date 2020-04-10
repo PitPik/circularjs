@@ -180,6 +180,7 @@ function resolveReferences(_this, dataDump, html, update) {
 // ---- attributes
 
 function attributeFn(_this, node, start$, end$, dump, dataDump) {
+  var regexp = />/g;
   var ownerElement = node.ownerElement;
   var attrFn = _this.options.attributes[node.nodeName];
   var update = function(helper) {
@@ -189,9 +190,10 @@ function attributeFn(_this, node, start$, end$, dump, dataDump) {
     if (attrFn) {
       return attrFn(ownerElement, node.nodeName, parentNode.textContent);
     }
-    node.textContent = parentNode.textContent;
+    node.textContent = parentNode.textContent.replace(regexp, '');
   };
-  var wrap = node._cache = node._cache || saveWrapHtml(node.textContent, true);
+  var wrap = node._cache = node._cache ||
+    saveWrapHtml(node.textContent.replace(regexp, ''), true);
   var helperNode = [].slice.call(wrap.childNodes).filter(function(item) {
     return item.textContent.indexOf(start$) !== -1; // TODO: optimise
   })[0];
