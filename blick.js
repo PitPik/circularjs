@@ -124,6 +124,7 @@ function findEndNode(node, end$) {
 function findSatrtNode(node, start$) {
   node = node.splitText(node.textContent.indexOf(start$));
   node.textContent = node.textContent.substring(start$.length);
+  node = node.splitText(0);
   return node;
 }
 

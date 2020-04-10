@@ -16,7 +16,7 @@
       <div class="row article-content">
         <div class="col-md-12">
           {{#if %body}}{{{markdown %body}}}{{else}}No article available...{{/if}}
-          <div>{{>tag-list %tagList}}</div><!-- TODO: doesn't work without <div>; blick -->
+          {{>tag-list %tagList}}
         </div>
       </div>
 
