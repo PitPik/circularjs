@@ -15,7 +15,10 @@ require([
   subscribe$: { this: ['*'] },
   styles: `
     .loader { display: none; }
-    .loading article-list { display: none }
+    article-list { display: block; opacity: 1; transition: opacity .5s }
+    .loading article-list {
+      transition: none; opacity: 0; height: 0; overflow: hidden
+    }
     .loading .loader { display: block }`,
 }, class MainApp {
   constructor() {
