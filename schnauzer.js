@@ -175,7 +175,6 @@ function getData(_this, model, tagData) {
   var path = model.scopes[0].path;
 
   path.splice(path.length - 1, 1, renderPath(variable.path, variable.value));
-  root._path = path.join('.');
 
   return { value: value, type: type };
 }
@@ -293,7 +292,7 @@ function renderWith(_this, data, model, tagData, bodyFns) {
 
 function render(_this, model, tagData, isBlock, out, renderFn, bodyFns, track) {
   return _this.options.renderHook ? _this.options.renderHook.call(
-    _this, out, tagData, model, isBlock, track, tagData.root._path,
+    _this, out, tagData, model, isBlock, track, model.scopes[0].path.join('.'),
     tagData.root ? tagData.root.variable.value : '', model.scopes[0] &&
       getDeepData(model.scopes[0].scope, tagData.root.variable, true) || {},
     function(data) { return renderFn(_this, tagData, model, bodyFns ||
@@ -407,7 +406,6 @@ function getVar(item) {
     isString: false,
     isStrict: false,
     active: 0,
-    _path: '',
   };
 
   item = cleanText(item, out).substr(out.active = getActiveState(item));
