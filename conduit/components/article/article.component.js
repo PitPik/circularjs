@@ -13,10 +13,7 @@ require([
   partials,
   styles: 'article .tag-list { text-align: right }',
   helpers,
-  subscribe$: {
-    this: ['articleSlug', 'isLoggedIn', 'article', 'comments', 'metaData', 'user'],
-    article: ['*'],
-  },
+  subscribe$: { this: ['*'], article: ['*'] },
 }, class Article {
   constructor(elm, crInst, input) {
     this.user = {};
