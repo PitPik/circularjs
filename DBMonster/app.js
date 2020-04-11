@@ -11,7 +11,7 @@ require(['circular'], ({ Module }) => Module({
           <span class="{{%lastSample.countClassName}}">
             {{%lastSample.nbQueries}}
           </span>
-          {{#each %lastSample.topFiveQueries}}
+          {{#each lastSample.topFiveQueries}}
         </td>
         <td class="{{%elapsedClassName}}">
           {{%formatElapsed}}
