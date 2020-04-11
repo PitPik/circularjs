@@ -9,12 +9,13 @@
 
 var saveWrapHtml = (function(search, tags) {
   for (var tag in tags) tags[tag] = document.createElement(tags[tag]);
-  return function(htmlText, clone) {
+  return function(htmlText, clone, textOnly) {
     var tagName = ((htmlText || '').match(search) || [])[1];
     var helper = (tags[tagName] || tags['default']);
 
     if (clone) helper = helper.cloneNode();
-    helper.insertAdjacentHTML('afterbegin', htmlText || '');
+    textOnly ? helper.textContent = htmlText || '' :
+      helper.insertAdjacentHTML('afterbegin', htmlText || '');
     // helper.innerHTML = htmlText || '';
     return helper;
   };
@@ -193,8 +194,8 @@ function attributeFn(_this, node, start$, end$, dump, dataDump) {
     }
     node.textContent = parentNode.textContent.replace(regexp, '');
   };
-  var wrap = node._cache = node._cache || // TODO: no saveWrapHtml(); slow;
-    saveWrapHtml(node.textContent.replace(regexp, ''), true);
+  var wrap = node._cache = node._cache ||
+    saveWrapHtml(node.textContent.replace(regexp, ''), true, true);
   var helperNode = [].slice.call(wrap.childNodes).filter(function(item) {
     return item.textContent.indexOf(start$) !== -1; // TODO: optimise
   })[0];
