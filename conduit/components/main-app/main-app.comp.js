@@ -97,7 +97,8 @@ require([
     if (data.pagination && !isHome) this.myPagination = data.pagination;
     if (data.article) {
       this.article = [data.article];
-      const isMine = this.user.username === data.article.author.username;
+      const isMine = this.user &&
+        this.user.username === data.article.author.username;
       this.myArticle = { // for convenience -> edit post
         title: isMine ? data.article.title : '',
         description: isMine ? data.article.description: '',
