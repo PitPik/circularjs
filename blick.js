@@ -14,7 +14,8 @@ var saveWrapHtml = (function(search, tags) {
     var helper = (tags[tagName] || tags['default']);
 
     if (clone) helper = helper.cloneNode();
-    helper.innerHTML = htmlText || '';
+    helper.insertAdjacentHTML('afterbegin', htmlText || '');
+    // helper.innerHTML = htmlText || '';
     return helper;
   };
 }(/<\s*(\w*)[\s\S]*?>/, {
@@ -153,7 +154,7 @@ function renderHook(
       data.active > 0 || data.active > 2,
     root: scopes[scopes.length - 1].scope, helper: helper,
     scope: scopes[0].scope || {}, parent: parent, key: longKey, out: out,
-    helperFn: isOdd ? bodyFn : null,
+    helperFn: isOdd ? bodyFn : null, isOdd: isOdd,
   });
 
   return start + out + end;
@@ -192,7 +193,7 @@ function attributeFn(_this, node, start$, end$, dump, dataDump) {
     }
     node.textContent = parentNode.textContent.replace(regexp, '');
   };
-  var wrap = node._cache = node._cache ||
+  var wrap = node._cache = node._cache || // TODO: no saveWrapHtml(); slow;
     saveWrapHtml(node.textContent.replace(regexp, ''), true);
   var helperNode = [].slice.call(wrap.childNodes).filter(function(item) {
     return item.textContent.indexOf(start$) !== -1; // TODO: optimise

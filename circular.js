@@ -694,7 +694,8 @@ function getTemplate(template, defData, where, modelName) {
 }
 
 function processTemplate(element, defData) {
-  var _ = element.innerHTML = defData.template || ''; // TODO: fragment...
+  var _ = element.insertAdjacentHTML('beforeend', defData.template || '');
+  // var _ = element.innerHTML = defData.template || ''; // TODO: fragment...
   var templates = $$('[cr-for]', element);
   var result = {};
 

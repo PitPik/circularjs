@@ -174,8 +174,8 @@ function getData(_this, model, tagData) {
     partial ? 'partial' : value.constructor === Array ? 'array' : typeof value;
   var path = model.scopes[0].path;
 
-  path.splice(path.length - 1, 1, renderPath(variable.path,
-    helper || partial ? tagData.vars[0].variable.value : variable.value));
+  path.splice(path.length - 1, 1, renderPath(variable.path, helper || partial ?
+    tagData.vars[0] && tagData.vars[0].variable.value : variable.value));
   variable._path = path.join('.');
 
   return { value: value, type: type };
