@@ -3,7 +3,7 @@
 > ### [CircularJS](https://github.com/PitPik/circularjs) codebase containing real world examples (CRUD, auth, advanced patterns, etc) that adheres to the [RealWorld](https://github.com/gothinkster/realworld) spec and API.
 
 
-### [Demo](https://pitpik.github.io/circularjs/conduit/src)&nbsp;&nbsp;&nbsp;&nbsp;[RealWorld](https://github.com/PitPik/circularjs)
+### [Demo](https://pitpik.github.io/circularjs/conduit)&nbsp;&nbsp;&nbsp;&nbsp;[RealWorld](https://github.com/PitPik/circularjs)
 
 
 This codebase was created to demonstrate a fully fledged fullstack application built with **CircularJS** including CRUD operations, authentication, routing, pagination, and more.
