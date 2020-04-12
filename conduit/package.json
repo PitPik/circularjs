@@ -5,7 +5,7 @@
   "main": "index.html",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "node scripts/package.js -p ./ -c js/amd.cfg.js -o js/main.min.js -e"
+    "build": "node ../package.js -p ./ -c js/amd.cfg.js -o js/main.min.js -cr ../circular.min.js -e"
   },
   "keywords": [
     "circularJS",
