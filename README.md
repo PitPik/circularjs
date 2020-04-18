@@ -2,6 +2,8 @@
 
 # What is CircularJS
 
+See some demos right away @ [pitpik.github.io/circularjs](https://pitpik.github.io/circularjs/)
+
 CircularJS is a tiny, progressive **MV\* like framework** with its goal to help building **web-pages** and **single-page-web-apps** in a **model-oriented** easy way with the help of powerful tools:
 
  - **Schnauzer**: tiny an fast rendering engine (like Handlebars but smaller than Mustache) to reflect VOM models on the fly in combination with the internal **rendering module**. (Replaces Angular like ng-if, ng-class, etc.)
