@@ -627,9 +627,10 @@ function render(html, operator, parentNode, sibling, created) { // TODO: created
 function installStyles(selector, options) {
   if (!options.styles) return;
 
+  var innerHTML = isArray(options.styles) ? options.styles.join('\n') : options.styles;
   var link = $create('style');
   link.setAttribute('name', selector);
-  link.innerHTML = '\n' + options.styles + '\n'; // TODO: sourceURL
+  link.innerHTML = '\n' + innerHTML + '\n';
   document.head.appendChild(link);
 
   return link;
@@ -734,7 +735,7 @@ function getAttrMap(element, attr, fn) {
     for (var m = chunks.length, item = [], type = '', value = ''; m--; ) {
       item = chunks[m].split(/\s*:+\s*/);
       type = item[0];
-      value = item[1];
+      value = item[1] || item[0];
       if (!value) {
         data[type] = data[type] || [];
         data[type].push(elements[n]);
