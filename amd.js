@@ -157,13 +157,14 @@ function getDependencies(parentName, deps, sync) {
     }
     module = modules[name] = {
       name: name,
+      isInline: name.charAt(0) === '%',
       isFile: name.charAt(0) === '!',
       path: getPathFromName(name),
-      parents: [parentName]
+      parents: [parentName],
     };
     if (module.isFile) {
       require.getFile(module, markAsDone);
-    } else {
+    } else if (!module.isInline) {
       appendScript(applyScript(module, sync));
       lookaheadForDeps(name);
     }
@@ -189,6 +190,7 @@ function define(name, deps, factory, sync) {
   if (module) { // is dependency
     module.deps = deps;
     module.factory = factory;
+    if (module.isInline) markAsDone(module);
   } else { // is not dependency
     module = modules[name] =
       { name: name, deps: deps, factory: factory, parents: [] };
