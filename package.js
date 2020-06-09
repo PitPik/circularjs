@@ -274,16 +274,18 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
   const require = { // local overwrite...
     config: cfgData => {
       Object.keys(cfgData.paths).forEach((item, idx) => {
-        const path = getRealPath(cfgData.paths[item]);
+        const production = cfgData.production || {};
+        const itemPath = production[item] || cfgData.paths[item];
+        const path = getRealPath(itemPath);
         if (fs.existsSync(path)) {
           arr.push({
             key: item,
-            path: cfgData.paths[item],
+            path: itemPath,
           });
         } else {
           console.log(`[SKIP] ${path}`);
           // TODO: necessary??
-          // delete cfgData.paths[item];
+          // delete itemPath;
         }
       });
 

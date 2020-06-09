@@ -39,6 +39,7 @@ var Blick = function(template, options) {
     attributes: {
       value: setValue,
       disabled: setAttribute,
+      hidden: setAttribute,
       checked: setAttribute,
       autocomplete: setAttribute,
       contenteditable: setAttribute,

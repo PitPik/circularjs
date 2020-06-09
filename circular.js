@@ -129,6 +129,10 @@ function initComponent(element, defData, Klass, plugData, parent) {
   var elmId = element.getAttribute('cr-id');
   var elmName = element.getAttribute('cr-name');
 
+  if (defData.singleton) {
+    if (components[defData.selector].singleton) return;
+    components[defData.selector].singleton = true;
+  }
   if (elmId && !plugData) {
     return instances[crInst.id + ':' + elmId];
   }
