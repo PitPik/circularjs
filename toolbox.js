@@ -155,6 +155,7 @@ var Toolbox = {
       }, obj || Toolbox.storageHelper);
     },
     save: function (data, key) {
+      if (data === null) return localStorage.removeItem(key);
       localStorage.setItem(key, JSON.stringify(data));
     }
   },
@@ -448,8 +449,12 @@ Promise.all = function(promises) {
 
 if (window.require) {
   require.getFile = function(resource, markAsDone) {
+    var ext = resource.name.substring(resource.name.lastIndexOf('.') + 1).toLowerCase();
+    var dataType = /^(?:json|xml)$/.test(ext) ? ext : '';
+
     Toolbox.ajax(resource.path, {
-      cache: resource.name.substr(0, 2) !== '!!'
+      cache: resource.name.substr(0, 2) !== '!!',
+      dataType: dataType,
     }).then(function(data) {
       resource.done = data;
       markAsDone(resource);

@@ -1,4 +1,4 @@
-/**! @license blick v0.1.0; Copyright (C) 2018-2020 by Peter Dematté */
+/**! @license blick v0.1.1; Copyright (C) 2018-2020 by Peter Dematté */
 (function defineBlick(global, factory) {
   if (typeof exports === 'object') module.exports =
     factory(global, require('schnauzer'));
@@ -83,11 +83,11 @@ return Blick;
 
 function setAttribute(element, name, value) {
   if (value === true || value === 'true' || (!value && value !== false)) {
-    element.setAttribute(name, '');
-    element[name] = true;
+    element.setAttribute(name, name === 'selected' ? name : '');
+    setTimeout(function() { element[name] = true });
   } else {
     element.removeAttribute(name);
-    element[name] = false;
+    setTimeout(function() { element[name] = false });
     if (value === 'focus') element.focus();
   }
 }

@@ -1,4 +1,4 @@
-/**! @license CircularJS ● v1.3.0; Copyright (C) 2019 by Peter Dematté */
+/**! @license CircularJS ● v1.3.1; Copyright (C) 2020 by Peter Dematté */
 define('circular', ['toolbox', 'blick', 'VOM', 'api', 'controller'],
 function(Toolbox, Blick, VOM, mixinAPI, Controller) { 'use strict';
 
@@ -223,7 +223,7 @@ function getInstance(Klass, element, crInst, instId, plugData, defData, inst, pa
     }
     if (subscribe !== false) {
       for (var key in parentValues.origin) {
-        if (parentValues.static[key] || key === 'null') continue;
+        if (parentValues.static[key] || key === 'null' || !key) continue;
         isLoop = key === 'this' || key === '.';
         if (isLoop) {
           scope[parentValues.names[key]] = loopItem;
@@ -350,15 +350,14 @@ function applyModel(data) {
   return vom;
 }
 
-function injectNewModel(vom, model, newModel, deltaOnly) {
+function injectNewModel(vom, model, newModel, deltaOnly, item) {
   for (var n = 0, m = newModel.length; n < m; n++) {
     if (model[n]) {
       updateModelItem(vom, model[n], newModel[n]);
-    } else { // if (!deltaOnly)
-      vom.appendChild(newModel[n], model.parentNode || model[0] && model[0].parentNode);
+    } else {
+      vom.appendChild(newModel[n], model.parentNode || model[0] && model[0].parentNode || item);
     }
   }
-  if (deltaOnly) return;
   while (model.length > newModel.length) vom.removeChild(model[model.length - 1]);
 }
 
@@ -369,15 +368,32 @@ function updateModelItemLoop(vom, item, newItem, key) { // TODO: performance
   if (key === 'childNodes' || !item) return;
   isArr = isArray(item[key]);
   isActiveArr = isArr && Object.getOwnPropertyDescriptor(item, key).get;
-  item[key] = isActiveArr ? newItem[key] :
-    typeof item[key] === 'object' || isArray(item[key]) ?
+  item[key] = isActiveArr ? newItem[key] : typeof item[key] === 'object' || isArr ?
     updateModelItem(vom, item[key], newItem[key] || {}) : newItem[key];
+}
+
+function deleteModelItem(newItem, item, key, vom) {
+  if (!newItem.hasOwnProperty(key)) {
+    if (key === 'childNodes') for (var n = item.childNodes.length; n--; )
+      vom.removeChild(item.childNodes[n]);
+    item[key] = null; // triger blick items ???
+    delete item[key];
+  }
 }
 
 function updateModelItem(vom, item, newItem) {
   for (var key in newItem) updateModelItemLoop(vom, item, newItem, key);
-  if (newItem.childNodes) {
-    injectNewModel(vom, item.childNodes, newItem.childNodes);
+  for (var key in item) deleteModelItem(newItem, item, key, vom);
+  if (newItem.childNodes && newItem.childNodes.length) {
+    if (!item.childNodes) {
+      for (var n = 0, l = newItem.childNodes.length; n < l; n++) {
+        vom.appendChild(newItem.childNodes[n], item);
+      }
+    } else {
+      injectNewModel(vom, item.childNodes, newItem.childNodes, false, item);
+    }
+  } else if (item.childNodes) {
+    for (var n = item.childNodes.length; n--; ) vom.removeChild(item.childNodes[n]);
   }
   return item;
 }
@@ -554,8 +570,9 @@ function registerEventsForBlickItem(data, item, element, eventName, fnName) {
   var rootElm = data.items && data.items.elements.element || data.instance.element;
 
   if (!elms) {
+    if (!item.events) item.events = {};
     elms = item.events[eventName] = {};
-    data.controller.installEvent(data.instance, rootElm, eventName);
+    data.controller.installEvent(data.instance, rootElm, eventName, item);
   }
   if (!elms[fnName]) {
     elms[fnName] = [element];

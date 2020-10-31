@@ -1,4 +1,4 @@
-/**! @license CircularJS v1.0.0; Copyright (C) 2019 by Peter Dematté */
+/**! @license CircularJS v1.0.1; Copyright (C) 2020 by Peter Dematté */
 define('api', ['VOM', 'blick', 'toolbox'], function(VOM, Blick, Toolbox) {
 return function addCircularAPI(inbound, Circular) {
 
@@ -35,7 +35,7 @@ prototype.subscribeToComponent = function(name, prop, fn, trigger) {
   var component = this.getComponent(name);
   var id = component && component['__cr-id'];
 
-  if (component) {
+  if (component && prop) {
     this.subscribe(this.id, id, prop, fn, trigger);
 
     return function unsubscribe() { _this.unsubscribe(_this.id, id, prop, fn) };
@@ -53,6 +53,7 @@ prototype.destroyComponents = function(insts) {
 
 prototype.subscribe = function(inst, comp, attr, callback, trigger) {
   var _this = this;
+  var _comp = comp;
 
   inst = inst ? inst.name || inst.components && inst.components[comp] || inst : this.name;
   pubsub[inst] = pubsub[inst] || {};
@@ -74,7 +75,7 @@ prototype.subscribe = function(inst, comp, attr, callback, trigger) {
     (callback.callback || callback).call(this, comp[attr].value);
   }
 
-  return function() { _this.unsubscribe(inst, comp, attr, callback) };
+  return function() { _this.unsubscribe(inst, _comp, attr, callback) };
 };
 
 prototype.publish = function(inst, comp, attr, data) {
@@ -236,11 +237,16 @@ prototype.renderModule = function(data) {
   var item = modulesMap[(data.context || '') + data.require];
   var _this = this;
 
-  if (!isValid) return new Promise(function(){});
+  if (!isValid) {
+    if (data.scroll && container.children) {
+      container.children[0]._scroll = (Toolbox.$(data.scroll, container) || {}).scrollTop;
+    }
+    return new Promise(function(){});
+  }
 
   if (item) {
     return new Toolbox.Promise(function(resolve) {
-      appendChildToContainer(item.element, container, data.transition);
+      appendChildToContainer(item.element, container, data);
       if (item.instance && item.instance.onLoad) item.instance.onLoad(item.element, _this);
       if (item.instance && item.instance.onRender) item.instance.onRender(data.data);
       resolve(item);
@@ -257,7 +263,7 @@ prototype.renderModule = function(data) {
       var instance = !module.instance && module.init(componentElm, null, data.this);
       var item = module.instance || instance;
 
-      appendChildToContainer(componentElm, container, data.transition);
+      appendChildToContainer(componentElm, container, data);
       if (item && item.onLoad) item.onLoad(componentElm, _this);
       if (item && item.onRender) item.onRender(data.data);
       resolve(modulesMap[(data.context || '') + data.require] = !module.instance ? {
@@ -268,9 +274,9 @@ prototype.renderModule = function(data) {
   });
 };
 
-function appendChildToContainer(element, container, transition) {
-  if (transition) {
-    return transition(function remove() {
+function appendChildToContainer(element, container, data) {
+  if (data.transition) {
+    return data.transition(function remove() {
       if (container.children[0]) {
         container.removeChild(container.children[0]);
       }
@@ -279,9 +285,17 @@ function appendChildToContainer(element, container, transition) {
     });
   }
   if (container.children[0]) {
+    container.children[0]._scroll = data.scroll &&
+      (Toolbox.$(data.scroll, data.container) || {}).scrollTop;
     container.replaceChild(element, container.children[0]);
+    if (element._scroll && data.scroll) {
+      (Toolbox.$(data.scroll, element) || {}).scrollTop = element._scroll || 0;
+    }
   } else {
     container.appendChild(element);
+    if (element._scroll && data.scroll) {
+      (Toolbox.$(data.scroll, data.container) || {}).scrollTop = element._scroll || 0;
+    }
   }
 }
 
