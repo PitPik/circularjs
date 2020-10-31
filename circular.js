@@ -392,7 +392,7 @@ function updateModelItem(vom, item, newItem) {
     } else {
       injectNewModel(vom, item.childNodes, newItem.childNodes, false, item);
     }
-  } else if (item.childNodes) {
+  } else if (item && item.childNodes) {
     for (var n = item.childNodes.length; n--; ) vom.removeChild(item.childNodes[n]);
   }
   return item;
