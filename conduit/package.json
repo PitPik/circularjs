@@ -18,7 +18,7 @@
   "author": "Peter Dematté",
   "license": "ISC",
   "dependencies": {
-    "marked": "^0.8.0"
+    "marked": "^4.0.10"
   },
   "devDependencies": {
     "node-minify": "3.6.0"
