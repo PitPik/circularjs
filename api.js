@@ -1,4 +1,4 @@
-/**! @license api v2.0.0; Copyright (C) 2022 by Peter Dematté */
+/**! @license api v2.0.0; Copyright (C) 2023 by Peter Dematté */
 define(['toolbox'], function(Toolbox) {
   return function addCircularAPI(inbound, Circular) {
   

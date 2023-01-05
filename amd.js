@@ -1,4 +1,4 @@
-/**! @license amd v1.0.0; Copyright (C) 2022 by Peter Dematté */
+/**! @license amd v1.0.0; Copyright (C) 2023 by Peter Dematté */
 !(function (root) { 'use strict';
 
 var mathRand = root.Math.random;

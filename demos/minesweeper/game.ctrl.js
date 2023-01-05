@@ -24,7 +24,7 @@ define('game-controller', ['game-service'], function(gameSrv) {  'use strict';
     } else if (mark && !item.isProcessed) {
       item.mark = item.mark === 'marked' ? 'open' : item.mark === 'open' ? '' : 'marked';
     } else if (item.isMine && item.mark !== 'marked') {
-      model.getElementsByProperty('isMine', true).forEach(function(_item) {
+      model.filterAll(item => item.isMine === true).forEach(function(_item) {
         _item.mark = _item === item ? 'mine last' : 'mine';
       });
 
@@ -34,7 +34,7 @@ define('game-controller', ['game-service'], function(gameSrv) {  'use strict';
       item.isProcessed = true;
       if (!item.surrounding) lookAround(model, item);
     }
-    return checkAll(model.getElementsByProperty('isProcessed', false));
+    return checkAll(model.filterAll(item => item.isProcessed === false));
   }
   return { checkItem: checkItem };
 });

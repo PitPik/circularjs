@@ -1,4 +1,4 @@
-/**! @license blick v1.0.0; Copyright (C) 2018-2022 by Peter Dematté */
+/**! @license blick v1.0.0; Copyright (C) 2018-2023 by Peter Dematté */
 (function(global, factory) {
   if (typeof exports === 'object' && typeof module === 'object')
     module.exports = factory(global, require('schnauzer'));

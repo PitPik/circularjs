@@ -1,4 +1,4 @@
-/**! @license CircularJS ● v2.0.0; Copyright (C) 2017-2022 by Peter Dematté */
+/**! @license CircularJS ● v2.0.0; Copyright (C) 2017-2023 by Peter Dematté */
 define(['toolbox', 'blick', 'VArray', 'api', 'controller'],
 function(Toolbox, Blick, VArray, mixinAPI, Controller) { 'use strict';
 

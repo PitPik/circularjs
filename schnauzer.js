@@ -1,4 +1,4 @@
-/**! @license schnauzer v2.0.7; Copyright (C) 2017-2022 by Peter Dematté */
+/**! @license schnauzer v2.0.7; Copyright (C) 2017-2023 by Peter Dematté */
 (function(global, factory) {
   if (typeof exports === 'object' && typeof module === 'object') module.exports = factory();
   else if (typeof define === 'function' && define.amd)

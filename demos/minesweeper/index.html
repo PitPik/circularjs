@@ -3,25 +3,27 @@
   <head>
     <meta charset="utf-8">
     <title>Minesweeper ● CircularJS</title>
+
     <link rel="stylesheet" href="index.css">
 
-    <!-- <script src="../amd.js"></script>
-    <script src="../toolbox.js"></script>
-    <script src="../VArray.js"></script>
-    <script src="../schnauzer.js"></script>
-    <script src="../blick.js"></script>
-    <script src="../api.js"></script>
-    <script src="../controller.js"></script>
-    <script src="../circular.js"></script> -->
-    <script src="../circular.min.js"></script>
+    <script src="../../amd.js"></script>
+    <script src="../../toolbox.js"></script>
+    <script src="../../VArray.js"></script>
+    <script src="../../schnauzer.js"></script>
+    <script src="../../blick.js"></script>
+    <script src="../../api.js"></script>
+    <script src="../../controller.js"></script>
+    <script src="../../circular.js"></script>
+    <!-- <script src="../../circular.min.js"></script> -->
   </head>
-  <body cr-cloak>
+  <body>
+  <minesweeper cr-cloak>
     <div class="game-board {{%class}}">
       <div class="header level">
-        <select cr-view="levels" cr-event="change: level">
-          <option value="9,9,10">beginner</option>
-          <option value="16,16,40">intermediate</option>
-          <option value="16,30,99">expert</option>
+        <select cr-view="levels" cr-event="change: setLevel">
+          <option value="9,9,10">Beginner</option>
+          <option value="16,16,40">Intermediate</option>
+          <option value="16,30,99">Expert</option>
         </select>
       </div>
       <div class="header">
@@ -29,28 +31,25 @@
         <button type="button" cr-event="click: restart"></button>
         <div class="timer">{{%time}}</div>
       </div>
-      <table
-        class="board"
-        cr-event="click: reveal; contextmenu: reveal; mousedown: huh"
-      >
-        <tbody>
-          <tr cr-for="board">
-            <td
-              cr-child
-              class="{{%mark}}{{#if %isProcessed}} color-{{%surrounding}}{{else}} hidden{{/if}}">
-              {{#if %isProcessed}}
-                {{#if %surrounding}}
-                  {{%surrounding}}
-                {{/if}}
-              {{/if}}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="board" cr-event="click?: reveal; contextmenu?: reveal; mousedown: huh">
+      {{#each %board}}
+        <div class="tr">
+        {{#each %arr}}
+          <div class="{{%mark}}{{#if %isProcessed}} color-{{%surrounding}}{{else}} hidden{{/if}} td">
+          {{#if %isProcessed}}
+            {{#if %surrounding}}
+              {{%surrounding}}
+            {{/if}}
+          {{/if}}
+          </div>
+        {{/each}}
+        </div>
+      {{/each}}
+      </div>
     </div>
-    <script src="game.srv.js"></script>
-    <script src="game.ctrl.js"></script>
-
-    <script src="app.js"></script>
+  </minesweeper>
   </body>
+  <script src="game.srv.js"></script>
+  <script src="game.ctrl.js"></script>
+  <script src="app.js"></script>
 </html>

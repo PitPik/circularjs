@@ -28,7 +28,7 @@ class Minesweeper {
     if (propName !== 'won') return;
 
     this.class = value ? 'win' : value === false ? 'loose' : '';
-    this.counter = this.mines - this.board.getElementsByProperty('mark', 'marked').length;
+    this.counter = this.mines - this.board.filterAll(item => item.mark === 'marked').length;
     if (value !== undefined) clearInterval(this.interval);
   }
 

@@ -1,4 +1,4 @@
-/**! @license controller v2.0.0; Copyright (C) 2022 by Peter Dematté */
+/**! @license controller v2.0.0; Copyright (C) 2023 by Peter Dematté */
 define(['toolbox'], function(Toolbox) { 'use strict';
 
 function Controller(element) {
