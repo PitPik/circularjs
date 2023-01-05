@@ -117,7 +117,7 @@ VOM.prototype = {
     return crawlObject(item, property.split(pathSplit));
   },
   getCleanModel: function(item) { // maybe not...
-    return JSON.parse(JSON.stringify(item || this.model));
+    return JSON.parse(JSON.stringify(item || this.model));
   },
   destroy: function() {
     return destroy(this, this.model);
@@ -137,7 +137,7 @@ function findProperty(node, id, prop, val, result, isFn, hasVal, hasProp, keys) 
     node[id][prop] : crawlObject(node[id], (keys[0] ?
     keys : (keys = hasProp && prop.split(pathSplit))));
 
-  if ((hasVal && propValue === val || (isFn && val(propValue))) ||
+  if ((hasVal && propValue === val || (isFn && val(propValue, node[id]))) ||
       (!hasVal && undefined !== propValue) ||
       (!hasVal && !hasProp)) {
     result.push(node[id]);
@@ -158,7 +158,7 @@ function destroy(_this, items) { // only cleans up NODES
       destroy(_this, items[n][_this.options.childNodes]);
     }
     delete NODES[_this.id][items[n][_this.options.idProperty]];
-    items.pop();
+    // items.pop(); // no, keep for looping through childNodes later on
   }
   return items;
 };
@@ -316,8 +316,7 @@ function defineProperty(_this, prop, obj, cache, enumable, path) {
       return prop === 'index' ? indexOf(_this, obj.current) : cache[prop];
     },
     set: function(value) {
-      validate((path || prop), obj, cache[prop],
-        cache[prop] = value, cache, _this);
+      validate((path || prop), obj, cache[prop], cache[prop] = value, cache, _this);
     },
     enumerable: enumable
   });

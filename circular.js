@@ -1,4 +1,4 @@
-/**! @license CircularJS ● v1.3.1; Copyright (C) 2020 by Peter Dematté */
+/**! @license CircularJS ● v1.3.2; Copyright (C) 2020 by Peter Dematté */
 define('circular', ['toolbox', 'blick', 'VOM', 'api', 'controller'],
 function(Toolbox, Blick, VOM, mixinAPI, Controller) { 'use strict';
 
@@ -32,7 +32,7 @@ function initCircular(_this, name, options) {
   for (var option in options) {
     _this.options[option] = options[option];
   }
-  _this.version = '1.3.0';
+  _this.version = '1.3.2';
   _this.id = 'cr_' + id++;
   _this.name = isName ? name : _this.id;
   instances[_this.id] = {};
@@ -47,8 +47,9 @@ Object.defineProperties(Circular.prototype, mixinAPI({
   destroyComponent: { value: function(inst) {
     var id = inst['__cr-id'].split(':');
     var data = instances[id[0]][id[1]];
-    var instance = data.instance;
+    var instance = data && data.instance || inst;
 
+    if (!data) return; // console.log('No item found to delete...');
     instance.onDestroy && instance.onDestroy();
     for (var key in instance) if ( // removes collectors, rendering, ...
       instance[key] &&
@@ -95,7 +96,7 @@ return Object.defineProperties(Circular, {
       name: defData.name || Klass.name,
       init: function init(element, plugData, parent) {
         var elm = typeof element === 'string' ? $(element) : element;
-
+        // TODO: store the instance in parent to be able to destroy inner
         return initComponent(elm, defData, Klass, plugData, parent);
       },
       preparePlugin: function preparePlugin(element, pData, values) {
@@ -134,7 +135,7 @@ function initComponent(element, defData, Klass, plugData, parent) {
     components[defData.selector].singleton = true;
   }
   if (elmId && !plugData) {
-    return instances[crInst.id + ':' + elmId];
+    return instances[crInst.id + ':' + elmId]; // ???
   }
   ['partials', 'helpers', 'decorators', 'attributes'].forEach(function(key) {
     if (!defData[key]) defData[key] = crInst.options[key];
@@ -176,6 +177,7 @@ function initComponent(element, defData, Klass, plugData, parent) {
       templateContainer: !plugData && key !== 'this' && tmpl ?
         getParent(element, tmpl.container) : element,
       modelName: key,
+      hasPartial: tmpl && tmpl.hasPartial,
       listeners: defData.subscribe$ && defData.subscribe$[key],
       crInstance: crInst,
       controller: controller,
@@ -206,6 +208,31 @@ function initInner(element, instance, defData, name) {
 
 /* -------------- scoping ------------ */
 
+function initKlassVars(key, parentValues, scope, rootItem) { // v8
+  var item = parentValues.vars[key];
+
+  if (key === 'null') return;
+  scope[key] = typeof item === 'function' ? item.bind(rootItem) : item;
+}
+
+function initSubscribers(key, parentValues, scope, isLoop,
+    instances, crInst, instId, loopItem, parentId) { // v8
+  if (parentValues.static[key] || key === 'null' || !key) return;
+  isLoop = key === 'this' || key === '.';
+  if (isLoop) {
+    scope[parentValues.names[key]] = loopItem || parentValues.origin[key];
+    // continue; // TODO: check if subscription is possible
+  }
+  instances[crInst.id][instId].subscribers.push((function(names, key) {
+    return crInst.subscribeToComponent(
+      loopItem && isLoop ? loopItem['cr-id'] : parentId,
+      key,
+      function(value) { scope[names[key]] = value },
+      true
+    );
+  })(parentValues.names, key));
+}
+
 function getInstance(Klass, element, crInst, instId, plugData, defData, inst, parentComp) {
   var rootItem = isArray(parentComp) ? parentComp[0] : parentComp;
   var loopItem = parentComp && parentComp[1];
@@ -217,42 +244,28 @@ function getInstance(Klass, element, crInst, instId, plugData, defData, inst, pa
   element.removeAttribute('cr-input');
 
   return new Klass(element, crInst, function(scope, subscribe) {
-    for (var key in parentValues.vars) if (key !== 'null') {
-      scope[key] = typeof parentValues.vars[key] === 'function' ?
-        parentValues.vars[key].bind(rootItem) : parentValues.vars[key];
-    }
+    for (var key in parentValues.vars) initKlassVars(key, parentValues, scope, rootItem);
     if (subscribe !== false) {
-      for (var key in parentValues.origin) {
-        if (parentValues.static[key] || key === 'null' || !key) continue;
-        isLoop = key === 'this' || key === '.';
-        if (isLoop) {
-          scope[parentValues.names[key]] = loopItem;
-          // continue; // TODO: check if subscription is possible
-        }
-        instances[crInst.id][instId].subscribers.push((function(names, key) {
-          return crInst.subscribeToComponent(
-            isLoop ? loopItem['cr-id'] : parentId,
-            key,
-            function(value) { scope[names[key]] = value },
-            true
-          );
-        })(parentValues.names, key));
-      }
+      for (var key in parentValues.origin)
+        initSubscribers(key, parentValues, scope, isLoop, instances,
+          crInst, instId, loopItem, parentId);
     }
     plugData && rootItem !== loopItem && installEvents(rootItem, scope, defData);
   }, function() { return rootItem || loopItem });
 }
 
+function installEvent(key, events, scope, parent) { // v8
+  if (!parent['pl-' + events[key]]) (function(event) {
+    Object.defineProperty(parent, 'pl-' + event, { value: function(e, elm, item) {
+      return scope[event](e, elm, item);
+    }});
+  })(events[key]);
+}
+
 function installEvents(parent, scope, defData) {
   var events = defData.events || {};
 
-  for (var key in events) {
-    if (!parent['pl-' + events[key]]) (function(event) {
-      Object.defineProperty(parent, 'pl-' + event, { value: function(e, elm, item) {
-        return scope[event](e, elm, item);
-      }});
-    })(events[key]);
-  }
+  for (var key in events) installEvent(key, events, scope, parent);
 }
 
 function processInput(input, parent) {
@@ -262,15 +275,17 @@ function processInput(input, parent) {
   var isStatic = false;
   var staticValue = '';
   var key = '';
+  var parentVal = {};
 
   for (var n = vars.length; n--; ) {
     name = vars[n].split(/\s+as\s+/);
     isStatic = name[0].charAt(0) === '\'' || name[0].charAt(0) === '"';
     staticValue = isStatic ? Toolbox.convertToType(name[0].replace(/'|"/g, '')) : '';
     key = isStatic ? staticValue : name[0];
+    parentVal = key === 'this' || key === '.' ? parent : parent && parent[key];
 
-    out.vars[name[1] || key] = isStatic ? staticValue : parent[key];
-    out.origin[key] = isStatic ? staticValue : parent[key];
+    out.vars[name[1] || key] = isStatic ? staticValue : parentVal;
+    out.origin[key] = isStatic ? staticValue : parentVal;
     out.names[key] = name[1] || key;
     out.static[key] = isStatic;
   }
@@ -279,7 +294,7 @@ function processInput(input, parent) {
 
 function getParentComponent(elm) {
   var parent = elm.closest('[cr-id|="cr_"]');
-  var ids = parent && parent.getAttribute('cr-id').substr(3).split(':');
+  var ids = parent && parent.getAttribute('cr-id').substring(3).split(':');
   var out = ids && instances['cr_' + ids[0]][ids[1]];
 
   return out && out.instance || out;
@@ -353,8 +368,9 @@ function applyModel(data) {
 function injectNewModel(vom, model, newModel, deltaOnly, item) {
   for (var n = 0, m = newModel.length; n < m; n++) {
     if (model[n]) {
+      if (typeof model[n] === typeof newModel[n])
       updateModelItem(vom, model[n], newModel[n]);
-    } else {
+    } else { // if (newModel[n]) {
       vom.appendChild(newModel[n], model.parentNode || model[0] && model[0].parentNode || item);
     }
   }
@@ -364,11 +380,13 @@ function injectNewModel(vom, model, newModel, deltaOnly, item) {
 function updateModelItemLoop(vom, item, newItem, key) { // TODO: performance
   var isActiveArr = false;
   var isArr = false;
+  var isObj = false;
 
   if (key === 'childNodes' || !item) return;
-  isArr = isArray(item[key]);
+  isArr = isArray(item[key]) && isArray(newItem[key]);
+  isObj = typeof item[key] === 'object' && typeof newItem[key] === 'object';
   isActiveArr = isArr && Object.getOwnPropertyDescriptor(item, key).get;
-  item[key] = isActiveArr ? newItem[key] : typeof item[key] === 'object' || isArr ?
+  item[key] = isActiveArr ? newItem[key] : isObj || isArr ?
     updateModelItem(vom, item[key], newItem[key] || {}) : newItem[key];
 }
 
@@ -377,7 +395,12 @@ function deleteModelItem(newItem, item, key, vom) {
     if (key === 'childNodes') for (var n = item.childNodes.length; n--; )
       vom.removeChild(item.childNodes[n]);
     item[key] = null; // triger blick items ???
-    delete item[key];
+    if (item.splice) item.splice(key, 1); else delete item[key];
+  }
+  var isArr = isArray(item[key]) && isArray(newItem[key]);
+  var diff = isArr && item[key].length - newItem[key].length;
+  if (key !== 'childNodes' && isArr && diff > 0) {
+    item[key].splice(newItem[key].length, diff);
   }
 }
 
@@ -421,7 +444,7 @@ function getVOMInstance(data) {
       var intern = property === 'childNodes' || !!VOM.prototype[property];
 
       data.template && changeItem(this, property, item, value, oldValue, sibling, data);
-      inst[name$] &&  !intern && inst[name$](property, item, value, oldValue);
+      inst[name$] && !intern && inst[name$](property, item, value, oldValue);
       inst[name$$] && inst[name$$](property, item, value, oldValue, intern);
       if (intern) return;
       if (item.parentNode === undefined && item.childNodes === undefined) {
@@ -486,35 +509,68 @@ function setNewItem(vomInstance, param) {
       });
     }
   }
-  initComponentsAndPlugins(element, data.defData, data.modelName, isChild, [data.instance, item]);
+  initComponentsAndPlugins(
+    element, data.defData, data.hasPartial, data.modelName, isChild, [data.instance, item]
+  );
 
   return element;
 }
 
-function initComponentsAndPlugins(element, defData, modelName, isChild, instance) {
+function loopComponents(key, componentsDefs, hasPartial, what, modelName, defData, insts, element, instance) {
+  var inst = {}; // v8
+
+  if (what && (componentsDefs[key][what][modelName] || hasPartial)) {
+    [].slice.call($$(key + ', [cr-name="' + key + '"]', element)).forEach(function(elm) {
+      if (elm.getAttribute(['cr-id'])) return;
+      inst = components[key].init(elm, null, instance);
+      if (inst) {
+        insts.push(inst);
+        defData.components[key].instances[instance[1]['cr-id']] = inst; // TODO: maybe just id
+      }
+    });
+  }
+}
+
+function loopPlugins(key, plugins, what, modelName, element, instance) {
+  if (what && plugins[key][what] && plugins[key][what][modelName]) {
+    // TODO: register plugins for destroy
+    initPlugins(key, plugins[key][what][modelName], element, instance);
+  }
+}
+
+function initComponentsAndPlugins(element, defData, hasPartial, modelName, isChild, instance) {
   var componentsDefs = defData.components;
   var plugins = defData.plugins;
   var isMain = modelName === 'this';
   var isLoop = !isMain && !isChild;
   var what = isMain ? 'main' : isLoop ? 'loop' : isChild ? 'child' : '';
   var insts = [];
-  var inst = {};
   // components
-  for (var key in componentsDefs) {
-    if (what && componentsDefs[key][what][modelName]) {
-      [].slice.call($$(key + ', [cr-name="' + key + '"]', element)).forEach(function(elm) {
-        inst = components[key].init(elm, null, instance);
-        inst && insts.push(inst);
-      });
-    }
+  for (var key in componentsDefs) { // v8
+    loopComponents(key, componentsDefs, hasPartial, what, modelName, defData, insts, element, instance);
   }
   // plugins
-  for (var key in plugins) {
-    if (what && plugins[key][what] && plugins[key][what][modelName]) {
-      initPlugins(key, plugins[key][what][modelName], element, instance);
-    }
+  for (var key in plugins) { // v8
+    loopPlugins(key, plugins, what, modelName, element, instance);
   }
   return insts;
+}
+
+function destroyChild(key, components, id, crInstance) { // v8
+  if (components[key].instances[id]) {
+    crInstance.destroyComponent(components[key].instances[id]);
+    delete components[key].instances[id];
+  }
+}
+
+function destroyChildren(components, id, childNodes, crInstance) {
+  for (var key in components) destroyChild(key, components, id, crInstance);
+
+  if (!childNodes) return;
+  for (var n = childNodes.length, node = {}; n--; ) { // see if this works
+    node = childNodes[n]['cr-id'] || childNodes[n]['__cr-id']; // well... __cr-id
+    destroyChildren(components, node, childNodes[n].childNodes, crInstance);
+  }
 }
 
 function changeItem(vomInstance, property, item, value, oldValue, sibling, data) {
@@ -528,7 +584,8 @@ function changeItem(vomInstance, property, item, value, oldValue, sibling, data)
   var intern = property === 'childNodes' || !!VOM.prototype[property];
 
   if (property === 'removeChild') {
-    render(element, property, element.parentElement);
+    if (element) render(element, property, element.parentElement); // plugins don't have elm
+    destroyChildren(data.defData.components, id /* item['cr-id'] */, item.childNodes, data.crInstance);
     destroyCollector(collector, id);
   } else if (property === 'sortChildren') {
     render(element, 'appendChild', parentElement);
@@ -595,8 +652,8 @@ function changeBlickItem(blickItem, data, item, value, oldValue) {
 
   if (data.controller) for (var m = elm.length; m--; ) {
     if (elm[m].nodeType !== 1) continue;
-    getAttrMap(elm[m], 'cr-event', function(eventName, fnName) {
-      registerEventsForBlickItem(data, item, elm[m], eventName, fnName);
+    getAttrMap(elm[m], 'cr-event', function(eventName, fnName, element) {
+      registerEventsForBlickItem(data, item, element || elm[m], eventName, fnName);
     });
   }
   if (components) {
@@ -609,6 +666,7 @@ function changeBlickItem(blickItem, data, item, value, oldValue) {
     blickItem.components = initComponentsAndPlugins(
       elm[x].parentNode, // TODO: not parentNode...
       data.defData,
+      data.hasPartial,
       data.modelName,
       false, // TODO: isChild,
       [data.instance, item]
@@ -696,7 +754,7 @@ function getTemplate(template, defData, where, modelName) {
   if (!components[template.tagName.toLowerCase()]) {
     getInnerComponents(keys(components), [], template, function(element, key) {
       var component = defData.components[key] = defData.components[key] ||
-        { main: {}, loop: {}, child: {} };
+        { main: {}, loop: {}, child: {}, instances: {} };
 
       component[where][modelName] = true;
     });
@@ -719,23 +777,45 @@ function processTemplate(element, defData) {
   var _ = element.insertAdjacentHTML('beforeend', defData.template || '');
   // var _ = element.innerHTML = defData.template || ''; // TODO: fragment...
   var templates = $$('[cr-for]', element);
+  var innerHTML = '';
   var result = {};
+  var children = [];
 
   templates.forEach(function(elm, idx) {
     var child = $('[cr-child]', elm);
     var modelName = elm.getAttribute('cr-for');
     var attr = modelName + idx;
+    var hasPartial = /{{>/.test(defData.template);
 
-    result[modelName] = {
+    children.push(result[modelName] = {
+      hasPartial: hasPartial,
       container: attr,
       child: child ? getTemplate(child, defData, 'child', modelName) : null,
       template: getTemplate(createPlaceHolder(elm, attr), defData, 'loop', modelName),
-    };
+    });
   });
+
+  innerHTML = element.firstElementChild ? element.firstElementChild.innerHTML : '';
 
   result['this'] = {
     template: getTemplate(element.firstElementChild, defData, 'main', 'this'),
   };
+
+  // TODO....... best for now but...
+  var mainPartials = innerHTML && result['this'].template.schnauzer.partials;
+  var partials = [];
+
+  if (mainPartials && children.length && keys(mainPartials).length > 1) {
+    innerHTML.replace(/{{#\*inline\s*["'](.*?)["']}}([\S\s]*){{\/inline}}/, function(_, $2, $3) {
+      partials.push({ name: $2, html: $3 });
+    });
+
+    for (var n = children.length; n--; ) {
+      for (var m = partials.length; m--; ) {
+        children[n].template.schnauzer.registerPartial(partials[m].name, partials[m].html);
+      }
+    }
+  }
 
   return result;
 }

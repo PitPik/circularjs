@@ -39,5 +39,9 @@
   "homepage": "https://github.com/PitPik/circularjs#readme",
   "devDependencies": {
     "node-minify": "3.6.0"
+  },
+  "dependencies": {
+    "vue-json-schema": "^1.1.1",
+    "schnauzer": "https://github.com/PitPik/Schnauzer/tarball/master"
   }
 }

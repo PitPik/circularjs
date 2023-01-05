@@ -220,12 +220,16 @@ var Toolbox = {
           }
         };
         xhr.open(method, url, prefs.async || true, prefs.username, prefs.password);
+        if (prefs.dataType === 'raw') xhr.responseType = 'blob';
 
         if (prefs.dataType === 'xml') {
           xhr.setRequestHeader('Content-Type', 'text/xml');
         }
+        if (prefs.dataType === 'json') {
+          xhr.setRequestHeader('Content-Type', 'application/json');
+        }
         if (method !== 'GET' && prefs.csrf) {
-          xhr.setRequestHeader('X-CSRF-Token', getCSRFToken(prefs.csrf));
+          xhr.setRequestHeader('X-XSRF-TOKEN', getCSRFToken(prefs.csrf));
         }
         if (prefs.headers) { // add more headers
           for (var header in prefs.headers) {
@@ -284,8 +288,8 @@ function getXHRData(xhr, dataType, reject) {
         error.response = xhr.response;
         reject(error);
       } else {
-        return xhr[dataType === 'xml' ?
-          'responseXML' : 'responseText'];
+        return xhr[dataType === 'xml' ? 'responseXML' :
+          dataType === 'raw' ? 'response' : 'responseText'];
       }
     }
   } catch(e) {
@@ -294,12 +298,13 @@ function getXHRData(xhr, dataType, reject) {
 }
 /* ---------------- Promise --------------- */
 
-function Promise(fn) {
+function Promise(fn, staticData) {
   this._state = 0;
   this._handled = false;
   this._value = undefined;
   this._deferreds = [];
   this._returnFn = doResolve(fn, this);
+  this._staticData = staticData;
 }
 
 Promise._cache = {};

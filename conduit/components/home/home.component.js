@@ -1,12 +1,11 @@
 require([
   'circular',
   '!home.component.html',
-  'api.service',
   'article-list.component',
   'tag-list.component',
   'feed-menu.component',
   'banner.component',
-], ({ Component }, template, api) => Component({
+], ({ Component }, template) => Component({
   selector: 'home',
   template,
   subscribe$: { this: ['*'] },

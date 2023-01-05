@@ -1,4 +1,4 @@
-/**! @license amd v0.1.0; Copyright (C) 2019 by Peter Dematté */
+/**! @license amd v0.1.1; Copyright (C) 2021 by Peter Dematté */
 !(function (root) { 'use strict';
 
 var mathRand = root.Math.random;
@@ -7,6 +7,8 @@ var documentFragment = root.document.createDocumentFragment();
 var timer = 0;
 var modules = require.modules = {};
 var executedModule = {};
+
+if (root.define && root.define.amd) return;
 
 define.amd = {};
 require.config = config;
@@ -29,7 +31,7 @@ function getPathFromName(name) {
   var postFix = /(?:^\!|^http[s]*:|.*\.js$)/.test(name) ? '' : '.js';
   var path = '';
 
-  name = (require.paths[name] || name).replace(/^\!/, '');
+  name = (require.paths[name] || name).replace(/^[!%]/, '');
   path = normalizePath((require.baseUrl || '.') + '/' +
     name + postFix).replace(/^.\//, '');
   return require.mapPath ? require.mapPath(name, postFix, path) : path;
@@ -102,13 +104,13 @@ function markAsDone(module) {
   }
 }
 
-function appendScript(script) {
-  documentFragment.appendChild(script);
-  clearTimeout(timer);
-  timer = setTimeout(function() {
-    document.head.appendChild(documentFragment);
-  });
-}
+// function appendScript(script) {
+//   documentFragment.appendChild(script);
+//   clearTimeout(timer);
+//   timer = setTimeout(function() {
+//     document.head.appendChild(documentFragment);
+//   });
+// }
 
 function applyScript(module, sync) {
   var script = root.document.createElement('script');
@@ -149,7 +151,7 @@ function onScriptLoaded(module) {
 }
 
 function getDependencies(parentName, deps, sync) {
-  for (var n = deps.length, module = {}, name = ''; n --; ) {
+  for (var n = deps.length, module = {}, name = ''; n--; ) {
     name = deps[n];
     if (modules[name]) {
       modules[name].parents.push(parentName);
@@ -165,10 +167,12 @@ function getDependencies(parentName, deps, sync) {
     if (module.isFile) {
       require.getFile(module, markAsDone);
     } else if (!module.isInline) {
-      appendScript(applyScript(module, sync));
+      // appendScript(applyScript(module, sync));
+      documentFragment.appendChild(applyScript(module, sync));
       lookaheadForDeps(name);
     }
   }
+  if (documentFragment.childNodes.length) document.head.appendChild(documentFragment);
 }
 
 function require(deps, factory, sync) {

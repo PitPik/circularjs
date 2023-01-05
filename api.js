@@ -87,6 +87,7 @@ prototype.publish = function(inst, comp, attr, data) {
     comp[attr].value = data;
     comp[attr][0] && publish(this, comp[attr], data);
   }
+  return data;
 };
 
 prototype.unsubscribe = function(inst, comp, attr, callback) {
@@ -239,7 +240,8 @@ prototype.renderModule = function(data) {
 
   if (!isValid) {
     if (data.scroll && container.children) {
-      container.children[0]._scroll = (Toolbox.$(data.scroll, container) || {}).scrollTop;
+      container.children[0]._scroll =
+        (Toolbox.$(data.scroll, container) || {}).scrollTop;
     }
     return new Promise(function(){});
   }
@@ -247,8 +249,11 @@ prototype.renderModule = function(data) {
   if (item) {
     return new Toolbox.Promise(function(resolve) {
       appendChildToContainer(item.element, container, data);
-      if (item.instance && item.instance.onLoad) item.instance.onLoad(item.element, _this);
-      if (item.instance && item.instance.onRender) item.instance.onRender(data.data);
+      // TODO: data.parent -> input doesn't work...
+      if (item.instance && item.instance.onLoad)
+        item.instance.onLoad(item.element, _this, data.parent);
+      if (item.instance && item.instance.onRender)
+        item.instance.onRender(data.data);
       resolve(item);
     });
   }
@@ -264,7 +269,8 @@ prototype.renderModule = function(data) {
       var item = module.instance || instance;
 
       appendChildToContainer(componentElm, container, data);
-      if (item && item.onLoad) item.onLoad(componentElm, _this);
+      // TODO: data.parent -> input doesn't work...
+      if (item && item.onLoad) item.onLoad(componentElm, _this, data.parent);
       if (item && item.onRender) item.onRender(data.data);
       resolve(modulesMap[(data.context || '') + data.require] = !module.instance ? {
         element: componentElm,
