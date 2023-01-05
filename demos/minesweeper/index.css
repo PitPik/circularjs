@@ -2,18 +2,19 @@ html, body {
   height: 100%;
   font: normal normal normal .90em/1.6em  "Trebuchet MS", Arial, Helvetica, sans-serif;
   color: #333;
-  text-align: center;
   margin: 0;
   padding: 0;
 }
 
-body {
-  display: flex;
-  align-items: center;
+[cr-cloak], .cr-cloak {
+  display: none;
 }
 
-[cr-for], [cr-cloak], .cr-cloak {
-  display: none;
+minesweeper {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  text-align: center;
 }
 
 .game-board {
@@ -27,60 +28,67 @@ body {
   text-align: center;
   padding: 2px 5px;
   margin: 0px -3px 3px;
-  border-bottom: 1px solid #ccc;
+  /* border-bottom: 1px solid #ccc; */
+  border-bottom: 1px solid #d6d6d6;
 }
 .counter,
 .timer {
   min-width: 1.6em;
-  padding: 6px 6px;
+  /* padding: 6px 6px; */
+  padding: 7px 3px;
   line-height: 16px;
-  border: 1px solid #ccc;
-  border-radius: 3px;
-  text-align: right;
+  /* border: 1px solid #ccc; */
+  /* border-radius: 3px; */
+  text-align: left;
   float: left;
   font-size: 1.5em;
   color: #666;
 }
 .timer {
   float: right;
+  text-align: right;
 }
-select {
+.game-board select {
   display: block;
+  /* height: 1.6em; */
+  margin-top: -3px;
+  height: 1.8em;
   border: none;
   font-size: inherit;
   color: #666;
   width: 100%;
   background-color: white;
 }
-select:focus {
+.game-board select:focus {
   outline: none;
 }
-button {
+.game-board button {
   display: inline-block;
   position: relative;
   width: 30px;
   height: 30px;
+  margin: 0 6px 3px;
   line-height: 34px;
   border: 1px solid #aaa;
   border-radius: 50%;
   font-size: inherit;
   color: #666;
 }
-button:before,
-button:after {
+.game-board button:before,
+.game-board button:after {
   content: "°";
   display: block;
   position: absolute;
   top: -4px;
   left: 0;
 }
-button:after {
+.game-board button:after {
   content: "o\00a0\00a0o";
   top: -9px;
   left: 7px;
   font-size: 8px;
 }
-button:before {
+.game-board button:before {
   content: "─";
   top: 2px;
   left: 7px;
@@ -103,22 +111,32 @@ button:before {
   transform: rotate(-70deg);
 }
 
-button:focus {
+.game-board button:focus {
   outline: none;
 }
 
-button.green {
+.game-board button.green {
   background: green;
   color: white;
 }
 
-.board td {
+.board {
+  padding: 1px;
+}
+
+.board .tr {
+  display: flex;
+}
+
+.board .td {
   color: green;
   font-weight: bold;
   width: 15px;
   height: 15px;
+  margin: 1px;
+  padding: 1px;
   font-size: .9em;
-  line-height: .8em;
+  line-height: 14px;
   border: 1px #ccc dotted;
   border-radius: 10%;
   cursor: default;

@@ -23,6 +23,9 @@
   left: 53px;
   width: calc(100% - 59px);
 }
+.footer {
+	margin-top: -1px;
+}
 
 [disabled] {
 	display: none!important;

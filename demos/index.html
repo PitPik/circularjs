@@ -4,21 +4,21 @@
   <meta charset="utf-8">
   <title>Circular.js • demo</title>
 
-  <link rel="stylesheet" type="text/css" href="demos/index.css">
+  <link rel="stylesheet" type="text/css" href="index.css">
 
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/prism.min.js"></script>
   <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/themes/prism.css">
 
-  <script type="text/javascript" src="amd.js"></script>
-  <script type="text/javascript" src="toolbox.js"></script>
-  <script type="text/javascript" src="VArray.js"></script>
-  <script type="text/javascript" src="schnauzer.js"></script>
-  <script type="text/javascript" src="blick.js"></script>
-  <script type="text/javascript" src="api.js"></script>
-  <script type="text/javascript" src="controller.js"></script>
-  <script type="text/javascript" src="circular.js"></script>
+  <script type="text/javascript" src="../amd.js"></script>
+  <script type="text/javascript" src="../toolbox.js"></script>
+  <script type="text/javascript" src="../VArray.js"></script>
+  <script type="text/javascript" src="../schnauzer.js"></script>
+  <script type="text/javascript" src="../blick.js"></script>
+  <script type="text/javascript" src="../api.js"></script>
+  <script type="text/javascript" src="../controller.js"></script>
+  <script type="text/javascript" src="../circular.js"></script>
   <!-- <script type="text/javascript" src="circular.min.js"></script> -->
-  <script type="text/javascript" src="demos/amd.cfg.js"></script>
+  <script type="text/javascript" src="amd.cfg.js"></script>
 </head>
 <body>
   <!-- CircularJS LOGO -->
@@ -50,16 +50,19 @@
     <li><a href="sierpinski/">Performance test Sierpinski</a></li>
   </ul>
   
-    <section class="demo">
+<section class="demo">
       <demo-nav>
-        <span cr-for="menu">
-          <a class="{{#if %active}}active{{/if}}" href="#/{{action}}">{{@counter}} {{title}}</a>
+        <span class="wrapper">
+          {{#each %menu}}
+          <a class="{{#if %active}}active{{/if}}" href="#/{{action}}">
+            {{@number}} {{title}}
+          </a>
           {{#unless @last}}|{{/unless}}
+          {{/each}}
         </span>
       </demo-nav>
-      <div class="module-outlet"></div>
 </section>
 
 </body>
-<script type="text/javascript" src="demos/index.js"></script>
+<script type="text/javascript" src="index.js"></script>
 </html>

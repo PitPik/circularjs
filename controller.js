@@ -1,86 +1,125 @@
-define('controller', ['toolbox', 'VOM'], function(Toolbox, VOM) { 'use strict';
+/**! @license controller v2.0.0; Copyright (C) 2022 by Peter Dematté */
+define(['toolbox'], function(Toolbox) { 'use strict';
 
-var keys = Toolbox.keys;
-
-function Controller(options) {
-  this.options = { element: document.body };
+function Controller(element) {
+  this.element = element || document.body;
+  this.listeners = {};
   this.events = {};
-
-  for (var option in options) {
-    this.options[option] = options[option];
-  }
 }
 
 Controller.prototype = {
-  installEvent: function(instance, element, eventName, items) {
-    var componentElement = this.options.element;
-    var parts = eventName.split('!');
-    var name = parts[2] || parts[1] || parts[0];
-    var useCapture = parts[2] ? true : parts[1] ? false :
-      /(?:focus|blur|mouseenter|mouseleave)/.test(name) ? true : false;
-
-    if (this.events[name]) return;
-
-    this.events[name] = Toolbox.addEvent(element, name, function(e) {
-      eventDelegator(e, instance, items, componentElement, VOM.getElementById);
-    }, useCapture);
+  installEvent: function(eventName, data, callbackNames, callbackFns) {
+    installEvent(this, data, callbackNames, callbackFns, eventName);
   },
-  installEvents: function(instance, element, events, items) {
-    var _this = this;
-
-    keys(events).forEach(function(key) {
-      _this.installEvent(instance, element, key, items);
-    });
-  },
-  removeEvent: function(eventName) {
-    if (this.events[eventName]) {
-      this.events[eventName]();
-      delete this.events[eventName];
-    }
-  },
-  removeEvents: function(events) {
-    events.forEach(this.removeEvent.bind(this));
-  },
+  removeEvent: function(eventName) { removeEvent(this, eventName) },
   destroy: function() {
-    this.removeEvents(keys(this.events));
-    this.options.element = null;
+    var _this = this;
+    Toolbox.keys(this.listeners).forEach(function(name) { removeEvent(_this, name) });
+    return this.element = null;
   },
 };
 
 return Controller;
 
-function triggerEvent(instance, events, model, key, e, stopPropagation) {
-  // if (!instance[key]) return console.warn(
-  //   'No event handler "' + key + '" on instance:',
-  //   instance
-  // );
-  if (!instance[key]) return;
-  events[e.type][key].forEach(function(eventElement) {
-    if (!stopPropagation._ && eventElement.contains(e.target)) {
-      stopPropagation._ = instance[key](e, eventElement, model) === false;
-      if (stopPropagation._) e.stopPropagation();
+function removeEvent(_this, eventName) {
+  var listener = _this.listeners[eventName];
+  var callbacks = listener && _this.events[eventName];
+  var keys = callbacks && Toolbox.keys(callbacks) || [];
+  var item = {};
+
+  if (!listener) return;
+
+  _this.listeners[eventName] = listener(); // = null
+  for (var n = keys.length; n--; ) while (item = callbacks[keys[n]].pop()) {
+    item.element = item.model = null;
+  }
+}
+
+// TODO: useCapture
+// TODO: cache doesn't work; doesn't clean up...
+function installEvent(_this, data, callbackNames, callbackFns, eventName) {
+  var capture = eventName.length - (eventName = eventName.replace(/\!/g, '')).length;
+  var delegate = eventName.length - (eventName = eventName.replace(/\?/g, '')).length;
+  var events = _this.events[eventName] = _this.events[eventName] || {};
+  var useCapture = !!/(?:focus|blur|mouseenter|mouseleave|scroll)/.test(eventName); // TODO
+
+  data.delegate = delegate;
+  for (var n = callbackNames.length, callback = ''; n--; ) {
+    callback = callbackNames[n];
+    events[callback] ? events[callback].push(data) : events[callback] = [data];
+  }
+  if (_this.listeners[eventName]) return;
+
+  _this.listeners[eventName] = Toolbox.addEvent(_this.element, eventName, function eventCB(e) {
+    eventDelegator(e, callbackFns, _this.events);
+  }, useCapture || capture > 1 ? true : capture === 1 ? false : undefined);
+}
+
+function findElement(items, element) {
+  for (var n = items.length; n--; ) if (items[n].element === element) return true;
+}
+
+function eventDelegator(e, callbackFns, events) {
+  var path = (e.composedPath && e.composedPath()) || e.path;
+  var callbacks = events[e.type];
+  var cbKeys = Toolbox.keys(callbacks);
+  var items = [];
+  var data = {};
+  var elm = {};
+  var target = {};
+  var key = '';
+  var n = 0, m = 0;
+  var cancel = false;
+  var model, delegate, children = '';
+
+  for (n = cbKeys.length; n--; ) {
+    key = cbKeys[n];
+    if (!callbackFns[key]) continue;
+
+    for (m = callbacks[key].length; m--; ) {
+      data = callbacks[key][m];
+      if (data.model.index < 0) { // TODO: check after VOM refactor
+        callbacks[key].splice(m, 1);
+        continue;
+      }
+      elm = data.element;
+      if (findElement(items, elm)) continue;
+      if (path ? path.indexOf(elm) === -1 : !elm.contains(e.target)) continue;
+      items.push(data);
     }
+  }
+  if (!items.length) return;
+
+  items.sort(function(a, b) {
+    return path ?
+      path.indexOf(b.element) - path.indexOf(a.element) :
+      a.element.contains(b.element) ? -1 : 1;
   });
+  for (n = items.length; n--; ) {
+    if (cancel) return;
+
+    data = items[n];
+    for (m = cbKeys.length; m--; ) {
+      key = cbKeys[m];
+      elm = data.element;
+      if (!callbackFns[key] || !findElement(callbacks[key], elm)) continue;
+        // || (callbacks[e.type] && callbacks[key][n].element !== callbacks[e.type][n].element)) continue;
+      delegate = data.delegate;
+      model = data.model;
+      children = data.children;
+      target = delegate ? Toolbox.findParent(e.target, data.idTag, elm) : elm;
+      // TODO: !data.getElementById(target[data.idTag], true) ... return or continue;
+      cancel = callbackFns[key](
+        e,
+        target,
+        delegate ? data.getElementById(target[data.idTag], true) : model, // || data.element
+        model.parentNode ? model.parentNode[children] : model[children] && model[children].parent,
+        delegate && elm || undefined,
+        delegate && model || undefined,
+        // delegate && data.parent, // parent of this????
+      ) === false || e.cancelBubble || cancel;
+    }
+  }
 }
 
-function eventDelegator(e, instance, rootItems, componentElement, getElementById) {
-  var element = Toolbox.closest(e.target, '[cr-event]');
-  var id = element && element.getAttribute('cr-id') ||
-    Toolbox.closest(e.target, '[cr-id]').getAttribute('cr-id');
-  var model = getElementById(id);
-  var events = model && model.events && keys(model.events[e.type]);
-  var rootEvents = rootItems && keys(rootItems.events[e.type]) || [];
-  var modelHasEvents = events && events.length;
-  var modelEvents = !modelHasEvents ? rootItems && rootItems.events : model && model.events;
-  var sP = { _: false }; // stopPropagation
-
-  (modelHasEvents ? events : rootItems && rootEvents || []).forEach(function(key) {
-    triggerEvent(instance, modelEvents, model || rootItems, key, e, sP);
-  });
-
-  element !== componentElement && modelHasEvents && rootEvents.forEach(function(key) {
-    triggerEvent(instance, rootItems.events, rootItems, key, e, sP);
-  });
-}
-
-});
+}, 'controller');

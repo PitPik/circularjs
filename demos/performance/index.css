@@ -5,25 +5,39 @@ body {
   margin: 0;
   padding: 30px;
 }
-table {
-	margin-top: 2em;
+
+cr-cloak {
+	display: none;
 }
-td {
+
+.table {
+	display: inline-block;
+	margin-top: 2em;
+	border: 1px solid #aaa;
+	border-width: 1px 1px 0 0	;
+
+}
+.tr {
+	display: flex;
+}
+.td {
 	padding: 8px;
+	width: 18px;
 	text-align: center;
 	border: 1px solid #aaa;
+	border-width: 0 0 1px 1px;
 	cursor: default;
 }
 .max {
 	background-color: #CC0000;
 	color: #eee;
 }
-td:hover {
+.td:hover {
 	background: #ccc;
 	position: relative;
 }
 
-td:hover:after {
+.td:hover:after {
 	content: attr(title);
 	position: absolute;
 	background: #999;
@@ -36,7 +50,7 @@ td:hover:after {
 	top: 5px;
 }
 
-td:hover:before {
+.td:hover:before {
 	content: '';
 	position: absolute;
 	background: #333;

@@ -1,9 +1,13 @@
-require(['circular'], ({ Module }) => Module({
+require(['circular'], ({ Component }) =>
+
+Component({
   selector: 'app',
+  initialize: true,
   template: `
   <table class="table table-striped latest-data">
     <tbody>
-      <tr cr-for="data">
+    {{#each data}}
+      <tr>
         <td class="dbname">
           {{dbname}}
         </td>
@@ -11,45 +15,47 @@ require(['circular'], ({ Module }) => Module({
           <span class="{{%lastSample.countClassName}}">
             {{%lastSample.nbQueries}}
           </span>
-          {{#each lastSample.topFiveQueries}}
         </td>
+        {{#each topFiveQueries}}
         <td class="{{%elapsedClassName}}">
           {{%formatElapsed}}
           <div class="popover left">
             <div class="popover-content">{{%query}}</div>
             <div class="arrow"></div>
           </div>
-          {{/each}}
         </td>
+        {{/each}}
       </tr>
+    {{/each}}
     </tbody>
   </table>`,
-  subscribe$: {
-    data: [
-      'lastSample.countClassName',
-      'lastSample.nbQueries',
-      'lastSample.topFiveQueries.*.elapsedClassName',
-      'lastSample.topFiveQueries.*.formatElapsed',
-      'lastSample.topFiveQueries.*.query',
-    ]
-  },
-}, class App {
+  subscribe$: { 'data:topFiveQueries': [] },
+},
+class App {
   constructor() {
-    const generateData = ENV.generateData;
-
-    this.getData = () => generateData().toArray();
     this.pingRenderRate = Monitoring.renderRate.ping;
-    this.$update = this.update.bind(this);
+    this.BoundUpdate = this.update.bind(this);
+    this.data = this.getViewModel();
 
-    this.data = this.getData();
+    setTimeout(this.BoundUpdate, ENV.timeout);
+  }
 
-    this.update();
+  getViewModel() { // some mapping for viewModel
+    let data = ENV.generateData().toArray();
+
+    data.forEach(item => {
+      item.topFiveQueries = item.lastSample.topFiveQueries;
+      item.lastSample.queries = null;
+    });
+
+    return data;
   }
 
   update() {
-    setTimeout(this.$update);
+    setTimeout(this.BoundUpdate, ENV.timeout);
 
-    this.data = this.getData();
+    this.data.updateModel(this.getViewModel());
     this.pingRenderRate();
   }
+
 }));

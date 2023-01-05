@@ -6,15 +6,15 @@
     <link rel="stylesheet" href="index.css">
     <link rel="stylesheet" href="todo.css">
 
-    <script type="text/javascript" src="../circular.min.js"></script>
     <!-- <script src="../amd.js"></script>
     <script src="../toolbox.js"></script>
-    <script src="../VOM.js"></script>
+    <script src="../VArray.js"></script>
     <script src="../schnauzer.js"></script>
     <script src="../blick.js"></script>
     <script src="../api.js"></script>
     <script src="../controller.js"></script>
     <script src="../circular.js"></script> -->
+    <script type="text/javascript" src="../circular.min.js"></script>
   </head>
   <body cr-cloak>
     <section class="todoapp">
@@ -26,12 +26,14 @@
         <input cr-event="click: toggleAll" class="toggle-all" id="toggle-all" type="checkbox" checked="{{%all}}" disabled="{{%hide}}">
         <label for="toggle-all">Mark all as complete</label>
         <ul class="todo-list">
-          <li cr-for="list" class="todo-list-item{{#if %done}} completed{{/if}}">
-            <input cr-event="change: toggle" class="toggle" type="checkbox" checked="{{%done}}">
-            <label cr-event="dblclick: focus">{{%text}}</label>
-            <button class="destroy" cr-event="click: delete"></button>
-            <input class="edit" cr-view="input" cr-event="change: save; blur: blur; keyup: keyup" value="{{%%text}}" disabled="{{%editable}}">
+          {{#each %list~}}
+          <li class="todo-list-item{{#if %done}} completed{{/if}}">
+            <input cr-event="change: toggleItem" class="toggle" type="checkbox" checked="{{%done}}">
+            <label cr-event="dblclick: editItem">{{%text}}</label>
+            <button class="destroy" cr-event="click: deleteItem"></button>
+            <input class="edit" cr-event="change: saveItem; blur; keyup: escape" value="{{%%text}}" disabled="{{%disabled}}">
           </li>
+          {{~/each}}
         </ul>
       </section>
       <footer class="footer{{#if %hide}} hidden{{/if}}">

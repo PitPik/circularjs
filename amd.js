@@ -1,10 +1,10 @@
-/**! @license amd v0.1.1; Copyright (C) 2021 by Peter Dematté */
+/**! @license amd v1.0.0; Copyright (C) 2022 by Peter Dematté */
 !(function (root) { 'use strict';
 
 var mathRand = root.Math.random;
 var link = document.createElement('a');
 var documentFragment = root.document.createDocumentFragment();
-var timer = 0;
+// var timer = 0;
 var modules = require.modules = {};
 var executedModule = {};
 
@@ -13,6 +13,7 @@ if (root.define && root.define.amd) return;
 define.amd = {};
 require.config = config;
 require.getFile = function(resource, markAsDone) { return resource; };
+require.debug = function() { return { modules: modules, executed: executedModule } };
 root.define = define;
 root.require = require;
 config({});
@@ -39,7 +40,7 @@ function getPathFromName(name) {
 
 function config(config) {
   var exceptions = { mapPath: 'function', baseUrl: 'string' };
-  var items = ['lookaheadMap', 'paths', 'options', 'mapPath', 'baseUrl'];
+  var items = ['lookaheadMap', 'paths', 'options', 'mapPath', 'baseUrl', 'lazyPackages'];
 
   if (!require[items[0]]) { // init first time
     for (var n = items.length; n--; ) {
@@ -76,7 +77,7 @@ function lookaheadForDeps(name) {
 function checkIfDone(module) {
   var deps = module.deps;
   var done = true;
-
+  // TODO: no module => !deps;
   for (var n = deps.length; n--; ) {
     if (modules[deps[n]] && modules[deps[n]].done === undefined) {
       done = false;
@@ -159,7 +160,7 @@ function getDependencies(parentName, deps, sync) {
     }
     module = modules[name] = {
       name: name,
-      isInline: name.charAt(0) === '%',
+      isInline: name.charAt(0) === '%', // TODO: ... make wait all others until this loaded...
       isFile: name.charAt(0) === '!',
       path: getPathFromName(name),
       parents: [parentName],
@@ -172,21 +173,22 @@ function getDependencies(parentName, deps, sync) {
       lookaheadForDeps(name);
     }
   }
-  if (documentFragment.childNodes.length) document.head.appendChild(documentFragment);
+  if (documentFragment.children.length) document.head.appendChild(documentFragment);
 }
 
-function require(deps, factory, sync) {
+function require(deps, factory, bName, sync) {
   deps.constructor === Array ?
-    define(getRandomName(), deps, factory, sync) :
-    define(getRandomName(), [], deps, factory);
+    define(getRandomName(), deps, factory, bName, sync) :
+    define(getRandomName(), [], deps, factory, bName);
 }
 
-function define(name, deps, factory, sync) {
+function define(name, deps, factory, bName, sync) {
   var module = {};
 
   if (typeof name !== 'string') {
-    return require(name, deps, factory); // shifting arguments
+    return require(name, deps, factory, bName); // shifting arguments
   }
+  if (!name && factory && factory.name || bName) name = bName || factory.name;
   name = name || getRandomName();
   module = modules[name];
   getDependencies(name, deps, sync);

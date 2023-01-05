@@ -1,18 +1,33 @@
 <section>
   <h2>Dynamic model structure</h2>
-  <p>In this demo you can see how <strong>VOM.js</strong> is working, how you can dynamically restructure the model and how it reflects in the view. <strong>blick.js</strong> enhances <strong>schnauzer.js</strong> and makes it possible to keep track of <strong>dynamic variables</strong>.</p>
+  <p>In this demo you can see how <strong>VArray.js</strong> is working, how you can dynamically
+    restructure the model and how it reflects in the view. <strong>blick.js</strong>
+    enhances <strong>schnauzer.js</strong> and makes it possible to keep track of
+    <strong>dynamic variables</strong>.
+  </p>
   <p>You can double click on an item to turn it into a folder.</p>
 
   <!-- the demo root element -->
-  <tree>
-    <ul class="tree demo">
-      <li cr-for="tree" class="leaf" cr-event="click: toggle; dblclick: addChildren">
-        <div class="{{#if childNodes.0}}bold{{/if}}">
-          {{name}}{{#if childNodes.0}} [{{#if %open}}-{{else}}+{{/if}}]{{/if}}
-        </div>
-        <ul cr-mount class="{{#if %open}}open{{else}}closed{{/if}}"></ul>
-      </li>
-    </ul>
+  <tree class="demo">
+      {{>tree childNodes=tree}}
+    
+      {{#*template "tree"}}
+        <ul class="tree{{#if %open}} open{{else}} closed{{/if}}">
+          {{#each %childNodes}}
+          <li class="leaf" cr-event="click!: toggle; dblclick!: addChildren">
+            <div class="{{#if %childNodes}}bold{{/if}}">
+              {{name}}
+              {{#if %childNodes}}
+                [{{#if %open}}-{{else}}+{{/if}}]
+              {{/if}}
+            </div>
+            {{#if %childNodes}}
+              {{>tree}}
+            {{/if}}
+          </li>
+          {{/each}}
+        </ul>
+      {{/template}}
 </tree>
   <pre><code class="language-javascript code">ss</code></pre>
   The HTML:

@@ -5,14 +5,16 @@ define('replacer', ['circular'], function(Circular) {
 
   // Quick and dirty... good enough for now though
   return function(selector, codeTxt, HTMLTxt) {
-    $('code.code').innerHTML = codeTxt;
+    $('code.code').innerHTML = codeTxt.replace(/</g, '&lt;'); //.replace(/>/g, '&gt;');
     HTMLTxt.replace(/.*?(<body[\S\s]+<\/body>.*?)/g, function(_, $1) {
       HTMLTxt = $1;
     });
     $('code.html').innerHTML = HTMLTxt;
     body = $(selector, $('code.html'));
     $('code.html').innerHTML = '';
-    $('code.html').textContent = body.outerHTML.replace(/([\n\r])\s{4}/g, '$1');
+    if (body) $('code.html').textContent = body.outerHTML
+      .replace(/([\n\r])\s{4}/g, '$1')
+      .replace(/&gt;/g, '>');
 
     window.Prism && Prism.highlightAll();
   }
