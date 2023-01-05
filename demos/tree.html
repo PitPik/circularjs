@@ -9,19 +9,19 @@
 
   <!-- the demo root element -->
   <tree class="demo">
-      {{>tree childNodes=tree}}
+      {{>tree children=tree}}
     
       {{#*template "tree"}}
         <ul class="tree{{#if %open}} open{{else}} closed{{/if}}">
-          {{#each %childNodes}}
+          {{#each %children}}
           <li class="leaf" cr-event="click!: toggle; dblclick!: addChildren">
-            <div class="{{#if %childNodes}}bold{{/if}}">
+            <div class="{{#if %children}}bold{{/if}}">
               {{name}}
-              {{#if %childNodes}}
+              {{#if %children}}
                 [{{#if %open}}-{{else}}+{{/if}}]
               {{/if}}
             </div>
-            {{#if %childNodes}}
+            {{#if %children}}
               {{>tree}}
             {{/if}}
           </li>

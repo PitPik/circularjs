@@ -1,24 +1,24 @@
-define('tree', ['circular', '!tree.html'], ({ Component, Toolbox: { $ } }, template) => 
+define('tree', ['circular', '!tree.html'], ({ Component }, template) => 
 
 Component({
   selector: 'tree',
   template,
-  subscribe$: { 'tree:childNodes': [] },
+  subscribe$: { 'tree:children': [] },
 },
 class Tree {
   constructor() {
     this.tree = [{
       name: 'My Tree',
       open: true,
-      childNodes: [
+      children: [
         { name: 'hello' },
         { name: 'some more' },
         {
           name: 'child folder',
-          childNodes: [
+          children: [
             {
               name: 'child folder',
-              childNodes: [ { name: 'hello' } ]
+              children: [ { name: 'hello' } ]
             }
           ]
         }
@@ -26,26 +26,27 @@ class Tree {
     }];
   }
 
-  tree$Intersept(vomInst, item) {
+  tree$PR(item, parent, root) {
     item.open = item.open || false;
-    if (item.childNodes) item.childNodes.push({ name: '+' });
+    if (item.children) item.children.push({ name: '+' });
   }
 
-  toggle(e, elm, item) {
+  toggle(e, elm, item, model) {
     e.stopPropagation();
-    if (item.childNodes) {
+    if (item.name === '+') {
+      model.move({ name: 'new stuff' }, item.index);
+    } else {
       item.open = !item.open;
-    } else if (item.name === '+') {
-      this.tree.insertBefore({ name: 'new stuff' }, item);
     }
   }
 
-  addChildren(e, elm, item) {
+  addChildren(e, elm, item, model) {
     e.stopPropagation();
-    if (!item.childNodes && item.name !== '+') {
-      this.tree.replaceChild({ name: item.name, open: true, childNodes: [
+    if (item.name !== '+' && !item.children.length) {
+      model.move({ name: item.name, open: true, children: [
         { name: 'new stuff' }
-      ]}, item);
+      ]}, item.index);
+      model.remove(item);
     }
   }
 

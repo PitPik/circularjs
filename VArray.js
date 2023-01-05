@@ -310,6 +310,7 @@ function initModel(vArr, opts, parent, root, index) {
 }
 
 function initChild(item, index, opts, parent, root) {
+  if (opts.promoter.interseptor) opts.promoter.interseptor(item, parent, root);
   NODES[root[opts.idProperty].split(':')[0]][idCounter] = item;
   setProp(item, opts.idProperty, root[opts.idProperty] + ':' + idCounter++, false);
   if (parent) setProp(item, 'parentNode', parent[index], true, false, true);
@@ -334,7 +335,6 @@ function setIndexGetter(model, children, root) {
 }
 
 function setGetter(model, property, cache, path, promoter) {
-  if (promoter.interseptor) promoter.interseptor(model, property, path);
   cache[property] = model[property];
 
   return Object.defineProperty(model, property, {

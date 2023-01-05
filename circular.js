@@ -70,8 +70,16 @@ Object.defineProperties(Circular.prototype, mixinAPI({
     // TODO: use getInstanceData(id)
     return getComponent(this, instances[this.id][inst['__cr-id'].split(':')[1]].parent.split(':')[1]);
   }},
-  hideComponent: { value: function(inst) {
-    // TODO: return showComponent
+  hideComponent: { value: function(elm) {
+    var start = elm._tracker || document.createTextNode('');
+
+    if (!elm.parentNode) return;
+    if (!elm._tracker) elm._tracker = elm.parentNode.insertBefore(start, elm);
+    elm.parentNode.removeChild(elm);
+
+    return function recover() {
+      start.parentNode.insertBefore(elm, elm._tracker);
+    }
   }},
   destroyComponent: { value: function(elm, remove) { // TODO: elm as selector??
     if (elm) {

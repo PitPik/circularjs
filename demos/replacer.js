@@ -1,5 +1,4 @@
 define('replacer', ['circular'], function(Circular) {
-  var circular = new Circular();
   var $ = Circular.Toolbox.$;
   var body = '';
 

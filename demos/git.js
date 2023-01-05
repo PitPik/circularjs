@@ -1,5 +1,5 @@
 define('git', ['circular', 'template-helpers', '!git.html'],
-({ Component, Toolbox: { $, ajax }}, helpers, template) =>
+({ Component, Toolbox: { ajax }}, helpers, template) =>
 
 Component({
   selector: 'git',
