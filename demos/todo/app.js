@@ -31,18 +31,18 @@ class TodoApp {
     this.updateUI();
   }
 
-  list$$(prop, item) {
+  list$(prop, item) {
     prop === 'text' ? item.disabled = true : lazy(this.updateUI.bind(this), this.list);
     if (prop !== 'disabled') storage.saveLazy(this.list, STORAGE_KEY);
   }
 
-  getDoneList(prop) {
-    return this.list.getElementsByProperty('done', prop);
+  list$Move(type, prop, item) {
+    this.list$(prop, item);
   }
 
   updateUI() {
     const all = this.list.length;
-    const done = this.getDoneList(true).length;
+    const done = this.list.filterAll(item => item.done === true).length;
 
     this.all = all !== 0 && all === done;
     this.hide = all === 0;
@@ -52,11 +52,11 @@ class TodoApp {
   }
 
   toggleAll(e) {
-    this.getDoneList(!e.target.checked).forEach(item => item.done = e.target.checked);
+    this.list.filterAll(item => item.done = e.target.checked);
   }
 
   deleteDone() {
-    this.getDoneList(true).forEach(item => this.list.removeChild(item));
+    this.list.filterAll(item => item.done === true && this.list.remove(item));
   }
 
   toggleItem(e, elm, item) {
@@ -67,12 +67,12 @@ class TodoApp {
     const value = elm.value.trim();
 
     if (e.keyCode !== ENTER_KEY || !value) return;
-    this.list.prependChild({ text: value, done: false, disabled: true });
+    this.list.unshift({ text: value, done: false, disabled: true });
     elm.value = '';
   }
   
   deleteItem(e, elm, item) {
-    this.list.removeChild(item);
+    this.list.remove(item);
   }
 
   editItem(e, elm, item) {
@@ -82,7 +82,7 @@ class TodoApp {
   saveItem(e, elm, item) {
     const value = elm.value.trim();
 
-    value ? item.text = value : this.list.removeChild(item);
+    value ? item.text = value : this.list.remove(item);
   }
 
   blur(e, elm, item) {

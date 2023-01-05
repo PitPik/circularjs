@@ -144,7 +144,7 @@ function move(arr, item, index, last) {
   if (prevParent && prevParent !== arr) resetParents(item, arr, children);
   if (!isMove) {
     item = initChild(item, getParentIndex(arr, index, children), opts, arr.parent, root);
-    item[children] = adopt(item[children] || [], opts, arr, root, index);
+    if (children) item[children] = adopt(item[children] || [], opts, arr, root, index);
   }
 
   arr._onChange(onChange, {
@@ -183,7 +183,7 @@ function onChange(apiCheck, data, opts) {
 
 function removeCache(ids, opts) {
   var main = NODES[ids[0]];
-  var children = main[ids[1]][opts.children];
+  var children = main[ids[1]][opts.children] || []; // 'tree:', so no children
   var n = children.length;
   
   for ( ; n--; ) removeCache(children[n][opts.idProperty].split(':'), opts);
