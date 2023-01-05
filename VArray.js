@@ -252,10 +252,8 @@ function findAll(arr, fn, thisArg, out) {
 };
 // ------
 function resetModel(oldValue, value, model, cache, property) { // TODO: check and ... recycle
-  while (cache[property][0]) {
-    cache[property].splice(0, 1); // , value.shift()
-  }
-  for (var n = value.length; n--; )  cache[property].push(value[n]);
+  while (cache[property][0]) cache[property].shift();
+  for (var n = value.length; n--; ) cache[property].push(value[n]);
 }
 
 // TODO: use following ... make them use new stuff as well
