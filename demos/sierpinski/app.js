@@ -3,11 +3,35 @@ require(['circular'], ({ Component }) => {
 
   Component({
     selector: 'sierpinski',
-    template: document.querySelector('sierpinski').innerHTML,
+    initialize: true,
+    template: `
+    <div class="root-triangle" style="{{%style}}">
+      <dots>
+      {{>dotsTMPL}}
+      </dots>
+    </div>
+
+    {{#*template "dotsTMPL"}}
+      <div>
+      {{#each %dots}}
+        <dot
+          cr-event="mouseenter!: mouseenter; mouseleave!: mouseleave"
+          class="dot"
+          style="{{%style}}"
+        >
+          {{%text}}
+          {{#if dots}}
+            {{>dotsTMPL}}
+          {{/if}}
+        </dot>
+      {{/each}}
+      </div>
+    {{/template}}
+    `,
     subscribe$: {
-      this: ['style'],
+      this: [],
       sierpinski: ['seconds', 'scale'],
-      dots: ['text', 'hover'],
+      'dots:dots': ['hover'],
     }
   }, class Dots {
     constructor(elm) {
@@ -34,8 +58,11 @@ require(['circular'], ({ Component }) => {
 
     dots$(propName, item, value) {
       if (propName === 'hover') {
+        item.style = item.style.replace(
+          /;background:[^;]*/,
+          ';background:' + (value ? '#ff0' : '#61dafb')
+        );
         item.text = value ? '*' + item.text + '*' : item.text.replace(/\*/g, '');
-        item.elements.container.style.background = value ? '#ff0' : '#61dafb'
       }
     }
 
@@ -50,7 +77,7 @@ require(['circular'], ({ Component }) => {
     }
 
     onInit(self) {
-      this.sierpinski.allDots = this.dots.getElementsByProperty('text');
+      this.sierpinski.allDots = this.dots.filterAll();
       this.sierpinski.start = Date.now();
 
       nextFrame(this.sierpinski);
@@ -66,7 +93,7 @@ require(['circular'], ({ Component }) => {
       item.hover = false;
     }
 
-  }).init('sierpinski');
+  });
 
   function getStyles(item) {
     return 'width: ' + item.size + 'px;' +
@@ -88,8 +115,8 @@ require(['circular'], ({ Component }) => {
     }
 
     for (let n = 0, l = item.length; n < l; n++) {
-      item[n].childNodes = getTriangleView(item[n]);
-      buildDotsModel(item[n].childNodes, null, max);
+      item[n].dots = getTriangleView(item[n]);
+      buildDotsModel(item[n].dots, null, max);
     }
     return item;
   }
@@ -152,7 +179,7 @@ require(['circular'], ({ Component }) => {
   }
 
   function nextSecond(item) {
-    item.seconds = (item.seconds > 9) ? 0 : item.seconds + 1;
+    item.seconds = (item.seconds > 8) ? 0 : item.seconds + 1;
     setTimeout(() => {
       nextSecond(item);
     }, 1000);
