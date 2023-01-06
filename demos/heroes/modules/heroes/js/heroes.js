@@ -13,7 +13,10 @@ define('app-heroes', ['circular', 'data-provider', '!modules/heroes/css/index.cs
       {{#each %heroList}}
         <li>
           <a href="#/detail/{{%id}}">
-            <span class="badge">{{%id}}</span> {{%name}}
+            <span class="badge">
+              {{%id}}
+            </span>
+            {{~%name}}
           </a>
           <button class="delete" title="delete hero" cr-event="click: deleteHero">x</button>
         </li>
