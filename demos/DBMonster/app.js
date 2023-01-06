@@ -16,7 +16,7 @@ Component({
             {{%lastSample.nbQueries}}
           </span>
         </td>
-        {{#each topFiveQueries}}
+        {{#each lastSample.topFiveQueries}}
         <td class="{{%elapsedClassName}}">
           {{%formatElapsed}}
           <div class="popover left">
@@ -29,33 +29,20 @@ Component({
     {{/each}}
     </tbody>
   </table>`,
-  subscribe$: { 'data:topFiveQueries': [] },
+  subscribe$: { 'data': [] },
 },
 class App {
   constructor() {
-    this.pingRenderRate = Monitoring.renderRate.ping;
-    this.BoundUpdate = this.update.bind(this);
-    this.data = this.getViewModel();
+    this.data = ENV.generateData().toArray();
 
-    setTimeout(this.BoundUpdate, ENV.timeout);
-  }
-
-  getViewModel() { // some mapping for viewModel
-    let data = ENV.generateData().toArray();
-
-    data.forEach(item => {
-      item.topFiveQueries = item.lastSample.topFiveQueries;
-      item.lastSample.queries = null;
-    });
-
-    return data;
+    setTimeout(() => this.update(), ENV.timeout);
   }
 
   update() {
-    setTimeout(this.BoundUpdate, ENV.timeout);
+    this.data.updateModel(ENV.generateData().toArray());
+    Monitoring.renderRate.ping();
 
-    this.data.updateModel(this.getViewModel());
-    this.pingRenderRate();
+    setTimeout(() => this.update(), ENV.timeout);
   }
 
 }));

@@ -10,11 +10,11 @@ define('app-detail', ['circular', 'data-provider', '!modules/detail/css/index.cs
         <input cr-event="input: updateName; keyup: cancel" placeholder="name" value="{{%name}}" />
       </label>
       <button cr-event="click: goBack">go back</button>
-      {{#if %dirty}}<button cr-event="click: save" disabled="{{%name}}">save</button>{{/if}}
+      {{#if %dirty}}<button cr-event="click: save" disabled="{{#unless %name}}true{{/unless}}">save</button>{{/if}}
     </div>`,
-  subscribe$: { this: ['name', 'id', 'dirty'] },
+  subscribe$: { this: [] },
 }, class Details {
-  constructor(elm, crInst) {
+  constructor(elm, init, crInst) {
     this.name = '';
     this.initialName = '';
     this.id = '';

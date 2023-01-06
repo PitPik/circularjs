@@ -56,7 +56,7 @@ VAProto.addSubscriber = function(property, item) { // TODO: rename;
   return setGetter(data.model, path[path.length - 1], {}, path, this._onChange._options.promoter);
 };
 VAProto.getCleanModel = function(item) { return JSON.parse(JSON.stringify(item)) };
-VAProto.updateModel = function(model, newModel) { return updateModel(model, newModel) };
+VAProto.updateModel = function(newModel) { return updateModel(this, newModel) };
 VAProto.destroy = function(id) { // TODO.... all
   id = typeof id !== 'object' ? id : this[this._onChange._options.idProperty].split(':')[0];
   for (var key in NODES[id]) delete NODES[id][key];
@@ -253,7 +253,7 @@ function findAll(arr, fn, thisArg, out) {
 // ------
 function resetModel(oldValue, value, model, cache, property) { // TODO: check and ... recycle
   while (cache[property][0]) cache[property].shift();
-  for (var n = value.length; n--; ) cache[property].push(value[n]);
+  for (var n = value.length; n--; ) cache[property].unshift(value[n]);
 }
 
 // TODO: use following ... make them use new stuff as well
@@ -268,7 +268,7 @@ function updateObject(model, newModel) {
 }
 
 function updater(model, newModel, n) { // TODO: if (model[n].constructor === VArray) ??
-  if (model[n] && VArray.isArray(model[n])) updateModel(model[n], newModel[n]);
+  if (model[n] && Array.isArray(model[n])) updateModel(model[n], newModel[n]);
   else if (model[n] && typeof model[n] === 'object') updateObject(model[n], newModel[n]);
   else if (model[n] !== newModel[n] && newModel[n] !== undefined) model[n] = newModel[n];
 }

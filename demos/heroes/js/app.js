@@ -9,19 +9,20 @@ define('app', ['circular'], ({ Module }) => Module({
       </nav>
       <div cr-view="app-modules"></div>
     </section>`,
-  subscribe$: { this: ['currentApp'] },
+  subscribe$: { this: [] },
 }, class AppMain {
-  constructor() {
-    this.crInst = {};
+  constructor(elm, init, crInst) {
+    this.circular = crInst;
     this.container = {};
+    this.apps = {};
+    this.activeApp;
 
     this.currentApp = '';
     this.title = 'Tour of Heroes';
   }
 
-  onInit(elm, crInst, items) {
-    this.crInst = crInst;
-    this.container = items.views['app-modules'];
+  onInit(elm, crInst) {
+    this.container = crInst.getView('app-modules', elm);
 
     crInst.addRoute({
       path: '(/:appName)(/*)',
@@ -29,11 +30,16 @@ define('app', ['circular'], ({ Module }) => Module({
     }, true);
   }
 
-  this$(property, item, value) {
-    value && this.crInst.renderModule({
-      require: 'app-' + value,
-      container: this.container,
-      init: true,
-    });
+  onChildInit(elm) { // one way of solving it
+    this.app = elm;
+  }
+
+  this$(property, item, value, oldValue) {
+    if (!value) return;
+
+    this.apps[oldValue] = this.circular.hideComponent(this.activeApp);
+    this.activeApp = this.apps[value] ?
+      this.apps[value]():
+      this.circular.createComponent('app-' + value, {'cr-lazy': ''}, this, this.container);
   }
 }));

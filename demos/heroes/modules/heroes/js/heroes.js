@@ -1,6 +1,6 @@
 define('app-heroes', ['circular', 'data-provider', '!modules/heroes/css/index.css'],
 ({ Component }, heroService, styles) => Component({
-  selector: 'app-heroes-list',
+  selector: 'app-heroes',
   styles,
   template: `
     <div>
@@ -10,15 +10,17 @@ define('app-heroes', ['circular', 'data-provider', '!modules/heroes/css/index.cs
         <button type="submit">add</button>
       </form>
       <ul>
-        <li cr-for="heroList">
+      {{#each %heroList}}
+        <li>
           <a href="#/detail/{{%id}}">
             <span class="badge">{{%id}}</span> {{%name}}
           </a>
           <button class="delete" title="delete hero" cr-event="click: deleteHero">x</button>
         </li>
+      {{/each}}
       </ul>
     </div>`,
-  subscribe$: { heroList: ['name'] },
+  subscribe$: { 'heroList:': [] },
 }, class HeroList {
   constructor() {
     this.heroList = [];
@@ -33,12 +35,12 @@ define('app-heroes', ['circular', 'data-provider', '!modules/heroes/css/index.cs
 
     e.preventDefault(); // don't submit form
     name && heroService.addHero(name).then(model => {
-      this.heroList.appendChild(model);
+      this.heroList.push(model);
       element.hero.value = '';
     });
   }
 
   deleteHero(e, element, item) {
-    heroService.deleteHero(item.id).then(() => this.heroList.removeChild(item));
+    heroService.deleteHero(item.id).then(() => this.heroList.remove(item));
   }
 }));

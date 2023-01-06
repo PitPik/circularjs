@@ -7,9 +7,9 @@ const ESCAPE_KEY = 27;
 const STORAGE_KEY = 'todos-circularjs-2.0.0';
 
 Component({
-  selector: 'body',
+  selector: 'todo-app',
   initialize: true,
-  template: document.body.innerHTML + (document.body.innerHTML = ''),
+  template: '{{>@content}}',
   subscribe$: { 'list:': [] },
 },
 class TodoApp {

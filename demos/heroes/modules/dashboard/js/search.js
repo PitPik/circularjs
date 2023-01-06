@@ -6,10 +6,12 @@ define('app-search', ['circular', 'data-provider'],
       <h4>Hero Search</h4>
       <input id="search-box" cr-view="search" cr-event="keyup: search" />
       <ul class="search-result" cr-event="click: select">
+      {{#each %searchList}}
         <li cr-for="searchList"><a href="#/detail/{{%id}}">{{%name}}</a></li>
+      {{/each}}
       </ul>
     </section>`,
-  subscribe$: { searchList: ['*'] },
+  subscribe$: { 'searchList:': [] },
 }, class AppSearch {
   constructor() {
     this.searchList = [];
@@ -18,7 +20,8 @@ define('app-search', ['circular', 'data-provider'],
   }
 
   onInit(elm, crInst, items) {
-    this.searchInput = items.views.search;
+    // this.searchInput = items.views.search;
+    this.searchInput = crInst.getView('search', elm);
   }
 
   search(e, elm) {

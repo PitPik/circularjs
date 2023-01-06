@@ -360,7 +360,7 @@ function getPropertyUpdateFn(item, data, udateFn, loopLimitsName) {
   var isScroll = data[0] && data[0].scrollers;
 
   return function updateProperty(value, stop) {
-    var loopLimits = value !== undefined && (value[loopLimitsName] || '').length;
+    var loopLimits = value !== undefined && value !== null && (value[loopLimitsName] || '').length;
 
     if (!isArray && value === item.value && item.variable.active < 2) return;
 
@@ -415,8 +415,12 @@ function registerProperties(_this, udateFn, collector, data, items, children) {
     variable = item.key || item.variable.value;
     propFn = getPropertyUpdateFn(item, data, udateFn, _this.options.loopLimitsName);
     loop = item.loop && item.loop.this['cr-id'];
-    parentId = item.parent['cr-id'] || item.parent.this['cr-id'];
-    if (item.parent.this) item.parent['cr-id'] = parentId;
+    parentId = item.parent['cr-id'] || item.loop.this['cr-id'] ||
+      item.loop['@parent']['cr-id'] || item.parent.this['cr-id'];
+    // if (item.parent.this) item.parent['cr-id'] = parentId;
+    if (item.parent['cr-id'] === undefined) Object.defineProperty(item.parent, 'cr-id', {
+      value: parentId,
+    });
 
     addDestroyer(collector.destroyers, parentId.split(':'));
     updaters = addUpdater(collector.updaters, parentId, variable, propFn);
@@ -741,7 +745,7 @@ function replaceBlock(_this, firstNode, lastNode, bodyFn, track, out, dataDump, 
 
   return function updateBlock(data, helpers, stopRender, isScroll) { // TODO: check helpers for siblings
     var dummy = isScroll ? setScroll(true, data[0], fnIdx) : undefined; // before bodyFn()
-    var arrData = data[0].value.length;
+    var arrData = data[0].value && data[0].value.length; // null
     var body = bodyFn(data, helpers, stopRender); // track.checkFn() gets triggered here...
     var html = firstNode; // fake
     var node = firstNode;

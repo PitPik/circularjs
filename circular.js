@@ -46,10 +46,10 @@ Object.defineProperties(Circular.prototype, mixinAPI({
 
     for (var attr in attrs) elm.setAttribute(attr, attrs[attr]);
     (node || inst.element).appendChild(elm); // TODO: maybe offer insertBefore...
-    initInnerComponents(inst, node || inst.element, selector);
+    initInnerComponents(inst, node || inst.element, selector, true);
     return elm;
   }},
-  initComponents: { value: function(selector, component, fragment) {
+  initComponents: { value: function(selector, component, fragment) { // TODO: why would we need this??
     var inst = getInstanceData(component['__cr-id']);
     var container = fragment || inst.element;
 
@@ -71,14 +71,16 @@ Object.defineProperties(Circular.prototype, mixinAPI({
     return getComponent(this, instances[this.id][inst['__cr-id'].split(':')[1]].parent.split(':')[1]);
   }},
   hideComponent: { value: function(elm) {
-    var start = elm._tracker || document.createTextNode('');
+    var start = elm && elm._tracker || document.createTextNode('');
+    var inst = elm && getInstanceData(elm['cr-id']);
 
-    if (!elm.parentNode) return;
+    if (!elm || !elm.parentNode) return;
     if (!elm._tracker) elm._tracker = elm.parentNode.insertBefore(start, elm);
     elm.parentNode.removeChild(elm);
 
     return function recover() {
-      start.parentNode.insertBefore(elm, elm._tracker);
+      if (inst.instance.onLoad) inst.instance.onLoad(elm, inst.crInst);
+      return start.parentNode.insertBefore(elm, elm._tracker);
     }
   }},
   destroyComponent: { value: function(elm, remove) { // TODO: elm as selector??
@@ -116,9 +118,9 @@ return Object.defineProperties(Circular, {
       singleton: false, // ????
       initialize: false,
       crInst: crInst,
-      init: function init(element, plugData, parent) {
+      init: function init(element, plugData, parent, onLoad) {
         if (defData.initialize) component.initialised = true;
-        return initComponent($(element), this, defData, plugData, parent);
+        return initComponent($(element), this, defData, plugData, parent, onLoad);
       },
       // preparePlugin: function preparePlugin() {
       //   //...
@@ -153,7 +155,7 @@ function getComponent(_this, cId, crId) { // splitting here...
   return data && { element: data.element, instance: data.instance, name: data.name };
 }
 
-function initComponent(element, component, defData, plugData, parent) {
+function initComponent(element, component, defData, plugData, parent, onLoad) {
   var crInst = component.crInst;
   var ID = id++;
   var elmId = element['cr-id'];
@@ -197,6 +199,7 @@ function initComponent(element, component, defData, plugData, parent) {
   // inst.instance.onBeforeInit && inst.instance.onBeforeInit(element, crInst);
   if (template) renderComponent(inst, defData.extra);
   inst.instance.onInit && inst.instance.onInit(element, crInst);
+  if (onLoad) inst.instance.onLoad && inst.instance.onLoad(element, crInst);
 
   return inst;
 }
@@ -238,7 +241,7 @@ function renderComponent(inst, extra) {
 }
 
 // TODO: just an idea: don't inst.element.appendChild(fragment) until
-function initInnerComponents(inst, element, selector) {
+function initInnerComponents(inst, element, selector, onLoad) {
   var query = inst.template.childQuery || [];
   var children = inst.template.childComponents;
   var isLazy = false, newInst;
@@ -258,14 +261,14 @@ function initInnerComponents(inst, element, selector) {
     if (isLazy && !components[name]) {
       (function(inst, elm, name) { // lazy loading :) nice
         require([require.lazyPackages[name] || name], function(component) {
-          var newInst = component.init(elm, null, inst.instance);
+          var newInst = component.init(elm, null, inst.instance, onLoad);
           if (inst.instance.onChildInit) inst.instance.onChildInit(newInst.element, newInst.instance, name);
           return component;
         });
       })(inst, elms[n], name);
       continue;
     }
-    newInst = components[name].init(elms[n], null, inst.instance);
+    newInst = components[name].init(elms[n], null, inst.instance, onLoad);
     if (inst.instance.onChildInit) inst.instance.onChildInit(newInst.element, newInst.instance, name);
   }
 }
