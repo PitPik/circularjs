@@ -4,7 +4,7 @@
 
 See some demos right away @ [pitpik.github.io/circularjs](https://pitpik.github.io/circularjs/)
 
-CircularJS is a tiny, progressive **MV\* like framework** with its goal to help building **web-pages** and **single-page-web-apps** in a **model-oriented** easy way with the help of powerful tools:
+CircularJS is a tiny (57.3 kB minified, 20.9 kB gzipped), progressive **MV\* like framework** with its goal to help building **web-pages** and **single-page-web-apps** in a **model-oriented** easy way with the help of powerful tools:
 
  - **Schnauzer**: tiny an fast rendering engine (like Handlebars but smaller than Mustache) to reflect VOM models on the fly in combination with the internal **rendering module**. (Replaces Angular like ng-if, ng-class, etc.)
  - **blick**: a layer in between Schnauzer and VOM to keep templates dynamic and reactive so they can not only serve at initial rendering but also in the live cycle of components.

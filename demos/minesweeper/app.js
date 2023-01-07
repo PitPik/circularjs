@@ -46,7 +46,7 @@ class Minesweeper {
   reveal(e, elm, item) {
     e.preventDefault();
 
-    if (this.won !== undefined) return;
+    if (this.won !== undefined || !elm.hasAttribute('td')) return this.won = this.won;
     if (!this.interval) this.interval = setInterval(() => this.time++, 1000);
 
     this.won = gameCtrl.checkItem(this.board, item, e.type === 'contextmenu');
