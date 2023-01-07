@@ -35,7 +35,7 @@
       {{#each %board}}
         <div class="tr">
         {{#each %arr}}
-          <div td class="{{%mark}}{{#if %isProcessed}} color-{{%surrounding}}{{else}} hidden{{/if}} td">
+          <div class="{{%mark}}{{#if %isProcessed}} color-{{%surrounding}}{{else}} hidden{{/if}} td">
           {{#if %isProcessed}}
             {{#if %surrounding}}
               {{%surrounding}}

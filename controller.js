@@ -70,7 +70,7 @@ function eventDelegator(e, callbackFns, events) {
   var key = '';
   var n = 0, m = 0;
   var cancel = false;
-  var model, delegate, children = '';
+  var model, delegate, children = '', retModel;
 
   for (n = cbKeys.length; n--; ) {
     key = cbKeys[n];
@@ -108,11 +108,12 @@ function eventDelegator(e, callbackFns, events) {
       model = data.model;
       children = data.children;
       target = delegate ? Toolbox.findParent(e.target, data.idTag, elm) : elm;
+      retModel = delegate ? data.getElementById(target[data.idTag], true) : model;
       // TODO: !data.getElementById(target[data.idTag], true) ... return or continue;
-      cancel = callbackFns[key](
+      if (retModel) cancel = callbackFns[key](
         e,
         target,
-        delegate ? data.getElementById(target[data.idTag], true) : model, // || data.element
+        retModel, // || data.element
         model.parentNode ? model.parentNode[children] : model[children] && model[children].parent,
         delegate && elm || undefined,
         delegate && model || undefined,
