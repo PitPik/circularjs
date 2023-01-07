@@ -49,24 +49,24 @@ Object.defineProperties(Circular.prototype, mixinAPI({
     initInnerComponents(inst, node || inst.element, selector, true);
     return elm;
   }},
-  initComponents: { value: function(selector, component, fragment) { // TODO: why would we need this??
-    var inst = getInstanceData(component['__cr-id']);
-    var container = fragment || inst.element;
+  // initComponents: { value: function(selector, component, fragment) { // TODO: why would we need this??
+  //   var inst = getInstanceData(component['__cr-id']);
+  //   var container = fragment || inst.element;
 
-    return initInnerComponents(inst, fragment, selector);
-  }},
+  //   return initInnerComponents(inst, fragment, selector);
+  // }},
   getChildComponents: { value: function(inst) { // do we ever need this?
     var parts = inst['__cr-id'].split(':');
     var children = instances[parts[0]][parts[1]].children;
     var out = [];
-// TODO: use getInstanceData(id)
+    // TODO: use getInstanceData(id)
     for (var n = children.length; n--; ) {
       parts = children[n].split(':');
       out.push(getComponent(this, parts[1], parts[0]));
     }
     return out;
   }},
-  getParentComponent: { value: function(inst) { // do we ever need this?
+  getParentComponent: { value: function(inst) { // do we ever need this? .. api.js
     // TODO: use getInstanceData(id)
     return getComponent(this, instances[this.id][inst['__cr-id'].split(':')[1]].parent.split(':')[1]);
   }},
@@ -74,13 +74,19 @@ Object.defineProperties(Circular.prototype, mixinAPI({
     var start = elm && elm._tracker || document.createTextNode('');
     var inst = elm && getInstanceData(elm['cr-id']);
 
+    if (elm) elm.__scrollers = elm.__scrollers ?
+      Blick.setScroll(true, elm.__scrollers, 0) :
+      Blick.setScroll(true, { scrollers: [] }, 0, elm);
+
     if (!elm || !elm.parentNode) return;
     if (!elm._tracker) elm._tracker = elm.parentNode.insertBefore(start, elm);
     elm.parentNode.removeChild(elm);
 
     return function recover() {
+      start.parentNode.insertBefore(elm, elm._tracker);
+      Blick.setScroll(false, elm.__scrollers, 0);
       if (inst.instance.onLoad) inst.instance.onLoad(elm, inst.crInst);
-      return start.parentNode.insertBefore(elm, elm._tracker);
+      return elm;
     }
   }},
   destroyComponent: { value: function(elm, remove) { // TODO: elm as selector??
@@ -89,11 +95,11 @@ Object.defineProperties(Circular.prototype, mixinAPI({
       if (remove) elm.parentNode.removeChild(elm);
     }
   }},
-  destroy: { value: function() {
-    var insts = instances[this.id];
-    // TODO: this.destroyComponents doesn't exists
-    this.destroyComponents(keys(insts).map(function(key) { return insts[key].instance; }));
-   }},
+  // destroy: { value: function() {
+  //   var insts = instances[this.id];
+  //   // TODO: this.destroyComponents() doesn't exist any more in api.js
+  //   this.destroyComponents(keys(insts).map(function(key) { return insts[key].instance; }));
+  //  }},
   // getAttributeData: { value: getAttrMap },
 }, Circular));
 
@@ -240,7 +246,6 @@ function renderComponent(inst, extra) {
   inst.element.appendChild(fragment);
 }
 
-// TODO: just an idea: don't inst.element.appendChild(fragment) until
 function initInnerComponents(inst, element, selector, onLoad) {
   var query = inst.template.childQuery || [];
   var children = inst.template.childComponents;
@@ -291,11 +296,8 @@ function initInstance(component, inst, plugData, name) {
       var value = item[1];
       var key = value || item[0];
 
-      value = isString ? value.substring(1, value.length - 1) :
-        value === 'true' ? true : value === 'false' ? false :
-        // value === 'null' ? null :
-        +value == value ? +value :
-        undefined;
+      value = isString ? value.substring(1, value.length - 1) : value === 'true' ? true : 
+        value === 'false' ? false : +value == value ? +value : undefined;
 
       if (hasOwnProperty.call(scope, item[0])) {
         if (value !== undefined) scope[item[0]] = value;
@@ -335,7 +337,6 @@ function getVArrayModel(name, component, inst, childNodes) {
     childNodes: childNodes,
   };
 
-  // console.log(name, name === 'this' ? inst : inst[name] || [])
   return VArray.adopt(name === 'this' ? inst : inst[name] || [], {
     idProperty: 'cr-id', // TODO: define by circular properties
     children: childNodes,
@@ -347,9 +348,7 @@ function getVArrayModel(name, component, inst, childNodes) {
     promoter: {
       interseptor: inst[name$PR] && inst[name$PR].bind(inst),
       onChange: function move(vArrData) {
-        // if (vArrData.action !== 'change') console.log('onChange', vArrData);
         if (vArrData.action === 'change') vSubscribe(data, vArrData);
-        // else vMoveCallback(data, vArrData);
         else vMoveCallback(vArrData.action, vArrData.item, vArrData.parent,
           vArrData.previousParent, vArrData.index, !vArrData.last, data);
       }
@@ -457,7 +456,6 @@ function isDynamic(blick, obj, key, vArrayID, makeDynamic) {
   return active;
 }
 
-// GOOD to go :) events go automatically
 function destroyItems(fragment, inst) {
   var childNodes = fragment.childNodes;
   var items = $$(inst.template.childQuery, fragment);
@@ -468,7 +466,6 @@ function destroyItems(fragment, inst) {
 
 // -----------------
 
-// GOOD for now (perfect with controller...)
 function addInstanceEvents(inst, vArray, fragment) {
   if (!inst.template.enableEvents) return null; // TODO:  || !vom
   if (fragment) addInstanceEvents(inst, vArray); // for it self!!!
@@ -491,7 +488,6 @@ function addInstanceEvents(inst, vArray, fragment) {
   });
 }
 
-// GOOD to go
 function installStyles(styles, selector) {
   var innerHTML = !styles ? '' : isArray(styles) ? styles.join('\n') : styles;
   var link = innerHTML && $create('style');
@@ -503,7 +499,6 @@ function installStyles(styles, selector) {
   return document.head.appendChild(link);
 }
 
-// GOOD to go
 function processSubscribers(subscribe$, children) {
   var items = keys(subscribe$);
 
@@ -524,15 +519,12 @@ function processSubscribers(subscribe$, children) {
 
 // ----------------- template...
 
-// GOOD for now (check childComponents)
 function processTemplate(template, blickOptions, skipBlick) {
   var childComponents = {};
   var componentKeys = keys(components);
   var query = componentKeys.join('|');
-  // <(?:(test-2)[^/]?|[^>]+cr-name=['"]*([^"'\s]*)|([^ >]+)[^>]*cr-lazy)[^/]*?>
   var addOn = query ? '(' + query + ')[^/]?|' : '';
   var regexp = '<(?:' + addOn + '([^ >]+)[^>]*cr-lazy)[^/]*?>';
-  // var regexp = '<(?:' + addOn + '[^>]+cr-name=[\'"]*([^"\'\\s]*)|([^ >]+)[^>]*cr-lazy)[^/]*?>';
   var partialKeys = !!keys(blickOptions.partials || {}); // TODO... good/save for now...
 
   // .replace(/(?:{{&gt;|cr-src=)/g, function($1) {
@@ -563,8 +555,6 @@ function checkPartial(partials, keys, regex) { // TODO: check ... geen zin in
   return false;
 }
 
-// GOOD for now
-// TODO: extract <my>...</my> innerHTML for @content partial in addComponentPartial()
 function addComponentPartial(template, content, blickOptions) {
   var partial = processTemplate(content, blickOptions, true);
   var childComponents = template.childComponents; // is []
@@ -588,8 +578,7 @@ function registerPartials(crInst, component) {
 }
 
 function getBlickOptions(options, defData) {
-  // TODO: maybe add more options...
-  return {
+  return { // TODO: maybe add more options...
     helpers: extend(extend({}, options.helpers), defData.helpers || {}),
     partials: extend(extend({}, options.partials), defData.partials || {}),
     attributes: extend(extend({}, options.attributes), defData.attributes || {}),

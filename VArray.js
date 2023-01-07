@@ -17,7 +17,7 @@ var getArgs = function(args, out) {
 };
 var createArraySubclass = function(arr, vArr, args) {
   arr.push.apply(arr, args);
-  return Object.setPrototypeOf(arr, vArr.prototype); // TODO: fix perf
+  return Object.setPrototypeOf(arr, vArr.prototype); // TODO: check performance
 }
 var VArray = function() { return createArraySubclass([], VArray, arguments) };
 
@@ -67,25 +67,25 @@ return VArray;
 
 // ---------------------------------------
 
-function shift(arr) { // DONE
+function shift(arr) {
   return remove(arr, arr[0]);
 }
 
-function pop(arr) { // DONE
+function pop(arr) {
   return remove(arr, arr[arr.length - 1]);
 }
 
-function unshift(arr, args) { // DONE
+function unshift(arr, args) {
   for (var n = args.length; n--; ) move(arr, args[n], 0, n === 0);
   return arr.length;
 }
 
-function push(arr, args) { // DONE
+function push(arr, args) {
   for (var n = 0, l = args.length; n < l; n++) move(arr, args[n], arr.length, n === l - 1);
   return arr.length;
 }
 
-function sort(arr, fn, order) { // DONE
+function sort(arr, fn, order) {
   var id = arr._onChange._options.idProperty;
   var oldOrder = order || {};
   var n = 0, l = 0;
@@ -103,7 +103,7 @@ function sort(arr, fn, order) { // DONE
   return out;
 }
 
-function reverse(arr) { // DONE
+function reverse(arr) {
   var id = arr._onChange._options.idProperty;
   var oldOrder = {};
   var n = arr.length;
@@ -112,7 +112,7 @@ function reverse(arr) { // DONE
   return sort(arr, AProto.reverse.call(arr), oldOrder);
 }
 
-function fill(arr, value, start, end) { // DONE
+function fill(arr, value, start, end) {
   start = +start || 0;
   end = end === undefined ? arr.length : Math.min(+end, arr.length);
   if (start === NaN || start >= end) return arr;
@@ -121,7 +121,7 @@ function fill(arr, value, start, end) { // DONE
   return arr;
 }
 
-function copyWithin(arr, target, start, end) { // DONE
+function copyWithin(arr, target, start, end) {
   start = +start || 0;
   end = end === undefined ? arr.length : Math.min(+end || 0, arr.length);
   if (start === NaN || start >= end) return arr;
@@ -208,8 +208,8 @@ function getParentIndex(arr, start, children) {
   return found || alt ? index : start;
 }
 
-function resetParents(item, arr, children, parentNode) { // TODO: revisit
-  var parentNode;
+function resetParents(item, arr, children) { // TODO: revisit
+  var parentNode = item.parentNode; // overwritten
 
   item[children].parent = arr;
   parentNode = arr.parent[getParentIndex(arr, item.index, children)];
@@ -284,7 +284,6 @@ function adopt(data, opts, parent, root, index) {
   if (!root) setProp(vArr._onChange, '_options', opts, false);
   if (standalone) setProp(vArr[0], opts.idProperty, '' + idCounter++, false);
   return standalone ? initGetters(vArr[0], opts) && vArr :
-    // opts.children === undefined ? vArr : initModel(vArr, opts || {}, parent, root, index);
     initModel(vArr, opts || {}, parent, root, index);
 }
 
@@ -303,7 +302,6 @@ function initModel(vArr, opts, parent, root, index) {
   for (var n = 0, l = vArr.length; n < l; n++) {
     initChild(vArr[n], index, opts, parent, root || vArr);
     if (!opts.children) continue; // in case of 'arr:'
-    // TODO: if VArray is slow (setPrototypeOf) make empty [] not yet VArray...
     vArr[n][opts.children] = adopt(vArr[n][opts.children] || [], opts, vArr, root || vArr, n);
   }
   return vArr;
@@ -342,7 +340,6 @@ function setGetter(model, property, cache, path, promoter) {
     set: function(value) {
       var oldValue = cache[property];
 
-      // if (oldValue && oldValue.constructor === VArray && value !== oldValue)
       if (oldValue && oldValue._onChange && value !== oldValue)
         return resetModel(oldValue, value, model, cache, property);
 

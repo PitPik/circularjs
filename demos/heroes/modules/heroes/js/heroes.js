@@ -3,26 +3,25 @@ define('app-heroes', ['circular', 'data-provider', '!modules/heroes/css/index.cs
   selector: 'app-heroes',
   styles,
   template: `
-    <div>
-      <h2>My Heroes</h2>
-      <form cr-event="submit: addHero">
-        <label>Hero name: <input name="hero" type="text" /></label>
-        <button type="submit">add</button>
-      </form>
-      <ul>
-      {{#each %heroList}}
-        <li>
-          <a href="#/detail/{{%id}}">
-            <span class="badge">
-              {{%id}}
-            </span>
-            {{~%name}}
-          </a>
-          <button class="delete" title="delete hero" cr-event="click: deleteHero">x</button>
-        </li>
-      {{/each}}
-      </ul>
-    </div>`,
+    <h2>My Heroes</h2>
+    <form cr-event="submit: addHero">
+      <label>Hero name: <input name="hero" type="text" /></label>
+      <button type="submit">add</button>
+    </form>
+    <ul>
+    {{#each %heroList}}
+      <li>
+        <a href="#/detail/{{%id}}">
+          <span class="badge">
+            {{%id}}
+          </span>
+          {{~%name}}
+        </a>
+        <button class="delete" title="delete hero" cr-event="click: deleteHero">x</button>
+      </li>
+    {{/each}}
+    </ul>
+  `,
   subscribe$: { 'heroList:': [] },
 }, class HeroList {
   constructor() {

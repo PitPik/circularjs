@@ -2,15 +2,14 @@ define('app-search', ['circular', 'data-provider'],
 ({ Component }, heroService) => Component({
   selector: 'app-search',
   template: `
-    <section>
-      <h4>Hero Search</h4>
-      <input id="search-box" cr-view="search" cr-event="keyup: search" />
-      <ul class="search-result" cr-event="click: select">
-      {{#each %searchList}}
-        <li cr-for="searchList"><a href="#/detail/{{%id}}">{{%name}}</a></li>
-      {{/each}}
-      </ul>
-    </section>`,
+    <h4>Hero Search</h4>
+    <input id="search-box" cr-view="search" cr-event="keyup: search" />
+    <ul class="search-result" cr-event="click: select">
+    {{#each %searchList}}
+      <li cr-for="searchList"><a href="#/detail/{{%id}}">{{%name}}</a></li>
+    {{/each}}
+    </ul>
+  `,
   subscribe$: { 'searchList:': [] },
 }, class AppSearch {
   constructor() {

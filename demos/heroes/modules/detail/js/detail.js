@@ -3,15 +3,14 @@ define('app-detail', ['circular', 'data-provider', '!modules/detail/css/index.cs
   selector: 'app-detail',
   styles,
   template: `
-    <div cr-template>
-      <h2><span cr-view="name">{{%name}}</span> Details</h2>
-      <div><span>id: </span>{{#if %id}}{{%id}}{{else}}--{{/if}}</div>
-      <label>name:
-        <input cr-event="input: updateName; keyup: cancel" placeholder="name" value="{{%name}}" />
-      </label>
-      <button cr-event="click: goBack">go back</button>
-      {{#if %dirty}}<button cr-event="click: save" disabled="{{#unless %name}}true{{/unless}}">save</button>{{/if}}
-    </div>`,
+    <h2><span cr-view="name">{{%name}}</span> Details</h2>
+    <div><span>id: </span>{{#if %id}}{{%id}}{{else}}--{{/if}}</div>
+    <label>name:
+      <input cr-event="input: updateName; keyup: cancel" placeholder="name" value="{{%name}}" />
+    </label>
+    <button cr-event="click: goBack">go back</button>
+    {{#if %dirty}}<button cr-event="click: save" disabled="{{#unless %name}}true{{/unless}}">save</button>{{/if}}
+    `,
   subscribe$: { this: [] },
 }, class Details {
   constructor(elm, init, crInst) {
@@ -46,11 +45,11 @@ define('app-detail', ['circular', 'data-provider', '!modules/detail/css/index.cs
   }
 
   cancel(e) {
-    if (e.key === 'Escape') {
-      this.name = this.initialName;
-      this.dirty = false;
-      e.target.blur();
-    }
+    if (e.key !== 'Escape') return;
+
+    this.name = this.initialName;
+    this.dirty = false;
+    e.target.blur();
   }
 
   goBack(e, element, item) {

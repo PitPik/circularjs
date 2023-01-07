@@ -49,8 +49,8 @@ return (function(Schnauzer, cloneObject) { /* class Blick extends Schnauzer */
       isDynamic: function(blick, obj, key, vomId, makeDynamic) { return false; },
       scanHTML: function(blick, fragment, item, parent, index, id, deleted) {},
       loopHelperName: 'loop-helper',
-      loopFnName: '__loopFn', // TODO: a common polution
-      loopLimitsName: '__loopLimits', // TODO: a common polution
+      loopFnName: '__loopFn',
+      loopLimitsName: '__loopLimits',
       limiters: ['{{#', '{{END:', '}}'],
       forceUpdate: false,
       missingProperty: undefined,
@@ -120,6 +120,8 @@ return (function(Schnauzer, cloneObject) { /* class Blick extends Schnauzer */
     Fn.prototype = Klass.prototype;
     ExtKlass.prototype = new Fn();
   })(Blick, Schnauzer);
+
+  Blick.setScroll = setScroll;
 
   return cloneObject(Blick.prototype, {
     renderHTML: function(data, extra) { return renderHTML(this, data, extra, []) },
@@ -303,7 +305,6 @@ function getActives(_this, actives, cData, data, tagData) {
   var vomId = itemID && itemID.split(':')[0] || Object.keys(models)[0]; // TODO: send to _this.options.isDynamic()
 
   if (variable.value === 'cr-scroll' && data[0].variable.active) data[0].scrollers = {};
-// console.log(_this)
   if (cData.renderArgs && !partial) getRenderArgsActives(cData.renderArgs, cData, actives); // TODO: check partial
   // TODO: Check if tagData.partial has any other consequences
   if (!variable || !variable.active || partial === variable.value) return;
@@ -318,11 +319,9 @@ function getActives(_this, actives, cData, data, tagData) {
   if (!models[vomId]) {
     return announce(_this, 3, 'No subscriber defined for:', '"' + key + '"', 'in:', cData.parent);
   }
-  // function isDynamic(blick, obj, key, makeDynamic) { check if putting back arguments...
   isDynamic = _this.options.isDynamic(_this, cData.parent, key, vomId,_this.options.forceUpdate);
   if (_this.options.debugMode) saySomething(_this, hasValue, isDynamic, tagData, cData, data, key);
   if (hasValue) actives.push(cData); // TODO: !hasValue ... do something about this
-  // actives.push(cData);
 }
 
 function renderHook(_this, out, data, bodyFn, tagData, track, getData) {
@@ -366,7 +365,6 @@ function getPropertyUpdateFn(item, data, udateFn, loopLimitsName) {
 
     item.value = value;
     if (parentHelperFn) data[0].value = parentHelperFn(item.parentHelper.renderArgs);
-    // if (isArray) console.log(stop, item.variable.value, value);
     udateFn(data, item.loop, stop || loopLimits && (!isArray || value.length !== 0), isScroll);
   };
 }
@@ -398,8 +396,7 @@ function getMover(updaters, collector, propFn, variable) { // TODO: something is
     var updater = collector.updaters[newParent];
 
     if (!newParent) return; // used for just deleting...
-    updater[variable].push(propFn); // Seems not to work all the time...
-    // return getDestroyer(updater, propFn);
+    updater[variable].push(propFn);
   }
 }
 
@@ -417,7 +414,6 @@ function registerProperties(_this, udateFn, collector, data, items, children) {
     loop = item.loop && item.loop.this['cr-id'];
     parentId = item.parent['cr-id'] || item.loop.this['cr-id'] ||
       item.loop['@parent']['cr-id'] || item.parent.this['cr-id'];
-    // if (item.parent.this) item.parent['cr-id'] = parentId;
     if (item.parent['cr-id'] === undefined) Object.defineProperty(item.parent, 'cr-id', {
       value: parentId,
     });
@@ -483,14 +479,13 @@ function registerLoop(_this, nodes, fn, data, items, limiters) {
   }
   if (!items[0].value[options.loopLimitsName])
     Object.defineProperty(items[0].value, options.loopLimitsName, { value: limiters });
-  // TODO: maybe; only send items[0] as it has all this information...
 }
 
 function loopHelper(_this, out, main, idx, loopFn, isActive) {
   var loopFnName = _this.options.loopFnName;
   var activeVar = main.variable.active;
   var value = main.value;
-  var helper = !activeVar ? '' : ' <!--' + _this.options.loopHelperName + '-->'; // white-space needed
+  var helper = !activeVar ? '' : ' <!--' + _this.options.loopHelperName + '-->'; // white-space!!
   // console.warn(typeof out, !!loopFn, out); // TODO: keep following for check...
   if (typeof out === 'function') {
     if (!value[loopFnName] && activeVar) Object.defineProperty(value, loopFnName, { value: out }) && '';
@@ -729,6 +724,7 @@ function setScroll(save, data, fnIdx, html) {
     if (save) item.__scroll = { y: item.scrollTop, x: item.scrollLeft };
     else { item.scrollTop = item.__scroll.y; item.scrollLeft = item.__scroll.x; }
   }
+  return data;
 }
 
 function replaceBlock(_this, firstNode, lastNode, bodyFn, track, out, dataDump, update, isEach) {

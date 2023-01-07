@@ -7,19 +7,18 @@ define('app-dashboard', [
   selector: 'app-dashboard',
   styles,
   template: `
-    <div class="module">
-      <h2>Top Heroes</h2>
-      <div class="grid grid-pad clearfix">
-      {{#each %heroes}}
-        <a class="col-1-4" href="#/detail/{{%id}}">
-          <div class="module hero">
-            <h4>{{%name}}</h4>
-          </div>
-        </a>
-      {{/each}}
-      </div>
-      <app-search></app-search>
-    </div>`,
+    <h2>Top Heroes</h2>
+    <div class="grid grid-pad clearfix">
+    {{#each %heroes}}
+      <a class="col-1-4" href="#/detail/{{%id}}">
+        <div class="module hero">
+          <h4>{{%name}}</h4>
+        </div>
+      </a>
+    {{/each}}
+    </div>
+    <app-search></app-search>
+  `,
   subscribe$: { 'heroes:': [] },
 }, class Dashboard {
   constructor() {
