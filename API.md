@@ -41,10 +41,10 @@ The rest of the app is then defined inside the `class` definition. The example a
 
 ### Circular.Component
 
-The *"decorator"* options of `Component()` (see above) can have the following properties:
+The *"decorator"* options of `Component()` can have the following properties:
 
 ```javascript
-{
+Component({
   selector: string; // selector of the component,
   template: string; // the template of the component
   styles?: string[]; // the styles of the component
@@ -56,7 +56,7 @@ The *"decorator"* options of `Component()` (see above) can have the following pr
   attributes?: { [name: string]: Function }; // see Schnauzer
   extra?: { [key: string]: any }; // some extra data to feed the template
   circular?: Circular; // a custom 'new Circular()' instance being used for this component
-}
+} ,...
 ```
 
 #### selector
@@ -204,3 +204,64 @@ Will end up as `<a href="https://my-domain.com/my-app-service/my-special-link.ht
 #### circular
 
 This option takes an instance of circular in case you need some special setup for your component. This is a bit experimental and probably never used. But, maybe just good to know that this option does exist...
+
+### Methods inside components
+
+A component has some pre-defined methods, some depending on the used view-models, some just always available.
+
+
+#### Livecycle methods
+
+
+##### constructor(element, input, circular)
+
+The constructor will always provide the following arguments:
+
+- `element` the HTMLElement of the component
+- `input` a function that will import variables from the parent
+- `circular` an instance of circulaJS used for this component
+
+To explain `input(this)` a bit better: Every component can import variables from its parent for communication between parent and child.
+
+```HTML
+<my-component cr-input="foo; cBar=bar; fBar='some text'"></my-component>
+```
+
+To import those variables you need to first define those varibles in the child component and then call `input(this)`.
+
+```js
+constructor(element, input, circular) {
+  foo = [];
+  cBar = {};
+  fBar = '';
+  input(this);
+
+  moreVars = '';
+}
+```
+
+If the variables on the parent are dynamic defined in `subscribe$()` option and change, the changes will be transferred to the child and can also be subscribed to. If you know Angular then think of the `@Input` decorator but not used for each variable but for all before `input(this)`.
+
+To communicate from the child to the parent you can use `circular.triggerEvent()` and install an event listener on the parent. This will be explaind in the **Circular instance methods** section of this documentation.
+
+##### onInit(element, circular)
+
+This method gets called as soon as the component is initialized and rendered on the page. The `element` is like in `constructor(element, input, circular)` the HTMLElement of the component and `circular` also an instance of CircularJS used for this component.
+
+##### onLoad(element, circular)
+
+This method is the same as `onInit(element, circular)` with the only difference that it 
+
+##### onDestroy()
+
+
+#### View model mutation callbacks
+
+
+##### this$(property, item, value, oldValue)
+
+##### myModel$(property, item, value, oldValue)
+
+##### myModel$Move(action, key, item, model, previousModel)
+
+##### myModel$PR(item, parent, root)
