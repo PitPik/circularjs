@@ -1,0 +1,42 @@
+app-heroes button {
+	background-color: #999;
+	color: #eee;
+	border-radius: 2px;
+	border: 1px solid #999;
+	padding: 2px 8px;
+}
+
+app-heroes ul {
+	padding: 0;
+	margin: 0;
+}
+app-heroes li {
+	position: relative;
+	display: block;
+	list-style: none;
+	background-color: #eee;
+	border-radius: 4px;
+	max-width: 225px;
+	margin-top: 6px;
+	transition: transform .1s;
+}
+app-heroes li:hover {
+	transform: translateX(2px);
+}
+app-heroes a {
+	text-decoration: none;
+	display: block;
+}
+app-heroes li button {
+	position: absolute;
+	right: 0;
+	top: 0;
+	margin: 5px;
+}
+
+app-heroes .badge {
+	padding: 12px;
+	background-color: #607D8B;
+	border-radius: 4px 0 0 4px;
+	margin-right: 1em;
+}

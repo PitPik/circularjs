@@ -1,13 +1,13 @@
 {
   "name": "circularjs",
-  "version": "1.3.1",
+  "version": "2.0.0",
   "description": "Tiny and fast SPA creation tool (MVC like framework with templating engine, router, pubsub, etc.)",
   "main": "circular.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "package": "node package.js",
-    "uglify": "node-minify --compressor uglify-es --input amd.js,toolbox.js,schnauzer.js,blick.js,VOM.js,api.js,controller.js,circular.js -o circular.min.js --option '{\"sourceMap\": { \"url\" : \"circular.min.js.map\"}}'",
-    "combine": "node-minify --compressor no-compress --input amd.js,toolbox.js,schnauzer.js,blick.js,VOM.js,api.js,controller.js,circular.js -o circular.all.js"
+    "uglify": "node-minify --compressor uglify-es --input amd.js,toolbox.js,schnauzer.js,blick.js,VArray.js,api.js,controller.js,circular.js -o circular.min.js --option '{\"sourceMap\": { \"url\" : \"circular.min.js.map\"}}'",
+    "combine": "node-minify --compressor no-compress --input amd.js,toolbox.js,schnauzer.js,blick.js,VArray.js,api.js,controller.js,circular.js -o circular.all.js"
   },
   "repository": {
     "type": "git",

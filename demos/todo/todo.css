@@ -1,0 +1,32 @@
+[cr-template-for] {
+	display: none;
+}
+.todo-list {
+	position: relative;
+	overflow: hidden;
+}
+.main.completed .todo-list-item:not(.completed),
+.main.active .todo-list-item.completed {
+	/*display: none;*/
+	position: absolute;
+	left: -100%;
+}
+.list-all .filter-all,
+.list-active .filter-active,
+.list-completed .filter-completed {
+	border-color: rgba(175, 47, 47, 0.1);
+}
+.todo-list li .edit {
+  display: block;
+  position: absolute;
+  top: 6px;
+  left: 53px;
+  width: calc(100% - 59px);
+}
+.footer {
+	margin-top: -1px;
+}
+
+[disabled] {
+	display: none!important;
+}

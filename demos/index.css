@@ -20,8 +20,10 @@ git-test .author, git-test .date {
   font-weight: bold;
 }
 
-
-.module-outlet pre {
+index, binding, tree, git {
+	display: block;
+}
+index pre, binding pre, tree pre, git pre {
 	line-height: 12px;
   font-size: 12px;
 }
@@ -29,9 +31,6 @@ section {
 	padding: 1em;
 }
 
-[cr-template-for] {
-	display: none;
-}
 .item, .items {
 	float: left;
 	height: 50px;
@@ -60,26 +59,31 @@ section {
 .demo {
 	border: 1px solid #aaa;
 	border-radius: 6px;
+	margin: 2em 0;
 }
 
 demo-nav {
 	display: block;
-  margin: -0.9em -1em 0;
-	border-bottom: 1px solid #aaa;
+	/* border-bottom: 1px solid #aaa; */
 	padding: 0.75em;
 }
+demo-nav .wrapper {
+	border-bottom: 1px solid #aaa;
+	display: block;
+	padding: 0 0.75em 0.75em;
+	margin: -0.9em -1.75em 0;
+}
+
 demo-nav a {
-	padding: 6px 9px;
+	padding: 6px 3px 6px 6px;
 	text-decoration: none;
+	margin-right: 6px;
 }
 demo-nav a.active {
 	font-weight: bold;
 	background: #eee;
 }
 
-.module-outlet {
-	padding: 0 0.75em;
-}
 input-test.demo {
 	display: block;
 	padding: 1em;
@@ -88,13 +92,14 @@ input-test.demo {
 	border-radius: 6px;
 }
 
-
-
 /*body {
   font-family: Menlo, Consolas, monospace;
   color: #444;
 }
 */
+.demo > tree, tree {
+	display: block!important;
+}
 .tree {
   padding: .5em 2em;
 }

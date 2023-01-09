@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en" data-framework="circularJS">
+	<head>
+		<meta charset="utf-8">
+		<title>Circular.js • TodoMVC</title>
+		<link rel="stylesheet" href="index.css">
+		<link rel="stylesheet" href="todo_original.css">
+
+		<!-- <script type="text/javascript" src="../amd.js"></script>
+		<script type="text/javascript" src="../toolbox.js"></script>
+		<script type="text/javascript" src="../VArray.js"></script>
+		<script type="text/javascript" src="../schnauzer.js"></script>
+		<script type="text/javascript" src="../blick.js"></script>
+		<script type="text/javascript" src="../circular.js"></script> -->
+		<script type="text/javascript" src="../circular.min.js"></script>
+	</head>
+	<body>
+		<section class="todoapp" cr-component="app" cr-view="app">
+			<header class="header">
+				<h1>todos</h1>
+				<input class="new-todo" cr-event="keypress: addItem" placeholder="What needs to be done?" autofocus>
+			</header>
+			<section class="main" cr-view="main">
+				<input cr-view="toggle" cr-event="click: toggleAll" class="toggle-all" id="toggle-all" type="checkbox">
+				<label for="toggle-all">Mark all as complete</label>
+				<ul class="todo-list" cr-component="list" cr-container="prepend">
+					<script type="text/template" cr-template-for="list">
+						<li cr-id="{{cr-id}}" class="todo-list-item{{#if done}} completed{{/if}}">
+							<input cr-event="click: toggle" cr-view="toggle" class="toggle" type="checkbox"{{#if done}} checked=""{{/if}}>
+							<label cr-event="dblclick: edit" cr-view="label">{{text}}</label>
+							<button class="destroy" cr-event="click: delete"></button>
+							<input class="edit" cr-event="change: save; blur: blurItem; keyup: escape" cr-view="text" value="{{text}}">
+						</li>
+					</script>
+				</ul>
+			</section>
+			<footer class="footer" cr-view="footer">
+				<span class="todo-count" cr-view="counter">
+					<script type="text/template" name="itemsLeft" cr-template="app">
+						<strong>{{count}}</strong> <span>item{{#if plural}}s{{/if}} left</span>
+					</script>
+				</span>
+				<ul class="filters">
+					<li><a href="#" cr-view="all">All</a></li>
+					<li><a href="#/active" cr-view="active">Active</a></li>
+					<li><a href="#/completed" cr-view="completed">Completed</a></li>
+				</ul>
+				<button class="clear-completed" cr-event="click: deleteDone" cr-view="clear">Clear completed</button>
+			</footer>
+		</section>
+		<footer class="info">
+			<p>Double-click to edit a todo</p>
+			<p>Created by <a href="https://github.com/PitPik">Peter Dematté</a></p>
+			<p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
+		</footer>
+		<script type="text/javascript" src="app_original.js"></script>
+	</body>
+</html>
