@@ -19,7 +19,6 @@ define('app-search', ['circular', 'data-provider'],
   }
 
   onInit(elm, crInst, items) {
-    // this.searchInput = items.views.search;
     this.searchInput = crInst.getView('search', elm);
   }
 

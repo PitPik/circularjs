@@ -1,9 +1,9 @@
 require.config({
 	lookaheadMap: {
-		'app-dashboard': ['circular', 'data-provider', 'app-search'],
+		'app-dashboard': ['circular', '!modules/dashboard/css/index.css', 'data-provider', 'app-search'],
 		'app-search': ['circular', 'data-provider'],
-		'app-detail': ['circular', 'data-provider'],
-		'app-heroes': ['circular', 'data-provider'],
+		'app-detail': ['circular', '!modules/detail/css/index.css', 'data-provider'],
+		'app-heroes': ['circular', '!modules/heroes/css/index.css', 'data-provider'],
 		'data-provider': ['toolbox'],
 	},
 	paths: {

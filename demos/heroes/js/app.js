@@ -30,9 +30,9 @@ define('app', ['circular'], ({ Module }) => Module({
     }, true);
   }
 
-  onChildInit(elm) { // one way of solving it
-    this.app = elm;
-  }
+  // onChildInit(elm) { // one way of solving it
+  //   this.activeApp = elm;
+  // }
 
   this$(property, item, value, oldValue) {
     if (!value) return;
