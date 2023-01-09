@@ -32,10 +32,12 @@ The rest of the app is then defined inside the `class` definition. The example a
 ## Table of content
 
 - [CircularJS static methods](#circular-static-methods)
-- Schnauzer (Handlebars templating)
-- The view model (VArray)
-- CircularJS instance methods
-- Toolbox (ajax, Promise, etc.)
+- [Live-cycle methods](#methods-inside-components)
+- [Schnauzer (Handlebars templating)](SCHNAUZER.md)
+- [The view model (VArray)](VARRAY.md)
+- [CircularJS instance methods](CIRCULAR.md)
+- [Toolbox (ajax, Promise, etc.)](TOOLBOX.md)
+- [AMD Asyncronous Module Loader](AMD.md)
 
 ## Circular static methods
 
