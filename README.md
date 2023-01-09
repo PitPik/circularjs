@@ -1,7 +1,7 @@
 ![CircularJS](circularjs-logo.png)
 
 See some demos right away @ [pitpik.github.io/circularjs](https://pitpik.github.io/circularjs/).
-or go straight to the [API documentation](API.md).
+or go straight to the [API documentation](documentation/API.md).
 
 # What is CircularJS
 
@@ -46,11 +46,11 @@ If you know your **JavaScript**, **common patterns** as **Promises**, **ajax**, 
 
 In my oppinion, **learning CircularJS in one day** is easily possible. Working with a new pattern system / framework although is always a matter of getting used to, although **CircularJS** tries to keep the logic behind it **as simple as possible**. Also, when coming from the Angular side, you will appreciate the **similarity** to it and learn to work with it in no time at all.
 
-See **[API documentation](API.md)** for more information/documentation.
+See **[API documentation](documentation/API.md)** for more information/documentation.
 
 ## Quick Start
 
-To quickly get started go to [Demo page](https://pitpik.github.io/circularjs/) or try the ["Tour of Heroes" tutorial](heroes), see the [TODO list demo](https://pitpik.github.io/circularjs/todo) and/or [API documentation](API.md) for a better overview.
+To quickly get started go to [Demo page](https://pitpik.github.io/circularjs/) or try the ["Tour of Heroes" tutorial](heroes), see the [TODO list demo](https://pitpik.github.io/circularjs/todo) and/or [API documentation](documentation/API.md) for a better overview.
 
 ## Why CircularJS
 
@@ -60,4 +60,4 @@ It is **closer to JavaScript** and therefore **easier to learn** and understand.
 
 ## CircularJS API
 
-See [API.md](API.md) for more information/documentation.
+See [API documentation](documentation/API.md) for more information/documentation.
