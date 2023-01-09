@@ -1,4 +1,4 @@
-![CircularJS](circularjs-logo.png)
+![CircularJS](assets/circularjs-logo.png)
 
 # What is CircularJS
 
