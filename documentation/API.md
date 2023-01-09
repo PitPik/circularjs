@@ -59,7 +59,7 @@ The *"decorator"* options of `Component()` can have the following properties:
 ```javascript
 Component({
   selector: string; // selector of the component,
-  template?: string; // the template of the component
+  template?: string; // the template of the component. Optional for components that just delegate.
   styles?: string[]; // the styles of the component
   subscribe$?: { [key: string]: string[] }; // definition of the data-change listeners of the view model
   initialize?: boolean; // automatically initializes the component as a singleton.
@@ -74,7 +74,7 @@ Component({
 
 #### selector
 
-This string defines the HTML selector of the component so you can use it anywhere like `<some-component></some-component>`. Once imported via **`AMD`**, this component can be used by just placeing this HTML tag anywhere inside a template.
+This string defines the HTML selector of the component so you can use it anywhere like `<some-component></some-component>`. Once imported via **`AMD`**, this component can be used by just placeing this HTML tag anywhere inside a template (unless used with attribute `cr-lazy`, so it doesn't even have to be imported yet).
 
 #### template
 
@@ -266,6 +266,20 @@ This method gets called as soon as the component is initialized and rendered on 
 This method is the same as `onInit(element, circular)` with the only difference that it can be called more than once.
 
 The CircularJS method `hideComponent()` can take components out of the DOM tree and later on recover or put it back to where it was. When this happens, `onLoad(element, circular)` gets called again.
+
+##### onChildInit(element, instance, name)
+
+This method gets called when a new child element within the component gets initialized.
+
+- `element: HTMLElement` the childs' DOM representation
+- `instance: component` the instance of the childs' class
+- `name: string` the selector of the child
+
+##### onBeforeChildInit(element)
+
+This method gets called when a new child element within the component is about to gete initialized.
+
+- `element: HTMLElement` the childs' DOM representation
 
 ##### onDestroy()
 
