@@ -1,0 +1,191 @@
+html, body {
+  height: 100%;
+  font: normal normal normal .90em/1.6em  "Trebuchet MS", Arial, Helvetica, sans-serif;
+  color: #333;
+  margin: 0;
+  padding: 0;
+}
+
+[cr-cloak], .cr-cloak {
+  display: none;
+}
+
+minesweeper {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  text-align: center;
+}
+
+.game-board {
+  display: inline-block;
+  padding: 3px;
+  border: 3px solid #ddd;
+  border-radius: 4px;
+  margin: auto;
+}
+.header {
+  text-align: center;
+  padding: 2px 5px;
+  margin: 0px -3px 3px;
+  /* border-bottom: 1px solid #ccc; */
+  border-bottom: 1px solid #d6d6d6;
+}
+.counter,
+.timer {
+  min-width: 1.6em;
+  /* padding: 6px 6px; */
+  padding: 7px 3px;
+  line-height: 16px;
+  /* border: 1px solid #ccc; */
+  /* border-radius: 3px; */
+  text-align: left;
+  float: left;
+  font-size: 1.5em;
+  color: #666;
+}
+.timer {
+  float: right;
+  text-align: right;
+}
+.game-board select {
+  display: block;
+  /* height: 1.6em; */
+  margin-top: -3px;
+  height: 1.8em;
+  border: none;
+  font-size: inherit;
+  color: #666;
+  width: 100%;
+  background-color: white;
+}
+.game-board select:focus {
+  outline: none;
+}
+.game-board button {
+  display: inline-block;
+  position: relative;
+  width: 30px;
+  height: 30px;
+  margin: 0 6px 3px;
+  line-height: 34px;
+  border: 1px solid #aaa;
+  border-radius: 50%;
+  font-size: inherit;
+  color: #666;
+}
+.game-board button:before,
+.game-board button:after {
+  content: "°";
+  display: block;
+  position: absolute;
+  top: -4px;
+  left: 0;
+}
+.game-board button:after {
+  content: "o\00a0\00a0o";
+  top: -9px;
+  left: 7px;
+  font-size: 8px;
+}
+.game-board button:before {
+  content: "─";
+  top: 2px;
+  left: 7px;
+}
+.huh button:before {
+  content: "o";
+}
+.loose button:before,
+.win button:before {
+  content: "(";
+  transform: rotate(70deg);
+}
+.loose button:after {
+  content: "x\00a0\00a0x";
+}
+.loose button:before {
+  left: 12px;
+}
+.win button:before {
+  transform: rotate(-70deg);
+}
+
+.game-board button:focus {
+  outline: none;
+}
+
+.game-board button.green {
+  background: green;
+  color: white;
+}
+
+.board {
+  padding: 1px;
+}
+
+.board .tr {
+  display: flex;
+}
+
+.board .td {
+  color: green;
+  font-weight: bold;
+  width: 15px;
+  height: 15px;
+  margin: 1px;
+  padding: 1px;
+  font-size: .9em;
+  line-height: 14px;
+  border: 1px #ccc dotted;
+  border-radius: 10%;
+  cursor: default;
+}
+
+@keyframes example {
+  0%   {transform: scale(1)}
+  50%  {transform: scale(0)}
+  100% {transform: scale(1)}
+}
+
+.board .hidden {
+  background: #eee;
+  animation-name: example;
+  animation-duration: 0.7s;
+  animation-delay: -0.2s;
+}
+.board .hidden:hover {
+  background: #ccc;
+}
+
+.board .mine,
+.board .mine:hover {
+  background: sandybrown;
+}
+.board .mine:after {
+  content: "o"
+}
+.board .mine.last {
+  color: white;
+  background: red;
+}
+
+.board .marked,
+.board .marked:hover,
+.board .open,
+.board .open:hover {
+  background: deepskyblue;
+}
+
+.board .marked:after {
+  content: "!"
+}
+.board .open:after {
+  content: "?"
+}
+
+.board .color-1 { color: blue; }
+.board .color-2 { color: green; }
+.board .color-3 { color: red; }
+.board .color-4 { color: black; }
+.board .color-5 { color: sandybrown; }

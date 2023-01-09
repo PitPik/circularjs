@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en" data-framework="circularJS">
+  <head>
+    <meta charset="utf-8">
+    <title>Circular.js • performance</title>
+    <link rel="stylesheet" href="index.css">
+
+    <script type="text/javascript" src="../../amd.js"></script>
+    <script type="text/javascript" src="../../toolbox.js"></script>
+    <script type="text/javascript" src="../../VArray.js"></script>
+    <script type="text/javascript" src="../../schnauzer.js"></script>
+    <script type="text/javascript" src="../../blick.js"></script>
+    <script type="text/javascript" src="../../api.js"></script>
+    <script type="text/javascript" src="../../controller.js"></script>
+    <script type="text/javascript" src="../../circular.js"></script>
+    <!-- <script type="text/javascript" src="../../circular.min.js"></script> -->
+  </head>
+  <body>
+    <app cr-cloak>
+      <section>
+        <label>
+          <span class="label">Refresh:</span>
+          <input cr-event="input: changeSpeed" type="range" name="" min="16" max="800" step="4" value="400">
+          <span>{{{%refresh}}}</span>
+        </label>
+        <label>
+          <span class="label">Raster:</span>
+          <input cr-event="change: changeRaster" type="range" name="" min="2" max="32" step="1" value="10">
+          <span>{{{%raster}}}</span>
+        </label>
+      </section>
+      <div class="table">
+        {{#each %model~}}
+        <div class="tr" cr-for="model">
+          {{#each %childNodes~}}
+          <div class="td {{%max}}" title="initial value: {{value}}">{{%value}}</div class="td">
+          {{~/each}}
+        </div>
+        {{~/each}}
+      </div class="table">
+    </app>
+    <script src="perf-monitor.js"></script>  
+    <script type="text/javascript" src="index.js"></script>
+  </body>
+</html>

@@ -1,44 +1,40 @@
-require(['circular', 'replacer'], function({ Module, Toolbox: { $ } }, replacer) {
-  var elm = $('demo-nav');
-  var template = elm.removeChild(elm.firstElementChild).outerHTML;
-  var model = [
-    { title: 'Demo home', action: 'home', active: false },
-    { title: 'Data binding', action: 'binding', active: false },
-    { title: 'Dynamic tree', action: 'tree', active: false },
-    { title: 'GitHub Commits', action: 'git', active: false }
-  ];
+require(['circular', 'replacer'], ({ Module, Toolbox: { $ } }, replacer) =>
 
-  Module({
-    selector: 'demo-nav',
-    template,
-    subscribe$: {
-      this: ['state'],
-      menu: ['active'],
-    },
-  }, class DemoNav {
-    constructor(rootElement, crInst) {
-      this.state = '';
-      this.menu = model;
-      this.cr = crInst;
-    }
+Module({
+  selector: 'demo-nav',
+  template: '{{>@content}}',
+  subscribe$: { this: ['state'], 'menu': [] },
+},
+class DemoNav {
+  constructor(element, input, circular) {
+    this.circular = circular;
+    this.demo;
+    this.state = '';
+    this.menu = [
+      { title: 'Demo home', action: 'index', active: false },
+      { title: 'Data binding', action: 'binding', active: false },
+      { title: 'Dynamic tree', action: 'tree', active: false },
+      { title: 'GitHub Commits', action: 'git', active: false }
+    ];
+  }
 
-    onInit() {
-      this.cr.addRoute({
-        path: '(/:state)',
-        callback: data => this.state = data.parameters.state || this.menu[0].action,
-      }, true);
-    }
+  onInit() {
+    this.circular.addRoute({
+      path: '(/:state)',
+      callback: data => this.state = data.parameters.state || this.menu[0].action,
+    }, true);
+  }
 
-    this$(propName, item, value, oldValue) {
-      this.menu.forEach(item => item.active = item.action === this.state);
+  onChildInit(elm, inst, name) {
+    require(['!' + name + '.html', '!' + name + '.js'], (html, js) => {
+      replacer('.demo', js, html); // displays HTML and JS code in nice colors
+    });
+  }
 
-      this.cr.renderModule({
-        require: 'app-' + value,
-        container: '.module-outlet',
-      }).then(() => value === 'home' ? null : require([
-        '!' + value + '.html',
-        '!' + value + '.js'
-      ], (html, js) => replacer('.demo', js, html)));
-    }
-  });
-});
+  this$(propName, item, value, oldValue) {
+    this.menu.forEach(item => item.active = item.action === this.state);
+
+    this.circular.destroyComponent(this.demo, true);
+    this.demo = this.circular.createComponent(value, {'cr-lazy': ''}, this);
+  }
+}));

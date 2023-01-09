@@ -1,17 +1,7 @@
-(function (root, factory) {
-  if (typeof exports === 'object') {
-    module.exports = factory(root);
-  } else if (typeof define === 'function' && define.amd) {
-    define('toolbox', [], function () {
-      return factory(root);
-    });
-  } else {
-    root.Toolbox = factory(root);
-  }
-}(this, function(window, undefined) {
+/**! @license toolbox v1.0.0; Copyright (C) 2023 by Peter Dematté */
+define([], function() {
   'use strict';
 
-// var resourceCache = null;
 var _link = document.createElement('a');
 var types = {
     'undefined': undefined,
@@ -45,11 +35,13 @@ var Toolbox = {
     }
     return Toolbox.closest(element, selector, root);
   },
-  // isConnected: function(elm, context) {
-  //   return elm.isConnected !== undefined ?
-  //     elm.isConnected || context.contains(elm) :
-  //     context.contains(elm);
-  // },
+  findParent: function(element, selector, root) { // TODO: rename;
+    do {
+        if (element[selector || 'cr-id']) return element;
+        element = element.parentElement || element.parentNode;
+    } while (element !== null && element !== root && element.nodeType === 1);
+    return null;
+  },
   $create: function(tag, className) {
     var elm = document.createElement(tag);
 
@@ -59,14 +51,15 @@ var Toolbox = {
     return elm;
   },
   $: function(selector, root) {
-    return (root || document).querySelector(selector);
+    return typeof selector === 'string' ?
+      (root || document).querySelector(selector) : selector;
   },
 
   $$: function(selector, root) {
     return (root || document).querySelectorAll(selector);
   },
 
-  parentsIndexOf: function(elements, target) {
+  parentsIndexOf: function(elements, target) { // TODO: check if needed
     for (var n = elements.length; n--; ) {
       if (elements[n].contains(target)) {
         return n;
@@ -83,65 +76,30 @@ var Toolbox = {
     return result;
   },
 
+  cloneObject: function(newObj, obj) {
+    var fn = function(obj, newObj, key) { newObj[key] = obj[key] };
+    for (var key in obj) fn(obj, newObj, key);
+    return newObj;
+  },
+
   isArray: Array.isArray || function(obj) { // obj instanceof Array;
     return obj && obj.constructor === Array;
   },
 
-  // extendClass: function(newClass, Class) {
-  //   newClass.prototype = Object.create(Class.prototype);
-  //   newClass.prototype.constructor = newClass;
-  //   newClass.prototype._super = Class;
-  // },
-
-  addClass: function(element, className) {
-    element && element.classList.add(className);
-  },
-
-  removeClass: function(element, className) {
-    element && element.classList.remove(className);
-  },
-
-  toggleClass: function(element, className, condition) {
-    if (!element) return;
-
-    var hasClass = element.classList.contains(className);
-
-    if (hasClass && !condition) {
-      element.classList.remove(className);
-    } else if (!hasClass && condition !== false) {
-      element.classList.add(className);
-    }
-  },
-
-  hasClass: function(element, className) {
-    return element && element.classList.contains(className);
-  },
-
-  toggleClasses: function(oldElm, newElm, oldClass, newClass) {
-    oldElm && oldClass && Toolbox.removeClass(oldElm, oldClass);
-    newElm && Toolbox.addClass(newElm, newClass || oldClass);
-  },
-
-  addEvents: function (elements, type, func, cap) {
-    var collection = [];
-
-    for (var n = elements.length; n--; ) {
-      collection.push(Toolbox.addEvent(elements[n], type, func, cap));
-    }
-    return collection;
-  },
-
-  removeEvents: function(collection) {
-    for (var n = collection.length; n--; ) collection[n]();
-  },
-
   addEvent: function(element, type, func, cap) {
     cap = cap !== undefined ? cap :
-      /(?:focus|blur|mouseenter|mouseleave)/.test(type) ? true : false;
+      /(?:focus|blur|mouseenter|mouseleave|scroll)/.test(type) ? true : false;
 
     element.addEventListener(type, func, cap);
 
-    return function removeEvent() { element.removeEventListener(type, func, cap) };
+    return function removeEvent() {
+      element.removeEventListener(type, func, cap);
+      return element = func = type = cap = null;
+    };
+  },
+
+  trim: function(text) {
+    return text.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
   },
 
   storageHelper: {
@@ -162,15 +120,6 @@ var Toolbox = {
   lazy: function(fn, obj, pref) {
     clearTimeout(obj._timer);
     obj._timer = setTimeout(fn, 0, pref);
-  },
-
-  itemsSorter: function(a, b, type, asc) {
-    var textA = a[type].toUpperCase();
-    var textB = b[type].toUpperCase();
-
-    return asc ?
-      textA < textB ? 1 : textA > textB ? -1 : 0 :
-      textA < textB ? -1 : textA > textB ? 1 : 0;
   },
 
   normalizePath: function(path) {
@@ -194,7 +143,7 @@ var Toolbox = {
 
     promise = promise || new Toolbox.Promise(function(resolve, reject) {
         var xhr = new XMLHttpRequest();
-        var method = (prefs.method || prefs.type || 'GET').toUpperCase();
+        var method = (prefs.method || prefs.type || 'GET').toUpperCase();
 
         if (!xhr) {
           reject('Giving up :( Cannot create an XMLHTTP instance');
@@ -257,18 +206,6 @@ var Toolbox = {
   },
   Promise: Promise,
 }
-
-function Event(event, params) {
-  var evt = document.createEvent('CustomEvent');
-
-  params = params || {};
-  evt.initCustomEvent(event,
-    params.bubbles || false, params.cancelable || false, params.detail);
-  return evt;
-}
-
-window.Event = window.Event || Event;
-window.CustomEvent = window.CustomEvent || Event;
 
 /* --------- AJAX ---------- */
 
@@ -469,4 +406,4 @@ if (window.require) {
 
 return Toolbox;
 
-}));
+}, 'toolbox');

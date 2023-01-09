@@ -15,7 +15,7 @@ define('template-helpers', [], function() {
         .toLocaleDateString(undefined, options);
     },
     slice: function($1, $2, $3) {
-      return $3.substring($2, $1);
+      return $1.substring($2, $3);
     }
   });
 });

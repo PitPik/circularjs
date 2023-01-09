@@ -1,9 +1,10 @@
-define('app-binding', ['circular', '!binding.html'],
-({ Component }, template) => Component({
+define('binding', ['circular', '!binding.html'], ({ Component }, template) =>
+
+Component({
   selector: 'input-test',
   template,
-  subscribe$: { this: ['value'] },
-}, class Binding {
+},
+class Binding {
   constructor() {
     this.value = '';
   }
@@ -15,4 +16,5 @@ define('app-binding', ['circular', '!binding.html'],
   clear() {
     this.value = '';
   }
+
 }));
