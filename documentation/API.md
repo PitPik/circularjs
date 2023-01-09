@@ -1,5 +1,7 @@
 # CircularJS API
 
+> This documentation is not complete yet, although on the way...
+
 For a start, a **typical setup** of a **component** (similar to Angular).
 
 ```javascript
