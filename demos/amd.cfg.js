@@ -1,5 +1,5 @@
   require.config({
-    // baseUrl: 'demos',
+    baseUrl: 'demos',
     lookaheadMap: {
       'index': ['circular', 'replacer', '!index.js', '!index.html', '!home.html'],
       'git': ['circular', 'template-helpers'],
@@ -10,14 +10,13 @@
       'template-helpers': 'helpers',
       'replacer': 'replacer',
       '!index.js': 'index.js',
-      // '!index.html': '!index.html',
+      '!index.html': '../index.html',
       '!binding.js': 'binding.js',
       '!binding.html': 'binding.html',
       '!tree.js': 'tree.js',
       '!tree.html': 'tree.html',
       '!git.html': 'git.html',
       '!git.js': 'git.js',
-      '!index.html': 'index.html',
       '!home.html': 'home.html',
       'git': 'git',
       'index': 'home',

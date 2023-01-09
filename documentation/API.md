@@ -31,7 +31,7 @@ The rest of the app is then defined inside the `class` definition. The example a
 
 ## Table of content
 
-- CircularJS static methods
+- [CircularJS static methods](#circular-static-methods)
 - Schnauzer (Handlebars templating)
 - The view model (VArray)
 - CircularJS instance methods
