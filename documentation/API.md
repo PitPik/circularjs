@@ -5,12 +5,12 @@
 For a start, a **typical setup** of a **component** (similar to Angular).
 
 ```javascript
-require(['circular'], ({ Module }) =>
+require(['circular'], ({ Component }) =>
 
 Component({
   selector: 'my-app',
   template: '{{text}}',
-  initialize: true, // only for main app
+  // initialize: true, // only for main app
 },
 class MyApp {
   constructor() {
@@ -31,10 +31,9 @@ require(['circular', '!my-app.html', '!my-app.css'], ({ Component }, template, s
 
 The rest of the app is then defined inside the `class` definition. The example above would already run (when `initialize: true` is set) and render "Hello world" on the page.
 
-## Table of content
+## Table of content (whole documentation)
 
 - [CircularJS static methods](#circular-static-methods)
-- [Live-cycle methods](#methods-inside-components)
 - [Schnauzer (Handlebars templating)](SCHNAUZER.md)
 - [The view model (VArray)](VARRAY.md)
 - [CircularJS instance methods](CIRCULAR.md)
@@ -43,6 +42,16 @@ The rest of the app is then defined inside the `class` definition. The example a
 
 ## Circular static methods
 
+**Table of content (within this page)**
+
+- [Circular.Component](#circularcomponent)
+- [Live-cycle methods](#methods-inside-components)
+- [Circular.Module](#circularmodule)
+- [Circular.Plugin](#circularplugin)
+- [Circular.Service](#circularservice)
+- [Circular.Toolbox](#circulartoolbox)
+- [Circular.CreateInstance](#circularcreateinstance)
+
 ### Circular.Component
 
 The *"decorator"* options of `Component()` can have the following properties:
@@ -50,7 +59,7 @@ The *"decorator"* options of `Component()` can have the following properties:
 ```javascript
 Component({
   selector: string; // selector of the component,
-  template: string; // the template of the component
+  template?: string; // the template of the component
   styles?: string[]; // the styles of the component
   subscribe$?: { [key: string]: string[] }; // definition of the data-change listeners of the view model
   initialize?: boolean; // automatically initializes the component as a singleton.
@@ -254,9 +263,13 @@ This method gets called as soon as the component is initialized and rendered on 
 
 ##### onLoad(element, circular)
 
-This method is the same as `onInit(element, circular)` with the only difference that it 
+This method is the same as `onInit(element, circular)` with the only difference that it can be called more than once.
+
+The CircularJS method `hideComponent()` can take components out of the DOM tree and later on recover or put it back to where it was. When this happens, `onLoad(element, circular)` gets called again.
 
 ##### onDestroy()
+
+Gets called when components gets destroyed.
 
 
 #### View model mutation callbacks
@@ -264,8 +277,76 @@ This method is the same as `onInit(element, circular)` with the only difference 
 
 ##### this$(property, item, value, oldValue)
 
+This method only gets "installed" on your instance of the class automatically when you define subscribers with the component option `subscribe$: { this: [] }`. The functionality is descibed [above in the section subscribe$](#subscribe)
+
 ##### myModel$(property, item, value, oldValue)
+
+This method only gets "installed" on your instance of the class automatically when you define subscribers with the component option `subscribe$: { myModel: [] }`. The functionality is descibed [above in the section subscribe$](#subscribe)
 
 ##### myModel$Move(action, key, item, model, previousModel)
 
+This method only gets "installed" on your instance of the class automatically when you define subscribers with the component option `subscribe$: { myModel: [] }`.
+It gets called when there is a VArray mutation for adding, removing, moving, sorting, ... executed and therefore the view updated (how this can be done will be explaind in the [view model (VArray) part of the documentation](VARRAY.md)).
+
+**the arguments**
+
+- `action: string` possible values: `add`, `move`, `remove` and `sort`.
+- `key: string` the name or index of the processed item.
+- `item: any` the view model item that was processed.
+- `model: Varray` the parent of the view model item that was processed.
+- `previousModel: Varray` the parent of the view model item that was processed in case it was moved.
+
+
 ##### myModel$PR(item, parent, root)
+
+This method only gets "installed" on your instance of the class automatically when you define subscribers with the component option `subscribe$: { myModel: [] }`.
+This method gets called right before it transforms into a `VArray` view model, gets iterated over the children and before the subscribers get set up. So, the last point where properties can be added to that model before it gets "locked" as being a view model.
+
+**the arguments**
+
+- `item: any` an item within the `VArray` view model
+- `parent: VArray` the holder of the `item` (Array)
+- `root: VArray` the root the view model. If thinking of a more dimentional Array with child nodes like in a table or a tree, this would be the initial Array.
+
+
+### Circular.Module
+
+This is not clear yet what it should be (in the future...).
+
+It currently acts like a `Component({ initialize: true })` but it could change in the future for something more useful.
+
+### Circular.Plugin
+
+Not yet implemented
+
+### Circular.Service
+
+Not yet implemented.
+
+### Circular.Toolbox
+
+This is a reference to Toolbox so you might not have to import it but use it from the instance if CircularJS.
+
+### Circular.CreateInstance
+
+CircularJS initializes automatically with the first incoming component. It uses all the default options though. If you want to set debugger on or change any of the default options then call this function before importing any of the components.
+
+```js
+Circular.CreateInstance(name, options, componentName);
+```
+
+where `name` would be the name of the instance (just for debugging), `options` are the options you want to be active in all components and `componentName` would be the first component that gets loaded (for convenience, so you don't have to call it yourself).
+
+`componentName` is optional though.
+
+#### The options
+
+```js
+{
+  hash: '#', // hash for routing
+  partials: {}, // Schnauzer partials
+  helpers: {}, // Schnauzer helpers
+  attributes: {}, // Schnauzer attributes
+  debug: 0, // 0 -> off; 1 - 3 levels of feedback
+}
+```

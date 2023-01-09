@@ -41,12 +41,15 @@ var initCircular = function(_this, name, options) {
 
 Object.defineProperties(Circular.prototype, mixinAPI({
   createComponent: { value: function(selector, attrs, component, node) {
+    var isObj = typeof selector !== 'string';
+    var sel = !isObj ? selector : selector.selector;
+    var name = !isObj ? selector : selector.name;
     var inst = getInstanceData(component['__cr-id']);
-    var elm = document.createElement(selector);
+    var elm = document.createElement(sel);
 
     for (var attr in attrs) elm.setAttribute(attr, attrs[attr]);
     (node || inst.element).appendChild(elm); // TODO: maybe offer insertBefore...
-    initInnerComponents(inst, node || inst.element, selector, true);
+    initInnerComponents(inst, node || inst.element, sel, true, name);
     return elm;
   }},
   // initComponents: { value: function(selector, component, fragment) { // TODO: why would we need this??
@@ -118,8 +121,7 @@ return Object.defineProperties(Circular, {
       selector: defData.selector,
       subscribe$: defData.subscribe$,
       childNames: childNames, // TODO: check above logic...
-      template: defData.template &&
-        processTemplate(defData.template, getBlickOptions(crInst.options, defData)),
+      template: processTemplate(defData.template || '', getBlickOptions(crInst.options, defData)),
       styles: installStyles(defData.styles, defData.selector),
       singleton: false, // ????
       initialize: false,
@@ -246,7 +248,7 @@ function renderComponent(inst, extra) {
   inst.element.appendChild(fragment);
 }
 
-function initInnerComponents(inst, element, selector, onLoad) {
+function initInnerComponents(inst, element, selector, onLoad, resource) {
   var query = inst.template.childQuery || [];
   var children = inst.template.childComponents;
   var isLazy = false, newInst;
@@ -261,11 +263,12 @@ function initInnerComponents(inst, element, selector, onLoad) {
     if (elms[n]['cr-id']) continue;
     if (inst.instance.onBeforeChildInit) inst.instance.onBeforeChildInit(elms[n]);
     name = elms[n].tagName.toLowerCase();
+    resource = resource || name;
     isLazy = elms[n].hasAttribute('cr-lazy');
     if (!inst.crInst.options.debug && isLazy) elms[n].removeAttribute('cr-lazy');
     if (isLazy && !components[name]) {
       (function(inst, elm, name) { // lazy loading :) nice
-        require([require.lazyPackages[name] || name], function(component) {
+        require([require.lazyPackages[resource] || resource], function(component) {
           var newInst = component.init(elm, null, inst.instance, onLoad);
           if (inst.instance.onChildInit) inst.instance.onChildInit(newInst.element, newInst.instance, name);
           return component;

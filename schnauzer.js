@@ -54,7 +54,7 @@ var initSchnauzer = function(_this, options, template) {
   switchTags(_this, options.tags);
   _this.helpers = options.helpers;
   _this.registerPartial(options.partials);
-  if (template) _this.parse(template);
+  if (template !== undefined) _this.parse(template);
   delete options.helpers; delete options.partials;
 };
 
