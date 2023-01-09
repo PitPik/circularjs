@@ -50,7 +50,7 @@ See **[API documentation](documentation/API.md)** for more information/documenta
 
 ## Quick Start
 
-To quickly get started go to [Demo page](https://pitpik.github.io/circularjs/) or try the ["Tour of Heroes" tutorial](heroes), see the [TODO list demo](https://pitpik.github.io/circularjs/todo) and/or [API documentation](documentation/API.md) for a better overview.
+To quickly get started go to [Demo page](https://pitpik.github.io/circularjs/) or try the ["Tour of Heroes" tutorial](https://pitpik.github.io/circularjs/demos/heroes/), see the [TODO list demo](https://pitpik.github.io/circularjs/demos/todo) and/or [API documentation](documentation/API.md) for a better overview.
 
 ## Why CircularJS
 
