@@ -45,6 +45,7 @@ The rest of the app is then defined inside the `class` definition. The example a
 **Table of content (within this page)**
 
 - [Circular.Component](#circularcomponent)
+- [Circular attributes](#circular-attributes)
 - [Live-cycle methods](#methods-inside-components)
 - [Circular.Module](#circularmodule)
 - [Circular.Plugin](#circularplugin)
@@ -217,6 +218,17 @@ Will end up as `<a href="https://my-domain.com/my-app-service/my-special-link.ht
 #### circular
 
 This option takes an instance of circular in case you need some special setup for your component. This is a bit experimental and probably never used. But, maybe just good to know that this option does exist...
+
+
+### Circular attributess
+
+- cr-event
+- cr-lazy
+- cr-view
+- cr-input
+- cr-scroll
+- cr-cloak
+
 
 ### Methods inside components
 

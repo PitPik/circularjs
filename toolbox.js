@@ -59,14 +59,14 @@ var Toolbox = {
     return (root || document).querySelectorAll(selector);
   },
 
-  parentsIndexOf: function(elements, target) { // TODO: check if needed
-    for (var n = elements.length; n--; ) {
-      if (elements[n].contains(target)) {
-        return n;
-      }
-    }
-    return -1;
-  },
+  // parentsIndexOf: function(elements, target) { // TODO: check if needed
+  //   for (var n = elements.length; n--; ) {
+  //     if (elements[n].contains(target)) {
+  //       return n;
+  //     }
+  //   }
+  //   return -1;
+  // },
 
   keys: function(obj) {
     var result = [];

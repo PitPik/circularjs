@@ -2,7 +2,7 @@
 
 **Schnauzer** is a **Handlebars** implementation in JavaScript. It is different though to others as it is not only designed for rendering a model **one time only** but has a special **internal API** to get a hold on all placeholders of the template including loops so they can be updated individually at any time. The template **stays dynamic** the whole time of the components live.
 
-This part of the documentation only covers **CircularJS** specific behaviour of **Schnauzer**. The complete documentation for **Schnauzer** can be found at the [Schnauzer repository](https://github.com/PitPik/Schnauzer) in case you're not too familiar with the Handlebars syntax.
+> This part of the documentation only covers **CircularJS** specific behaviour of **Schnauzer**. The complete documentation for **Schnauzer** can be found at the [Schnauzer repository](https://github.com/PitPik/Schnauzer) in case you're not too familiar with the Handlebars syntax.
 
 ## Special features
 
@@ -114,6 +114,11 @@ Auto updates when used like `{{%@length}}`. Mostly not used in templates but ins
 Index based number of depth of the view model when using child nodes. Can be used for rendering "flat trees", so when you want to render a deep model structure without creating a deeply nested HTML structure.
 
 Auto updates when used like `{{%@depth}}`.
+
+
+### Scroll-position preserver
+
+When having an `{{#if %foo}}<div> ... </div>{{else}}...{{/if}}` situation in your template and there is a HTMLElement container inside that `<div>`, or the `<div>` itself, that shows a scroll bar then you will usually loose the scroll position when coming back from the `{{else}}` part. To prevent this, you can mark the Element wit a `cr-scroll` attribute and it will automatically restore the scroll positions of all containers inside the `{{#if %foo}}` block that contain that attribute. The same is valid for using `circular.hideComponent()` described in [the CIRCULAR documantation](CIRCULAR.md#circularjs-instances).
 
 
 ### Recursive templates
