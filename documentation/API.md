@@ -31,7 +31,7 @@ require(['circular', '!my-app.html', '!my-app.css'], ({ Component }, template, s
 
 The rest of the app is then defined inside the `class` definition. The example above would already run (when `initialize: true` is set) and render "Hello world" on the page.
 
-## Table of content (whole documentation)
+## Table of contents (whole documentation)
 
 - [CircularJS static methods](#circular-static-methods)
 - [Schnauzer (Handlebars templating)](SCHNAUZER.md)
@@ -42,11 +42,12 @@ The rest of the app is then defined inside the `class` definition. The example a
 
 ## Circular static methods
 
-**Table of content (within this page)**
+**Table of contents (within this page)**
 
 - [Circular.Component](#circularcomponent)
 - [Circular attributes](#circular-attributes)
 - [Live-cycle methods](#methods-inside-components)
+- [Circular attributes](#the-six-circular-attributes)
 - [Circular.Module](#circularmodule)
 - [Circular.Plugin](#circularplugin)
 - [Circular.Service](#circularservice)
@@ -220,14 +221,74 @@ Will end up as `<a href="https://my-domain.com/my-app-service/my-special-link.ht
 This option takes an instance of circular in case you need some special setup for your component. This is a bit experimental and probably never used. But, maybe just good to know that this option does exist...
 
 
-### Circular attributess
+### The six Circular attributes
 
-- cr-event
-- cr-lazy
-- cr-view
-- cr-input
-- cr-scroll
-- cr-cloak
+
+#### `cr-event`
+
+This is the proper way to install event listeners to HTMLElements via **Schnauzer** templates.
+
+```Handlebars
+<div cr-event="click; mousedown: doSomething; dblclick?: dblclick; input!: input">...</div>
+```
+
+This example shows 4 different ways of setting event listeners:
+
+`click` will listen to a click event and also expects a `click()` method in your component.
+
+`mousedown` listens to mousedown and calls `doSomething()`
+
+`dblclick?` listens to dblclick and calls `dblclick()` although it is used in combination with event delegation.
+
+`input!` listens to input events and calls `input()` although the listener gets install with capture `false`.
+
+##### How event listeners work in detail
+
+Every `cr-event` value expects a method in the component, otherwise it will just silently fail.
+
+```js
+clickHandler(e, elm, item, model, ...) {
+  // do your magic here...
+}
+```
+
+`e` is the Event model.
+
+`elm` represents the HTMLElement registered in the `VArray` view model, so in loops like lists or trees, every closest loop item or if not, then the component's `this`.
+
+`item` is the model part that represents the rendered item and
+
+`model` is the Array or better `VArray` where `item` comes from.
+
+Using `e.stopPropagation()` or just returning `false` does the same.
+
+> When dealing with lists, tables or trees you can install the event listener with a `?` on its root element so you can realise event-delegation. This speeds up rendering of big ammounts of items as they don't need to register to the event-controller one by one.
+
+#### `cr-lazy`
+
+In case you want to make components load lazy because you include them in an `{{else}}` part of the template and don't usually expect them to show up or you use `circular.createComponent()` and also not want to load it by default, you can add this attribute to the component and make it load later. This way you **don't need to** import it inside `define()` or `require()`. The value of the attribute can help to find the resource if the `selector` doesn't match the resource name. Instead of adding an attribute value you can also introduce a property in the **amd configuration** to find the resource.
+
+#### `cr-view`
+
+This is kind of a left over from a previous version of **CircularJS**. You can add this attribute to any HTMLElement and then find it in your component using `circular.getView(value, element)`. You culd probably do the same using `Toolbox.$(selector)` but after findin the element with `getView()`, the attribute will be removed (if not in debug mode).
+
+#### `cr-input`
+
+This attribute can transport variables from the parent to the child for direct communication.
+
+```Handlebars
+<div cr-input="foo; bar=foo; fooBar='some text'">
+```
+
+See more details [in the above description](#constructorelement-input-circular).
+
+#### `cr-scroll`
+
+When having an `{{#if %foo}}<div> ... </div>{{else}}...{{/if}}` situation in your template and there is a HTMLElement container inside that `<div>`, or the `<div>` itself, that shows a scroll bar then you will usually loose the scroll position when coming back from the `{{else}}` part. To prevent this, you can mark the Element with a `cr-scroll` attribute and it will automatically restore the scroll positions of all containers inside the `{{#if %foo}}` block that contain that attribute. The same is valid for using `circular.hideComponent()` after restoring the component.
+
+#### `cr-cloak`
+
+This does actually nothing to the component. This attribute just disapears after the component is rendered and attached to the DOM. This can be used to have a class `[cr-cloak] { display: none }` in your CSS if you wish.
 
 
 ### Methods inside components
@@ -238,7 +299,7 @@ A component has some pre-defined methods, some depending on the used view-models
 #### Livecycle methods
 
 
-##### constructor(element, input, circular)
+##### `constructor(element, input, circular)`
 
 The constructor will always provide the following arguments:
 
@@ -269,17 +330,17 @@ If the variables on the parent are dynamic defined in `subscribe$()` option and 
 
 To communicate from the child to the parent you can use `circular.triggerEvent()` and install an event listener on the parent. This will be explaind in the **Circular instance methods** section of this documentation.
 
-##### onInit(element, circular)
+##### `onInit(element, circular)`
 
 This method gets called as soon as the component is initialized and rendered on the page. The `element` is like in `constructor(element, input, circular)` the HTMLElement of the component and `circular` also an instance of CircularJS used for this component.
 
-##### onLoad(element, circular)
+##### `onLoad(element, circular)`
 
 This method is the same as `onInit(element, circular)` with the only difference that it can be called more than once.
 
 The CircularJS method `hideComponent()` can take components out of the DOM tree and later on recover or put it back to where it was. When this happens, `onLoad(element, circular)` gets called again.
 
-##### onChildInit(element, instance, name)
+##### `onChildInit(element, instance, name)`
 
 This method gets called when a new child element within the component gets initialized.
 
@@ -287,13 +348,13 @@ This method gets called when a new child element within the component gets initi
 - `instance: component` the instance of the childs' class
 - `name: string` the selector of the child
 
-##### onBeforeChildInit(element)
+##### `onBeforeChildInit(element)`
 
 This method gets called when a new child element within the component is about to gete initialized.
 
 - `element: HTMLElement` the childs' DOM representation
 
-##### onDestroy()
+##### `onDestroy()`
 
 Gets called when components gets destroyed.
 
@@ -301,15 +362,15 @@ Gets called when components gets destroyed.
 #### View model mutation callbacks
 
 
-##### this$(property, item, value, oldValue)
+##### `this$(property, item, value, oldValue)`
 
 This method only gets "installed" on your instance of the class automatically when you define subscribers with the component option `subscribe$: { this: [] }`. The functionality is descibed [above in the section subscribe$](#subscribe)
 
-##### myModel$(property, item, value, oldValue)
+##### `myModel$(property, item, value, oldValue)`
 
 This method only gets "installed" on your instance of the class automatically when you define subscribers with the component option `subscribe$: { myModel: [] }`. The functionality is descibed [above in the section subscribe$](#subscribe)
 
-##### myModel$Move(action, key, item, model, previousModel)
+##### `myModel$Move(action, key, item, model, previousModel)`
 
 This method only gets "installed" on your instance of the class automatically when you define subscribers with the component option `subscribe$: { myModel: [] }`.
 It gets called when there is a VArray mutation for adding, removing, moving, sorting, ... executed and therefore the view updated (how this can be done will be explaind in the [view model (VArray) part of the documentation](VARRAY.md)).
@@ -323,7 +384,7 @@ It gets called when there is a VArray mutation for adding, removing, moving, sor
 - `previousModel: Varray` the parent of the view model item that was processed in case it was moved.
 
 
-##### myModel$PR(item, parent, root)
+##### `myModel$PR(item, parent, root)`
 
 This method only gets "installed" on your instance of the class automatically when you define subscribers with the component option `subscribe$: { myModel: [] }`.
 This method gets called right before it transforms into a `VArray` view model, gets iterated over the children and before the subscribers get set up. So, the last point where properties can be added to that model before it gets "locked" as being a view model.

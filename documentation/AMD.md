@@ -7,7 +7,7 @@
 
 `define` and `require` are on the global scope (window). Those are the only ones though produced by **CircularJS**. From there on everything is handled through factories of amd.js.
 
-Calling `define()` without a name as first argument ends up as if you called `require()`.
+Calling `define()` without a name as first argument ends up as if you called `require()`. Calling  `define()` also without the `dependencies` argument will end up like calling `require([], () => {})`. The same for calling `require()` without `dependencies`, they will default to an empty array.
 
 Assume you have the following folder structure:
 
@@ -28,7 +28,7 @@ index.html
               |_dep.js
 ```
 
-### require
+### `require(dependencies?, factory)`
 
 ```js
 require(['dependency-01', 'dependency-02'], function(dep1, dep2) {
@@ -53,6 +53,9 @@ require.config({
     options: {
         minifyPrefix: '.min',
         debug: false
+    },
+    lazyPackages: {
+      //
     }
 });
 ```

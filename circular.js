@@ -41,15 +41,12 @@ var initCircular = function(_this, name, options) {
 
 Object.defineProperties(Circular.prototype, mixinAPI({
   createComponent: { value: function(selector, attrs, component, node) {
-    var isObj = typeof selector !== 'string';
-    var sel = !isObj ? selector : selector.selector;
-    var name = !isObj ? selector : selector.name;
     var inst = getInstanceData(component['__cr-id']);
-    var elm = document.createElement(sel);
+    var elm = document.createElement(selector);
 
     for (var attr in attrs) elm.setAttribute(attr, attrs[attr]);
     (node || inst.element).appendChild(elm); // TODO: maybe offer insertBefore...
-    initInnerComponents(inst, node || inst.element, sel, true, name);
+    initInnerComponents(inst, node || inst.element, selector, true);
     return elm;
   }},
   // initComponents: { value: function(selector, component, fragment) { // TODO: why would we need this??
@@ -248,10 +245,10 @@ function renderComponent(inst, extra) {
   inst.element.appendChild(fragment);
 }
 
-function initInnerComponents(inst, element, selector, onLoad, resource) {
+function initInnerComponents(inst, element, selector, onLoad) {
   var query = inst.template.childQuery || [];
   var children = inst.template.childComponents;
-  var isLazy = false, newInst;
+  var isLazy = false, newInst, resource = '';
 
   if (!selector && (!children.length || !element.firstElementChild)) return;
   if (typeof query !== 'string') {
@@ -263,8 +260,8 @@ function initInnerComponents(inst, element, selector, onLoad, resource) {
     if (elms[n]['cr-id']) continue;
     if (inst.instance.onBeforeChildInit) inst.instance.onBeforeChildInit(elms[n]);
     name = elms[n].tagName.toLowerCase();
-    resource = resource || name;
     isLazy = elms[n].hasAttribute('cr-lazy');
+    resource = isLazy ? elms[n].getAttribute('cr-lazy') || name : name;
     if (!inst.crInst.options.debug && isLazy) elms[n].removeAttribute('cr-lazy');
     if (isLazy && !components[name]) {
       (function(inst, elm, name) { // lazy loading :) nice

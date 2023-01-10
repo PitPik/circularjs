@@ -1,6 +1,6 @@
 # Toolbox helper functions
 
-The **Toolbox** helper functions are not related to an instance of a component and therefore kept as seperate functions. **CircularJS** internally also uses quite some of those functions. The resource `circular` (when imported) has a reference to it as `Circular.Toolbox`, but it can ofcourse also imported as such: `require(['toolbox'])`.
+The **Toolbox** helper functions are not related to an instance of a component and therefore kept as seperate functions. **CircularJS** internally also uses quite some of those functions. The resource `circular` (when imported) has a reference to it as `Circular.Toolbox`, but it can ofcourse also be imported as such: `require(['toolbox'])`.
 
 - [convertToType(value)](#converttotypevalue) converts literals to a logical type
 - [closest(element, selector, root)](#closestelement-selector-root) in case `Element.closest()` is not vailable in browser.

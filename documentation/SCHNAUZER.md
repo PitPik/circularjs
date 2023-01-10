@@ -118,7 +118,7 @@ Auto updates when used like `{{%@depth}}`.
 
 ### Scroll-position preserver
 
-When having an `{{#if %foo}}<div> ... </div>{{else}}...{{/if}}` situation in your template and there is a HTMLElement container inside that `<div>`, or the `<div>` itself, that shows a scroll bar then you will usually loose the scroll position when coming back from the `{{else}}` part. To prevent this, you can mark the Element wit a `cr-scroll` attribute and it will automatically restore the scroll positions of all containers inside the `{{#if %foo}}` block that contain that attribute. The same is valid for using `circular.hideComponent()` described in [the CIRCULAR documantation](CIRCULAR.md#circularjs-instances).
+When having an `{{#if %foo}}<div> ... </div>{{else}}...{{/if}}` situation in your template and there is a HTMLElement container inside that `<div>`, or the `<div>` itself, that shows a scroll bar then you will usually loose the scroll position when coming back from the `{{else}}` part. To prevent this, you can mark the Element with a `cr-scroll` attribute and it will automatically restore the scroll positions of all containers inside the `{{#if %foo}}` block that contain that attribute. The same is valid for using `circular.hideComponent()` described in [the CIRCULAR documantation](CIRCULAR.md#circularjs-instances).
 
 
 ### Recursive templates
