@@ -128,6 +128,7 @@ Lets say we have a variable `this.tree` that represens a tree structure that has
       {{%title}}
       {{>tree}} <!-- this is the recursive part -->
     </li>
+    {{/each}}
   </ul>
 {{/template}}
 ```
