@@ -54,7 +54,7 @@ The rest of the app is then defined inside the `class` definition. The example a
 
 ### Circular.Component
 
-The *"decorator"* options of `Component()` can have the following properties:
+The options of the *"decorator"* like `Component()` can have the following properties:
 
 ```javascript
 Component({
@@ -357,10 +357,12 @@ where `name` would be the name of the instance (just for debugging), `options` a
 
 ```js
 {
-  hash: '#', // hash for routing
-  partials: {}, // Schnauzer partials
-  helpers: {}, // Schnauzer helpers
-  attributes: {}, // Schnauzer attributes
+  hash: '#', // hash symbol for routing
+  partials: {}, // Schnauzer partials. key is name of partial;
+  helpers: {}, // Schnauzer helpers. key is name of helper;
+  attributes: {}, // Schnauzer attributes. key is name of attribute being supported;
   debug: 0, // 0 -> off; 1 - 3 levels of feedback
 }
 ```
+
+The `debug` options not only defines the level of feedabck you get in the console but also leaves the `cr-xyz` attributes (like `cr-event` etc.) on all HTML Elements and all the `cr-id` that are visible on all view elements to be able to compare to the view model.
