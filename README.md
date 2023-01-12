@@ -19,13 +19,50 @@ I know, yet another MVC/MVVM framework ;)... but
 - Keeps a healthy balance between **coding convenience**, **flexibility** and **restrictions/oppinionation**
 - Quick and **easy to learn**
 
-When creating a MVC/MVVM Framework you are immediately confronted with making compromises between those arguments because it is not easy or possible to **address all of those expectations** at the same level. Usually, when trying to get one of them perfect, some other point suffers from it (most obvious example would be coding convenience vs. rendering performance).
+There are immediately some confrontations with those arguments when creating a MVC/MVVM Framework as it is not easy or possible to **address all of those expectations** at the same level. Usually, when trying to get one of them perfect, some other point suffers from it.
 
 **CircularJS** though does a pretty good job in finding the **perfect ballance** between all of those **expectations**.
-It is very small though has **all the features** you would expect from a MVC/MVVM Framework and is **"pluggable"** for all the features you need to add to your project. Even though your code base can be kept **very small** (because in general you really just deal with the view model) it renders **blasting fast** without having to face compromises.
-Also a perfect prerequisite for apps on **mobile/tablet/smart TV/PIs** etc.
+It is very small though has **all the features** you would expect from a MVC/MVVM Framework and is **"pluggable"** for all the features you need to add to your project. Your code base can be kept **very small** and it renders **blasting fast** without having to face compromises so it's perfectly suitable for apps on **mobile/tablet/smart TV/PIs** etc.
 
 Understanding how things work and learning the way of working with **CircularJS** is based on **well known technology/patterns** and therefore **"realy" easy to learn**. Most provided APIs that are **CircularJS** specific are done in a way so you get familiar with quite fast as they are based on logic/patterns from **known APIs** (like the DOM API, etc.).
+
+## A minimal example
+
+```js
+require(['circular', '!app.html'], ({ Component }, template) =>
+
+Component({
+  selector: 'app',
+  template: template,
+},
+class myApp {
+  count = 0;
+
+  click(e, elm, item, model) {
+    this.count++;
+  }
+}))
+
+```
+
+```Handlebars
+<button cr-event="click">
+  Count is: {{%count}}
+</button>
+```
+
+The above example demonstrates the three core features of **CircularJS**:
+
+- **Declarative Rendering**: CircularJS extends standard HTML with a Handlebars template syntax that allows us to declaratively describe HTML output based on JavaScript state.
+
+- **Reactivity**: CircularJS automatically tracks JavaScript state changes and efficiently updates the DOM when changes happen.
+
+- **CircularJS** doesn't need to be pre-compiled due to it's own smart component loader **amd.js**. Just run your code from within a folder served by your favorite WEB-Server.
+
+You may already have questions - don't worry. We will cover every little detail in the rest of the documentation. For now, please read along so you can have a high-level understanding of what CircularJS offers.
+
+> **Prerequisites**
+>The rest of the documentation assumes basic familiarity with HTML, CSS, and JavaScript. If you are totally new to frontend development, it might not be the best idea to jump right into a framework as your first step - grasp the basics and then come back! You can check your knowledge level with [this JavaScript overview](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Language_Overview). Prior experience with other frameworks helps, but is not required.
 
 ## What you will deal with when working with/learning CircularJS
 
@@ -49,4 +86,4 @@ It is **closer to JavaScript** and therefore **easier to learn** and understand.
 
 ## CircularJS API
 
-See [API documentation](documentation/API.md) for more information/documentation.
+See [API documentation](documentation/API.md) for more information/documentation or see the [Table of contents of all API features](documentation/TOC.md) to get an idea of all the features CircularJS offers.
