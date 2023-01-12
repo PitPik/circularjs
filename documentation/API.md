@@ -105,7 +105,7 @@ would render "Hello world. How is it going?" on your page.
 
 #### styles
 
-This array holds a bunch of strings that define some CSS. It's an array so you can concatinate string for better formatting or just add some general imported styles to it. You don't get the convenience like in Angular where all styles only work on that specific component but you can always use like in SASS the selector-wrapper named after your component: `my-app { ... }`
+This array holds a bunch of strings that define some CSS. It's an array so you can concatenate string for better formatting or just add some general imported styles to it. You don't get the convenience like in Angular where all styles only work on that specific component but you can always use like in SASS the selector-wrapper named after your component: `my-app { ... }`
 
 #### subscribe$
 
@@ -141,7 +141,7 @@ If returning `false` inside this callback would set the value back to the old va
 
 The subscriber `'tree:children': []` is a bit more complex. First, you can also have a subscriber callback `tree$()` like just described before and react on changes there. The reason of the fact that the array there is empty sits in the template.
 
-For further explanation let's asume the component has a view model like such:
+For further explanation let's assume the component has a view model like such:
 
 ```js
 this tree = [{
@@ -154,33 +154,33 @@ this tree = [{
 }];
 ```
 
-**Schnauzer** templates can have "dynamic" variables like `{{%title}}`. The `%` makes this variable dynamic and therefore **observable**. The fact that it's defined as such in the template makes the definition inside the array of `'tree:children': []` obsolete. If there are variables within the model that the template doesn't use and you still want to listen to changes, you can still define it in that configuratin: `'tree:children': ['title']`
+**Schnauzer** templates can have "dynamic" variables like `{{%title}}`. The `%` makes this variable dynamic and therefore **observable**. The fact that it's defined as such in the template makes the definition inside the array of `'tree:children': []` obsolete. If there are variables within the model that the template doesn't use and you still want to listen to changes, you can still define it in that configuration: `'tree:children': ['title']`
 
 The `:children` part defines the name of the children (or the branches of the tree) being used in this model. In the template you would represent this with a block like:
 
 ```HTML
 ...
-{{#each %chilren}} ... {{/each}} <!-- inside recursive template -->
+{{#each %children}} ... {{/each}} <!-- inside recursive template -->
 ...
 ```
 
-This makes your **children dynamic** and **mutable** with all the mutation functions an Array offers (including some extra methods explained later on or in the section `VArray` in this documentation). For arrays an their manipulations, the changes are not represented in `tree$()` but in `tree$Move()`.
+This makes your **children dynamic** and **mutable** with all the mutation functions an Array offers (including some extra methods explained later on or in the section `VArray` in this documentation). For arrays and their manipulations, the changes are not represented in `tree$()` but in `tree$Move()`.
 
 Any other Object can also be subscribed to like `myObject: ['foo', 'bar']` and listened to in `myObject$(property, item, value, oldValue) {}`. All those subscriptions are **canceled automatically** when a component gets **destroyed**.
 
 #### initialize
 
-This is simply a boolean that triggers the component to initialize itself without being introduced in a template. Ususally it's the starting point of your app. The component will end up as a singleton and not being re-usable anymore.
+This is simply a boolean that triggers the component to initialize itself without being introduced in a template. Usually it's the starting point of your app. The component will end up as a singleton and not being re-usable anymore.
 
 #### context
 
-Is a helper (HTMLElement) to the `initialize` option. It can help finding the `<my-app></my-app>` tag. See it as giving a context to jQuery's `$()`. So CircularJS looks inside the context for the app HTML tag. Probably never used but there for special occations...
+Is a helper (HTMLElement) to the `initialize` option. It can help finding the `<my-app></my-app>` tag. See it as giving a context to jQuery's `$()`. So CircularJS looks inside the context for the app HTML tag. Probably never used but there for special occasions...
 
 #### helpers
 
 See `Schnauzer` about helpers. When adding helpers to the component they will be available inside the template.
 
-Helpers can be used for any reason. Thinking of Angular they can replace pipes like `date`, `format` etc. but they could also help setting up `picture` for hi-res `<img src="">` tags or help setting up `Router` links in case you don't want to use `hashes` in your routing. In the future I will come up with a useful set of helper that will take care of all those neeeds (stay tuned).
+Helpers can be used for any reason. Thinking of Angular they can replace pipes like `date`, `format` etc. but they could also help setting up `picture` for hi-res `<img src="">` tags or help setting up `Router` links in case you don't want to use `hashes` in your routing. In the future I will come up with a useful set of helper that will take care of all those needs (stay tuned).
 
 #### partials
 
@@ -190,7 +190,7 @@ Also see `{{>@content}}` described above. It is a special partial that will be i
 
 #### attributes
 
-See `Schnauzer` about attributes. When adding attribute functions to the component they will be available inside the template. **CircularJS** alredy offers a wide set of attribute functions (described in `Schnauzer`).
+See `Schnauzer` about attributes. When adding attribute functions to the component they will be available inside the template. **CircularJS** already offers a wide set of attribute functions (described in `Schnauzer`).
 
 #### extra
 
@@ -260,7 +260,7 @@ clickHandler(e, elm, item, model, ...) {
 
 Using `e.stopPropagation()` or just returning `false` does the same.
 
-> When dealing with lists, tables or trees you can install the event listener with a `?` on its root element so you can realise event-delegation. This speeds up rendering of big ammounts of items as they don't need to register to the event-controller one by one.
+> When dealing with lists, tables or trees you can install the event listener with a `?` on its root element so you can realise event-delegation. This speeds up rendering of big amounts of items as they don't need to register to the event-controller one by one.
 
 #### `cr-lazy`
 
@@ -268,7 +268,7 @@ In case you want to make components load lazy because you include them in an `{{
 
 #### `cr-view`
 
-This is kind of a left over from a previous version of **CircularJS**. You can add this attribute to any HTMLElement and then find it in your component using `circular.getView(value, element)`. You culd probably do the same using `Toolbox.$(selector)` but after findin the element with `getView()`, the attribute will be removed (if not in debug mode).
+This is kind of a left over from a previous version of **CircularJS**. You can add this attribute to any HTMLElement and then find it in your component using `circular.getView(value, element)`. You could probably do the same using `Toolbox.$(selector)` but after finding the element with `getView()`, the attribute will be removed (if not in debug mode).
 
 #### `cr-input`
 
@@ -286,7 +286,7 @@ When having an `{{#if %foo}}<div> ... </div>{{else}}...{{/if}}` situation in you
 
 #### `cr-cloak`
 
-This does actually nothing to the component. This attribute just disapears after the component is rendered and attached to the DOM. This can be used to have a class `[cr-cloak] { display: none }` in your CSS if you wish.
+This does actually nothing to the component. This attribute just disappears after the component is rendered and attached to the DOM. This can be used to have a class `[cr-cloak] { display: none }` in your CSS if you wish.
 
 
 ### Methods inside components
@@ -294,7 +294,7 @@ This does actually nothing to the component. This attribute just disapears after
 A component has some pre-defined methods, some depending on the used view-models, some just always available.
 
 
-#### Livecycle methods
+#### Live-cycle methods
 
 
 ##### `constructor(element, input, circular)`
@@ -311,7 +311,7 @@ To explain `input(this)` a bit better: Every component can import variables from
 <my-component cr-input="foo; cBar=bar; fBar='some text'"></my-component>
 ```
 
-To import those variables you need to first define those varibles in the child component and then call `input(this)`.
+To import those variables you need to first define those variables in the child component and then call `input(this)`.
 
 ```js
 constructor(element, input, circular) {
@@ -326,7 +326,7 @@ constructor(element, input, circular) {
 
 If the variables on the parent are dynamic defined in `subscribe$()` option and change, the changes will be transferred to the child and can also be subscribed to. If you know Angular then think of the `@Input` decorator but not used for each variable but for all before `input(this)`.
 
-To communicate from the child to the parent you can use `circular.triggerEvent()` and install an event listener on the parent. This will be explaind in the **Circular instance methods** section of this documentation.
+To communicate from the child to the parent you can use `circular.triggerEvent()` and install an event listener on the parent. This will be explained in the **Circular instance methods** section of this documentation.
 
 ##### `onInit(element, circular)`
 
@@ -342,15 +342,15 @@ The CircularJS method `hideComponent()` can take components out of the DOM tree 
 
 This method gets called when a new child element within the component gets initialized.
 
-- `element: HTMLElement` the childs' DOM representation
-- `instance: component` the instance of the childs' class
+- `element: HTMLElement` the child's DOM representation
+- `instance: component` the instance of the child's class
 - `name: string` the selector of the child
 
 ##### `onBeforeChildInit(element)`
 
-This method gets called when a new child element within the component is about to gete initialized.
+This method gets called when a new child element within the component is about to get initialized.
 
-- `element: HTMLElement` the childs' DOM representation
+- `element: HTMLElement` the child's DOM representation
 
 ##### `onDestroy()`
 
@@ -362,16 +362,16 @@ Gets called when components gets destroyed.
 
 ##### `this$(property, item, value, oldValue)`
 
-This method only gets "installed" on your instance of the class automatically when you define subscribers with the component option `subscribe$: { this: [] }`. The functionality is descibed [above in the section subscribe$](#subscribe)
+This method only gets "installed" on your instance of the class automatically when you define subscribers with the component option `subscribe$: { this: [] }`. The functionality is described [above in the section subscribe$](#subscribe)
 
 ##### `myModel$(property, item, value, oldValue)`
 
-This method only gets "installed" on your instance of the class automatically when you define subscribers with the component option `subscribe$: { myModel: [] }`. The functionality is descibed [above in the section subscribe$](#subscribe)
+This method only gets "installed" on your instance of the class automatically when you define subscribers with the component option `subscribe$: { myModel: [] }`. The functionality is described [above in the section subscribe$](#subscribe)
 
 ##### `myModel$Move(action, key, item, model, previousModel)`
 
 This method only gets "installed" on your instance of the class automatically when you define subscribers with the component option `subscribe$: { myModel: [] }`.
-It gets called when there is a VArray mutation for adding, removing, moving, sorting, ... executed and therefore the view updated (how this can be done will be explaind in the [view model (VArray) part of the documentation](VARRAY.md)).
+It gets called when there is a VArray mutation for adding, removing, moving, sorting, ... executed and therefore the view updated (how this can be done will be explained in the [view model (VArray) part of the documentation](VARRAY.md)).
 
 **the arguments**
 
@@ -391,7 +391,7 @@ This method gets called right before it transforms into a `VArray` view model, g
 
 - `item: any` an item within the `VArray` view model
 - `parent: VArray` the holder of the `item` (Array)
-- `root: VArray` the root the view model. If thinking of a more dimentional Array with child nodes like in a table or a tree, this would be the initial Array.
+- `root: VArray` the root the view model. If thinking of a more dimensional Array with child nodes like in a table or a tree, this would be the initial Array.
 
 
 ### Circular.Module
@@ -436,4 +436,4 @@ where `name` would be the name of the instance (just for debugging), `options` a
 }
 ```
 
-The `debug` options not only defines the level of feedabck you get in the console but also leaves the `cr-xyz` attributes (like `cr-event` etc.) on all HTML Elements and all the `cr-id` that are visible on all view elements to be able to compare to the view model.
+The `debug` options not only defines the level of feedback you get in the console but also leaves the `cr-xyz` attributes (like `cr-event` etc.) on all HTML Elements and all the `cr-id` that are visible on all view elements to be able to compare to the view model.

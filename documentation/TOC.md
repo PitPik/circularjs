@@ -1,6 +1,6 @@
 # Table of contets
 
-> This is a kind of a cheat sheat to quickly find all the API documentations a bit faster without having to scoll through all the files.
+> This is a kind of a cheat sheet to quickly find all the API documentations a bit faster without having to scroll through all the files.
 
 ## All documents relevant for API documentation
 

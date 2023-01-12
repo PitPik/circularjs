@@ -1,9 +1,9 @@
 # Toolbox helper functions
 
-The **Toolbox** helper functions are not related to an instance of a component and therefore kept as seperate functions. **CircularJS** internally also uses quite some of those functions. The resource `circular` (when imported) has a reference to it as `Circular.Toolbox`, but it can ofcourse also be imported as such: `require(['toolbox'])`.
+The **Toolbox** helper functions are not related to an instance of a component and therefore kept as separate functions. **CircularJS** internally also uses quite some of those functions. The resource `circular` (when imported) has a reference to it as `Circular.Toolbox`, but it can of course also be imported as such: `require(['toolbox'])`.
 
 - [convertToType(value)](#converttotypevalue) converts literals to a logical type
-- [closest(element, selector, root)](#closestelement-selector-root) in case `Element.closest()` is not vailable in browser.
+- [closest(element, selector, root)](#closestelement-selector-root) in case `Element.closest()` is not available in browser.
 - [findParent(element, selector, root)](#findparentelement-selector-root) finds the first parent defined with `VArray`
 - [$create(tag, className)](#createtag-classname) creates a HTMLElement
 - [$(selector, root)](#selector-root) like `querySelector()`
@@ -64,7 +64,7 @@ A function that makes a shallow copy of an Object.
 
 ### `isArray: { Array.isArray || function(obj) }`
 
-Polyfill for `Array.isArray()` if browser doesn't support, otherwise eactly this method.
+Polyfill for `Array.isArray()` if browser doesn't support, otherwise exactly this method.
 
 ### `addEvent(element, type, func, cap)`
 
@@ -109,4 +109,3 @@ The function also auto detects `json`, `text` or `xml`.
 ### `Promise(fn, staticData)`
 
 The different `Promise` implementation with the possibility to cancel the Promise calling `Promise.cancel(string)` previously defined.
-

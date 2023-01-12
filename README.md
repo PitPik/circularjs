@@ -5,7 +5,7 @@ or go straight to the [API documentation](documentation/API.md).
 
 # What is CircularJS
 
-I know, yet another MVC/MVVM framework ;)... but
+I know, yet another MVC/MVVM framework... ***but***
 
 ## What we expect from a front-end MVC/MVVM Framework
 
@@ -13,18 +13,18 @@ I know, yet another MVC/MVVM framework ;)... but
 - **Loads/Initialises** as **fast** as possible (mobile / tablet)
 - **Starts/Renders** the app as **fast** as possible
 - **Fast** adding/removing items into/from the view (fast **DOM manipulation**)
-- **Fast changing** items in the view (fast DOM manipulation)
+- **Fast changing** items in the view (also fast DOM manipulation)
 - Make it possible to keep **App/Code** as **small** as possible
 - **Coding/Complexity** as **simple** as possible
-- Keeps a healthy balance between **coding convenience**, **flexibility** and **restrictions/oppinionation**
+- Keeps a healthy balance between **coding convenience**, **flexibility** and **restrictions/opinionation**
 - Quick and **easy to learn**
 
 There are immediately some confrontations with those arguments when creating a MVC/MVVM Framework as it is not easy or possible to **address all of those expectations** at the same level. Usually, when trying to get one of them perfect, some other point suffers from it.
 
-**CircularJS** though does a pretty good job in finding the **perfect ballance** between all of those **expectations**.
+**CircularJS** though does a pretty good job in finding the **perfect balance** between all of those **expectations**.
 It is very small though has **all the features** you would expect from a MVC/MVVM Framework and is **"pluggable"** for all the features you need to add to your project. Your code base can be kept **very small** and it renders **blasting fast** without having to face compromises so it's perfectly suitable for apps on **mobile/tablet/smart TV/PIs** etc.
 
-Understanding how things work and learning the way of working with **CircularJS** is based on **well known technology/patterns** and therefore **"realy" easy to learn**. Most provided APIs that are **CircularJS** specific are done in a way so you get familiar with quite fast as they are based on logic/patterns from **known APIs** (like the DOM API, etc.).
+Understanding how things work and learning the way of working with **CircularJS** is based on **well known technology/patterns** and therefore **"really" easy to learn**. Most provided APIs that are **CircularJS** specific are done in a way so you get familiar with quite fast as they are based on logic/patterns from **known APIs** (like the DOM API, etc.).
 
 ## A minimal example
 
@@ -57,7 +57,9 @@ The above example demonstrates the three core features of **CircularJS**:
 
 - **Reactivity**: CircularJS automatically tracks JavaScript state changes and efficiently updates the DOM when changes happen.
 
-- **CircularJS** doesn't need to be pre-compiled due to it's own smart component loader **amd.js**. Just run your code from within a folder served by your favorite WEB-Server.
+- **CircularJS** doesn't need to be pre-compiled due to it's own smart component loader **amd.js** and because it even uses the browser itself to parse the templates in the rendering engine **Blick**, it is **all native**.
+
+Just run your code from within a folder served by your favourite WEB-Server (pre-installed on your OS). 
 
 You may already have questions - don't worry. We will cover every little detail in the rest of the documentation. For now, please read along so you can have a high-level understanding of what CircularJS offers.
 
@@ -70,7 +72,7 @@ If you know your **JavaScript**, **common patterns** as **Promises**, **ajax**, 
 
 See the complete list of functionality in the [Table of Contents](documentation/TOC.md) linking to all the documentations
 
-In my oppinion, **learning CircularJS in one day** is easily possible. Working with a new pattern system / framework although is always a matter of getting used to, although **CircularJS** tries to keep the logic behind it **as simple as possible**. Also, when coming from the Angular side, you will appreciate the **similarity** to it and learn to work with it in no time at all.
+In my opinion, **learning CircularJS in one day** is easily possible. Working with a new pattern system / framework although is always a matter of getting used to, although **CircularJS** tries to keep the logic behind it **as simple as possible**. Also, when coming from the Angular side, you will appreciate the **similarity** to it and learn to work with it in no time at all.
 
 See **[API documentation](documentation/API.md)** for more information/documentation.
 

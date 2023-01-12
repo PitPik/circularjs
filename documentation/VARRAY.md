@@ -33,13 +33,13 @@ This works like `filter(fn, thisArg)` on normal arrays but can go deeper inside 
 
 ### `getCleanModel(item)`
 
-In case you need to return the model to the server, you can clean it up to a state it was before it got tranformed to `VArray`. The `item` can be a `Array`, `VArray` or just an `Object`.
+In case you need to return the model to the server, you can clean it up to a state it was before it got transformed to `VArray`. The `item` can be a `Array`, `VArray` or just an `Object`.
 
 The reason for cleaning up could also be that you need to "clone" an item from the existing model and re-use it at a different position. This item, before it goes back to the model, needs to be clean though, otherwise **CircularJS** will throw an error.
 
 ### `updateModel(newModel)`
 
-This method walks through the exising `VArray` and changes all the data to values coming from `newModel`. So, `newModel` has to be an array.
+This method walks through the existing `VArray` and changes all the data to values coming from `newModel`. So, `newModel` has to be an array.
 
 ### `getElementById(id, fullId)`
 
@@ -52,4 +52,3 @@ This method is mostly used internally.
 ### `destroy(id)`
 
 This method is mostly used internally.
-

@@ -12,7 +12,7 @@
 
 ### Dynamic variables
 
-The `%` (or `%%`) infront of variables in templates makes them dynamic, or in other words: This part of the template can be changed at any time by just updating the variable.
+The `%` (or `%%`) in front of variables in templates makes them dynamic, or in other words: This part of the template can be changed at any time by just updating the variable.
 
 ```Handlebars
 This is some {{%value}} thing.
@@ -25,7 +25,7 @@ The view only changes when the variable changes. If it should be re-rendered eve
 This is some {{%%value}} thing.
 ```
 
-All those changes can be subscribed to in the component with the `subscribe$: {}` option and there corresponding methods `this$()` described in the main [API documentation](API.md).
+All those changes can be subscribed to in the component with the `subscribe$: {}` option and their corresponding methods `this$()` described in the main [API documentation](API.md).
 
 
 ### HTML attributes
@@ -36,9 +36,9 @@ All those changes can be subscribed to in the component with the `subscribe$: {}
 <div class="my-class {{%class}}{{#if %isOpen}} open{{/if}}">
 ```
 
-This way, when the variable `isOpen` is truethy, the class `open` would be rendered as well. The variable `class` can be rendered without a block notation if it's just a string.
+This way, when the variable `isOpen` is truthy, the class `open` would be rendered as well. The variable `class` can be rendered without a block notation if it's just a string.
 
-Special attributes like `disabled`, `readonly`, `value` etc. need a special treatment as they act in a very specific way in the DOM, especially when updated after the first rendering. To avoid mistakes and make things esaier to work with, **Blick** offers special functions for the following attributes:
+Special attributes like `disabled`, `readonly`, `value` etc. need a special treatment as they act in a very specific way in the DOM, especially when updated after the first rendering. To avoid mistakes and make things easier to work with, **Blick** offers special functions for the following attributes:
 
 - value
 - disabled
@@ -51,9 +51,9 @@ Special attributes like `disabled`, `readonly`, `value` etc. need a special trea
 - selected
 
 Example: `<button disabled="{{#if %disabled}}true{{/if}}">...</button>`.
-If the variable `disabled` would be falsy, the attribute would disapear  all together.
+If the variable `disabled` would be falsey, the attribute would disappear  all together.
 
-Those functions can be overwritten or defined for other attributes globally in the options definition of the **CircularJS** instanciation or with any component definition. For further information see [#Circular.component in API documentation](API.md#circularcomponent).
+Those functions can be overwritten or defined for other attributes globally in the options definition of the **CircularJS** instantiation or with any component definition. For further information see [#Circular.component in API documentation](API.md#circularcomponent).
 
 
 ### The partial `@content`
@@ -81,7 +81,7 @@ As there is no model that is reachable for the developer, this variable can only
 
 #### `@number`
 
-Other than other Handlebars implementations, **Schnauzer** has a `@index` like helper variable but "human readable" ;). Its the index + 1. Good for lists etc.
+Other than other Handlebars implementations, **Schnauzer** has a `@index` like helper variable but "human readable" ;). It's the index + 1. Good for lists etc.
 
 Use dynamically as `{{%@number}}`.
 
@@ -118,17 +118,17 @@ Auto updates when used like `{{%@depth}}`.
 
 ### Scroll-position preserver
 
-When having an `{{#if %foo}}<div> ... </div>{{else}}...{{/if}}` situation in your template and there is a HTMLElement container inside that `<div>`, or the `<div>` itself, that shows a scroll bar then you will usually loose the scroll position when coming back from the `{{else}}` part. To prevent this, you can mark the Element with a `cr-scroll` attribute and it will automatically restore the scroll positions of all containers inside the `{{#if %foo}}` block that contain that attribute. The same is valid for using `circular.hideComponent()` described in [the CIRCULAR documantation](CIRCULAR.md#circularjs-instances).
+When having an `{{#if %foo}}<div> ... </div>{{else}}...{{/if}}` situation in your template and there is a HTMLElement container inside that `<div>`, or the `<div>` itself, that shows a scroll bar then you will usually loose the scroll position when coming back from the `{{else}}` part. To prevent this, you can mark the Element with a `cr-scroll` attribute and it will automatically restore the scroll positions of all containers inside the `{{#if %foo}}` block that contain that attribute. The same is valid for using `circular.hideComponent()` described in [the CIRCULAR documentation](CIRCULAR.md#circularjs-instances).
 
 
 ### Recursive templates
 
-Not special for **Schnauzer** but still worth metioning is the way you can build tables and trees. Build a list is easy as you just need a `{{#each list}}` but rendering a tree needs some recursion.
+Not special for **Schnauzer** but still worth mentioning is the way you can build tables and trees. Build a list is easy as you just need a `{{#each list}}` but rendering a tree needs some recursion.
 
-Lets say we have a variable `this.tree` that represens a tree structure that has `chilren: []` as its branches:
+Lets say we have a variable `this.tree` that represents a tree structure that has `children: []` as its branches:
 
 ```Handlebars
-{{>tree chilren=tree}}
+{{>tree children=tree}}
 
 {{#*template "tree"}}
   <ul>
@@ -142,11 +142,11 @@ Lets say we have a variable `this.tree` that represens a tree structure that has
 {{/template}}
 ```
 
-This would be the simplest implementation of the tree. If you want to avoid `<ul>`s being when there are no children, then just wrap the partials with an `if` like `{{#if %tree}}{{>tree chilren=tree}}{{/if}}` and `{{#if %children}}{{>tree}}{{/if}}`.
+This would be the simplest implementation of the tree. If you want to avoid `<ul>`s being when there are no children, then just wrap the partials with an `if` like `{{#if %tree}}{{>tree children=tree}}{{/if}}` and `{{#if %children}}{{>tree}}{{/if}}`.
 
 Other than in Handlebars you can use the word `template` in  `{{#*template ...}}` or any other word that seems logic to you.
 
-The `chilren=tree` in `{{>tree chilren=tree}}` helps the template/inline-partial to have to deal with one variable only.
+The `children=tree` in `{{>tree children=tree}}` helps the template/inline-partial to have to deal with one variable only.
 
 It also doesn't matter where in the template you define the inline-partial. The only limitation: inline-partials don't work (yet) when defined inside the component tags ([as described above](#content))
 
@@ -154,7 +154,7 @@ It also doesn't matter where in the template you define the inline-partial. The 
 
 Also not special for **Schnauzer** but good to know: Helper functions can do a lot for you and can also have dynamic variables included. Think of **dynamic Routes** or `<img>` tags that should actually wrapped with `<picture>` tags. Helpers can do all the heavy lifting for you in a blink.
 
-Think of Angulars' `rawSrc="https://my.domain/300/300"`
+Think of Angular's `rawSrc="https://my.domain/300/300"`
 
 ```Handlebars
 <img src="{{picture 'https://my.domain/300/300'}}">
