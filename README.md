@@ -31,7 +31,7 @@ Understanding how things work and learning the way of working with **CircularJS*
 
 If you know your **JavaScript**, **common patterns** as **Promises**, **ajax**, **PubSub**, **Array methods**, **Handlebars**, **AMD** ... then you cover 70% of the API already, if you ever worked with Angular, it's probably about **90%**. So, **not much new to learn**.
 
-See the complete list of functionality in the [Table of Contetnts](documentation/TOC.md) linking to all the documentations
+See the complete list of functionality in the [Table of Contents](documentation/TOC.md) linking to all the documentations
 
 In my oppinion, **learning CircularJS in one day** is easily possible. Working with a new pattern system / framework although is always a matter of getting used to, although **CircularJS** tries to keep the logic behind it **as simple as possible**. Also, when coming from the Angular side, you will appreciate the **similarity** to it and learn to work with it in no time at all.
 
