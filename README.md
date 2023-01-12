@@ -31,18 +31,7 @@ Understanding how things work and learning the way of working with **CircularJS*
 
 If you know your **JavaScript**, **common patterns** as **Promises**, **ajax**, **PubSub**, **Array methods**, **Handlebars**, **AMD** ... then you cover 70% of the API already, if you ever worked with Angular, it's probably about **90%**. So, **not much new to learn**.
 
-- **Schnauzer** templating (Schnauzer is a JS implementation of the **Handlebars** standard)
-- **Promise** standard (with cancel functionality)
-- **PubSub** standard (with "before subscription" data)
-- General standard **Router** functionality
-- **Ajax** with cancel (as it uses Promise as described above)
-- **15 methods** on circular (most of them for PubSub and Routing, the rest for dealing with components)
-- **5 simple static methods** on Circular (mostly only 1 is needed, like Decorators "Component" known from Angular)
-- **8 additional methods** on model arrays
-- **5 CircularJS specific attributes** on DOM elements (for event handling, lazy loading, etc.)
-- **7 pre-defined methods** in/for components (life-cycle methods like onInit, onDestroy, onChanges, etc.)
-- **AMD** Module loader
-- Some **configurations** if needed at all (options, amd, etc.)
+See the complete list of functionality in the [Table of Contetnts](documentation/TOC.md) linking to all the documentations
 
 In my oppinion, **learning CircularJS in one day** is easily possible. Working with a new pattern system / framework although is always a matter of getting used to, although **CircularJS** tries to keep the logic behind it **as simple as possible**. Also, when coming from the Angular side, you will appreciate the **similarity** to it and learn to work with it in no time at all.
 
