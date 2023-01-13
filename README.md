@@ -45,6 +45,9 @@ class myApp {
 
 ```
 
+The `app.html`
+
+
 ```Handlebars
 <button cr-event="click">
   Count is: {{%count}}
