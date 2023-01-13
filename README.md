@@ -26,6 +26,8 @@ It is very small though has **all the features** you would expect from a MVC/MVV
 
 Understanding how things work and learning the way of working with **CircularJS** is based on **well known technology/patterns** and therefore **"really" easy to learn**. Most provided APIs that are **CircularJS** specific are done in a way so you get familiar with quite fast as they are based on logic/patterns from **known APIs** (like the DOM API, etc.).
 
+Maybe the biggest difference to most of the other MVC frameworks (let's call them like this...) is that **CircularJS** doesn't need any pre-compilation. It's all native and therefore runs from your folder you create your app in. The atvantage is that you don't need to learn a lot of framework specific things as it's all native. Even the templates actually render in a browser what **CircularJS** also uses to make the browser's API help rendering them as fast as possible. It lets the browser do the heavy lifting as it's always faster than written code. You may ofcourse use TypeScript or LESS or SCSS that needs to be pre-compiled, but... you don't need to. **CircularJS** components could even be used inside other frameworks like Angular etc.
+
 ## A minimal example
 
 ```js
