@@ -43,7 +43,7 @@
   - [myModel$](API.md#myModelproperty-item-value-oldValue)
   - [myModel$Move](API.md#myModelMoveaction-key-item-model-previousModel)
   - [myModel$PR](API.md#myModelPRitem-parent-root)
-- [Circular.Module](API.md#circularmodule)
+- [Circular.App](API.md#circularapp)
 - [Circular.Plugin](API.md#circularplugin)
 - [Circular.Service](API.md#circularservice)
 - [Circular.Toolbox](API.md#circulartoolbox)

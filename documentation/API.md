@@ -8,7 +8,7 @@ require(['circular'], ({ Component }) =>
 Component({
   selector: 'my-app',
   template: '{{text}}',
-  // initialize: true, // only for main app
+  // initialize: true, // only for main app; or use App() instead.
 },
 class MyApp {
   constructor() {
@@ -18,6 +18,8 @@ class MyApp {
 ```
 
 To start an app **automatically** place `<my-app></my-app>` in your `index.html` file and set the option `initialize: true`. All other components **don't need this option** and can be initialized by just **placing the HTML tag** like `<my-component></my-component>` inside this/other template/s.
+
+Alternatively you could use `App()` instead of `Component()`. The property `initialize` will be set automatically and if `selector` is not set, it defaults to `app`.
 
 `template` and `styles` can also be imported via **`AMD`**, just like any resource/dependency needed for the component like other components, services, helpers, partials, etc.:
 
@@ -46,7 +48,7 @@ The rest of the app is then defined inside the `class` definition. The example a
 - [Circular attributes](#circular-attributes)
 - [Live-cycle methods](#methods-inside-components)
 - [Circular attributes](#the-six-circular-attributes)
-- [Circular.Module](#circularmodule)
+- [Circular.App](#circularapp)
 - [Circular.Plugin](#circularplugin)
 - [Circular.Service](#circularservice)
 - [Circular.Toolbox](#circulartoolbox)
@@ -394,11 +396,9 @@ This method gets called right before it transforms into a `VArray` view model, g
 - `root: VArray` the root the view model. If thinking of a more dimensional Array with child nodes like in a table or a tree, this would be the initial Array.
 
 
-### Circular.Module
+### Circular.App
 
-This is not clear yet what it should be (in the future...).
-
-It currently acts like a `Component({ initialize: true })` but it could change in the future for something more useful.
+It currently acts like a `Component({ initialize: true })`. When no selector is defined, it defaults to 'app'
 
 ### Circular.Plugin
 

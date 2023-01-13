@@ -1,14 +1,13 @@
 // Full spec-compliant TodoMVC with localStorage persistence
 // and hash-based routing in ~75 effective lines of JavaScript.
-require(['circular'], ({ Component, Toolbox: { storageHelper: storage, lazy } }) => {
+require(['circular'], ({ App, Toolbox: { storageHelper: storage, lazy } }) => {
 
 const ENTER_KEY = 13;
 const ESCAPE_KEY = 27;
 const STORAGE_KEY = 'todos-circularjs-2.0.0';
 
-Component({
+App({
   selector: 'todo-app',
-  initialize: true,
   template: '{{>@content}}',
   subscribe$: { 'list:': [] },
 },

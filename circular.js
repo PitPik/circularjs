@@ -105,7 +105,8 @@ Object.defineProperties(Circular.prototype, mixinAPI({
 
 return Object.defineProperties(Circular, {
   Service: { value: function(defData, Klass) { /* TODO: brand new thought */ }},
-  Module: { value: function(defData, Klass) {
+  App: { value: function(defData, Klass) {
+    if (!defData.selector) defData.selector = 'app';
     defData.initialize = true;
     return Circular.Component(defData, Klass);
   }},

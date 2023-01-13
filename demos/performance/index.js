@@ -1,8 +1,7 @@
-require(['circular'], ({ Component }) =>
+require(['circular'], ({ App }) =>
 
-Component({
+App({
   selector: 'app',
-  initialize: true,
   template: '{{>@content}}',
   subscribe$: { this: ['levelRaster', 'levelSpeed'], 'model:childNodes': [] }
 },

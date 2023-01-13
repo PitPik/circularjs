@@ -1,9 +1,8 @@
 require(['circular', 'game-controller', 'game-service'],
-({ Component }, gameCtrl, gameSrv) =>
+({ App }, gameCtrl, gameSrv) =>
 
-Component({
+App({
   selector: 'minesweeper',
-  initialize: true,
   template: '{{>@content}}',
   subscribe$: { this: ['won'], 'board:arr': [] },
 },

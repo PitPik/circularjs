@@ -1,6 +1,6 @@
-require(['circular', 'replacer'], ({ Module, Toolbox: { $ } }, replacer) =>
+require(['circular', 'replacer'], ({ App, Toolbox: { $ } }, replacer) =>
 
-Module({
+App({
   selector: 'demo-nav',
   template: '{{>@content}}',
   subscribe$: { this: ['state'], 'menu': [] },
