@@ -91,6 +91,10 @@ The intention to build **CircularJS** was to create something **small and fast**
 Using **CircularJS** is quite easy and straight forward but it provides a lot of power to create strong UIs.
 It is **closer to JavaScript** and therefore **easier to learn** and understand. The fact that is uses **plain HTML** files as templates and CSS files for styling makes it even more convenient to get started as those disciplines are known already. This way you can even split effort of design and programming in a project (HTML/CSS part and the JavaScript part).
 
+As mentioned above, **CircularJS** works in a **native** way, so it doesn't need any pre-compiling and doesn't have any specific APIs for templating or coding. This makes things internally as well as for developers way easier. Less APIs to learn (all native JS, HTML, CSS), less effort/problems packaging and deploying...
+
+This may sound like a compromise to speed as SSR might be faster. It isn't though as **Schnauzer** parses so fast that you won't recognice a difference, and parsing would be the only reason for SSR. In fact, it parses as fast as it renders, so if you have a list of 100 items being rendered it then has the speed of 101 times being rendered... and we're talking about nano seconds here. The fact that **Schnauzer** is also "tiny" compared to other frameworks it will be ahead for "first time rendering" anyhow. Even complex apps won't flicker when refreshing the browser.
+
 ## CircularJS API
 
 See [API documentation](documentation/API.md) for more information/documentation or see the [Table of contents of all API features](documentation/TOC.md) to get an idea of all the features CircularJS offers.
