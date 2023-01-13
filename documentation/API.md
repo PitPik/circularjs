@@ -53,6 +53,7 @@ The rest of the app is then defined inside the `class` definition. The example a
 - [Circular.Service](#circularservice)
 - [Circular.Toolbox](#circulartoolbox)
 - [Circular.CreateInstance](#circularcreateinstance)
+- [Extending a Component](#extending-a-component)
 
 ### Circular.Component
 
@@ -437,3 +438,38 @@ where `name` would be the name of the instance (just for debugging), `options` a
 ```
 
 The `debug` options not only defines the level of feedback you get in the console but also leaves the `cr-xyz` attributes (like `cr-event` etc.) on all HTML Elements and all the `cr-id` that are visible on all view elements to be able to compare to the view model.
+
+### Extending a Component
+
+Importing a component via `require()` of `define()` is not only meant for using this component in your template but also for extending an existing component.
+
+The imported component has the following definition:
+
+```js
+{
+  Klass: class SomeClass;
+  styles: HTMLStyleElement;
+  selector: string;
+  subscribe$: { [key: string]: string[] };
+  template: { blick: Blick, ... };
+  // ... some more properties you won't need
+}
+```
+
+> As this is actually a "private" Object, don't mess around with it, just read from it.
+
+This way you can extend from `Klass` and create a new component.
+
+```js
+require(['circular', 'cmpnt'], ({ Component }, cmpnt) =>
+
+Component({
+  selector: cmpnt.selector + '-ext',
+  template: 'some new template {{bar}}',
+  subscribe$: { foo: ['bar'], ...cmpnt.subscribe$ },
+},
+class ExtComponent extends cmpnt.Klass {
+  super();
+  // ...
+}));
+```
