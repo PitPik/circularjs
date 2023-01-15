@@ -106,12 +106,14 @@ return (function(Schnauzer, cloneObject) { /* class Blick extends Schnauzer */
     }
   };
   var renderHTML = function(_this, data, extra, elms) {
+    var fragment = _this.returnFragment.childNodes.length ?
+      document.createDocumentFragment() : _this.returnFragment;
     _this.controls.active = false; // TODO: check...
     elms = resolveReferences(
       _this, _this.dataDump, saveWrapHtml(_this.render(data, extra), true)
     ).childNodes;
-    while (elms.length) _this.returnFragment.appendChild(elms[0]);
-    return _this.returnFragment;
+    while (elms.length) fragment.appendChild(elms[0]);
+    return fragment;
   };
 
   (function(ExtKlass, Klass) { // extend

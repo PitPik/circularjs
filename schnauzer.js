@@ -296,7 +296,7 @@ function renderPartial(_this, data, model, tagData) {
   var name = tagData.partial.orig || newData && (helperValue || newData[0].value) || '';
   var isTemplate = name === '@partial-block';
   var isBlock = !isTemplate && name.charAt(0) === '@';
-  var partial = _this.partials[isBlock ? name.substring(1) : name];
+  var partial = _this.partials[isBlock ? name.substring(1) : name] || (model.extra && model.extra[name]);
   var scope = data[0] && !data[0].variable.name ? data[0].value : model.scopes[0].scope;
   var reset = addScope(model, scope, model.scopes[0].alias);
 

@@ -174,6 +174,7 @@ function initComponent(element, component, defData, plugData, parent, onLoad) {
   var content = Toolbox.trim(element.innerHTML);
   var name = crInst.id + ':' + ID;
   var blickOptions = component.template.blick.options;
+  var partials = component.template.blick.partials;
 
   if (isExisting || (component.singleton && !plugData)) return getInstanceData(elmId);
 
@@ -183,7 +184,12 @@ function initComponent(element, component, defData, plugData, parent, onLoad) {
     inst.crInst.options.debug && element.setAttribute('cr-id', name);
   }
 
-  if (content) element.innerHTML = addComponentPartial(template, content, blickOptions);
+  if (content) {
+    element.innerHTML = addComponentPartial(template, content, blickOptions);
+    if (!defData.extra) defData.extra = Object.create(null); // new ...
+    defData.extra['@content'] = partials['@content'];
+    partials['@content'] = null;
+  }
   inst.name = defData.selector;
   inst.controller = new Controller(element);
   if (parent) {
@@ -247,18 +253,25 @@ function renderComponent(inst, extra) {
 }
 
 function initInnerComponents(inst, element, selector, onLoad) {
-  var query = inst.template.childQuery || [];
-  var children = inst.template.childComponents;
+  var template = inst.template;
+  var query = template.childQuery || [];
+  var children = template.childComponents;
   var isLazy = false, newInst, resource = '';
+  var elms = [], name = '', n = 0, l = 0;
+  var hasContent = template.blick.partials['@content'] === null;
 
   if (!selector && (!children.length || !element.firstElementChild)) return;
   if (typeof query !== 'string') {
     for (var n = children.length; n--; ) query.push(children[n]);
-    inst.template.childQuery = query.join(',');
+    template.childQuery = query.join(',');
   }
 
-  for (var elms = $$(selector || inst.template.childQuery, element), name = '', n = 0, l = elms.length; n < l; n++) {
-    if (elms[n]['cr-id']) continue;
+  elms = [].slice.call($$(selector || template.childQuery, element));
+  if (hasContent) for (n = elms.length; n--; ) { // this sucks... but well...
+    if (elms[n]['cr-id'] || (elms[n - 1] && elms[n - 1].contains(elms[n]))) elms.splice(n, 1);
+  }
+
+  for (n = 0, l = elms.length; n < l; n++) {
     if (inst.instance.onBeforeChildInit) inst.instance.onBeforeChildInit(elms[n]);
     name = elms[n].tagName.toLowerCase();
     isLazy = elms[n].hasAttribute('cr-lazy');
@@ -546,8 +559,6 @@ function processTemplate(template, blickOptions, skipBlick) {
     childComponents: keys(childComponents),
     enableEvents: /\s+cr-event/.test(template) ||
       checkPartial(blickOptions.partials, partialKeys, /\s+cr-event/),
-    enableViews: /\s+cr-view/.test(template) ||
-      checkPartial(blickOptions.partials, partialKeys, /\s+cr-view/),
   };
 }
 
@@ -557,16 +568,16 @@ function checkPartial(partials, keys, regex) { // TODO: check ... geen zin in
 }
 
 function addComponentPartial(template, content, blickOptions) {
-  var partial = processTemplate(content, blickOptions, true);
+  var text = content.replace(/cr-src/g, 'src');
+  var partial = processTemplate(text, blickOptions, true);
   var childComponents = template.childComponents; // is []
-
+// console.log(content)
   template.enableEvents = template.enableEvents || partial.enableEvents;
-  template.enableViews = template.enableViews || partial.enableViews;
   for (var n = partial.childComponents.length; n--; ) {
     if (childComponents.indexOf(partial.childComponents[n]) !== -1) continue;
     childComponents.push(partial.childComponents[n]);
   }
-  template.blick.registerPartial('@content', content);
+  template.blick.registerPartial('@content', text);
   return '';
 }
 
