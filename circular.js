@@ -292,9 +292,9 @@ function initInnerComponents(inst, element, selector, onLoad) {
   }
 }
 
-function setSubscribers(listeners, scope, destroyers, name, key) {
+function setSubscribers(listeners, scope, destroyers, name, key, value) {
   if (!listeners[key]) listeners[key] = {};
-  listeners[key][name] = scope;
+  listeners[key][name] = { scope: scope, key: value };
   destroyers.push(function() { delete listeners[key][name] });
 }
 
@@ -317,7 +317,7 @@ function initInstance(component, inst, plugData, name) {
         if (value !== undefined) scope[item[0]] = value;
         else if (hasOwnProperty.call(parent.instance, key)) {
           scope[item[0]] = parent.instance[key];
-          if (doSubscribe) setSubscribers(parent.listeners, scope, inst.destroyers, name, key);
+          if (doSubscribe) setSubscribers(parent.listeners, scope, inst.destroyers, name, key, item[0]);
         }
       }
     });
@@ -361,7 +361,7 @@ function getVArrayModel(name, component, inst, childNodes) {
     },
     promoter: {
       interseptor: inst[name$PR] && inst[name$PR].bind(inst),
-      onChange: function move(vArrData) {
+      onChange: function(vArrData) {
         if (vArrData.action === 'change') vSubscribe(data, vArrData);
         else vMoveCallback(vArrData.action, vArrData.item, vArrData.parent,
           vArrData.previousParent, vArrData.index, !vArrData.last, data);
@@ -383,7 +383,7 @@ function vSubscribe(data, vData) {
   if (inst[name$]) inst[name$](vData.key, vData.item, vData.value, vData.oldValue);
 
   inst = instances[ids[0]][ids[1]].listeners[vData.key];
-  if (inst) for (key in inst) inst[key][vData.key] = vData.value;
+  if (inst) for (key in inst) inst[key].scope[inst[key].key || vData.key] = vData.value;
 }
 
 function vMoveCallback(action, item, parent, previousParent, index, skipFix, data) {
@@ -571,7 +571,7 @@ function addComponentPartial(template, content, blickOptions) {
   var text = content.replace(/cr-src/g, 'src');
   var partial = processTemplate(text, blickOptions, true);
   var childComponents = template.childComponents; // is []
-// console.log(content)
+
   template.enableEvents = template.enableEvents || partial.enableEvents;
   for (var n = partial.childComponents.length; n--; ) {
     if (childComponents.indexOf(partial.childComponents[n]) !== -1) continue;
