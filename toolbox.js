@@ -103,18 +103,26 @@ var Toolbox = {
   },
 
   storageHelper: {
-    fetch: function (key) {
+    fetch: function (key, inObj) {
       var data = localStorage.getItem(key);
-      return data ? JSON.parse(data) : data;
+      var parsed = data ? JSON.parse(data) : data;
+
+      return inObj && data ? parsed[inObj] : parsed;
     },
     saveLazy: function (data, key, obj) {
       Toolbox.lazy(function() {
         Toolbox.storageHelper.save(data, key);
       }, obj || Toolbox.storageHelper);
     },
-    save: function (data, key) {
+    save: function (data, key, inObj) {
+      var obj;
+
       if (data === null) return localStorage.removeItem(key);
-      localStorage.setItem(key, JSON.stringify(data));
+      if (inObj) {
+        obj = Toolbox.storageHelper.fetch(key) || {};
+        obj[inObj] = data;
+        localStorage.setItem(key, JSON.stringify(obj));
+      } else localStorage.setItem(key, JSON.stringify(data));
     }
   },
   lazy: function(fn, obj, pref) {

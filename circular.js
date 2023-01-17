@@ -40,11 +40,12 @@ var initCircular = function(_this, name, options) {
 }
 
 Object.defineProperties(Circular.prototype, mixinAPI({
-  createComponent: { value: function(selector, attrs, component, node) {
+  createComponent: { value: function(selector, attrs, component, node, html) {
     var inst = getInstanceData(component['__cr-id']);
     var elm = document.createElement(selector);
 
     for (var attr in attrs) elm.setAttribute(attr, attrs[attr]);
+    if (html) elm.innerHTML = html;
     (node || inst.element).appendChild(elm); // TODO: maybe offer insertBefore...
     initInnerComponents(inst, node || inst.element, selector, true);
     return elm;
@@ -307,17 +308,19 @@ function initInstance(component, inst, plugData, name) {
     getAttrMap(inst.element, 'cr-input', function(type, value, element) {
       var item = value.split(/\s*=\s*/);
       var isString = item[1] && (item[1].indexOf('"') === 0 || item[1].indexOf("'") === 0);
-      var value = item[1];
+      var oneWay = item[1] && item[1].charAt(0) === '!';
+      var value = oneWay ? item[1].substring(1) : item[1];
       var key = value || item[0];
 
       value = isString ? value.substring(1, value.length - 1) : value === 'true' ? true : 
-        value === 'false' ? false : +value == value ? +value : undefined;
+        value === 'false' ? false : +value == value ? +value : undefined; // value ??
 
       if (hasOwnProperty.call(scope, item[0])) {
         if (value !== undefined) scope[item[0]] = value;
         else if (hasOwnProperty.call(parent.instance, key)) {
           scope[item[0]] = parent.instance[key];
-          if (doSubscribe) setSubscribers(parent.listeners, scope, inst.destroyers, name, key, item[0]);
+          if (doSubscribe && !isString && !oneWay)
+            setSubscribers(parent.listeners, scope, inst.destroyers, name, key, item[0]);
         }
       }
     });
@@ -557,8 +560,9 @@ function processTemplate(template, blickOptions, skipBlick) {
     // TODO: also check imported partials the same way...
     // childComponents: hasPartials ? componentKeys : keys(childComponents),
     childComponents: keys(childComponents),
-    enableEvents: /\s+cr-event/.test(template) ||
-      checkPartial(blickOptions.partials, partialKeys, /\s+cr-event/),
+    // enableEvents: /\s+cr-event/.test(template) ||
+    //   checkPartial(blickOptions.partials, partialKeys, /\s+cr-event/),
+    enableEvents: true, // TODO: fix dynamic @content
   };
 }
 
