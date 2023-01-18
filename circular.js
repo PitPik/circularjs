@@ -63,10 +63,10 @@ Object.defineProperties(Circular.prototype, mixinAPI({
     elm.parentNode.removeChild(elm);
 
     return function recover(newParent) {
-      if (newParent && elm._tracker) {
+      if (newParent && elm._tracker && newParent !== elm._tracker.parentNode) {
         elm._tracker.parentNode.removeChild(elm._tracker);
         delete elm._tracker;
-      }
+      } else newParent = undefined;
       newParent ? newParent.appendChild(elm) : // TODO: maybe offer insertBefore...
         start.parentNode.insertBefore(elm, elm._tracker);
       Blick.setScroll(false, elm.__scrollers, 0);
