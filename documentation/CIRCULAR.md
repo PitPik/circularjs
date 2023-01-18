@@ -8,10 +8,10 @@ require(['circular'], ({ Component, circular }) => {});
 
 The instance offers quite some useful methods to manage your apps.
 
-- [createComponent(selector, attrs, component, node)](#createcomponentselector-attrs-component-node) dynamically create components on the fly
+- [createComponent(selector, attrs, component, node, html)](#createcomponentselector-attrs-component-node-html) dynamically create components on the fly
+- [hideComponent(elm)](#hidecomponentelm) removes the component from the DOM and returns a recover function
 - [getChildComponents(inst)](#getchildcomponentsinst) returns all children currently rendered within the component
 - [getParentComponent(inst)](#getparentcomponentinst) returns the parent of itself
-- [hideComponent(elm)](#hidecomponentelm) removes the component from the DOM and returns a recover function
 - [destroyComponent(elm, remove)](#destroycomponentelm-remove) removes a component
 
 - [triggerEvent(type, data, params)](#triggereventtype-data-params) triggers custom events
@@ -25,11 +25,24 @@ The instance offers quite some useful methods to manage your apps.
 - [toggleRoute(data, isOn)](#toggleroutedata-ison) toggles routes
 
 
-### `createComponent(selector, attrs, component, node?)`
+### `createComponent(selector, attrs, parent, node?, c?)`
 
 This method can create a component on the fly and appends it to your view. It is then treated as if it was part of your template. It creates a HTMLElement defined by `selector` and adds attributes to it defined by `attrs` (also good for the `cr-lazy` attribute in case your component hasn't already imported this component).
 
-The argument `component` will always be `this` to define its parent and `node` is optional if the new created component should be appended at a different HTMLElement than the parent itself.
+The argument `parent` will always be `this` to define its parent and `node` is optional if the new created component should be appended at a different HTMLElement than the parent itself.
+
+`parent` defines the innerHTML of the tag created with `selector` that will then define the `@content` partial that can be used inside the newly created component. This is one of the key features for dynamic component creation.
+
+
+### `hideComponent(elm)`
+
+This method takes the component defined by the argument `elm` (a HTMLElement) out of the DOM, but remembers where to put it back.
+
+The method returns a `recover(newParent)` function that, when called without arguments, puts the component back to where it was. When `newParent` is set, it will append the component to that new parent.
+
+Additionally, it takes care of inner HTMLElements with the attribute `cr-scroll` that the scroll position will be recovered as well.
+
+If the component has the methods `onLoad()` defined, it will also get triggered.
 
 
 ### `getChildComponents(inst)`
@@ -47,16 +60,6 @@ This method takes `this` as the only argument and return an Array filled with al
 ### `getParentComponent(inst)`
 
 Same as `getChildComponents(inst)` but the other way around, getting the parent component. The method returns just an Object, not an Array. The Object looks just like the one described above in `getChildComponents(inst)`.
-
-### `hideComponent(elm)`
-
-This method takes the component defined by the argument `elm` (a HTMLElement) out of the DOM, but remembers where to put it back.
-
-The method returns a `recover()` function that, when called (without arguments), puts the component back to where it was.
-
-Additionally, it takes care of inner HTMLElements with the attribute `cr-scroll` that the scroll position will be recovered as well.
-
-If the component has the methods `onLoad()` defined, it will also get triggered.
 
 ### `destroyComponent(elm, remove?)`
 

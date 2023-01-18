@@ -79,10 +79,10 @@
 
 ### Inside [CIRCULAR.md](CIRCULAR.md)
 
-- [createComponent](CIRCULAR.md#createcomponentselector-attrs-component-node)
+- [createComponent](CIRCULAR.md#createcomponentselector-attrs-component-node-html)
+- [hideComponent](CIRCULAR.md#hidecomponentelm)
 - [getChildComponents](CIRCULAR.md#getchildcomponentsinst)
 - [getParentComponent](CIRCULAR.md#getparentcomponentinst)
-- [hideComponent](CIRCULAR.md#hidecomponentelm)
 - [destroyComponent](CIRCULAR.md#destroycomponentelm-remove)
 - [triggerEvent](CIRCULAR.md#triggereventtype-data-params)
 - [installEvent](CIRCULAR.md#installeventelement-type-func-cap)

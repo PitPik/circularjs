@@ -40,8 +40,8 @@ var initCircular = function(_this, name, options) {
 }
 
 Object.defineProperties(Circular.prototype, mixinAPI({
-  createComponent: { value: function(selector, attrs, component, node, html) {
-    var inst = getInstanceData(component['__cr-id']);
+  createComponent: { value: function(selector, attrs, parent, node, html) {
+    var inst = getInstanceData(parent['__cr-id']);
     var elm = document.createElement(selector);
 
     for (var attr in attrs) elm.setAttribute(attr, attrs[attr]);
@@ -50,12 +50,30 @@ Object.defineProperties(Circular.prototype, mixinAPI({
     initInnerComponents(inst, node || inst.element, selector, true);
     return elm;
   }},
-  // initComponents: { value: function(selector, component, fragment) { // TODO: why would we need this??
-  //   var inst = getInstanceData(component['__cr-id']);
-  //   var container = fragment || inst.element;
+  hideComponent: { value: function(elm) {
+    var start = elm && elm._tracker || document.createTextNode('');
+    var inst = elm && getInstanceData(elm['cr-id']);
 
-  //   return initInnerComponents(inst, fragment, selector);
-  // }},
+    if (elm) elm.__scrollers = elm.__scrollers ?
+      Blick.setScroll(true, elm.__scrollers, 0) :
+      Blick.setScroll(true, { scrollers: [] }, 0, elm);
+
+    if (!elm || !elm.parentNode) return;
+    if (!elm._tracker) elm._tracker = elm.parentNode.insertBefore(start, elm);
+    elm.parentNode.removeChild(elm);
+
+    return function recover(newParent) {
+      if (newParent && elm._tracker) {
+        elm._tracker.parentNode.removeChild(elm._tracker);
+        delete elm._tracker;
+      }
+      newParent ? newParent.appendChild(elm) : // TODO: maybe offer insertBefore...
+        start.parentNode.insertBefore(elm, elm._tracker);
+      Blick.setScroll(false, elm.__scrollers, 0);
+      if (inst.instance.onLoad) inst.instance.onLoad(elm, inst.crInst);
+      return elm;
+    }
+  }},
   getChildComponents: { value: function(inst) { // do we ever need this?
     var parts = inst['__cr-id'].split(':');
     var children = instances[parts[0]][parts[1]].children;
@@ -71,37 +89,12 @@ Object.defineProperties(Circular.prototype, mixinAPI({
     // TODO: use getInstanceData(id)
     return getComponent(this, instances[this.id][inst['__cr-id'].split(':')[1]].parent.split(':')[1]);
   }},
-  hideComponent: { value: function(elm) {
-    var start = elm && elm._tracker || document.createTextNode('');
-    var inst = elm && getInstanceData(elm['cr-id']);
-
-    if (elm) elm.__scrollers = elm.__scrollers ?
-      Blick.setScroll(true, elm.__scrollers, 0) :
-      Blick.setScroll(true, { scrollers: [] }, 0, elm);
-
-    if (!elm || !elm.parentNode) return;
-    if (!elm._tracker) elm._tracker = elm.parentNode.insertBefore(start, elm);
-    elm.parentNode.removeChild(elm);
-
-    return function recover() {
-      start.parentNode.insertBefore(elm, elm._tracker);
-      Blick.setScroll(false, elm.__scrollers, 0);
-      if (inst.instance.onLoad) inst.instance.onLoad(elm, inst.crInst);
-      return elm;
-    }
-  }},
   destroyComponent: { value: function(elm, remove) { // TODO: elm as selector??
     if (elm) {
       destroyComponent(elm['cr-id'], getInstanceData(getInstanceData(elm['cr-id']).parent));
       if (remove) elm.parentNode.removeChild(elm);
     }
   }},
-  // destroy: { value: function() {
-  //   var insts = instances[this.id];
-  //   // TODO: this.destroyComponents() doesn't exist any more in api.js
-  //   this.destroyComponents(keys(insts).map(function(key) { return insts[key].instance; }));
-  //  }},
-  // getAttributeData: { value: getAttrMap },
 }, Circular));
 
 return Object.defineProperties(Circular, {
