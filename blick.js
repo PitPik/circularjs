@@ -355,7 +355,7 @@ function renderHook(_this, out, data, bodyFn, tagData, track, getData) {
 
 // ------------- registerProperties ----------------
 
-function getPropertyUpdateFn(item, data, udateFn, loopLimitsName) {
+function getPropertyUpdateFn(item, data, udateFn, loopLimitsName, comp) {
   var parentHelperFn = item.parentHelper && item.parentHelper.variable.renderFn;
   var isArray = data[0] && data[0].type === 'array';
   var isScroll = data[0] && data[0].scrollers;
@@ -367,7 +367,7 @@ function getPropertyUpdateFn(item, data, udateFn, loopLimitsName) {
 
     item.value = value;
     if (parentHelperFn) data[0].value = parentHelperFn(item.parentHelper.renderArgs);
-    udateFn(data, item.loop, stop || loopLimits && (!isArray || value.length !== 0), isScroll);
+    udateFn(data, item.loop, stop || loopLimits && (!isArray || value.length !== 0), isScroll, comp);
   };
 }
 
@@ -412,7 +412,7 @@ function registerProperties(_this, udateFn, collector, data, items, children) {
   for (var n = items.length, item = {}, variable = '', parentId = '', propFn, loop = '', updaters; n--; ) {
     item = items[n];
     variable = item.key || item.variable.value;
-    propFn = getPropertyUpdateFn(item, data, udateFn, _this.options.loopLimitsName);
+    propFn = getPropertyUpdateFn(item, data, udateFn, _this.options.loopLimitsName, _this.cr_component);
     loop = item.loop && item.loop.this['cr-id'];
     parentId = item.parent['cr-id'] || item.loop.this['cr-id'] ||
       item.loop['@parent']['cr-id'] || item.parent.this['cr-id'];
@@ -741,7 +741,7 @@ function replaceBlock(_this, firstNode, lastNode, bodyFn, track, out, dataDump, 
     if (!wasEverRendered[currentFnIdx]) _this.controls.active = false;
   };
 
-  return function updateBlock(data, helpers, stopRender, isScroll) { // TODO: check helpers for siblings
+  return function updateBlock(data, helpers, stopRender, isScroll, comp) { // TODO: check helpers for siblings
     var dummy = isScroll ? setScroll(true, data[0], fnIdx) : undefined; // before bodyFn()
     var arrData = data[0].value && data[0].value.length; // null
     var body = bodyFn(data, helpers, stopRender); // track.checkFn() gets triggered here...
@@ -750,6 +750,7 @@ function replaceBlock(_this, firstNode, lastNode, bodyFn, track, out, dataDump, 
     var wasNotRendered = !wasEverRendered[track.fnIdx];
     var wasElse = fnIdx > track.fnIdx && isEach && wasEverRendered[track.fnIdx] === undefined;
 
+    _this.cr_component = comp; // TODO: ...
     if (fnIdx !== track.fnIdx || !body) { // TODO: check || !body ... good for existing data (faster)
       while ((node = firstNode.nextSibling) && node !== lastNode) trackDF[fnIdx].appendChild(node);
     }
