@@ -1,4 +1,4 @@
-/**! @license toolbox v1.0.0; Copyright (C) 2023 by Peter Dematté */
+/**! @license toolbox v1.0.1; Copyright (C) 2023 by Peter Dematté */
 define([], function() {
   'use strict';
 

@@ -1,4 +1,4 @@
-/**! @license CircularJS ● v2.0.0; Copyright (C) 2017-2023 by Peter Dematté */
+/**! @license CircularJS ● v2.0.1; Copyright (C) 2017-2023 by Peter Dematté */
 define(['toolbox', 'blick', 'VArray', 'api', 'controller'],
 function(Toolbox, Blick, VArray, mixinAPI, Controller) { 'use strict';
 
@@ -15,7 +15,7 @@ var extend = Toolbox.cloneObject;
 
 var Circular = function Circular(name, options) {
   this.controls = { initPartials: false };
-  this.version = '2.0.0';
+  this.version = '2.0.1';
   this.id = 0;
   this.name = '';
   this.options = {

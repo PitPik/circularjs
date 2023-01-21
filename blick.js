@@ -1,4 +1,4 @@
-/**! @license blick v1.0.0; Copyright (C) 2018-2023 by Peter Dematté */
+/**! @license blick v1.0.1; Copyright (C) 2018-2023 by Peter Dematté */
 (function(global, factory) {
   if (typeof exports === 'object' && typeof module === 'object')
     module.exports = factory(global, require('schnauzer'));
@@ -68,7 +68,7 @@ return (function(Schnauzer, cloneObject) { /* class Blick extends Schnauzer */
         selected: setAttribute,
       }
     });
-    this.version = { blick: '1.0.0', schnauzer: this.version };
+    this.version = { blick: '1.0.1', schnauzer: this.version };
     this.collector = { destroyers: {}, updaters: {}, movers: {}, helpers: {} };
     this.returnFragment = document.createDocumentFragment();
     this.dataDump = [];

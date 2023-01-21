@@ -1,4 +1,4 @@
-/**! @license VArray v0.0.1; Copyright (C) 2023 by Peter Dematté */
+/**! @license VArray v0.0.2; Copyright (C) 2023 by Peter Dematté */
 (function (root, factory) {
   if (typeof exports === 'object' && typeof module === 'object') module.exports = factory();
   else if (typeof define === 'function' && define.amd)
