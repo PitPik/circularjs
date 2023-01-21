@@ -70,7 +70,7 @@ Object.defineProperties(Circular.prototype, mixinAPI({
       newParent ? newParent.appendChild(elm) : // TODO: maybe offer insertBefore...
         start.parentNode.insertBefore(elm, elm._tracker);
       Blick.setScroll(false, elm.__scrollers, 0);
-      if (inst.instance.onLoad) inst.instance.onLoad(elm, inst.crInst);
+      trigerOnLoad(elm, inst);
       return elm;
     }
   }},
@@ -205,9 +205,20 @@ function initComponent(element, component, defData, plugData, parent, onLoad) {
   // inst.instance.onBeforeInit && inst.instance.onBeforeInit(element, crInst);
   if (template) renderComponent(inst, defData.extra);
   inst.instance.onInit && inst.instance.onInit(element, crInst);
-  if (onLoad) inst.instance.onLoad && inst.instance.onLoad(element, crInst);
+  if (onLoad) trigerOnLoad(element, inst);
 
   return inst;
+}
+
+function trigerOnLoad(elm, inst) {
+  if (!inst.instance.onLoad || !inst.instance.onLoad(elm, inst.crInst)) return;
+  for (var n = inst.children.length, id = '', ids = [], child; n--; ) {
+    id = inst.children[n];
+    ids = id.split(':');
+    child = instances[ids[0]][ids[1]];
+
+    trigerOnLoad(child.element, child);
+  }
 }
 
 function destroyComponent(id, parentInst) {
