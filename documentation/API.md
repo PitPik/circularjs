@@ -339,7 +339,7 @@ This method gets called as soon as the component is initialized and rendered on 
 
 This method is the same as `onInit(element, circular)` with the only difference that it can be called more than once.
 
-The CircularJS method `hideComponent()` can take components out of the DOM tree and later on recover or put it back to where it was. When this happens, `onLoad(element, circular)` gets called again.
+The CircularJS method `hideComponent()` can take components out of the DOM tree and later on recover or put it back to where it was. When this happens, `onLoad(element, circular)` gets called again. It also triggers with lazy-loaded components and when a parent component returns `true` on `onLoad()`.
 
 ##### `onChildInit(element, instance, name)`
 
