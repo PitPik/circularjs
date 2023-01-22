@@ -5,10 +5,13 @@
 
 The helper scripts in the `scripts` folder work together with `amd.js` and your `amd.config.js` file.
 
-`register.js` scans your project folder and re-configures your `amd.config.js` file for optimal bundling later on with `package.js`.
+`register.js` scans your project folder and re-configures your `amd.config.js` file for optimal bundling later on with `package.js`. It can also be used to register a newly created component so you don't have to configure your `amd.config.js` yourself. Run `node scripts/register.js` to get help.
 
-`package.js` then takes all entries from your project `amd.config.js` file and starts minifying all of the files, including `HTML` and `CSS` files into one big package or several ones if used with `lazyPackages`. Optional inclusion of `CircularJS` is also possible so you end up with a single JavaScript file including all your resources for optimal page performance.
+`package.js` then takes all entries from your project `amd.config.js` file and starts minifying all of the files, including `HTML`, `CSS` and `JSON` files into one big package or several ones if used with `lazyPackages`. Optional inclusion of `CircularJS` is also possible so you end up with a single JavaScript file including all your resources for optimal page performance. Run `node scripts/package.js` to get help.
 
+**If performance is in your mind**: Copy/paste this minification file into your `index.html` file inside a `<script>` tag so you have only **1 file** and nothing else, so you don't have to load any resources after `index.html` is loaded. This garatees the fastest possible loading time there is.
+
+>One thing though you need to be careful with: When using `require()` inside your components, the minification tool has problems with this function. To avoid strange behaviour just use `window.require()` instead.
 
 ### `define(name?, dependencies?, factory)`
 
