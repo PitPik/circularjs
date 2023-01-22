@@ -10,13 +10,14 @@
 const fs = require('fs');
 const compressor = require('node-minify');
 
-const fileRegexp = /\.(?:html|css|txt)$/;
+const fileRegexp = /\.(?:html|css|json|txt)$/;
 
 const collection = {};
 const jsCollection = {};
 
 const html = [];
 const css = [];
+const json = [];
 const js = [];
 
 const getRealPath = itemPath => {
@@ -59,6 +60,8 @@ const collectDeps = (data, rootPath) => {
         css.push(item);
       } else if (item.type === 'html') {
         html.push(item);
+      } else if (item.type === 'json') {
+        json.push(item);
       }
       collection[item.key] = item;
     } else {
@@ -122,6 +125,7 @@ const writeMinJSFile = (data, outputName, type) => {
     if (!item.path.match(fileRegexp)) {
       item.path += '.js';
     }
+    if (/\.json$/.test(item.path)) return;
     output.push((options.path + '/' + item.path).replace('//', '/'));
     options.echo && console.log(`[Compressing] ${item.path}`);
   });
@@ -144,6 +148,8 @@ const writeMinJSFile = (data, outputName, type) => {
     min = min.split(/\n/).map(item => {
       return item.replace(/((require|define)\((.*?)\))/, (_, $1, $2, $3) => {
         let out = "";
+
+        if (!data[index]) return console.error(item);
   
         const params = $3.split(/\s*,\s*/);
         const noName = params[0][0] !== '"';
@@ -351,6 +357,22 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
       return 'define("' + cssData.key + '",[],function(){return\'' +
         min.replace(/\'/g, "\\'") + '\'});'
     }).catch(e => { console.error(e); throw new Error('Error parsing CSS'); })));
+
+    json.length && promises.push(Promise.resolve('/* JSON */'));
+
+    json.forEach(jsonData => promises.push(new Promise((resolve, reject) => {  
+      const path = (options.path + '/' + jsonData.path).replace('//', '/');
+      const content = fs.readFileSync(path, 'utf-8', (err) => {
+        reject(err);
+        // if (err) { throw err; }
+      });
+
+      options.echo && console.log(`[Processing*] ${jsonData.path}`);
+  
+      return resolve('define("' + jsonData.key + '",[],function(){return' +
+        content.replace(/\n\s*/g, '') + '});');
+    
+    })));
 
     promises.push(Promise.resolve('/* javaScript */'));
 
