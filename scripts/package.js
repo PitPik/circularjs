@@ -119,13 +119,16 @@ const sortOutput = items => {
 };
 
 const writeMinJSFile = (data, outputName, type) => {
-  let output = [];
+  const jsFiles = [];
+  const output = [];
 
   data.forEach(item => {
     if (!item.path.match(fileRegexp)) {
       item.path += '.js';
     }
     if (/\.json$/.test(item.path)) return;
+    jsFiles.push(item);
+
     output.push((options.path + '/' + item.path).replace('//', '/'));
     options.echo && console.log(`\x1b[94m[Compressing]\x1b[0m ${item.path}`);
   });
@@ -136,33 +139,25 @@ const writeMinJSFile = (data, outputName, type) => {
     output: outputName,
     // sync: true,
   }).then(min => {
-    let index = 0;
 
-    min = min.replace(/(\){2,}),(require|define)/g, (_, $1, $2) => {
+    min = min.replace(/([)]{2,}),(require|define)/g, (_, $1, $2) => {
       return $1 + ',\n' + $2;
     });
     min = min.replace(/\),!*function/g, (_, $1) => {
       return '),\nfunction';
     });
 
-    min = min.split(/\n/).map(item => {
-      return item.replace(/((require|define)\((.*?)\))/, (_, $1, $2, $3) => {
-        let out = "";
-
-        if (!data[index]) return console.error(item);
-  
+    min = min.split(/\n/).map((item, index) => {
+      return item.replace(/((require|define)\((.*?)\))/, (_, $1, $2, $3) => {  
         const params = $3.split(/\s*,\s*/);
         const noName = params[0][0] !== '"';
-        let name = noName ? `"${data[index].key}",` : '';
+        let name = noName ? `"${jsFiles[index].key}",` : '';
   
         if (noName && params[0][0] !== '[') {
           name += '[],';
         }
-        
-        out = `define(${name}${$3})`;
   
-        index++;
-        return out;
+        return  `define(${name}${$3})`;
       });
     }).join('\n');
 
@@ -317,9 +312,7 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
     if (options.circularjs) {
       html.length && promises.push(Promise.resolve('/* CircularJS */'));
       promises.push(fs.readFileSync(options.circularjs, 'utf-8')
-        .replace('sourceMappingURL=', 'sourceMappingURL=' + '../'.repeat(
-          options.output.replace(/^\.\//, '').split('/').length - 1
-        )));
+        .replace(/\n\s*\/\/#\s*sourceMappingURL=[^\n]*/, ''));
     }
 
     html.length && promises.push(Promise.resolve('/* HTML */'));
@@ -385,7 +378,7 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
       console.log(`\n\x1b[94m[*Packaging*]\x1b[0m ${options.output}`);
       fs.writeFile(
         options.output,
-        textOut.replace(/\\n\s+/g, "\\n"),
+        textOut.replace(/\\n\s+/g, "\\n") + '\n/* EOF: */',
         err => {
           if (err) throw err;
           console.log('\n' + options.output + ' successfully saved!');
