@@ -127,7 +127,7 @@ const writeMinJSFile = (data, outputName, type) => {
     }
     if (/\.json$/.test(item.path)) return;
     output.push((options.path + '/' + item.path).replace('//', '/'));
-    options.echo && console.log(`[Compressing] ${item.path}`);
+    options.echo && console.log(`\x1b[94m[Compressing]\x1b[0m ${item.path}`);
   });
 
   return compressor.minify({
@@ -138,8 +138,8 @@ const writeMinJSFile = (data, outputName, type) => {
   }).then(min => {
     let index = 0;
 
-    min = min.replace(/,(require|define)/g, (_, $1) => {
-      return ',\n' + $1;
+    min = min.replace(/(\){2,}),(require|define)/g, (_, $1, $2) => {
+      return $1 + ',\n' + $2;
     });
     min = min.replace(/\),!*function/g, (_, $1) => {
       return '),\nfunction';
@@ -316,7 +316,10 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
 
     if (options.circularjs) {
       html.length && promises.push(Promise.resolve('/* CircularJS */'));
-      promises.push(fs.readFileSync(options.circularjs, 'utf-8'));
+      promises.push(fs.readFileSync(options.circularjs, 'utf-8')
+        .replace('sourceMappingURL=', 'sourceMappingURL=' + '../'.repeat(
+          options.output.replace(/^\.\//, '').split('/').length - 1
+        )));
     }
 
     html.length && promises.push(Promise.resolve('/* HTML */'));
@@ -338,7 +341,7 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
         collapseBooleanAttributes: false,
       }
     }).then(min => {
-      options.echo && console.log(`[Compressing] ${htmlData.path}`);
+      options.echo && console.log(`\x1b[94m[Compressing]\x1b[0m ${htmlData.path}`);
 
       return 'define("' + htmlData.key + '",[],function(){return\'' +
         min.replace(/\'/g, "\\'").replace(/\n/g, "\\n") + '\'});';
@@ -352,7 +355,7 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
       output: options.output,
       sync: true,
     }).then(min => {
-      options.echo && console.log(`[Compressing] ${cssData.path}`);
+      options.echo && console.log(`\x1b[94m[Compressing]\x1b[0m ${cssData.path}`);
   
       return 'define("' + cssData.key + '",[],function(){return\'' +
         min.replace(/\'/g, "\\'") + '\'});'
@@ -367,7 +370,7 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
         // if (err) { throw err; }
       });
 
-      options.echo && console.log(`[Processing*] ${jsonData.path}`);
+      options.echo && console.log(`\x1b[94m[Compressing]\x1b[0m ${jsonData.path}`);
   
       return resolve('define("' + jsonData.key + '",[],function(){return' +
         content.replace(/\n\s*/g, '') + '});');
@@ -379,7 +382,7 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
     Promise.all(promises).then(data => {
       data.push(minJS);
       textOut = data.join('\n');
-      console.log(`[*Packaging*] ${options.output}`);
+      console.log(`\n\x1b[94m[*Packaging*]\x1b[0m ${options.output}`);
       fs.writeFile(
         options.output,
         textOut.replace(/\\n\s+/g, "\\n"),
