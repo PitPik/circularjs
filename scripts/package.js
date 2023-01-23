@@ -284,7 +284,7 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
             path: itemPath,
           });
         } else {
-          console.log(`[SKIP] ${path}`);
+          console.log(`\x1b[31m[-- SKIPS --]\x1b[0m ${path}`);
           // TODO: necessary??
           // delete itemPath;
         }
