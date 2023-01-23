@@ -310,7 +310,9 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
     let promises = [];
 
     if (options.circularjs) {
-      html.length && promises.push(Promise.resolve('/* CircularJS */'));
+      html.length && promises.push(Promise.resolve(
+        '/**! @license CircularJS ● v2.0.1; Copyright (C) 2017-2023 by Peter Dematté */'
+      ));
       promises.push(fs.readFileSync(options.circularjs, 'utf-8')
         .replace(/\n\s*\/\/#\s*sourceMappingURL=[^\n]*/, ''));
     }
