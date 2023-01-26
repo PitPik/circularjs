@@ -122,9 +122,6 @@ return Object.defineProperties(Circular, {
         if (defData.initialize) component.initialised = true;
         return initComponent($(element), this, defData, plugData, parent, onLoad);
       },
-      // preparePlugin: function preparePlugin() {
-      //   //...
-      // },
     });
     var elm = defData.initialize ? $(defData.selector, defData.context) : {};
 
@@ -136,9 +133,6 @@ return Object.defineProperties(Circular, {
       instance: component.init(elm),
       element: elm,
     } : component;
-  }},
-  Plugin: { value: function(defData, Klass) {
-    return Circular.Component(defData, Klass);
   }},
 });
 
@@ -262,7 +256,7 @@ function initInnerComponents(inst, element, selector, onLoad) {
   var query = template.childQuery || [];
   var children = template.childComponents;
   var isLazy = false, newInst, resource = '';
-  var elms = [], name = '', n = 0, l = 0;
+  var elms = [], name = '', n = 0, l = 0, m = 0;
   var hasContent = template.blick.partials['@content'] === null;
 
   if (!selector && (!children.length || !element.firstElementChild)) return;
@@ -273,9 +267,10 @@ function initInnerComponents(inst, element, selector, onLoad) {
 
   elms = [].slice.call($$((selector || template.childQuery) + ', [cr-lazy]', element));
   if (hasContent) for (n = elms.length; n--; ) { // this sucks... but well...
+    // TODO: rethink logic for better performance...
     if (elms[n]['cr-id']) elms.splice(n, 1);
-    for (var m = elms.length; m--; )
-      if (elms[m] !== elms[n] && elms[m].contains(elms[n])) elms.splice(n, 1);
+    for (m = n; m--; ) // elms.length n as order of $ defines it
+      if (elms[m].contains(elms[n])) elms.splice(n, 1); // elms[m] !== elms[n] &&
   }
 
   for (n = 0, l = elms.length; n < l; n++) {

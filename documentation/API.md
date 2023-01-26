@@ -49,7 +49,6 @@ The rest of the app is then defined inside the `class` definition. The example a
 - [Live-cycle methods](#methods-inside-components)
 - [Circular attributes](#the-six-circular-attributes)
 - [Circular.App](#circularapp)
-- [Circular.Plugin](#circularplugin)
 - [Circular.Service](#circularservice)
 - [Circular.Toolbox](#circulartoolbox)
 - [Circular.CreateInstance](#circularcreateinstance)
@@ -400,10 +399,6 @@ This method gets called right before it transforms into a `VArray` view model, g
 ### Circular.App
 
 It currently acts like a `Component({ initialize: true })`. When no selector is defined, it defaults to 'app'
-
-### Circular.Plugin
-
-Not yet implemented
 
 ### Circular.Service
 

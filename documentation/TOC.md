@@ -26,7 +26,6 @@
     - [extra](API.md#extra)
     - [circular](API.md#circular)
   - [Circular.App](API.md#circularapp)
-  - [Circular.Plugin](API.md#circularplugin)
   - [Circular.Service](API.md#circularservice)
   - [Circular.Toolbox](API.md#circulartoolbox)
   - [Circular.CreateInstance](API.md#circularcreateinstance)
