@@ -78,7 +78,7 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
 
   const require = { // local overwrite...
     config: cfgData => {
-      fs.readdir(options.folder, (err, items) => {     
+      fs.readdir(options.folder, (err, items) => {
         let count = 0;
         if (!items) {
           console.log(`The are no files in "${options.folder}" or the folder doesn't exist`);
@@ -91,7 +91,8 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
           if (isJS) {
             file = file.replace(/\.js$/, '');
           }
-          const key = (isJS ? '!' : '') + file.split('/').pop();
+          // const key = (isJS ? '' : '!') + file.split('/').pop();
+          const key = file.split('/').pop();
           let cont = false;
 
           if (cfgData[key]) continue;

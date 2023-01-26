@@ -271,12 +271,13 @@ function initInnerComponents(inst, element, selector, onLoad) {
     template.childQuery = query.join(',');
   }
 
-  elms = [].slice.call($$(selector || template.childQuery, element));
+  elms = [].slice.call($$((selector || template.childQuery) + ' ,[cr-lazy]', element));
   if (hasContent) for (n = elms.length; n--; ) { // this sucks... but well...
     if (elms[n]['cr-id'] || (elms[n - 1] && elms[n - 1].contains(elms[n]))) elms.splice(n, 1);
   }
 
   for (n = 0, l = elms.length; n < l; n++) {
+    if (elms[n]['cr-id']) continue;
     if (inst.instance.onBeforeChildInit) inst.instance.onBeforeChildInit(elms[n]);
     name = elms[n].tagName.toLowerCase();
     isLazy = elms[n].hasAttribute('cr-lazy');
