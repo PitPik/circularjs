@@ -24,8 +24,8 @@ define('game-controller', ['game-service'], function(gameSrv) {  'use strict';
     } else if (mark && !item.isProcessed) {
       item.mark = item.mark === 'marked' ? 'open' : item.mark === 'open' ? '' : 'marked';
     } else if (item.isMine && item.mark !== 'marked') {
-      model.filterAll(item => item.isMine === true).forEach(function(_item) {
-        _item.mark = _item === item ? 'mine last' : 'mine';
+      model.filterAll(function(_item) {
+        if (_item.isMine === true) _item.mark = _item === item ? 'mine last' : 'mine';
       });
 
       return checkItem._win = false; // no proper return on lookAround

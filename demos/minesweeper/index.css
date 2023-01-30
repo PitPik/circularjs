@@ -136,7 +136,7 @@ minesweeper {
   margin: 1px;
   padding: 1px;
   font-size: .9em;
-  line-height: 14px;
+  line-height: 15px;
   border: 1px #ccc dotted;
   border-radius: 10%;
   cursor: default;
@@ -163,7 +163,10 @@ minesweeper {
   background: sandybrown;
 }
 .board .mine:after {
-  content: "o"
+  content: "o";
+  font-size: 14px;
+  line-height: 13px;
+  /* content: "💣"; */
 }
 .board .mine.last {
   color: white;
@@ -178,10 +181,12 @@ minesweeper {
 }
 
 .board .marked:after {
-  content: "!"
+  content: "!";
+  /* content: "🚩"; */
 }
 .board .open:after {
-  content: "?"
+  content: "?";
+  /* content: "📍"; */
 }
 
 .board .color-1 { color: blue; }

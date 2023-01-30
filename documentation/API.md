@@ -290,6 +290,8 @@ When having an `{{#if %foo}}<div> ... </div>{{else}}...{{/if}}` situation in you
 
 This does actually nothing to the component. This attribute just disappears after the component is rendered and attached to the DOM. This can be used to have a class `[cr-cloak] { display: none }` in your CSS if you wish.
 
+As browsers try to render as soon as there is something on the "canvas", the page might flicker when the app / component with a **dynamic template inside** its tags has not fully initialized yet (later called with `{{>@content}}`, see [Schnauzer documentation](SCHNAUZER.md#the-partial-content)) as the browser renders the un-processed template before the component gets a chance to initialize.
+
 
 ### Methods inside components
 
@@ -329,6 +331,8 @@ constructor(element, input, circular) {
 If the variables on the parent are dynamic defined in `subscribe$()` option and change, the changes will be transferred to the child and can also be subscribed to. If you know Angular then think of the `@Input` decorator but not used for each variable but for all before `input(this)`.
 
 To communicate from the child to the parent you can use `circular.triggerEvent()` and install an event listener on the parent. This will be explained in the **Circular instance methods** section of this documentation.
+
+The `constructor()` is mentioned as part of the **live-cycle** as it gets executed before all the dynamic listeners are installed. This means that if you get data that serve as dynamic listeners and you need to alter the "view-model" before it gets initialized, now is the time to do that. Also [see pre-recursion method](#mymodelpritem-parent-root) to cover this topic.
 
 ##### `onInit(element, circular)`
 

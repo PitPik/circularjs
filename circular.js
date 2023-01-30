@@ -195,7 +195,7 @@ function initComponent(element, component, defData, plugData, parent, onLoad) {
     }, {});
 
   inst.template.blick.cr_component = inst; // TODO: uuuuaaaaaa
-  // TODO: plugins
+  // TODO: see if we can trigger childrens onInit only when parent is rendered (not only onLoad)...
   // inst.instance.onBeforeInit && inst.instance.onBeforeInit(element, crInst);
   if (template) renderComponent(inst, defData.extra);
   inst.instance.onInit && inst.instance.onInit(element, crInst);
