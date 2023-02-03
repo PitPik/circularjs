@@ -6,6 +6,7 @@
 
 - `move` moves an item, either new or exising, to the array at a certain position
 - `remove` removes the item from the array
+- `replace` replace an item of the array
 - `filterAll` like `filter` but then also deep into tree structures
 - `getCleanModel` brings the model to a state as it was before the `VArray` creation
 - `updateModel` updates an existing `VArray` with data from a new model
@@ -26,6 +27,10 @@ The `item` can be just a **new item**, so it gets added to the array or it can b
 ### `remove(item)`
 
 No index needed here as **VArray** will find out itself. This method works like `arr.splice(2, 1)`.
+
+### `replace(item, index)`
+
+Replaces a child  within the array defined by `index` by a new item. This method works like `arr.splice(2, 1, item)`. Returns the new item.
 
 ### `filterAll(fn, thisArg)`
 

@@ -69,6 +69,7 @@
 
 - [move](VARRAY.md#moveitem-index)
 - [remove](VARRAY.md#removeitem)
+- [replace](VARRAY.md#replaceitem-index)
 - [filterAll](VARRAY.md#filterAllfn-thisArg)
 - [getCleanModel](VARRAY.md#getCleanModelitem)
 - [updateModel](VARRAY.md#updateModelnewModel)

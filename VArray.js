@@ -41,6 +41,7 @@ VAProto.splice = function() { this._onChange._options.error('use move() instead 
 // ---
 VAProto.move = function(item, index) { return move(this, item, index) };
 VAProto.remove = function(item) { return remove(this, item) };
+VAProto.replace = function(item, index) { return updateObject(this[index], item), this[index] };
 // ---
 VAProto.filterAll = function(fn, thisArg) { return findAll(this, fn, thisArg, []) };
 VAProto.getElementById = function(id, fullId) {
@@ -250,16 +251,20 @@ function findAll(arr, fn, thisArg, out) {
   }
   return out;
 };
-// ------
-function resetModel(oldValue, value, model, cache, property) { // TODO: check and ... recycle
-  while (cache[property][0]) cache[property].shift();
-  for (var n = value.length; n--; ) cache[property].unshift(value[n]);
-}
 
-// TODO: use following ... make them use new stuff as well
+// ------
+
 function updateModel(model, newModel) {
-  for (var n = 0, l = model.length; n < l; n++) if (newModel[n] !== undefined)
+  for (var n = 0, l = model.length; n < l; n++) if (newModel[n] !== undefined) {
     updater(model, newModel, n);
+  } else model.pop();
+
+  if (newModel && l < newModel.length) {
+    for (n = l, l = newModel.length; n < l; n++) {
+      if (model._onChange) move(model, newModel[n], n, n === l - 1);
+      else model.push(newModel[n]);
+    }
+  }
 }
 
 function updateObject(model, newModel) {
@@ -340,8 +345,7 @@ function setGetter(model, property, cache, path, promoter) {
     set: function(value) {
       var oldValue = cache[property];
 
-      if (oldValue && oldValue._onChange && value !== oldValue)
-        return resetModel(oldValue, value, model, cache, property);
+      if (oldValue && oldValue._onChange && value !== oldValue) return updateModel(oldValue, value);
 
       cache[property] = value;
       if (promoter.onChange({
