@@ -14,7 +14,7 @@
 - `addSubscriber` mostly for internal use
 - `destroy` mostly for internal use
 
-The **nine mutating methods** of arrays `shift`, `pop`, `unshift`, `push`, `sort`, `reverse`, `fill`, `copyWithin` except `splice` work like `Array` methods but with a twist... `splice` is actually disabled as it would cause too many unwanted rendering steps and it's not usable for deep arrays like in trees. **All other eight methods** actually also trigger `Blick` to update the view. The rest of the methods (`find`, `slice`, `forEach`, etc...) work just normal as any other `Array` method.
+The **nine mutating methods** of arrays `shift`, `pop`, `unshift`, `push`, `sort`, `reverse`, `fill`, `copyWithin` and `splice` work like `Array` methods but with a twist... They actually also trigger `Blick` to update the view. The rest of the methods (`find`, `slice`, `forEach`, etc...) work just normal as any other `Array` method.
 
 So using `this.tree.pop()` would do exactly like you would expect. It removes the last item from the array `this.tree` and returns that removed item. But in the background the view represented by that model `this.tree` also gets updated.
 

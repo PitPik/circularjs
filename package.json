@@ -1,6 +1,6 @@
 {
   "name": "circularjs",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Tiny and fast SPA creation tool (MVC like framework with templating engine, router, pubsub, etc.)",
   "main": "circular.js",
   "scripts": {

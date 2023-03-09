@@ -1,4 +1,4 @@
-/**! @license VArray v0.0.2; Copyright (C) 2023 by Peter Dematté */
+/**! @license VArray v0.0.3; Copyright (C) 2023 by Peter Dematté */
 (function (root, factory) {
   if (typeof exports === 'object' && typeof module === 'object') module.exports = factory();
   else if (typeof define === 'function' && define.amd)
@@ -37,7 +37,7 @@ VAProto.sort = function(fn) { return sort(this, fn) };
 VAProto.reverse = function() { return reverse(this) };
 VAProto.fill = function(value, start, end) { return fill(this, value, start, end) };
 VAProto.copyWithin = function(target, start, end) { return copyWithin(this, target, start, end) };
-VAProto.splice = function() { this._onChange._options.error('use move() instead of splice()') };
+VAProto.splice = function() { return splice(this, getArgs(arguments, [])) };
 // ---
 VAProto.move = function(item, index) { return move(this, item, index) };
 VAProto.remove = function(item) { return remove(this, item) };
@@ -84,6 +84,18 @@ function unshift(arr, args) {
 function push(arr, args) {
   for (var n = 0, l = args.length; n < l; n++) move(arr, args[n], arr.length, n === l - 1);
   return arr.length;
+}
+
+function splice(arr, args) {
+  var index = args[0] < 0 ? arr.length + args[0] : args[0];
+  var count = args[1];
+  var n = 0;
+  var out = [];
+
+  for (n = 0; n < count; n++) if (arr[index]) out.push(remove(arr, arr[index]));
+  if (index > arr.length) index = arr.length;
+  for (n = 2; n < args.length; n++) move(arr, args[n], index + (n - 2), n >= args.length);
+  return out;
 }
 
 function sort(arr, fn, order) {

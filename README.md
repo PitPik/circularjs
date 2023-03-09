@@ -1,7 +1,6 @@
 ![CircularJS](assets/circularjs-logo.png)
 
-See some demos right away @ [pitpik.github.io/circularjs](https://pitpik.github.io/circularjs/).
-or go straight to the [API documentation](documentation/API.md).
+See some demos right away @ [pitpik.github.io/circularjs](https://pitpik.github.io/circularjs/)... or go straight to the [API documentation](documentation/API.md).
 
 # What is CircularJS
 

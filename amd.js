@@ -1,4 +1,4 @@
-/**! @license amd v1.0.1; Copyright (C) 2023 by Peter Dematté */
+/**! @license amd v1.0.2; Copyright (C) 2023 by Peter Dematté */
 !(function (root) { 'use strict';
 
 var mathRand = root.Math.random;
@@ -105,14 +105,6 @@ function markAsDone(module) {
   }
 }
 
-// function appendScript(script) {
-//   documentFragment.appendChild(script);
-//   clearTimeout(timer);
-//   timer = setTimeout(function() {
-//     document.head.appendChild(documentFragment);
-//   });
-// }
-
 function applyScript(module, sync) {
   var script = root.document.createElement('script');
 
@@ -168,7 +160,6 @@ function getDependencies(parentName, deps, sync) {
     if (module.isFile) {
       require.getFile(module, markAsDone);
     } else if (!module.isInline) {
-      // appendScript(applyScript(module, sync));
       documentFragment.appendChild(applyScript(module, sync));
       lookaheadForDeps(name);
     }
