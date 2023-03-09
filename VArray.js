@@ -87,13 +87,16 @@ function push(arr, args) {
 }
 
 function splice(arr, args) {
+  var children = arr._onChange._options.children;
   var index = args[0] < 0 ? arr.length + args[0] : args[0];
   var count = args[1];
   var n = 0, m = 0;
   var out = [];
 
-  for (n = 0; n < count && args[n + 2] && arr[index + n]; n++)
+  for (n = 0; n < count && args[n + 2] && arr[index + n]; n++) {
     out.push(arr.replace(args[n + 2], index + n));
+    if (args[n + 2].index !== undefined) args[n + 2][children].parent.remove(args[n + 2]);
+  }
   for (m = n ; m < count && arr[index + n]; m++) out.push(remove(arr, arr[index + n])); 
   if (index > arr.length) index = arr.length;
   for (n += 2; n < args.length; n++) move(arr, args[n], index + (n - 2), n >= args.length);
