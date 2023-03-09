@@ -48,6 +48,8 @@ The reason for cleaning up could also be that you need to "clone" an item from t
 
 This method walks through the existing `VArray` and changes all the data to values coming from `newModel`. So, `newModel` has to be an array.
 
+When you need to update a model within your component and it already has a subscriber then you can simply replace the existing model by the new one like: `this.myModel = newModel;`
+
 ### `getElementById(id, fullId)`
 
 This method is mostly used internally.
