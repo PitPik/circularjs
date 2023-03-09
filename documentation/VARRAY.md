@@ -14,9 +14,11 @@
 - `addSubscriber` mostly for internal use
 - `destroy` mostly for internal use
 
-The **nine mutating methods** of arrays `shift`, `pop`, `unshift`, `push`, `sort`, `reverse`, `fill`, `copyWithin` and `splice` work like `Array` methods but with a twist... They actually also trigger `Blick` to update the view. The rest of the methods (`find`, `slice`, `forEach`, etc...) work just normal as any other `Array` method.
+The **nine mutating methods** of arrays `shift`, `pop`, `unshift`, `push`, `splice`, `sort`, `reverse`, `fill` and `copyWithin` work like `Array` methods but with a twist... They actually also trigger `Blick` to update the view. The rest of the methods (`find`, `slice`, `forEach`, etc...) work just normal as any other `Array` method.
 
 So using `this.tree.pop()` would do exactly like you would expect. It removes the last item from the array `this.tree` and returns that removed item. But in the background the view represented by that model `this.tree` also gets updated.
+
+**splice()** is a bit optimised though. The return value can include replaced items as well. Assume you have a model like `arr = [{...}, {...}, {...}]` and if you want to replace an item with `arr.splice(1, 1, { ... })` and `arr[1]` actually exists, then it will be replaced instead of removed. Therefore, the return value contains the "replaced" value as `arr[1]` didn't get removed but replaced. To detect items being removed check if index < 0.
 
 ### `move(item, index)`
 

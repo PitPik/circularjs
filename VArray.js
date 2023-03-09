@@ -89,12 +89,13 @@ function push(arr, args) {
 function splice(arr, args) {
   var index = args[0] < 0 ? arr.length + args[0] : args[0];
   var count = args[1];
-  var n = 0;
+  var n = 0, m = 0;
   var out = [];
 
-  for (n = 0; n < count; n++) if (arr[index]) out.push(remove(arr, arr[index]));
+  for (n = 0; n < count && args[n + 2]; n++) out.push(arr.replace(args[n + 2], index + n));
+  for (m = n ; m < count && arr[index + n]; m++) out.push(remove(arr, arr[index + n])); 
   if (index > arr.length) index = arr.length;
-  for (n = 2; n < args.length; n++) move(arr, args[n], index + (n - 2), n >= args.length);
+  for (n += 2; n < args.length; n++) move(arr, args[n], index + (n - 2), n >= args.length);
   return out;
 }
 
