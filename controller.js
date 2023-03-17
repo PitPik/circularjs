@@ -5,11 +5,12 @@ function Controller(element) {
   this.element = element || document.body;
   this.listeners = {};
   this.events = {};
+  this.items = {};
 }
 
 Controller.prototype = {
   installEvent: function(eventName, data, callbackNames, callbackFns) {
-    installEvent(this, data, callbackNames, callbackFns, eventName);
+    installEvent(this, data, eventName, callbackNames, callbackFns);
   },
   removeEvent: function(eventName) { removeEvent(this, eventName) },
   destroy: function() {
@@ -17,6 +18,9 @@ Controller.prototype = {
     Toolbox.keys(this.listeners).forEach(function(name) { removeEvent(_this, name) });
     return this.element = null;
   },
+  setSort: function() {
+    for (var key in this.items) this.items[key] = [];
+  }
 };
 
 return Controller;
@@ -35,14 +39,13 @@ function removeEvent(_this, eventName) {
   }
 }
 
-// TODO: useCapture
-// TODO: cache doesn't work; doesn't clean up...
-function installEvent(_this, data, callbackNames, callbackFns, eventName) {
+function installEvent(_this, data, eventName, callbackNames, callbackFns) {
   var capture = eventName.length - (eventName = eventName.replace(/\!/g, '')).length;
   var delegate = eventName.length - (eventName = eventName.replace(/\?/g, '')).length;
   var events = _this.events[eventName] = _this.events[eventName] || {};
   var useCapture = !!/(?:focus|blur|mouseenter|mouseleave|scroll)/.test(eventName); // TODO
 
+  if (!_this.items[eventName]) _this.items[eventName] = [];
   data.delegate = delegate;
   for (var n = callbackNames.length, callback = ''; n--; ) {
     callback = callbackNames[n];
@@ -51,73 +54,68 @@ function installEvent(_this, data, callbackNames, callbackFns, eventName) {
   if (_this.listeners[eventName]) return;
 
   _this.listeners[eventName] = Toolbox.addEvent(_this.element, eventName, function eventCB(e) {
-    eventDelegator(e, callbackFns, _this.events);
+    eventDelegator(e, callbackFns, _this.events, _this.items);
   }, useCapture || capture > 1 ? true : capture === 1 ? false : undefined);
 }
 
-function findElement(items, element) {
-  for (var n = items.length; n--; ) if (items[n].element === element) return true;
-}
-
-function eventDelegator(e, callbackFns, events) {
-  var path = (e.composedPath && e.composedPath()) || e.path;
-  var callbacks = events[e.type];
-  var cbKeys = Toolbox.keys(callbacks);
-  var items = [];
-  var data = {};
-  var elm = {};
-  var target = {};
-  var key = '';
+function collect(cbKeys, callbacks, cbFns, e, path, items) {
   var n = 0, m = 0;
-  var cancel = false;
-  var model, delegate, children = '', retModel;
+  var cbName = '';
+  var data = callbacks; // dummy reference
 
   for (n = cbKeys.length; n--; ) {
-    key = cbKeys[n];
-    if (!callbackFns[key]) continue;
+    cbName = cbKeys[n];
+    if (!cbFns[cbName]) continue;
 
-    for (m = callbacks[key].length; m--; ) {
-      data = callbacks[key][m];
-      if (data.model.index < 0) { // TODO: check after VOM refactor
-        callbacks[key].splice(m, 1);
+    for (m = callbacks[cbName].length; m--; ) {
+      data = callbacks[cbName][m];
+      if (data.model.index < 0) { // !data.isRoot && 
+        callbacks[cbName].splice(m, 1);
         continue;
       }
-      elm = data.element;
-      if (findElement(items, elm)) continue;
-      if (path ? path.indexOf(elm) === -1 : !elm.contains(e.target)) continue;
       items.push(data);
     }
   }
-  if (!items.length) return;
 
-  items.sort(function(a, b) {
+  return items.length < 2 ? items : items.sort(function(a, b) {
     return path ?
       path.indexOf(b.element) - path.indexOf(a.element) :
       a.element.contains(b.element) ? -1 : 1;
   });
+}
+
+function eventDelegator(e, cbFns, events, itemsCache) {
+  var callbacks = events[e.type];
+  var cbKeys = Toolbox.keys(callbacks);
+  var path = (e.composedPath && e.composedPath()) || e.path;
+  var items = itemsCache[e.type].length ? itemsCache[e.type] :
+    collect(cbKeys, callbacks, cbFns, e, path, []);
+  var cbName = '';
+  var n = 0, m = 0;
+  var cancel = false;
+  var data = items[0];
+  var retModel = data && data.model;
+  var element = data && data.element;
+
+  itemsCache[e.type] = items;
   for (n = items.length; n--; ) {
     if (cancel) return;
 
     data = items[n];
+    if (path ? path.indexOf(data.element) === -1 : !data.element.contains(e.target)) continue;
+
     for (m = cbKeys.length; m--; ) {
-      key = cbKeys[m];
-      elm = data.element;
-      if (!callbackFns[key] || !findElement(callbacks[key], elm)) continue;
-        // || (callbacks[e.type] && callbacks[key][n].element !== callbacks[e.type][n].element)) continue;
-      delegate = data.delegate;
-      model = data.model;
-      children = data.children;
-      target = delegate ? Toolbox.findParent(e.target, data.idTag, elm) : elm;
-      retModel = delegate ? data.getElementById(target[data.idTag], true) : model;
-      // TODO: !data.getElementById(target[data.idTag], true) ... return or continue;
-      if (retModel) cancel = callbackFns[key](
+      cbName = cbKeys[m];
+      if (!cbFns[cbName] || data.callbacks.indexOf(cbName) === -1) continue;
+
+      element = data.delegate ? Toolbox.findParent(e.target, data.idTag, data.element) : data.element;
+      retModel = data.delegate ? element && data.getElementById(element[data.idTag], true) : data.model;
+
+      if (retModel) cancel = cbFns[cbName](
         e,
-        target,
-        retModel, // || data.element
-        model.parentNode ? model.parentNode[children] : model[children] && model[children].parent,
-        delegate && elm || undefined,
-        delegate && model || undefined,
-        // delegate && data.parent, // parent of this????
+        element,
+        retModel, // !data.isRoot && 
+        retModel[data.children] && retModel[data.children].parent // !data.isRoot && 
       ) === false || e.cancelBubble || cancel;
     }
   }

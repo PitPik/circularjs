@@ -262,7 +262,7 @@ clickHandler(e, elm, item, model, ...) {
 
 Using `e.stopPropagation()` or just returning `false` does the same.
 
-> When dealing with lists, tables or trees you can install the event listener with a `?` on its root element so you can realise event-delegation. This speeds up rendering of big amounts of items as they don't need to register to the event-controller one by one.
+> When dealing with lists, tables or trees you can install the event listener with a `?` on its root element so you can realise event-delegation. This speeds up rendering of big amounts of items as they don't need to register to the event-controller one by one. Note that event delegation **doesn't** bubble / bleed out of child components.
 
 #### `cr-lazy`
 

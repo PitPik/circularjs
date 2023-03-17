@@ -33,11 +33,11 @@ VAProto.shift = function() { return shift(this) };
 VAProto.pop = function() { return pop(this) };
 VAProto.unshift = function() { return unshift(this, getArgs(arguments, [])) };
 VAProto.push = function() { return push(this, getArgs(arguments, [])) };
+VAProto.splice = function() { return splice(this, getArgs(arguments, [])) };
 VAProto.sort = function(fn) { return sort(this, fn) };
 VAProto.reverse = function() { return reverse(this) };
 VAProto.fill = function(value, start, end) { return fill(this, value, start, end) };
 VAProto.copyWithin = function(target, start, end) { return copyWithin(this, target, start, end) };
-VAProto.splice = function() { return splice(this, getArgs(arguments, [])) };
 // ---
 VAProto.move = function(item, index) { return move(this, item, index) };
 VAProto.remove = function(item) { return remove(this, item) };
@@ -97,7 +97,7 @@ function splice(arr, args) {
     out.push(arr.replace(args[n + 2], index + n));
     if (args[n + 2].index !== undefined) args[n + 2][children].parent.remove(args[n + 2]);
   }
-  for (m = n ; m < count && arr[index + n]; m++) out.push(remove(arr, arr[index + n])); 
+  for (m = n ; m < count && arr[index + n]; m++) out.push(remove(arr, arr[index + n]));
   if (index > arr.length) index = arr.length;
   for (n += 2; n < args.length; n++) move(arr, args[n], index + (n - 2), n >= args.length);
   return out;

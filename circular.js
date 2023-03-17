@@ -344,7 +344,7 @@ function applyModel(name, component, inst) {
     return { model: vArray, standalone: true, id: inst['cr-id'] };
 
   inst[name] = vArray;
-  return { model: vArray, id: vArray['cr-id'] }; //.addSubscriber(name, inst)[name], // ???
+  return { model: vArray, id: vArray['cr-id'] };
 }
 
 function getVArrayModel(name, component, inst, childNodes) {
@@ -402,6 +402,7 @@ function vMoveCallback(action, item, parent, previousParent, index, skipFix, dat
     if (previousParent !== parent && count === 1)
       updateArrayListeners(data, item.parentNode, blick.options.loopHelperName);
     blick.moveChild(index, newParent, item.index, parent, data.childNodes, skipFix);
+    if (previousParent !== parent) blick.cr_component.controller.setSort();
   } else if (action === 'add') {
     if (count === 1) checkRoot(item, parent, data);
     blick.addChild(index, parent, item);
@@ -414,9 +415,6 @@ function vMoveCallback(action, item, parent, previousParent, index, skipFix, dat
 
   if (data.inst[name$Move]) data.inst[name$Move](action,
     parent.parent ? data.childNodes : data.name, item, parent, previousParent);
-
-  // TODO: replaceChild should work like: this.tree = data; VOM.updateModel(model, newModel);
-  // ... but maybe the use then should use VOM.updateModel() instead of replaceChild()
 }
 
 function checkRoot(item, parent, data) { // TODO: rename
@@ -465,11 +463,8 @@ function scanHTML(blick, fragment, item, parent, index, id, deleted) {
 function isDynamic(blick, obj, key, vArrayID, makeDynamic) {
   var active = obj ? (Object.getOwnPropertyDescriptor(obj, key) || {}).set ? 1 : 0 : 0;
   var models = blick.cr_component.models;
-  // var itemID = obj['cr-id']; // TODO: repetitive code
-  // var vArrayID = '';
 
   if (!active && makeDynamic && obj && hasOwnProperty.call(obj, key)) {
-    // vArrayID = itemID && itemID.split(':')[0] || keys(models)[0]; // TODO: catch?
     models[vArrayID].model.addSubscriber(key, obj);
     active = 2;
   }
@@ -487,8 +482,11 @@ function destroyItems(fragment, inst) {
 // -----------------
 
 function addInstanceEvents(inst, vArray, fragment) {
+  var doTrigger = false;
+
   if (!inst.template.enableEvents) return null; // TODO:  || !vom
   if (fragment) addInstanceEvents(inst, vArray); // for it self!!!
+
   getAttrMap(fragment || inst.element, 'cr-event', function(type, value, element) {
     var idElm = Toolbox.findParent(element, 'cr-id', inst.element);
     var id = idElm ? idElm['cr-id'] : '';
@@ -496,16 +494,20 @@ function addInstanceEvents(inst, vArray, fragment) {
     var model = vArray && id && vArray.getElementById(id, true) || inst.instance; // TODO: check
     var parent = inst.models[mainID] && inst.models[mainID].model;
     var children = parent && parent._onChange && parent._onChange._options.children;
+    var val = value.split(/\s*,\s*/);
 
+    if (!doTrigger) doTrigger = true;
     inst.controller.installEvent(type, {
       idTag: 'cr-id',
       getElementById: vArray && vArray.getElementById,
       model: model,
       children: children,
       element: element,
-    }, value.split(/\s*,\s*/), inst.instance);
+      callbacks: val,
+    }, val, inst.instance);
     !inst.crInst.options.debug && element.removeAttribute('cr-event');
   });
+  if (doTrigger) inst.controller.setSort();
 }
 
 function installStyles(styles, selector) {
@@ -569,10 +571,10 @@ function processTemplate(template, blickOptions, skipBlick) {
   };
 }
 
-function checkPartial(partials, keys, regex) { // TODO: check ... geen zin in
-  for (var n = keys.length; n--; ) if (regex.test(partials[keys[n]])) return true;
-  return false;
-}
+// function checkPartial(partials, keys, regex) { // TODO: check ... geen zin in
+//   for (var n = keys.length; n--; ) if (regex.test(partials[keys[n]])) return true;
+//   return false;
+// }
 
 function addComponentPartial(template, content, blickOptions) {
   var text = content.replace(/cr-src/g, 'src');

@@ -5,6 +5,10 @@
 	position: relative;
 	overflow: hidden;
 }
+.todo-list-item {
+	content-visibility: auto;
+	contain-intrinsic-size: 0 59.8px;
+}
 .main.completed .todo-list-item:not(.completed),
 .main.active .todo-list-item.completed {
 	/*display: none;*/
