@@ -1,4 +1,4 @@
-/**! @license blick v1.0.2; Copyright (C) 2018-2023 by Peter Dematté */
+/**! @license blick v1.0.3; Copyright (C) 2018-2023 by Peter Dematté */
 (function(global, factory) {
   if (typeof exports === 'object' && typeof module === 'object')
     module.exports = factory(global, require('schnauzer'));
@@ -68,7 +68,7 @@ return (function(Schnauzer, cloneObject) { /* class Blick extends Schnauzer */
         selected: setAttribute,
       }
     });
-    this.version = { blick: '1.0.1', schnauzer: this.version };
+    this.version = { blick: '1.0.3', schnauzer: this.version };
     this.collector = { destroyers: {}, updaters: {}, movers: {}, helpers: {} };
     this.returnFragment = document.createDocumentFragment();
     this.dataDump = [];
@@ -749,6 +749,7 @@ function replaceBlock(_this, firstNode, lastNode, bodyFn, track, out, dataDump, 
     var node = firstNode;
     var wasNotRendered = !wasEverRendered[track.fnIdx];
     var wasElse = fnIdx > track.fnIdx && isEach && wasEverRendered[track.fnIdx] === undefined;
+    var item = data[0].loop && data[0].loop['this'];
 
     _this.cr_component = comp; // TODO: ...
     if (fnIdx !== track.fnIdx || !body) { // TODO: check || !body ... good for existing data (faster)
@@ -767,7 +768,7 @@ function replaceBlock(_this, firstNode, lastNode, bodyFn, track, out, dataDump, 
     if (wasElse && data[0].value[options.loopLimitsName] && arrData) { // TODO: check
       _this._firstTimeLoop = trackDF[fnIdx]; // TODO: spooky
       return (data[0].value[options.loopLimitsName].push(firstNode), ''); // TODO: check
-    } else if (wasNotRendered && body && !update) options.scanHTML(_this, trackDF[fnIdx], data);
+    } else if (wasNotRendered && body && !update) options.scanHTML(_this, trackDF[fnIdx], item, 'skip');
 
     if (body) lastNode.parentNode.insertBefore(trackDF[fnIdx], lastNode); // TODO: check...
     if (isScroll && body) setScroll(false, data[0], fnIdx);

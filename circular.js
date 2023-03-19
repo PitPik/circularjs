@@ -15,7 +15,7 @@ var extend = Toolbox.cloneObject;
 
 var Circular = function Circular(name, options) {
   this.controls = { initPartials: false };
-  this.version = '2.0.1';
+  this.version = '2.0.2';
   this.id = 0;
   this.name = '';
   this.options = {
@@ -113,7 +113,8 @@ return Object.defineProperties(Circular, {
       selector: defData.selector,
       subscribe$: defData.subscribe$,
       childNames: childNames, // TODO: check above logic...
-      template: processTemplate(defData.template || '', getBlickOptions(crInst.options, defData)),
+      template: defData.template && defData.template.blick ? defData.template :
+        processTemplate(defData.template || '', getBlickOptions(crInst.options, defData)),
       styles: installStyles(defData.styles, defData.selector),
       singleton: false, // ????
       initialize: false,
@@ -433,18 +434,19 @@ function updateArrayListeners(data, parent, stop) { // TODO: optimise
 
 function registerLoopItem(node, item, debugMode, processed) { // TODO: uuuhhh,...
   if (processed) return;
-  node['cr-id'] = item['cr-id'];
+  node['cr-id'] = item['cr-id']; // TODO: refactor ... getElementByCrId
   debugMode && node.setAttribute('cr-id', item['cr-id']); // TODO: this
 }
 
 function scanHTML(blick, fragment, item, parent, index, id, deleted) {
   var inst = blick.cr_component;
   var models = inst.models;
-  var itemID = item['cr-id'];
+  var itemID = item && item['cr-id'];
   var vArrayID = itemID && itemID.split(':')[0] || keys(models)[0];
   var vArray = models[vArrayID].model;
   var childNodes = vArray._onChange._options.children;
   var children = fragment.children;
+  var n = 0;
 
   if (deleted === true) {
     destroyItems(fragment, inst);
@@ -452,12 +454,14 @@ function scanHTML(blick, fragment, item, parent, index, id, deleted) {
   }
   if (!children.length) return; // prevents unnecessary initInnerComponents()...
 
-  if (itemID) for (var n = children.length; n--; ) registerLoopItem( // TODO: check why...
+  if (itemID) for (n = children.length; n--; ) registerLoopItem( // TODO: check why...
     children[n], item, blick.options.debugMode, children[n]['cr-id']
   );
 
   initInnerComponents(inst, fragment);
   addInstanceEvents(inst, vArray, fragment);
+   // TODO: check why... well, addEvents needs (ids) it because fragment is not yet appended
+  if (parent === 'skip') for (n = children.length; n--; ) delete children[n]['cr-id'];
 }
 
 function isDynamic(blick, obj, key, vArrayID, makeDynamic) {
@@ -488,7 +492,7 @@ function addInstanceEvents(inst, vArray, fragment) {
   if (fragment) addInstanceEvents(inst, vArray); // for it self!!!
 
   getAttrMap(fragment || inst.element, 'cr-event', function(type, value, element) {
-    var idElm = Toolbox.findParent(element, 'cr-id', inst.element);
+    var idElm = Toolbox.findParent(element, 'cr-id', inst.element); // might be non-loop-item!!
     var id = idElm ? idElm['cr-id'] : '';
     var mainID = id.substring(0, id.indexOf(':'));
     var model = vArray && id && vArray.getElementById(id, true) || inst.instance; // TODO: check

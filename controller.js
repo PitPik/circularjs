@@ -1,4 +1,4 @@
-/**! @license controller v2.0.1; Copyright (C) 2023 by Peter Dematté */
+/**! @license controller v2.0.2; Copyright (C) 2023 by Peter Dematté */
 define(['toolbox'], function(Toolbox) { 'use strict';
 
 function Controller(element) {
@@ -48,7 +48,7 @@ function installEvent(_this, data, eventName, callbackNames, callbackFns) {
   if (!_this.items[eventName]) _this.items[eventName] = [];
   data.delegate = delegate;
   for (var n = callbackNames.length, callback = ''; n--; ) {
-    callback = callbackNames[n];
+    callback = callbackNames[n] = callbackNames[n].replace(/[?!]/g, '');
     events[callback] ? events[callback].push(data) : events[callback] = [data];
   }
   if (_this.listeners[eventName]) return;
@@ -58,7 +58,7 @@ function installEvent(_this, data, eventName, callbackNames, callbackFns) {
   }, useCapture || capture > 1 ? true : capture === 1 ? false : undefined);
 }
 
-function collect(cbKeys, callbacks, cbFns, e, path, items) {
+function collect(cbKeys, callbacks, cbFns, items) {
   var n = 0, m = 0;
   var cbName = '';
   var data = callbacks; // dummy reference
@@ -69,7 +69,7 @@ function collect(cbKeys, callbacks, cbFns, e, path, items) {
 
     for (m = callbacks[cbName].length; m--; ) {
       data = callbacks[cbName][m];
-      if (data.model.index < 0) { // !data.isRoot && 
+      if (data.model.index < 0) {
         callbacks[cbName].splice(m, 1);
         continue;
       }
@@ -78,26 +78,24 @@ function collect(cbKeys, callbacks, cbFns, e, path, items) {
   }
 
   return items.length < 2 ? items : items.sort(function(a, b) {
-    return path ?
-      path.indexOf(b.element) - path.indexOf(a.element) :
-      a.element.contains(b.element) ? -1 : 1;
+    return a.element.contains(b.element) ? -1 : 1;
   });
 }
 
-function eventDelegator(e, cbFns, events, itemsCache) {
+function eventDelegator(e, cbFns, events, cache) {
   var callbacks = events[e.type];
   var cbKeys = Toolbox.keys(callbacks);
   var path = (e.composedPath && e.composedPath()) || e.path;
-  var items = itemsCache[e.type].length ? itemsCache[e.type] :
-    collect(cbKeys, callbacks, cbFns, e, path, []);
+  var items = cache[e.type].length ? cache[e.type] : collect(cbKeys, callbacks, cbFns, []);
   var cbName = '';
   var n = 0, m = 0;
   var cancel = false;
   var data = items[0];
   var retModel = data && data.model;
   var element = data && data.element;
+  var model = retModel;
 
-  itemsCache[e.type] = items;
+  cache[e.type] = items;
   for (n = items.length; n--; ) {
     if (cancel) return;
 
@@ -110,12 +108,14 @@ function eventDelegator(e, cbFns, events, itemsCache) {
 
       element = data.delegate ? Toolbox.findParent(e.target, data.idTag, data.element) : data.element;
       retModel = data.delegate ? element && data.getElementById(element[data.idTag], true) : data.model;
+      model = retModel[data.children] && retModel[data.children].parent;
 
       if (retModel) cancel = cbFns[cbName](
         e,
         element,
-        retModel, // !data.isRoot && 
-        retModel[data.children] && retModel[data.children].parent // !data.isRoot && 
+        retModel,
+        model,
+        model && (data.delegate ? element : Toolbox.findParent(e.target, data.idTag, data.element))
       ) === false || e.cancelBubble || cancel;
     }
   }

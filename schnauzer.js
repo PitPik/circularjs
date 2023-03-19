@@ -20,7 +20,7 @@ var cloneObject = function(newObj, obj) {
 var concatArrays = function(array, host) { return host.push.apply(host, array), host };
 
 var Schnauzer = function(templateOrOptions, options) {
-  this.version = '2.0.7';
+  this.version = '2.0.8';
   this.partials = {};
   this.helpers = {};
   this.regexps = {};
