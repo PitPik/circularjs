@@ -18,6 +18,7 @@ var cloneObject = function(newObj, obj) {
   return newObj;
 };
 var concatArrays = function(array, host) { return host.push.apply(host, array), host };
+var trims = { start: /^\s*/, all: /^\s*|\s*$/g, end: /\s*$/ };
 
 var Schnauzer = function(templateOrOptions, options) {
   this.version = '2.0.8';
@@ -431,10 +432,9 @@ function renderBlock(_this, tagData, data, model, recursive) {
 function trim(text, start, end) {
   var doStart = start.indexOf('~') !== -1;
   var doEnd = end.indexOf('~') !== -1;
-  var regExp = !doStart && !doEnd ? '' :
-    !doStart ? '\\s*$' : !doEnd ? '^\\s*' : '^\\s*|\\s*$';
+  var regExp = !doStart && !doEnd ? '' : !doStart ? trims.end : !doEnd ? trims.start : trims.all;
 
-  return regExp ? text.replace(new RegExp(regExp, 'g'), '') : text;
+  return regExp ? text.replace(regExp, '') : text;
 }
 
 function convertValue(text, skip) {

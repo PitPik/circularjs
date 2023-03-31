@@ -17,16 +17,16 @@ define(['toolbox'], function(Toolbox) {
     _params.bubbles = parent ? false : _params.bubbles !== undefined ? _params.bubbles : true;
     event = new CustomEvent(type, _params);
     (_params.element).dispatchEvent(event);
-  }
+  };
   
   prototype.installEvent = function(element, type, func, cap) {
     return Toolbox.addEvent(element || window, type, func, cap);
-  }  
+  };
   
   prototype.getView = function(value, element) { // TODO: maybe remove attribute...
     return Toolbox.$('[cr-view="' + value + '"]',
       element['cr-id'] ? element : Toolbox.findParent(element));
-  }  
+  };
 
   /* --------------------  pubsub  ----------------------- */
   
@@ -132,7 +132,7 @@ define(['toolbox'], function(Toolbox) {
   
   function installRouter(routes, _this, hash) {
     var event = window.onpopstate !== undefined ? 'popstate' : 'hashchange';
-  
+
     return Toolbox.addEvent(window, event, function(e) {
       var parts = {};
   

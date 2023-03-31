@@ -69,7 +69,7 @@ return (function(Schnauzer, cloneObject) { /* class Blick extends Schnauzer */
       }
     });
     this.version = { blick: '1.0.3', schnauzer: this.version };
-    this.collector = { destroyers: {}, updaters: {}, movers: {}, helpers: {} };
+    this.collector = { destroyers: {}, updaters: {}, movers: {}, helpers: {}, element: {} };
     this.returnFragment = document.createDocumentFragment();
     this.dataDump = [];
     this._firstTimeLoop = null;
@@ -133,6 +133,7 @@ return (function(Schnauzer, cloneObject) { /* class Blick extends Schnauzer */
       return moveChild(this, idx, item, nIdx, nItem, childNodes, skipFix)
     },
     addChild: function(idx, item, child) { return addChild(this, idx, item, child) },
+    findElement: function(item) { return this.collector.element[item['cr-id'].split(':')[1]] },
   }).constructor;
 })(Schnauzer, Schnauzer.cloneObject);
 
@@ -311,6 +312,7 @@ function getActives(_this, actives, cData, data, tagData) {
   // TODO: Check if tagData.partial has any other consequences
   if (!variable || !variable.active || partial === variable.value) return;
 
+  if (key === 'this') { /* TODO */ }
   if (key.charAt(0) === '@') { // TODO: clean up...
     if (cData.parent[key] === undefined) cData.parent[key] = ''; // makes getter possible
     hasValue = true;
@@ -334,8 +336,9 @@ function renderHook(_this, out, data, bodyFn, tagData, track, getData) {
   var actives = [];
 
   // TODO: check partial; TODO: maybe delete stuff as helpers etc (check first)...
-  for (var n = 0, l = data.length; n < l; n++) if (data[n].parent) // static values possible
-    getActives(_this, actives, data[n], data, tagData);
+  for (var n = 0, l = data.length; n < l; n++)
+    if (data[n].parent) getActives(_this, actives, data[n], data, tagData); // static values possible
+    else if (data[n].renderArgs) getRenderArgsActives(data[n].renderArgs, data[n], actives);
   if (getData) getIfElseActives(_this, tagData.children, getData, tagData, actives);
 
   if (actives.length === 0 || tagData.partial) return out; // TODO: check partial ... earlier; before for()
@@ -355,19 +358,32 @@ function renderHook(_this, out, data, bodyFn, tagData, track, getData) {
 
 // ------------- registerProperties ----------------
 
+function triggerAllHelperFns(item, data) {
+  item.value = item.variable.renderFn(item.renderArgs);
+  if (data) for (var n = data.length; n--; ) {
+    if (data[n].renderArgs && item.renderArgs !== data[n].renderArgs) {
+      triggerAllHelperFns(data[n]);
+    }
+  }
+}
+
 function getPropertyUpdateFn(item, data, udateFn, loopLimitsName, comp) {
-  var parentHelperFn = item.parentHelper && item.parentHelper.variable.renderFn;
-  var isArray = data[0] && data[0].type === 'array';
-  var isScroll = data[0] && data[0].scrollers;
+  var parentHelper = item.parentHelper;
+  var parentHelperFn = parentHelper && parentHelper.variable.renderFn;
+  var renderArgs = parentHelper && parentHelper.renderArgs;
 
   return function updateProperty(value, stop) {
     var loopLimits = value !== undefined && value !== null && (value[loopLimitsName] || '').length;
+    var isArray = item.type === 'array';
 
     if (!isArray && value === item.value && item.variable.active < 2) return;
 
     item.value = value;
-    if (parentHelperFn) data[0].value = parentHelperFn(item.parentHelper.renderArgs);
-    udateFn(data, item.loop, stop || loopLimits && (!isArray || value.length !== 0), isScroll, comp);
+    if (parentHelperFn) {
+      if (renderArgs !== data[0].renderArgs) triggerAllHelperFns(parentHelper, data[0].renderArgs);
+      data[0].value = parentHelperFn(data[0].renderArgs);
+    }
+    udateFn(data, item.loop, stop || loopLimits && (!isArray || value.length !== 0), item.scrollers, comp);
   };
 }
 
@@ -390,14 +406,18 @@ function getDestroyer(container, updatePropertyFn) {
   return function find() { return container.splice(container.indexOf(updatePropertyFn), 1)[0] };
 }
 
-function getMover(updaters, collector, propFn, variable) { // TODO: something is not smooth here......
+function getMover(updaters, collector, propFn, variable, depth) { // TODO: something is not smooth here......
   var getter = getDestroyer(updaters, propFn); // TODO: remove yourself...
-  // TODO: works for ../ only anyhow...
-  return function moveDestroyer(newParent) { // TODO: check if no function but id only (not crucial though)
-    var propFn = getter();
-    var updater = collector.updaters[newParent];
 
-    if (!newParent) return; // used for just deleting...
+  return function moveDestroyer(item) { // TODO: check if no function but id only (not crucial though)
+    var propFn = getter();
+    var updater = collector.updaters; // will be replaced
+    var num = depth;
+
+    if (!item) return; // used for just deleting...
+
+    while (num) { item = item.parentNode || {}; num--; }
+    updater = collector.updaters[item['cr-id']];
     updater[variable].push(propFn);
   }
 }
@@ -423,9 +443,10 @@ function registerProperties(_this, udateFn, collector, data, items, children) {
     addDestroyer(collector.destroyers, parentId.split(':'));
     updaters = addUpdater(collector.updaters, parentId, variable, propFn);
     if (variable.charAt(0) === '@') addHelper(_this, _this.collector.helpers, item, parentId, variable);
-
     if (item.movingParent) // TODO: check if also needed for non-helpers...
-      addUpdater(collector.movers, loop, variable, getMover(updaters, collector, propFn, variable));
+      addUpdater(collector.movers, loop, variable,
+        getMover(updaters, collector, propFn, variable, item.variable.depth)
+      );
     if (item.isFromRoot) addDestroyer(collector.destroyers, loop.split(':'))
       .push(getDestroyer(updaters, propFn)); // This works...
   }
@@ -449,6 +470,7 @@ function unsubscribe(collector, id, item, getChildren) {
   var vomIds = id.split(':');
   var movers = collector.movers;
 
+  delete collector.element[vomIds[1]]; // works...
   if (vomIds[1] === 'root') id = vomIds[0];
   for (var varName in updaters[id]) destroy(varName, updaters[id], vomIds, collector);
   delete updaters[id];
@@ -475,6 +497,7 @@ function registerLoop(_this, nodes, fn, data, items, limiters) {
       nodes[n].parentNode.removeChild(nodes[n]);
       idx--;
     } else if (nodes[n].nodeType !== 3) {
+      _this.collector.element[data[0].value[idx]['cr-id'].split(':')[1]] = nodes[n];
       options.registerLoopItem(nodes[n], data[0].value[idx], options.debugMode, lastIdx === idx);
       lastIdx = idx;
     }
@@ -558,9 +581,9 @@ function updateHelpers(_this, index, item, movedItem, remove, newIndex, newItem,
   if (remove) for (n = len ? 0 : index, l = item.length; n < l; n++) updater(n, 0, item); // 1???
   else if (!movedItem) for (n = len ? 0 : index + 1, l = item.length; n < l; n++) updater(n, 0, item);
   else if (movedItem) {
-    if (changedItem.parentNode !== currItem.parentNode) {
+    if (item !== newItem) {
       collector = _this.collector.movers[currItem['cr-id']];
-      for (key in collector) while (tmp = collector[key].shift()) tmp(changedItem['cr-id']);
+      for (key in collector) while (tmp = collector[key].shift()) tmp(changedItem);
     }
     for (n = len ? 0 : newIndex, l = newItem.length; n < l; n++) updater(n, 0, newItem);
     for (n = len ? 0 : index, l = item.length; n < l; n++) updater(n, 0, item); // old parent
@@ -604,8 +627,9 @@ function moveChild(_this, index, item, newIndex, newItem, childNodes, skipFix) {
   if (!end.nextSibling) end.parentNode.appendChild(removeChild(_this, index, item, item[index], true, newParent));
   else end.parentNode.insertBefore(removeChild(_this, index, item, item[index], true, newParent), end.nextSibling);
   limits.splice(newIndex + 1, 0, tmp);
-  if (!skipFix && _this.controls.helpers)
-    updateHelpers(_this, index, item, item[index], false, newIndex, newItem, childNodes);
+  if (!skipFix && _this.controls.helpers) updateHelpers(
+    _this, index, item, newParent ? newItem[newIndex] : item[index], false, newIndex, newItem, childNodes
+  );
 }
 
 function addChild(_this, index, item, child) {
@@ -638,6 +662,7 @@ function addChild(_this, index, item, child) {
         end.parentNode.appendChild(limit);
       continue;
     }
+    if (nodes[n].nodeType === 1) _this.collector.element[item[index]['cr-id'].split(':')[1]] = nodes[n];
     end = end.parentNode.insertBefore(nodes[n], end);
   }
   if (_this._firstTimeLoop) { limiters.splice(1, 1); _this._firstTimeLoop = null; }

@@ -9,9 +9,9 @@ The helper scripts in the `scripts` folder work together with `amd.js` and your 
 
 `package.js` then takes all entries from your project `amd.config.js` file and starts minifying all of the files, including `HTML`, `CSS` and `JSON` files into one big package or several ones if used with `lazyPackages`. Optional inclusion of `CircularJS` is also possible so you end up with a single JavaScript file including all your resources for optimal page performance. Run `node scripts/package.js` to get help.
 
-**If performance is in your mind**: Copy/paste this minification file into your `index.html` file inside a `<script>` tag so you have only **1 file** and nothing else, so you don't have to load any resources after `index.html` is loaded. This garatees the fastest possible loading time there is.
+**If performance is in your mind**: Copy/paste this minification file into your `index.html` file inside a `<script>` tag so you have only **1 file** and nothing else, so you don't have to load any resources after `index.html` is loaded. This garantees the fastest possible loading time there is.
 
->One thing though you need to be careful with: When using `require()` inside your components, the minification tool has problems with this function. To avoid strange behaviour just use `window.require()` instead.
+>`require()`can also be used inside your components.
 
 ### `define(name?, dependencies?, factory)`
 
@@ -62,7 +62,14 @@ require.config({
    },
     options: {
         minifyPrefix: '.min',
-        debug: false
+        debug: false,
+        devMocks: false,
+    },
+    development: {
+        'dependency-02': 'js/deps2-dev',
+    },
+    mocks: {
+        'dependency-03': 'modules/module3/js/dep.mock',
     },
     lazyPackages: {
       //
@@ -71,5 +78,11 @@ require.config({
 ```
 
 When copy pasting the `define`/`require` part of your components into the section `lookaheadMap` then you can realise a faster resource loading as `amd.js` will check this section and downloads the dependencies already without waiting for the main component to request its dependencies.
+
+`development` is overwriting everything that would be the same in `paths` in unpackaged/development mode. For development reasons you might want to relate to some alternative JSON or JS that has some extra mocks or data just relevant for development like server paths configuration etc. When packaging with `scripts/package.js` the original dependencies will be taken/packaged in place of the mocks.
+
+`mocks` are just like dependency definitions in `development` but only for packaged mode. When using `scripts/package.js` with the option `-m` or `--mocks` then the dependencies from the `mocks` sections will be taken instead of the `paths` section. In development mode, this section will be ignore unless `options.devMocks` is set to `true`. But even in this case `development` section will be looked up before the `mocks` section.
+
+`options.devMocks` turn on mocks in development mode (unpacked).
 
 `lazyPackages` is not yet implemented because the package tool doesn't respect it yet. You will be able though to package all your components, that you think will be not needed right away or are being lazy-loaded anyhow, into separate (minified) files. It's like lazy loading but then from a bundle holding more components and component parts together. Once this package is requested, all included files will register in `AMD` and be available from that moment on without having to request the bundle again.

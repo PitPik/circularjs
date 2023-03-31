@@ -13,6 +13,7 @@ The instance offers quite some useful methods to manage your apps.
 - [getChildComponents(inst)](#getchildcomponentsinst) returns all children currently rendered within the component
 - [getParentComponent(inst)](#getparentcomponentinst) returns the parent of itself
 - [destroyComponent(elm, remove)](#destroycomponentelm-remove) removes a component
+- [getModelElement(inst, item)](#getmodelelementinst-item) returns a rendered HTMLElement according to view-model
 
 - [triggerEvent(type, data, params)](#triggereventtype-data-params) triggers custom events
 - [installEvent(element, type, func, cap)](#installeventelement-type-func-cap) installs event listeners if needed
@@ -66,6 +67,12 @@ Same as `getChildComponents(inst)` but the other way around, getting the parent 
 This destroys components defined by the argument `elm` as HTMLElements. Be careful though with this method.
 
 The argument `remove` is an optional boolean that determines wether the HTML of the component should also be removed from the DOM.
+
+### `getModelElement(inst, item)`
+
+When rendering a repetitive view model (as a list, table or tree) each model item represents a HTMLElement (or more).
+Returns the first HTMLElement from that view model **item** responsible for rendering this element.
+First argument **inst** must be **this** (as the component instance).
 
 ### `triggerEvent(type, data, params)`
 

@@ -52,6 +52,7 @@ The rest of the app is then defined inside the `class` definition. The example a
 - [Circular.Service](#circularservice)
 - [Circular.Toolbox](#circulartoolbox)
 - [Circular.CreateInstance](#circularcreateinstance)
+- [Circular.extend$](#circularextend)
 - [Extending a Component](#extending-a-component)
 
 ### Circular.Component
@@ -166,13 +167,13 @@ The `:children` part defines the name of the children (or the branches of the tr
 ...
 ```
 
-This makes your **children dynamic** and **mutable** with all the mutation functions an Array offers (including some extra methods explained later on or in the section `VArray` in this documentation). For arrays and their manipulations, the changes are not represented in `tree$()` but in `tree$Move()`.
+This makes your **children dynamic** and **mutable** with all the mutation functions an Array offers (including some extra methods explained later on or in the section `VArray` in this documentation). For arrays and their manipulations, the changes are not represented in `tree$()` but in `tree$Move()` and `tree$Update()`.
 
 Any other Object can also be subscribed to like `myObject: ['foo', 'bar']` and listened to in `myObject$(property, item, value, oldValue) {}`. All those subscriptions are **canceled automatically** when a component gets **destroyed**.
 
 #### initialize
 
-This is simply a boolean that triggers the component to initialize itself without being introduced in a template. Usually it's the starting point of your app. The component will end up as a singleton and not being re-usable anymore.
+This is simply a boolean that triggers the component to initialize itself without being introduced in a template. Usually it's the starting point of your app. The component will end up as a singleton and not being re-usable anymore. In place of this you could also use `App()` instead of `Component()`.
 
 #### context
 
@@ -332,7 +333,7 @@ If the variables on the parent are dynamic defined in `subscribe$()` option and 
 
 To communicate from the child to the parent you can use `circular.triggerEvent()` and install an event listener on the parent. This will be explained in the **Circular instance methods** section of this documentation.
 
-The `constructor()` is mentioned as part of the **live-cycle** as it gets executed before all the dynamic listeners are installed. This means that if you get data that serve as dynamic listeners and you need to alter the "view-model" before it gets initialized, now is the time to do that. Also [see pre-recursion method](#mymodelpritem-parent-root) to cover this topic.
+The `constructor()` is mentioned as part of the **live-cycle** as it gets executed before all the dynamic listeners are installed. This means that if you get data that serve as dynamic listeners and you need to alter the "view-model" before it gets initialized, now is the time to do that. Also [see pre-recursion method](#mymodelpritem-parent-root-extendmodel) to cover this topic.
 
 ##### `onInit(element, circular)`
 
@@ -374,7 +375,7 @@ This method only gets "installed" on your instance of the class automatically wh
 
 This method only gets "installed" on your instance of the class automatically when you define subscribers with the component option `subscribe$: { myModel: [] }`. The functionality is described [above in the section subscribe$](#subscribe)
 
-##### `myModel$Move(action, key, item, model, previousModel)`
+##### `myModel$Move(action, key, item, model, previousModel, previousNode)`
 
 This method only gets "installed" on your instance of the class automatically when you define subscribers with the component option `subscribe$: { myModel: [] }`.
 It gets called when there is a VArray mutation for adding, removing, moving, sorting, ... executed and therefore the view updated (how this can be done will be explained in the [view model (VArray) part of the documentation](VARRAY.md)).
@@ -386,18 +387,37 @@ It gets called when there is a VArray mutation for adding, removing, moving, sor
 - `item: any` the view model item that was processed.
 - `model: Varray` the parent of the view model item that was processed.
 - `previousModel: Varray` the parent of the view model item that was processed in case it was moved.
+- `previousNode: {}` the node of `model` the item was child of in case it was moved to another parent.
 
 
-##### `myModel$PR(item, parent, root)`
+##### `myModel$PR(item, parentItem, parent, root, extendModel)`
 
 This method only gets "installed" on your instance of the class automatically when you define subscribers with the component option `subscribe$: { myModel: [] }`.
 This method gets called right before it transforms into a `VArray` view model, gets iterated over the children and before the subscribers get set up. So, the last point where properties can be added to that model before it gets "locked" as being a view model.
 
+To not "polute" your original model (when using `getCleanModel()` the new properties would not show) but need to alter it with properties for view purposes, you can alter the model by using the function `extendModel(item, model, options)` where **`item`** is the model to be altered and **`model`** is the Object() containing your view properies.
+**`options`** is an object containing some switches: `options: { force: boolean = true; show: boolean = false }`. **`force`** toggles the property to be set even if it's not undefined, **`show`** toggles weather the properties should be enumerable and therefore also show after `getCleanModel()`.
+You can alter your model by simply setting `item.foo = 'foo'` but then it would be just part of the item at all time.
+
 **the arguments**
 
 - `item: any` an item within the `VArray` view model
+- `parentItem: any` the parent item containing the `parent`
 - `parent: VArray` the holder of the `item` (Array)
 - `root: VArray` the root the view model. If thinking of a more dimensional Array with child nodes like in a table or a tree, this would be the initial Array.
+- `extendModel(item, model, options)` the function to alter **view properties** to the model.
+
+##### `myModel$Update(item, newData, index, parent)`
+
+If `myModel` would get updated with something like `myModel = [{ foo: 'foo' }]` or by using `myModel.updateModel(newModel)`, all the items (if there were any before) will not get re-rendered but updated. On every item that gets updated `myModel$Update()` will be called.
+This function gets called **right before** the data is changed.
+
+**the arguments**
+
+- `item: any` an item within the `VArray` view model
+- `newData: any` the new data being applied (will not be part of the new model, just data gets copyed)
+- `index: Integer` the index `item` sits in `parent`
+- `parent` the holder of the `item` (Array)
 
 
 ### Circular.App
@@ -438,6 +458,17 @@ where `name` would be the name of the instance (just for debugging), `options` a
 
 The `debug` options not only defines the level of feedback you get in the console but also leaves the `cr-xyz` attributes (like `cr-event` etc.) on all HTML Elements and all the `cr-id` that are visible on all view elements to be able to compare to the view model.
 
+### Circular.extend$
+
+When [extending a component](#extending-a-component) you might want to add new subscribers. Doing so would though overwrite the base class's subscribers. You can use this function to merge the 2 subscribers.
+
+```js
+  // base class has subscribe$: { this: ['foo'], other: ['otherFoo'] };
+  subscribe$: extend$({ this: ['bar'] }, cmpnt);
+```
+will end up as `subscribe$: { this: ['foo', 'bar'], other: ['otherFoo'] }`.
+The argument **cmpnt** is the imported component data. See [Extending a Component](extending-a-component) so understand **cmpnt**.
+
 ### Extending a Component
 
 Importing a component via `require()` of `define()` is not only meant for using this component in your template but also for extending an existing component.
@@ -460,15 +491,22 @@ The imported component has the following definition:
 This way you can extend from `Klass` and create a new component.
 
 ```js
-require(['circular', 'cmpnt'], ({ Component }, cmpnt) =>
+require(['circular', 'cmpnt'], ({ Component, extend$ }, cmpnt) =>
 
 Component({
   selector: cmpnt.selector + '-ext',
-  template: 'some new template {{bar}}',
-  subscribe$: { foo: ['bar'], ...cmpnt.subscribe$ },
+  template: 'some new template {{bar}}', // or cmpnt.template
+  subscribe$: extend$({ foo: ['bar'] }, cmpnt),
 },
 class ExtComponent extends cmpnt.Klass {
-  super();
+  constructor (elm, input, crInst) {
+    super(elm, input, crInst);
+  }
+
+  this$() {
+    super.this$();
+    // ...
+  }
   // ...
 }));
 ```

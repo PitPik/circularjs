@@ -26,7 +26,7 @@ class Tree {
     }];
   }
 
-  tree$PR(item, parent, root) {
+  tree$PR(item, parentItem, parent, root) {
     item.open = item.open || false;
     if (item.children) item.children.push({ name: '+' });
   }

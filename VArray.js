@@ -56,7 +56,7 @@ VAProto.addSubscriber = function(property, item) { // TODO: rename;
   if (!data.model) return;
   return setGetter(data.model, path[path.length - 1], {}, path, this._onChange._options.promoter);
 };
-VAProto.getCleanModel = function(item) { return JSON.parse(JSON.stringify(item)) };
+VAProto.getCleanModel = function(item) { return JSON.parse(JSON.stringify(item || this)) };
 VAProto.updateModel = function(newModel) { return updateModel(this, newModel) };
 VAProto.destroy = function(id) { // TODO.... all
   id = typeof id !== 'object' ? id : this[this._onChange._options.idProperty].split(':')[0];
@@ -152,6 +152,7 @@ function move(arr, item, index, last) {
   var opts = arr._onChange._options;
   var children = opts.children;
   var isMove = item.index !== undefined;
+  var prevNode = isMove ? item.parentNode : undefined;
   var prevParent = isMove ? item[children].parent : undefined;
   var movedIndex = isMove ? item.index : index;
   var root = !isMove ? getRoot(arr) : undefined;
@@ -170,6 +171,7 @@ function move(arr, item, index, last) {
     index: movedIndex,
     parent: arr,
     previousParent: prevParent,
+    previousNode: prevNode,
     item: item,
     last: last === undefined ? true : last,
   });
@@ -230,7 +232,7 @@ function resetParents(item, arr, children) { // TODO: revisit
   var parentNode = item.parentNode; // overwritten
 
   item[children].parent = arr;
-  parentNode = arr.parent[getParentIndex(arr, item.index, children)];
+  parentNode = arr.parent && arr.parent[getParentIndex(arr, item.index, children)];
   if (!parentNode) delete item.parentNode;
   else {
     if (item.parentNode !== undefined) item.parentNode = parentNode;
@@ -290,6 +292,9 @@ function updateObject(model, newModel) {
 }
 
 function updater(model, newModel, n) { // TODO: if (model[n].constructor === VArray) ??
+  var onUpdate = model._onChange && model._onChange._options.promoter.onUpdate;
+
+  if (onUpdate) onUpdate(model[n], newModel[n], n, model);
   if (model[n] && Array.isArray(model[n])) updateModel(model[n], newModel[n]);
   else if (model[n] && typeof model[n] === 'object') updateObject(model[n], newModel[n]);
   else if (model[n] !== newModel[n] && newModel[n] !== undefined) model[n] = newModel[n];
@@ -330,13 +335,23 @@ function initModel(vArr, opts, parent, root, index) {
 }
 
 function initChild(item, index, opts, parent, root) {
-  if (opts.promoter.interseptor) opts.promoter.interseptor(item, parent, root);
+  if (opts.promoter.interseptor)
+    opts.promoter.interseptor(item, parent && parent[index], parent, root, extendModel);
   NODES[root[opts.idProperty].split(':')[0]][idCounter] = item;
   setProp(item, opts.idProperty, root[opts.idProperty] + ':' + idCounter++, false);
   if (parent) setProp(item, 'parentNode', parent[index], true, false, true);
   setIndexGetter(item, opts.children, root);
   initGetters(item, opts);
   return item;
+}
+
+function extendModel(item, model, options) {
+  options = options || {};
+  options.force = options.force === undefined ? true : options.force;
+
+  for (var key in model) if (item[key] === undefined || options.force) setProp(
+    item, key, model[key], true, !!options.show, true
+  );
 }
 
 function setProp(model, property, value, writeable, enumable, configurable) {

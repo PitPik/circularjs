@@ -47,6 +47,7 @@ function installEvent(_this, data, eventName, callbackNames, callbackFns) {
 
   if (!_this.items[eventName]) _this.items[eventName] = [];
   data.delegate = delegate;
+  data.path = [];
   for (var n = callbackNames.length, callback = ''; n--; ) {
     callback = callbackNames[n] = callbackNames[n].replace(/[?!]/g, '');
     events[callback] ? events[callback].push(data) : events[callback] = [data];
@@ -54,11 +55,11 @@ function installEvent(_this, data, eventName, callbackNames, callbackFns) {
   if (_this.listeners[eventName]) return;
 
   _this.listeners[eventName] = Toolbox.addEvent(_this.element, eventName, function eventCB(e) {
-    eventDelegator(e, callbackFns, _this.events, _this.items);
+    eventDelegator(_this, e, callbackFns, _this.events, _this.items);
   }, useCapture || capture > 1 ? true : capture === 1 ? false : undefined);
 }
 
-function collect(cbKeys, callbacks, cbFns, items) {
+function collect(rootElement, cbKeys, callbacks, cbFns, items) {
   var n = 0, m = 0;
   var cbName = '';
   var data = callbacks; // dummy reference
@@ -73,20 +74,28 @@ function collect(cbKeys, callbacks, cbFns, items) {
         callbacks[cbName].splice(m, 1);
         continue;
       }
+      if (data.element !== rootElement)
+        data.path = getPath(data.element, rootElement, [data.element]);
       items.push(data);
     }
   }
 
   return items.length < 2 ? items : items.sort(function(a, b) {
-    return a.element.contains(b.element) ? -1 : 1;
+    return a.path.indexOf(b.element) - b.path.indexOf(a.element) ||
+      (a.model[a.idTag] < b.model[b.idTag] ? 1 : -1);
   });
 }
 
-function eventDelegator(e, cbFns, events, cache) {
+function getPath(elm, rootElement, out) {
+  while ((elm = elm.parentNode) && elm !== rootElement) out.unshift(elm);
+  return out;
+}
+
+function eventDelegator(_this, e, cbFns, events, cache) {
   var callbacks = events[e.type];
   var cbKeys = Toolbox.keys(callbacks);
   var path = (e.composedPath && e.composedPath()) || e.path;
-  var items = cache[e.type].length ? cache[e.type] : collect(cbKeys, callbacks, cbFns, []);
+  var items = cache[e.type].length ? cache[e.type] : collect(_this.element, cbKeys, callbacks, cbFns, []);
   var cbName = '';
   var n = 0, m = 0;
   var cancel = false;
@@ -108,7 +117,7 @@ function eventDelegator(e, cbFns, events, cache) {
 
       element = data.delegate ? Toolbox.findParent(e.target, data.idTag, data.element) : data.element;
       retModel = data.delegate ? element && data.getElementById(element[data.idTag], true) : data.model;
-      model = retModel[data.children] && retModel[data.children].parent;
+      model = retModel && retModel[data.children] && retModel[data.children].parent;
 
       if (retModel) cancel = cbFns[cbName](
         e,

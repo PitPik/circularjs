@@ -121,6 +121,7 @@ const sortOutput = items => {
 const writeMinJSFile = (data, outputName, type) => {
   const jsFiles = [];
   const output = [];
+  const promises = [];
 
   data.forEach(item => {
     if (!item.path.match(fileRegexp)) {
@@ -133,37 +134,32 @@ const writeMinJSFile = (data, outputName, type) => {
     options.echo && console.log(`\x1b[94m[Compressing]\x1b[0m ${item.path}`);
   });
 
-  return compressor.minify({
-    compressor: type,
-    input: output,
-    output: outputName,
-    // sync: true,
-  }).then(min => {
+  output.forEach((name, index) => {
+    return promises.push(
+      compressor
+        .minify({
+          compressor: type,
+          input: name,
+          output: outputName,
+          // sync: true,
+        })
+        .then(min => {
+          return min.replace(/((require|define)\((.*?)\))/, (_, $1, $2, $3) => {
+            const params = $3.split(/\s*,\s*/);
+            const noName = params[0][0] !== '"';
+            let name = noName ? `"${jsFiles[index].key}",` : '';
 
-    min = min.replace(/([)]{2,}),(require|define)/g, (_, $1, $2) => {
-      return $1 + ',\n' + $2;
-    });
-    min = min.replace(/\),!*function/g, (_, $1) => {
-      return '),\nfunction';
-    });
+            if (noName && params[0][0] !== '[') name += '[],';
 
-    min = min.split(/\n/).map((item, index) => {
-      return item.replace(/((require|define)\((.*?)\))/, (_, $1, $2, $3) => {  
-        const params = $3.split(/\s*,\s*/);
-        const noName = params[0][0] !== '"';
-        let name = noName ? `"${jsFiles[index].key}",` : '';
-  
-        if (noName && params[0][0] !== '[') {
-          name += '[],';
-        }
-  
-        return  `define(${name}${$3})`;
-      });
-    }).join('\n');
+            return `define(${name}${$3})`;
+          });
+        })
+        .catch(e => console.error(e))
+    );
 
+  });
 
-    return min;
-  }).catch(e => console.error(e));
+  return Promise.all(promises);
 }
 
 const params = process.argv.slice(2);
@@ -175,6 +171,7 @@ const options = {
   help: false,
   circularjs: '',
   echo: true,
+  mocks: false,
 };
 for (let j = 0; j < params.length; j++) {
   if (params[j] === '--path' || params[j] === '-p') {
@@ -198,6 +195,9 @@ for (let j = 0; j < params.length; j++) {
   if (params[j] === '--echo' || params[j] === '-e') {
     options.echo = params[j + 1] === 'false' ? false : true;
   }
+  if (params[j] === '--mocks' || params[j] === '-m') {
+    options.mocks = params[j + 1] === 'false' ? false : true;
+  }
 }
 if (!params.length || options.help) {
   console.log(`How to use package.js
@@ -218,6 +218,7 @@ Options:
 --output | -o: path (relative to --path) to output file
 --update | -u: update the lookahedMap of configuration defined by --cfg
 --circularjs | -cr: path to circular.min.j; includes circular.min.js to the file
+--mocks | -m: enables mock dependency packaging
 --echo | -e: more details about compressed files`);
   return;
 }
@@ -276,7 +277,7 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
     config: cfgData => {
       Object.keys(cfgData.paths).forEach((item, idx) => {
         const production = cfgData.production || {};
-        const itemPath = production[item] || cfgData.paths[item];
+        const itemPath = production[item] || (options.mocks && cfgData.mocks[item]) || cfgData.paths[item];
         const path = getRealPath(itemPath);
         if (fs.existsSync(path)) {
           arr.push({
@@ -375,7 +376,7 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
     promises.push(Promise.resolve('/* javaScript */'));
 
     Promise.all(promises).then(data => {
-      data.push(minJS);
+      data.push(minJS.join('\n'));
       textOut = data.join('\n');
       console.log(`\n\x1b[94m[*Packaging*]\x1b[0m ${options.output}`);
       fs.writeFile(

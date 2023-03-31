@@ -46,8 +46,9 @@
   - [onDestroy](API.md#onDestroy)
   - [this$](API.md#thisproperty-item-value-oldValue)
   - [myModel$](API.md#myModelproperty-item-value-oldValue)
-  - [myModel$Move](API.md#myModelMoveaction-key-item-model-previousModel)
-  - [myModel$PR](API.md#myModelPRitem-parent-root)
+  - [myModel$Move](API.md#mymodelmoveaction-key-item-model-previousmodel-previousnode)
+  - [myModel$PR](API.md#mymodelpritem-parentitem-parent-root-extendmodel)
+  - [myModel$Update](API.md#mymodelupdateitem-newdata-index-parent)
 
 ### Inside [SCHNAUZER.md](SCHNAUZER.md)
 
@@ -84,6 +85,8 @@
 - [getChildComponents](CIRCULAR.md#getchildcomponentsinst)
 - [getParentComponent](CIRCULAR.md#getparentcomponentinst)
 - [destroyComponent](CIRCULAR.md#destroycomponentelm-remove)
+- [getModelElement](CIRCULAR.md#getmodelelementinst-item)
+
 - [triggerEvent](CIRCULAR.md#triggereventtype-data-params)
 - [installEvent](CIRCULAR.md#installeventelement-type-func-cap)
 - [getView](CIRCULAR.md#getviewvalue-element)

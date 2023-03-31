@@ -32,7 +32,12 @@ function getPathFromName(name) {
   var postFix = /(?:^\!|^http[s]*:|.*\.js$)/.test(name) ? '' : '.js';
   var path = '';
 
-  name = (require.paths[name] || name).replace(/^[!%]/, '');
+  name = (
+    require.development[name] ||
+    (require.options.devMocks && require.mocks[name] || '') ||
+    require.paths[name] ||
+    name
+  ).replace(/^[!%]/, '');
   path = normalizePath((require.baseUrl || '.') + '/' +
     name + postFix).replace(/^.\//, '');
   return require.mapPath ? require.mapPath(name, postFix, path) : path;
@@ -40,7 +45,7 @@ function getPathFromName(name) {
 
 function config(config) {
   var exceptions = { mapPath: 'function', baseUrl: 'string' };
-  var items = ['lookaheadMap', 'paths', 'options', 'mapPath', 'baseUrl', 'lazyPackages'];
+  var items = ['lookaheadMap', 'paths', 'options', 'mapPath', 'baseUrl', 'lazyPackages', 'development', 'mocks'];
 
   if (!require[items[0]]) { // init first time
     for (var n = items.length; n--; ) {
@@ -63,7 +68,11 @@ function lookaheadForDeps(name) {
   var deps = require.lookaheadMap[name];
   var minifyPrefix = require.options.minifyPrefix; // ??
 
-  if (!deps || (require.paths[name] || '').indexOf(minifyPrefix) !== -1) {
+  if (!deps || (
+    require.development[name] ||
+    (require.options.devMocks && require.mocks[name] || '') ||
+    require.paths[name] || ''
+  ).indexOf(minifyPrefix) !== -1) {
     return;
   }
   require(deps);

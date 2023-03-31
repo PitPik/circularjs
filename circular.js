@@ -95,6 +95,9 @@ Object.defineProperties(Circular.prototype, mixinAPI({
       if (remove) elm.parentNode.removeChild(elm);
     }
   }},
+  getModelElement: { value: function(inst, item) {
+    return instances[this.id][inst['__cr-id'].split(':')[1]].template.blick.findElement(item);
+  }}
 }, Circular));
 
 return Object.defineProperties(Circular, {
@@ -135,6 +138,18 @@ return Object.defineProperties(Circular, {
       element: elm,
     } : component;
   }},
+  extend$: { value: function(list, Component) {
+    var source = Component.subscribe$, key = '', _key = '', n = 0;
+
+    for (key in source) {
+      _key = Component.childNames[key] ? key + ':' + Component.childNames[key] : key;
+
+      if (!list[_key]) list[_key] = [];
+      for (n = source[key].length; n--; ) if (list[_key].indexOf(source[key][n]) === -1)
+        list[_key].push(source[key][n]);
+    }
+    return list;
+  }}
 });
 
 /* -------------------- private functions ------------------- */
@@ -304,34 +319,42 @@ function setSubscribers(listeners, scope, destroyers, name, key, value) {
 }
 
 function initInstance(component, inst, plugData, name) {
+  return new component.Klass(inst.element, function(scope, doSubscribe) {
+    return setupParentVars(scope, doSubscribe, inst, name);
+  }, inst.crInst);
+}
+
+function setupParentVars(scope, doSubscribe, inst, name) {
   var ids = inst.parent && inst.parent.split(':');
   var parent = inst.parent && (instances[ids[0]][ids[1]] || {}) || {};
 
-  return new component.Klass(inst.element, function(scope, doSubscribe) {
-    if (doSubscribe !== false) doSubscribe = true;
-    getAttrMap(inst.element, 'cr-input', function(type, value, element) {
-      var item = value.split(/\s*=\s*/);
-      var isString = item[1] && (item[1].indexOf('"') === 0 || item[1].indexOf("'") === 0);
-      var oneWay = item[1] && item[1].charAt(0) === '!';
-      var value = oneWay ? item[1].substring(1) : item[1];
-      var key = value || item[0];
+  if (doSubscribe !== false) doSubscribe = true;
+  getAttrMap(inst.element, 'cr-input', function(type, value, element) {
+    setupInput(value, scope, doSubscribe, parent, inst, name);
+  });
+  if (!inst.crInst.options.debug) inst.element.removeAttribute('cr-input');
+  // TODO: check foo="Hi, this is me" ... the comma , in getAttrMap
+  return;
+}
 
-      value = isString ? value.substring(1, value.length - 1) : value === 'true' ? true : 
-        value === 'false' ? false : +value == value ? +value : undefined; // value ??
+function setupInput(value, scope, doSubscribe, parent, inst, name) {
+  var item = value.split(/\s*=\s*/);
+  var isString = item[1] && (item[1].indexOf('"') === 0 || item[1].indexOf("'") === 0);
+  var oneWay = item[1] && item[1].charAt(0) === '!';
+  var value = oneWay ? item[1].substring(1) : item[1];
+  var key = value || item[0];
 
-      if (hasOwnProperty.call(scope, item[0])) {
-        if (value !== undefined) scope[item[0]] = value;
-        else if (hasOwnProperty.call(parent.instance, key)) {
-          scope[item[0]] = parent.instance[key];
-          if (doSubscribe && !isString && !oneWay)
-            setSubscribers(parent.listeners, scope, inst.destroyers, name, key, item[0]);
-        }
-      }
-    });
-    if (!inst.crInst.options.debug) inst.element.removeAttribute('cr-input');
-    // TODO: check foo="Hi, this is me" ... the comma , in getAttrMap
-    return;
-  }, inst.crInst);
+  value = isString ? value.substring(1, value.length - 1) : value === 'true' ? true : 
+    value === 'false' ? false : +value == value ? +value : undefined; // value ??
+
+  if (hasOwnProperty.call(scope, item[0])) {
+    if (value !== undefined) scope[item[0]] = value;
+    else if (hasOwnProperty.call(parent.instance, key)) {
+      scope[item[0]] = parent.instance[key];
+      if (doSubscribe && !isString && !oneWay)
+        setSubscribers(parent.listeners, scope, inst.destroyers, name, key, item[0]);
+    }
+  }
 }
 
 // ------- model stuff
@@ -349,7 +372,8 @@ function applyModel(name, component, inst) {
 }
 
 function getVArrayModel(name, component, inst, childNodes) {
-  var name$PR = name + '$PR'; // TODO: $interseptor vs $PR
+  var name$PR = name + '$PR';
+  var name$Update = name + '$Update';
   var data = {
     collector: component.template.blick.collector,
     inst: inst,
@@ -368,10 +392,11 @@ function getVArrayModel(name, component, inst, childNodes) {
     },
     promoter: {
       interseptor: inst[name$PR] && inst[name$PR].bind(inst),
+      onUpdate: inst[name$Update] && inst[name$Update].bind(inst),
       onChange: function(vArrData) {
         if (vArrData.action === 'change') vSubscribe(data, vArrData);
         else vMoveCallback(vArrData.action, vArrData.item, vArrData.parent,
-          vArrData.previousParent, vArrData.index, !vArrData.last, data);
+          vArrData.previousParent, vArrData.previousNode, vArrData.index, !vArrData.last, data);
       }
     }
   });
@@ -393,7 +418,7 @@ function vSubscribe(data, vData) {
   if (inst) for (key in inst) inst[key].scope[inst[key].key || vData.key] = vData.value;
 }
 
-function vMoveCallback(action, item, parent, previousParent, index, skipFix, data) {
+function vMoveCallback(action, item, parent, previousParent, previousNode, index, skipFix, data) {
   var blick = data.blick;
   var newParent = previousParent !== parent ? previousParent : parent;
   var count = parent.length;
@@ -403,10 +428,11 @@ function vMoveCallback(action, item, parent, previousParent, index, skipFix, dat
     if (previousParent !== parent && count === 1)
       updateArrayListeners(data, item.parentNode, blick.options.loopHelperName);
     blick.moveChild(index, newParent, item.index, parent, data.childNodes, skipFix);
+    if (previousParent.length === 0) updateArrayListeners(data, previousNode);
     if (previousParent !== parent) blick.cr_component.controller.setSort();
   } else if (action === 'add') {
     if (count === 1) checkRoot(item, parent, data);
-    blick.addChild(index, parent, item);
+    if (parent[blick.options.loopLimitsName]) blick.addChild(index, parent, item);
   } else if (action === 'remove') {
     blick.removeChild(index, parent, item); // this first
     if (count === 0) checkRoot(item, parent, data);
@@ -415,10 +441,10 @@ function vMoveCallback(action, item, parent, previousParent, index, skipFix, dat
   }
 
   if (data.inst[name$Move]) data.inst[name$Move](action,
-    parent.parent ? data.childNodes : data.name, item, parent, previousParent);
+    parent.parent ? data.childNodes : data.name, item, parent, previousParent, previousNode);
 }
 
-function checkRoot(item, parent, data) { // TODO: rename
+function checkRoot(item, parent, data) {
   if (!parent.parent) data.inst[data.name] = data.inst[data.name];
   else updateArrayListeners(data, item.parentNode);
 }
