@@ -434,8 +434,7 @@ function registerProperties(_this, udateFn, collector, data, items, children) {
     variable = item.key || item.variable.value;
     propFn = getPropertyUpdateFn(item, data, udateFn, _this.options.loopLimitsName, _this.cr_component);
     loop = item.loop && item.loop.this['cr-id'];
-    parentId = item.parent['cr-id'] || item.loop.this['cr-id'] ||
-      item.loop['@parent']['cr-id'] || item.parent.this['cr-id'];
+    parentId = item.parent['this'] !== undefined ? item.parent.this['cr-id'] : item.parent['cr-id'];
     if (item.parent['cr-id'] === undefined) Object.defineProperty(item.parent, 'cr-id', {
       value: parentId,
     });
