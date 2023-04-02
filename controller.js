@@ -1,4 +1,4 @@
-/**! @license controller v2.0.2; Copyright (C) 2023 by Peter Dematté */
+/**! @license controller v2.0.3; Copyright (C) 2023 by Peter Dematté */
 define(['toolbox'], function(Toolbox) { 'use strict';
 
 function Controller(element) {
@@ -81,7 +81,7 @@ function collect(rootElement, cbKeys, callbacks, cbFns, items) {
   }
 
   return items.length < 2 ? items : items.sort(function(a, b) {
-    return a.path.indexOf(b.element) - b.path.indexOf(a.element) ||
+    return a.path.indexOf(b.element) - b.path.indexOf(a.element) -
       (a.model[a.idTag] < b.model[b.idTag] ? 1 : -1);
   });
 }

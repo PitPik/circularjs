@@ -1,4 +1,4 @@
-/**! @license CircularJS ● v2.0.2; Copyright (C) 2017-2023 by Peter Dematté */
+/**! @license CircularJS ● v2.0.3; Copyright (C) 2017-2023 by Peter Dematté */
 define(['toolbox', 'blick', 'VArray', 'api', 'controller'],
 function(Toolbox, Blick, VArray, mixinAPI, Controller) { 'use strict';
 
@@ -15,7 +15,7 @@ var extend = Toolbox.cloneObject;
 
 var Circular = function Circular(name, options) {
   this.controls = { initPartials: false };
-  this.version = '2.0.2';
+  this.version = '2.0.3';
   this.id = 0;
   this.name = '';
   this.options = {
@@ -394,15 +394,14 @@ function getVArrayModel(name, component, inst, childNodes) {
       interseptor: inst[name$PR] && inst[name$PR].bind(inst),
       onUpdate: inst[name$Update] && inst[name$Update].bind(inst),
       onChange: function(vArrData) {
-        if (vArrData.action === 'change') vSubscribe(data, vArrData);
-        else vMoveCallback(vArrData.action, vArrData.item, vArrData.parent,
+        if (vArrData.action === 'change') return vSubscribe(data, vArrData);
+        else return vMoveCallback(vArrData.action, vArrData.item, vArrData.parent,
           vArrData.previousParent, vArrData.previousNode, vArrData.index, !vArrData.last, data);
       }
     }
   });
 }
 
-// TODO: return false would return the value back .... hmmmm ... no rendering...
 function vSubscribe(data, vData) {
   var key = data.childNodes;
   var inst = data.inst;
@@ -411,8 +410,8 @@ function vSubscribe(data, vData) {
   var name$ = data.name + '$';
   var ids = data.inst['__cr-id'].split(':');
 
+  if (inst[name$] && inst[name$](vData.key, vData.item, vData.value, vData.oldValue) === false) return false;
   if (updaters) for (var n = updaters.length; n--; ) updaters[n](vData.value);
-  if (inst[name$]) inst[name$](vData.key, vData.item, vData.value, vData.oldValue);
 
   inst = instances[ids[0]][ids[1]].listeners[vData.key];
   if (inst) for (key in inst) inst[key].scope[inst[key].key || vData.key] = vData.value;
@@ -423,6 +422,10 @@ function vMoveCallback(action, item, parent, previousParent, previousNode, index
   var newParent = previousParent !== parent ? previousParent : parent;
   var count = parent.length;
   var name$Move = data.name + '$Move';
+
+  if (data.inst[name$Move] && data.inst[name$Move](action,
+    parent.parent ? data.childNodes : data.name, item, parent, previousParent, previousNode) === false)
+      return false;
 
   if (action === 'move') {
     if (previousParent !== parent && count === 1)
@@ -439,9 +442,6 @@ function vMoveCallback(action, item, parent, previousParent, previousNode, index
   } else if (action === 'sort') {
     blick.moveChild(index, parent, count - 1, parent, data.childNodes, skipFix);
   }
-
-  if (data.inst[name$Move]) data.inst[name$Move](action,
-    parent.parent ? data.childNodes : data.name, item, parent, previousParent, previousNode);
 }
 
 function checkRoot(item, parent, data) {
