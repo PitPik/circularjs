@@ -423,10 +423,6 @@ function vMoveCallback(action, item, parent, previousParent, previousNode, index
   var count = parent.length;
   var name$Move = data.name + '$Move';
 
-  if (data.inst[name$Move] && data.inst[name$Move](action,
-    parent.parent ? data.childNodes : data.name, item, parent, previousParent, previousNode) === false)
-      return false;
-
   if (action === 'move') {
     if (previousParent !== parent && count === 1)
       updateArrayListeners(data, item.parentNode, blick.options.loopHelperName);
@@ -442,6 +438,9 @@ function vMoveCallback(action, item, parent, previousParent, previousNode, index
   } else if (action === 'sort') {
     blick.moveChild(index, parent, count - 1, parent, data.childNodes, skipFix);
   }
+
+  if (data.inst[name$Move]) data.inst[name$Move](action,
+    parent.parent ? data.childNodes : data.name, item, parent, previousParent, previousNode);
 }
 
 function checkRoot(item, parent, data) {
