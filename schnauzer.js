@@ -63,6 +63,10 @@ var HBSS = Schnauzer.SafeString = function(text) { this.string = text }; // WTF
 HBSS.prototype.toString = HBSS.prototype.toHTML = function() { return '' + this.string };
 Schnauzer.getObjectKeys = getObjectKeys; Schnauzer.cloneObject = cloneObject;
 Schnauzer.concatArrays = concatArrays;
+Schnauzer.isEmpty = function(item) {
+  return !item ? true : item.constructor === Array ? !item.length :
+    typeof item === 'object' ? !getObjectKeys(item).length : !item;
+};
 
 Schnauzer.prototype = {
   render: function(data, extra) {
@@ -238,6 +242,7 @@ function getHelperArgs(_this, model, tagData, data, newData, track) {
     extend: cloneObject,
     concat: concatArrays,
     getDataDetails: function() { return data },
+    isEmpty: Schnauzer.isEmpty,
   };
 
   if (helpers['@length']) cloneObject(args.data, { loop: helpers['@loop'], depth: helpers['@depth'],

@@ -489,9 +489,8 @@ function scanHTML(blick, fragment, item, parent, index, id, deleted) {
   if (parent === 'skip') for (n = children.length; n--; ) delete children[n]['cr-id'];
 }
 
-function isDynamic(blick, obj, key, vArrayID, makeDynamic) {
+function isDynamic(obj, key, vArrayID, makeDynamic, models) {
   var active = obj ? (Object.getOwnPropertyDescriptor(obj, key) || {}).set ? 1 : 0 : 0;
-  var models = blick.cr_component.models;
 
   if (!active && makeDynamic && obj && hasOwnProperty.call(obj, key)) {
     models[vArrayID].model.addSubscriber(key, obj);

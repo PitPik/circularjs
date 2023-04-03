@@ -323,7 +323,7 @@ function getActives(_this, actives, cData, data, tagData) {
   if (!models[vomId]) {
     return announce(_this, 3, 'No subscriber defined for:', '"' + key + '"', 'in:', cData.parent);
   }
-  isDynamic = _this.options.isDynamic(_this, cData.parent, key, vomId,_this.options.forceUpdate);
+  isDynamic = _this.options.isDynamic(cData.parent, key, vomId,_this.options.forceUpdate, models);
   if (_this.options.debugMode) saySomething(_this, hasValue, isDynamic, tagData, cData, data, key);
   if (hasValue) actives.push(cData); // TODO: !hasValue ... do something about this
 }
