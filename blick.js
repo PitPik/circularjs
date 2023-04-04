@@ -316,6 +316,11 @@ function getActives(_this, actives, cData, data, tagData) {
   }
   if (variable.path[0] === '@root') cData.isFromRoot = true;
 
+  if (cData.loop && !cData.parent.parent) Object.defineProperty(cData.parent, '__cr-id', {
+    value: cData.loop['@root']['__cr-id'] });
+  if (!cData.parent['cr-id'] && !cData.parent.this) Object.defineProperty(cData.parent, 'cr-id', {
+    value: cData.loop.this['cr-id'] || cData.loop['@parent']['cr-id'],
+  });
   isDynamic = _this.options.isDynamic(cData, key, _this.options.forceUpdate);
   if (isDynamic === null) {
     return announce(_this, 3, 'No subscriber defined for:', '"' + key + '"', 'in:', cData.parent);
@@ -789,7 +794,7 @@ function replaceBlock(_this, firstNode, lastNode, bodyFn, track, out, dataDump, 
       _this._firstTimeLoop = trackDF[fnIdx]; // TODO: spooky
       return (data[0].value[options.loopLimitsName].push(firstNode), ''); // TODO: check
     } else if (wasNotRendered && body && !update) options.scanHTML(_this, trackDF[fnIdx], item,
-        data[0].parent['__cr-id'] && data[0].parent || data[0].value, 'skip');
+      data[0].renderArgs ? data[0] : data[0].parent['__cr-id'] && data[0].parent || data[0].value, 'skip');
 
     if (body) lastNode.parentNode.insertBefore(trackDF[fnIdx], lastNode); // TODO: check...
     if (isScroll && body) setScroll(false, data[0], fnIdx);

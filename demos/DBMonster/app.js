@@ -6,7 +6,7 @@ Component({
   template: `
   <table class="table table-striped latest-data">
     <tbody>
-    {{#each data}}
+    {{#each %data}}
       <tr>
         <td class="dbname">
           {{dbname}}
@@ -39,7 +39,7 @@ class App {
   }
 
   update() {
-    this.data.updateModel(ENV.generateData().toArray());
+    this.data = ENV.generateData().toArray();
     Monitoring.renderRate.ping();
 
     setTimeout(() => this.update(), ENV.timeout);

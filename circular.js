@@ -465,7 +465,8 @@ function registerLoopItem(node, item, debugMode, processed) { // TODO: uuuhhh,..
 }
 
 function scanHTML(blick, fragment, item, data, skip, deleted) {
-  var instId = data['__cr-id'] || data._onChange._options.instId;
+  var cData = data.renderArgs ? scanArgs(data.renderArgs).parent : data;
+  var instId = cData['__cr-id'] || cData._onChange._options.instId;
   var ids = instId.split(':')
   var inst = instances[ids[0]][ids[1]];
   var models = inst.models;
@@ -492,7 +493,8 @@ function scanHTML(blick, fragment, item, data, skip, deleted) {
   if (skip) for (n = children.length; n--; ) delete children[n]['cr-id'];
 }
 
-function isDynamic(cData, key, makeDynamic) {
+function isDynamic(data, key, makeDynamic) {
+  var cData = data.renderArgs ? scanArgs(data.renderArgs) : data;
   var obj = cData.parent;
   var rootId = getRootId(cData);
   var itemId = (cData.parent['cr-id'] || cData.parent.this['cr-id']).split(':')[0];
@@ -508,12 +510,19 @@ function isDynamic(cData, key, makeDynamic) {
   return active;
 }
 
+function scanArgs(data) {
+  for (var n = 0, l = data.length; n < l; n++) {
+    if (data[n].renderArgs) return scanArgs(data[n].renderArgs);
+    if (data[n].parent['__cr-id']) return data[n];
+  }
+}
+
 function getRootId(data) {
   return data.parent['__cr-id'] ||
     (data._onChange && data._onChange._options.instId) ||
     (data.loop && data.loop['@root']['__cr-id']) ||
-    (data.value && data.value._onChange._options.instId) ||
-    (data.parent['@root']['__cr-id']);
+    (data.value && data.value._onChange && data.value._onChange._options.instId) ||
+    (data.parent['@root'] && data.parent['@root']['__cr-id']) || '';
 }
 
 function destroyItems(fragment, inst) {
