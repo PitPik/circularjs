@@ -210,7 +210,6 @@ function initComponent(element, component, defData, plugData, parent, onLoad) {
       return acc;
     }, {});
 
-  inst.template.blick.cr_component = inst; // TODO: uuuuaaaaaa
   // TODO: see if we can trigger childrens onInit only when parent is rendered (not only onLoad)...
   // inst.instance.onBeforeInit && inst.instance.onBeforeInit(element, crInst);
   if (template) renderComponent(inst, defData.extra);
@@ -386,6 +385,7 @@ function getVArrayModel(name, component, inst, childNodes) {
     idProperty: 'cr-id', // TODO: define by circular properties
     children: childNodes,
     listeners: component.subscribe$[name],
+    instId: inst['__cr-id'],
     error: function(error, level) {
       if (!level) throw('VArray Error: ' + error);
       else console.error('VArray Error: ' + error);
@@ -422,16 +422,17 @@ function vMoveCallback(action, item, parent, previousParent, previousNode, index
   var newParent = previousParent !== parent ? previousParent : parent;
   var count = parent.length;
   var name$Move = data.name + '$Move';
+  var ids = action === 'move' && parent._onChange._options.instId.split(':');
 
   if (action === 'move') {
     if (previousParent !== parent && count === 1)
       updateArrayListeners(data, item.parentNode, blick.options.loopHelperName);
     blick.moveChild(index, newParent, item.index, parent, data.childNodes, skipFix);
     if (previousParent.length === 0) updateArrayListeners(data, previousNode);
-    if (previousParent !== parent) blick.cr_component.controller.setSort();
+    if (previousParent !== parent) instances[ids[0]][ids[1]].controller.setSort();
   } else if (action === 'add') {
     if (count === 1) checkRoot(item, parent, data);
-    if (parent[blick.options.loopLimitsName]) blick.addChild(index, parent, item);
+    blick.addChild(index, parent, item);
   } else if (action === 'remove') {
     blick.removeChild(index, parent, item); // this first
     if (count === 0) checkRoot(item, parent, data);
@@ -463,8 +464,10 @@ function registerLoopItem(node, item, debugMode, processed) { // TODO: uuuhhh,..
   debugMode && node.setAttribute('cr-id', item['cr-id']); // TODO: this
 }
 
-function scanHTML(blick, fragment, item, parent, index, id, deleted) {
-  var inst = blick.cr_component;
+function scanHTML(blick, fragment, item, data, skip, deleted) {
+  var instId = data['__cr-id'] || data._onChange._options.instId;
+  var ids = instId.split(':')
+  var inst = instances[ids[0]][ids[1]];
   var models = inst.models;
   var itemID = item && item['cr-id'];
   var vArrayID = itemID && itemID.split(':')[0] || keys(models)[0];
@@ -479,24 +482,38 @@ function scanHTML(blick, fragment, item, parent, index, id, deleted) {
   }
   if (!children.length) return; // prevents unnecessary initInnerComponents()...
 
-  if (itemID) for (n = children.length; n--; ) registerLoopItem( // TODO: check why...
+  if (itemID) for (n = children.length; n--; ) registerLoopItem( // 'cr-id's needed
     children[n], item, blick.options.debugMode, children[n]['cr-id']
   );
 
   initInnerComponents(inst, fragment);
   addInstanceEvents(inst, vArray, fragment);
-   // TODO: check why... well, addEvents needs (ids) it because fragment is not yet appended
-  if (parent === 'skip') for (n = children.length; n--; ) delete children[n]['cr-id'];
+   // ... well, addEvents needs 'cr-id's because fragment is not yet appended
+  if (skip) for (n = children.length; n--; ) delete children[n]['cr-id'];
 }
 
-function isDynamic(obj, key, vArrayID, makeDynamic, models) {
+function isDynamic(cData, key, makeDynamic) {
+  var obj = cData.parent;
+  var rootId = getRootId(cData);
+  var itemId = (cData.parent['cr-id'] || cData.parent.this['cr-id']).split(':')[0];
+  var ids = (rootId).split(':');
+  var model = (instances[ids[0]][ids[1]].models[itemId] || {}).model;
   var active = obj ? (Object.getOwnPropertyDescriptor(obj, key) || {}).set ? 1 : 0 : 0;
 
+  if (!model) return null;
   if (!active && makeDynamic && obj && hasOwnProperty.call(obj, key)) {
-    models[vArrayID].model.addSubscriber(key, obj);
+    model.addSubscriber(key, obj);
     active = 2;
   }
   return active;
+}
+
+function getRootId(data) {
+  return data.parent['__cr-id'] ||
+    (data._onChange && data._onChange._options.instId) ||
+    (data.loop && data.loop['@root']['__cr-id']) ||
+    (data.value && data.value._onChange._options.instId) ||
+    (data.parent['@root']['__cr-id']);
 }
 
 function destroyItems(fragment, inst) {

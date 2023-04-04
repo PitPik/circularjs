@@ -47,7 +47,7 @@ return (function(Schnauzer, cloneObject) { /* class Blick extends Schnauzer */
     this.options = cloneObject(this.options, {
       registerLoopItem: function(node, item, debugMode, processed) {},
       isDynamic: function(blick, obj, key, vomId, makeDynamic) { return false; },
-      scanHTML: function(blick, fragment, item, parent, index, id, deleted) {},
+      scanHTML: function(blick, fragment, item, parent, skip, deleted) {},
       loopHelperName: 'loop-helper',
       loopFnName: '__loopFn',
       loopLimitsName: '__loopLimits',
@@ -303,10 +303,6 @@ function getActives(_this, actives, cData, data, tagData) {
   var isDynamic = 0;
   var partial = tagData.partial && tagData.partial.value;
 
-  var models = _this.cr_component.models;
-  var itemID = cData.parent['cr-id']; // TODO: put back to circular...
-  var vomId = itemID && itemID.split(':')[0] || Object.keys(models)[0]; // TODO: send to _this.options.isDynamic()
-
   if (variable.value === 'cr-scroll' && data[0].variable.active) data[0].scrollers = {};
   if (cData.renderArgs && !partial) getRenderArgsActives(cData.renderArgs, cData, actives); // TODO: check partial
   // TODO: Check if tagData.partial has any other consequences
@@ -320,10 +316,11 @@ function getActives(_this, actives, cData, data, tagData) {
   }
   if (variable.path[0] === '@root') cData.isFromRoot = true;
 
-  if (!models[vomId]) {
+  isDynamic = _this.options.isDynamic(cData, key, _this.options.forceUpdate);
+  if (isDynamic === null) {
     return announce(_this, 3, 'No subscriber defined for:', '"' + key + '"', 'in:', cData.parent);
   }
-  isDynamic = _this.options.isDynamic(cData.parent, key, vomId,_this.options.forceUpdate, models);
+
   if (_this.options.debugMode) saySomething(_this, hasValue, isDynamic, tagData, cData, data, key);
   if (hasValue) actives.push(cData); // TODO: !hasValue ... do something about this
 }
@@ -367,7 +364,7 @@ function triggerAllHelperFns(item, data) {
   }
 }
 
-function getPropertyUpdateFn(item, data, udateFn, loopLimitsName, comp) {
+function getPropertyUpdateFn(item, data, udateFn, loopLimitsName) {
   var parentHelper = item.parentHelper;
   var parentHelperFn = parentHelper && parentHelper.variable.renderFn;
   var renderArgs = parentHelper && parentHelper.renderArgs;
@@ -383,7 +380,7 @@ function getPropertyUpdateFn(item, data, udateFn, loopLimitsName, comp) {
       if (renderArgs !== data[0].renderArgs) triggerAllHelperFns(parentHelper, data[0].renderArgs);
       data[0].value = parentHelperFn(data[0].renderArgs);
     }
-    udateFn(data, item.loop, stop || loopLimits && (!isArray || value.length !== 0), item.scrollers, comp);
+    udateFn(data, item.loop, stop || loopLimits && (!isArray || value.length !== 0), item.scrollers);
   };
 }
 
@@ -432,7 +429,7 @@ function registerProperties(_this, udateFn, collector, data, items, children) {
   for (var n = items.length, item = {}, variable = '', parentId = '', propFn, loop = '', updaters; n--; ) {
     item = items[n];
     variable = item.key || item.variable.value;
-    propFn = getPropertyUpdateFn(item, data, udateFn, _this.options.loopLimitsName, _this.cr_component);
+    propFn = getPropertyUpdateFn(item, data, udateFn, _this.options.loopLimitsName);
     loop = item.loop && item.loop.this['cr-id'];
     parentId = item.parent['this'] !== undefined ? item.parent.this['cr-id'] : item.parent['cr-id'];
     if (item.parent['cr-id'] === undefined) Object.defineProperty(item.parent, 'cr-id', {
@@ -609,7 +606,7 @@ function removeChild(_this, index, item, child, isMoving, newParent) { // TODO: 
   if (isMoving) return garbage;
 
   unsubscribe(_this.collector, child[['cr-id']], child,
-    options.scanHTML(_this, garbage, child, item, index, null, true));
+    options.scanHTML(_this, garbage, child, item, false, true));
   if (_this.controls.helpers) updateHelpers(_this, index, item, child, true);
   return garbage;
 }
@@ -650,7 +647,7 @@ function addChild(_this, index, item, child) {
     resolveReferences(_this, _this.dataDump, saveWrapHtml(fn(child, index)));
   _this.controls.active = true;
 
-  options.scanHTML(_this, out, item[index]);  // TODO: check if index and such is good...
+  options.scanHTML(_this, out, item[index], item);
 
   for (var nodes = out.childNodes, n = nodes.length; n--; ) {
     if (nodes[n].nodeType === COMMENT_NODE && nodes[n].textContent === options.loopHelperName) {
@@ -765,7 +762,7 @@ function replaceBlock(_this, firstNode, lastNode, bodyFn, track, out, dataDump, 
     if (!wasEverRendered[currentFnIdx]) _this.controls.active = false;
   };
 
-  return function updateBlock(data, helpers, stopRender, isScroll, comp) { // TODO: check helpers for siblings
+  return function updateBlock(data, helpers, stopRender, isScroll) { // TODO: check helpers for siblings
     var dummy = isScroll ? setScroll(true, data[0], fnIdx) : undefined; // before bodyFn()
     var arrData = data[0].value && data[0].value.length; // null
     var body = bodyFn(data, helpers, stopRender); // track.checkFn() gets triggered here...
@@ -775,7 +772,6 @@ function replaceBlock(_this, firstNode, lastNode, bodyFn, track, out, dataDump, 
     var wasElse = fnIdx > track.fnIdx && isEach && wasEverRendered[track.fnIdx] === undefined;
     var item = data[0].loop && data[0].loop['this'];
 
-    _this.cr_component = comp; // TODO: ...
     if (fnIdx !== track.fnIdx || !body) { // TODO: check || !body ... good for existing data (faster)
       while ((node = firstNode.nextSibling) && node !== lastNode) trackDF[fnIdx].appendChild(node);
     }
@@ -792,7 +788,8 @@ function replaceBlock(_this, firstNode, lastNode, bodyFn, track, out, dataDump, 
     if (wasElse && data[0].value[options.loopLimitsName] && arrData) { // TODO: check
       _this._firstTimeLoop = trackDF[fnIdx]; // TODO: spooky
       return (data[0].value[options.loopLimitsName].push(firstNode), ''); // TODO: check
-    } else if (wasNotRendered && body && !update) options.scanHTML(_this, trackDF[fnIdx], item, 'skip');
+    } else if (wasNotRendered && body && !update) options.scanHTML(_this, trackDF[fnIdx], item,
+        data[0].parent['__cr-id'] && data[0].parent || data[0].value, 'skip');
 
     if (body) lastNode.parentNode.insertBefore(trackDF[fnIdx], lastNode); // TODO: check...
     if (isScroll && body) setScroll(false, data[0], fnIdx);
