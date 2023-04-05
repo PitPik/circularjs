@@ -798,7 +798,7 @@ function replaceBlock(_this, firstNode, lastNode, bodyFn, track, out, dataDump, 
 
     if (body) lastNode.parentNode.insertBefore(trackDF[fnIdx], lastNode); // TODO: check...
     if (isScroll && body) setScroll(false, data[0], fnIdx);
-    update && update(firstNode);
+    if (update) { firstNode.nextSibling.textContent = body; update(firstNode); }
     if (dataDump.length) dataDump.splice(0, dataDump.length);
   };
 }
