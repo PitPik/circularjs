@@ -411,7 +411,7 @@ function vSubscribe(data, vData) {
   var ids = data.inst['__cr-id'].split(':');
 
   if (inst[name$] && inst[name$](vData.key, vData.item, vData.value, vData.oldValue) === false) return false;
-  if (updaters) for (var n = updaters.length; n--; ) updaters[n](vData.value);
+  if (updaters) for (var n = updaters.length; n--; ) updaters[n](vData.value, null, vData.item);
 
   inst = instances[ids[0]][ids[1]].listeners[vData.key];
   if (inst) for (key in inst) inst[key].scope[inst[key].key || vData.key] = vData.value;
@@ -453,7 +453,7 @@ function updateArrayListeners(data, parent, stop) { // TODO: optimise
   var childNodes = data.childNodes; // TODO: check...
   var updaters = data.collector.updaters[parent['cr-id']][childNodes] || [];
 
-  for (var n = updaters.length; n--; ) updaters[n](parent[childNodes], stop);
+  for (var n = updaters.length; n--; ) updaters[n](parent[childNodes], stop, parent);
 }
 
 // ------- blick stuff

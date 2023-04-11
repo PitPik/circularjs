@@ -373,11 +373,13 @@ function getPropertyUpdateFn(item, data, udateFn, loopLimitsName) {
   var parentHelper = item.parentHelper;
   var parentHelperFn = parentHelper && parentHelper.variable.renderFn;
   var renderArgs = parentHelper && parentHelper.renderArgs;
+  var isHelper = item.variable.value.indexOf('@') !== - 1;
 
-  return function updateProperty(value, stop) {
+  return function updateProperty(value, stop, parent) {
     var loopLimits = value !== undefined && value !== null && (value[loopLimitsName] || '').length;
     var isArray = item.type === 'array';
 
+    if (!isHelper && parent !== item.parent) return; // TODO: isHelper -> ../
     if (!isArray && value === item.value && item.variable.active < 2) return;
 
     item.value = value;
@@ -776,6 +778,7 @@ function replaceBlock(_this, firstNode, lastNode, bodyFn, track, out, dataDump, 
     var wasNotRendered = !wasEverRendered[track.fnIdx];
     var wasElse = fnIdx > track.fnIdx && isEach && wasEverRendered[track.fnIdx] === undefined;
     var item = data[0].loop && data[0].loop['this'];
+    var diff = fnIdx !== track.fnIdx;
 
     if (fnIdx !== track.fnIdx || !body) { // TODO: check || !body ... good for existing data (faster)
       while ((node = firstNode.nextSibling) && node !== lastNode) trackDF[fnIdx].appendChild(node);
@@ -798,7 +801,7 @@ function replaceBlock(_this, firstNode, lastNode, bodyFn, track, out, dataDump, 
 
     if (body) lastNode.parentNode.insertBefore(trackDF[fnIdx], lastNode); // TODO: check...
     if (isScroll && body) setScroll(false, data[0], fnIdx);
-    if (update) { firstNode.nextSibling.textContent = body; update(firstNode); }
+    if (update) { if (!diff) firstNode.nextSibling.textContent = body; update(firstNode); }
     if (dataDump.length) dataDump.splice(0, dataDump.length);
   };
 }

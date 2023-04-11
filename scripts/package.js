@@ -340,7 +340,11 @@ fs.readFile(options.cfg, 'utf-8', (err, data) => {
       options.echo && console.log(`\x1b[94m[Compressing]\x1b[0m ${htmlData.path}`);
 
       return 'define("' + htmlData.key + '",[],function(){return\'' +
-        min.replace(/\'/g, "\\'").replace(/\n/g, "\\n") + '\'});';
+        min
+          .replace(/\s+({{2,3})~/g, '$1')
+          .replace(/~(}{2,3})\s+/g, '$1')
+          .replace(/\'/g, "\\'")
+          .replace(/\n/g, "\\n") + '\'});';
     }).catch(e => { console.error(e); throw new Error('Error parsing HTML'); })));
 
     css.length && promises.push(Promise.resolve('/* CSS */'));
