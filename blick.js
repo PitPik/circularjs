@@ -373,13 +373,13 @@ function getPropertyUpdateFn(item, data, udateFn, loopLimitsName) {
   var parentHelper = item.parentHelper;
   var parentHelperFn = parentHelper && parentHelper.variable.renderFn;
   var renderArgs = parentHelper && parentHelper.renderArgs;
-  var isHelper = item.variable.value.indexOf('@') !== - 1;
+  var isDeep = !!item.variable.path.length;
 
   return function updateProperty(value, stop, parent) {
     var loopLimits = value !== undefined && value !== null && (value[loopLimitsName] || '').length;
     var isArray = item.type === 'array';
 
-    if (!isHelper && parent !== item.parent) return; // TODO: isHelper -> ../
+    if (isDeep && parent !== item.parent) return;
     if (!isArray && value === item.value && item.variable.active < 2) return;
 
     item.value = value;
