@@ -294,6 +294,7 @@ function resolve(self, newValue) {
         return doResolve(then.bind(newValue), self);
       }
     }
+    self._cancelFn = null;
     self._state = 1;
     self._value = newValue;
     finale(self);
@@ -360,7 +361,7 @@ Promise.prototype.then = function (onFulfilled, onRejected) {
   return promise;
 };
 
-Promise.prototype.cancel = function (id) {
+Promise.prototype.cancel = function (id, fn) {
   var promise = Promise._cache[id];
 
   Promise._cache[id] = this;
@@ -374,8 +375,11 @@ Promise.prototype.cancel = function (id) {
     promise.then = promise['catch'] = function(){};
     promise._handled = true;
     promise._state = 1;
-  }
+    if (promise._cancelFn) promise._cancelFn();
+  } else this._cancelFn = fn;
+
   promise._returnFn = null;
+  promise._cancelFn = null;
 
   return this;
 };

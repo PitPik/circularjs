@@ -51,7 +51,7 @@ VAProto.getElementById = function(id, fullId) {
   return inst ? inst[id.substring(id.indexOf(':') + 1)] : null;
 };
 VAProto.addSubscriber = function(property, item) { // TODO: rename;
-  var path = Array.isArray(property) ? property : property.split('.');
+  var path = Array.isArray(property) ? property : property.split(/[./]/);
   var data = crawlObject(item, path); // TODO: check if needed??
   if (!data.model) return;
   return setGetter(data.model, path[path.length - 1], {}, path, this._onChange._options.promoter);

@@ -102,10 +102,10 @@ A simple function that takes a string `path` as an argument that defines a path 
 
 ### `ajax(url, prefs)`
 
-Like the `jQuery.ajax()` functionality but with the possibility to cancel the request by adding a string to `prefs.cancel` to identify the request.
+Like the `jQuery.ajax()` functionality but with the possibility to cancel the request by adding a `.cancel(string, fn)` to identify the request (See `Promise()` in next chapter).
 
 The function also auto detects `json`, `text` or `xml`.
 
-### `Promise(fn, staticData)`
+### `Promise(fn(resolve, reject))`
 
-The different `Promise` implementation with the possibility to cancel the Promise calling `Promise.cancel(string)` previously defined.
+The different `Promise` implementation with the possibility to cancel the Promise calling `new Promise().cancel(string, fn)` where `string` is like an ID to define the previously defined promise and `fn` as a callback being called in case the promise got cancelled.
