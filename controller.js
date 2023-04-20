@@ -81,8 +81,14 @@ function collect(rootElement, cbKeys, callbacks, cbFns, items) {
   }
 
   return items.length < 2 ? items : items.sort(function(a, b) {
-    return a.path.indexOf(b.element) - b.path.indexOf(a.element) -
-      (a.model[a.idTag] < b.model[b.idTag] ? 1 : -1);
+    const abIndex = a.path.indexOf(b.element);
+    const baIndex = b.path.indexOf(a.element);
+
+    return abIndex > baIndex ? 1 :
+      abIndex < baIndex ? -1 :
+      a.model[a.idTag] > b.model[b.idTag] ? 1 :
+      a.model[a.idTag] < b.model[b.idTag] ? -1 :
+      0;
   });
 }
 

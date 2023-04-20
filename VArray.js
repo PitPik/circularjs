@@ -106,14 +106,18 @@ function splice(arr, args) {
 function sort(arr, fn, order) {
   var id = arr._onChange._options.idProperty;
   var oldOrder = order || {};
-  var n = 0, l = 0;
+  var n = 0, l = 0, idx = 0;
   var out;
+  var resetIndex = !order && function(source, currentId) {
+    for (var id in source) if (source[currentId] < source[id]) --source[id];
+    delete source[currentId];
+  };
 
   if (!order) for (n = arr.length; n--; ) oldOrder[arr[n][id]] = n;
   out = typeof fn === 'function' || fn === undefined ? AProto.sort.call(arr, fn) : fn;
   for (n = 0, l = arr.length; n < l; n++) arr._onChange(onChange, {
     action: 'sort',
-    index: oldOrder[arr[n][id]],
+    index: (idx = oldOrder[arr[n][id]], resetIndex && resetIndex(oldOrder, arr[n][id]), idx),
     item: arr[n],
     parent: arr,
     last: n === l - 1,
