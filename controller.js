@@ -88,6 +88,8 @@ function collect(rootElement, cbKeys, callbacks, cbFns, items) {
       abIndex < baIndex ? -1 :
       a.model[a.idTag] > b.model[b.idTag] ? 1 :
       a.model[a.idTag] < b.model[b.idTag] ? -1 :
+      a.path.length > b.path.length ? 1 :
+      b.path.length > a.path.length ? -1 :
       0;
   });
 }
