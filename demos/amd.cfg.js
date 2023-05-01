@@ -5,6 +5,7 @@
       'git': ['circular', 'template-helpers'],
       'tree': ['circular', '!tree.html'],
       'binding': ['circular', '!binding.html'],
+      'home': ['circular', 'index'],
     },
     paths: {
       'template-helpers': 'helpers',
@@ -22,5 +23,6 @@
       'index': 'home',
       'tree': 'tree',
       'binding': 'binding',
+      'home': 'index'
     },
   });
