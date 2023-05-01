@@ -91,7 +91,7 @@ function eventDelegator(_this, e, cbFns, idTag, element, parent, store, item) {
     if (data.index === -1) continue;
     items.push(data);
   }
-  if (!items.length) return;
+  // if (!items.length) return;
   items.sort(function(a, b) { return b.index - a.index; });
 
 
