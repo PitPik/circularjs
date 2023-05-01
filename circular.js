@@ -429,7 +429,6 @@ function vMoveCallback(action, item, parent, previousParent, previousNode, index
       updateArrayListeners(data, item.parentNode, blick.options.loopHelperName);
     blick.moveChild(index, newParent, item.index, parent, data.childNodes, skipFix);
     if (previousParent.length === 0) updateArrayListeners(data, previousNode);
-    if (previousParent !== parent) instances[ids[0]][ids[1]].controller.setSort();
   } else if (action === 'add') {
     if (count === 1) checkRoot(item, parent, data);
     blick.addChild(index, parent, item);
@@ -479,7 +478,10 @@ function scanHTML(blick, fragment, item, data, skip, deleted) {
 
   if (deleted === true) {
     destroyItems(fragment, inst);
-    return function getChildren(sItem) { return sItem[childNodes] || [] };
+    return function getChildren(sItem) {
+      inst.controller.removeItem(sItem['cr-id']); // blick walks through all children
+      return sItem[childNodes] || [];
+    };
   }
   if (!children.length) return; // prevents unnecessary initInnerComponents()...
 
@@ -490,7 +492,9 @@ function scanHTML(blick, fragment, item, data, skip, deleted) {
   initInnerComponents(inst, fragment);
   addInstanceEvents(inst, vArray, fragment);
    // ... well, addEvents needs 'cr-id's because fragment is not yet appended
-  if (skip) for (n = children.length; n--; ) delete children[n]['cr-id'];
+  if (skip) for (n = children.length; n--; ) {
+    if (!children[n]['__loopItem']) delete children[n]['cr-id']; else delete children[n]['__loopItem'];
+  }
 }
 
 function isDynamic(data, key, makeDynamic) {
@@ -536,8 +540,6 @@ function destroyItems(fragment, inst) {
 // -----------------
 
 function addInstanceEvents(inst, vArray, fragment) {
-  var doTrigger = false;
-
   if (!inst.template.enableEvents) return null; // TODO:  || !vom
   if (fragment) addInstanceEvents(inst, vArray); // for it self!!!
 
@@ -550,7 +552,6 @@ function addInstanceEvents(inst, vArray, fragment) {
     var children = parent && parent._onChange && parent._onChange._options.children;
     var val = value.split(/\s*,\s*/);
 
-    if (!doTrigger) doTrigger = true;
     inst.controller.installEvent(type, {
       idTag: 'cr-id',
       getElementById: vArray && vArray.getElementById,
@@ -561,7 +562,6 @@ function addInstanceEvents(inst, vArray, fragment) {
     }, val, inst.instance);
     !inst.crInst.options.debug && element.removeAttribute('cr-event');
   });
-  if (doTrigger) inst.controller.setSort();
 }
 
 function installStyles(styles, selector) {

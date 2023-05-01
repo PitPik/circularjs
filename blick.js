@@ -492,7 +492,7 @@ function unsubscribe(collector, id, item, getChildren) {
 
 function registerLoop(_this, nodes, fn, data, items, limiters) {
   var idx = data[0].value.length;
-  var lastIdx = -1;
+  // var lastIdx = -1;
 
   for (var n = nodes.length, options = _this.options; n--; ) {
     if (nodes[n].nodeType === 8 && nodes[n].textContent === options.loopHelperName) {
@@ -501,8 +501,9 @@ function registerLoop(_this, nodes, fn, data, items, limiters) {
       idx--;
     } else if (nodes[n].nodeType !== 3) {
       _this.collector.element[data[0].value[idx]['cr-id'].split(':')[1]] = nodes[n];
-      options.registerLoopItem(nodes[n], data[0].value[idx], options.debugMode, lastIdx === idx);
-      lastIdx = idx;
+      nodes[n]['__loopItem'] = true;
+      options.registerLoopItem(nodes[n], data[0].value[idx], options.debugMode); // , lastIdx === idx
+      // lastIdx = idx;
     }
   }
   if (!items[0].value[options.loopLimitsName])

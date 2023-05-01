@@ -4,8 +4,8 @@ define(['toolbox'], function(Toolbox) { 'use strict';
 function Controller(element) {
   this.element = element || document.body;
   this.listeners = {};
-  this.events = {};
-  this.items = {};
+  this.store = Object.create(null);
+  this.root = Object.create(null);
 }
 
 Controller.prototype = {
@@ -16,123 +16,106 @@ Controller.prototype = {
   destroy: function() {
     var _this = this;
     Toolbox.keys(this.listeners).forEach(function(name) { removeEvent(_this, name) });
-    return this.element = null;
+    return this.element = this.root = this.store = null;
   },
-  setSort: function() {
-    for (var key in this.items) this.items[key] = [];
-  }
+  removeItem: function(id) { delete this.store[id]; },
 };
 
 return Controller;
 
 function removeEvent(_this, eventName) {
   var listener = _this.listeners[eventName];
-  var callbacks = listener && _this.events[eventName];
-  var keys = callbacks && Toolbox.keys(callbacks) || [];
-  var item = {};
-
   if (!listener) return;
 
   _this.listeners[eventName] = listener(); // = null
-  for (var n = keys.length; n--; ) while (item = callbacks[keys[n]].pop()) {
-    item.element = item.model = null;
-  }
+  delete _this.listeners[eventName];
 }
 
 function installEvent(_this, data, eventName, callbackNames, callbackFns) {
   var capture = eventName.length - (eventName = eventName.replace(/\!/g, '')).length;
   var delegate = eventName.length - (eventName = eventName.replace(/\?/g, '')).length;
-  var events = _this.events[eventName] = _this.events[eventName] || {};
   var useCapture = !!/(?:focus|blur|mouseenter|mouseleave|scroll)/.test(eventName); // TODO
+  var isRoot = data.model === callbackFns; // TODO
+  var idTag = (isRoot ? '__' : '') + data.idTag;
+  var store = _this.store[data.model[idTag]];
 
-  if (!_this.items[eventName]) _this.items[eventName] = [];
+  if (!store) store = _this.store[data.model[idTag]] = Object.create(null);
+  if (!store[eventName]) store[eventName] = Object.create(null);
+  store = store[eventName];
+
   data.delegate = delegate;
-  data.path = [];
+  if (delegate || isRoot) _this.root[eventName] = callbackFns['__' + idTag] || _this.element[data.idTag];
+
   for (var n = callbackNames.length, callback = ''; n--; ) {
     callback = callbackNames[n] = callbackNames[n].replace(/[?!]/g, '');
-    events[callback] ? events[callback].push(data) : events[callback] = [data];
+    if (!callback) continue;
+    store[callback] ? store[callback].push(data) : store[callback] = [data];
   }
   if (_this.listeners[eventName]) return;
 
   _this.listeners[eventName] = Toolbox.addEvent(_this.element, eventName, function eventCB(e) {
-    eventDelegator(_this, e, callbackFns, _this.events, _this.items);
+    eventDelegator(_this, e, callbackFns, data.idTag, _this.element, _this.element.parentNode, _this.store);
   }, useCapture || capture > 1 ? true : capture === 1 ? false : undefined);
 }
 
-function collect(rootElement, cbKeys, callbacks, cbFns, items) {
+function findStore(_this, type, target, item, element, parent, idTag, store) {
+  var itemElm = item ? null : Toolbox.findParent(target, idTag, element) || target;
+  var id = item ? item[idTag] : itemElm[idTag] || element[idTag];
+  var elm = !store[id] && target !== element ?
+    itemElm && itemElm.parentNode || Toolbox.findParent(parent, idTag) : null;
+
+  return elm ? findStore(_this, type, elm, item, element, parent, idTag, store) : store[id] || {};
+}
+
+function eventDelegator(_this, e, cbFns, idTag, element, parent, store, item) {
+  var callbacks = findStore(_this, e.type, e.target, item, element, parent, idTag, store)[e.type];
+  var path = e.path || (e.composedPath && e.composedPath());
+  var items = [];
   var n = 0, m = 0;
+  var data = null;
   var cbName = '';
-  var data = callbacks; // dummy reference
+  var cancel = false;
 
-  for (n = cbKeys.length; n--; ) {
-    cbName = cbKeys[n];
-    if (!cbFns[cbName]) continue;
+  var retModel = data && data.model;
+  var retElement = element;
+  var model = retModel;
+  var tmp = Object.create(null);
 
-    for (m = callbacks[cbName].length; m--; ) {
-      data = callbacks[cbName][m];
-      if (data.model.index < 0) {
-        callbacks[cbName].splice(m, 1);
-        continue;
-      }
-      if (data.element !== rootElement)
-        data.path = getPath(data.element, rootElement, [data.element]);
-      items.push(data);
-    }
+  if (_this.store[_this.root[e.type]] && !item && !callbacks) { // TODO: check...
+    callbacks = _this.store[_this.root[e.type]][e.type];
   }
 
-  return items.length < 2 ? items : items.sort(function(a, b) {
-    const abIndex = a.path.indexOf(b.element);
-    const baIndex = b.path.indexOf(a.element);
+  for (cbName in callbacks) for (m = callbacks[cbName].length; m--; ) {
+    data = callbacks[cbName][m];
+    data.index = path.indexOf(data.element);
+    if (data.index === -1) continue;
+    items.push(data);
+  }
+  if (!items.length) return;
+  items.sort(function(a, b) { return b.index - a.index; });
 
-    return abIndex > baIndex ? 1 :
-      abIndex < baIndex ? -1 :
-      a.path.length > b.path.length ? 1 :
-      a.path.length < b.path.length ? -1 :
-      0;
-  });
-}
 
-function getPath(elm, rootElement, out) {
-  while ((elm = elm.parentNode) && elm !== rootElement) out.unshift(elm);
-  return out;
-}
-
-function eventDelegator(_this, e, cbFns, events, cache) {
-  var callbacks = events[e.type];
-  var cbKeys = Toolbox.keys(callbacks);
-  var path = (e.composedPath && e.composedPath()) || e.path;
-  var items = cache[e.type].length ? cache[e.type] : collect(_this.element, cbKeys, callbacks, cbFns, []);
-  var cbName = '';
-  var n = 0, m = 0;
-  var cancel = false;
-  var data = items[0];
-  var retModel = data && data.model;
-  var element = data && data.element;
-  var model = retModel;
-
-  cache[e.type] = items;
-  for (n = items.length; n--; ) {
-    if (cancel) return;
-
+  for (n = items.length; !cancel && n--; ) for (m = items[n].callbacks.length; m--; ) {
+    cbName = items[n].callbacks[m];
+    if (!cbFns[cbName]) continue;
     data = items[n];
-    if (path ? path.indexOf(data.element) === -1 : !data.element.contains(e.target)) continue;
 
-    for (m = cbKeys.length; m--; ) {
-      cbName = cbKeys[m];
-      if (!cbFns[cbName] || data.callbacks.indexOf(cbName) === -1) continue;
+    retElement = data.delegate ? Toolbox.findParent(e.target, idTag, data.element) : data.element;
+    retModel = data.delegate ? retElement && data.getElementById(retElement[idTag], true) : data.model;
+    model = retModel && retModel[data.children] && retModel[data.children].parent;
 
-      element = data.delegate ? Toolbox.findParent(e.target, data.idTag, data.element) : data.element;
-      retModel = data.delegate ? element && data.getElementById(element[data.idTag], true) : data.model;
-      model = retModel && retModel[data.children] && retModel[data.children].parent;
+    if (retModel) cancel = cbFns[cbName](
+      e,
+      retElement,
+      retModel,
+      model,
+      model && (data.delegate ? retElement : Toolbox.findParent(e.target, idTag, data.element))
+    ) === false || e.cancelBubble || cancel;
+  }
 
-      if (retModel) cancel = cbFns[cbName](
-        e,
-        element,
-        retModel,
-        model,
-        model && (data.delegate ? element : Toolbox.findParent(e.target, data.idTag, data.element))
-      ) === false || e.cancelBubble || cancel;
-    }
+  if (!cancel && data && (data.model.parentNode || data.children)) { // down the tree...
+    tmp[idTag] = data.model['__' + idTag];
+    eventDelegator(_this, e, cbFns, idTag, retElement, parent, store, data.model.parentNode || tmp);
   }
 }
 
