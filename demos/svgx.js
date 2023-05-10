@@ -22,4 +22,8 @@ class Svg {
   changeRadius(e, elm) {
     this.changeValues(this.r = elm.value);
   }
+
+  reset(e, elm) {
+    this.changeValues(this.r = 10);
+  }
 }));
