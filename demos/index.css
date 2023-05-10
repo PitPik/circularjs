@@ -23,7 +23,7 @@ git-test .author, git-test .date {
 index, binding, tree, git {
 	display: block;
 }
-index pre, binding pre, tree pre, git pre {
+index pre, binding pre, tree pre, git pre, svgx pre {
 	line-height: 12px;
   font-size: 12px;
 }
@@ -84,12 +84,23 @@ demo-nav a.active {
 	background: #eee;
 }
 
-input-test.demo {
+input-test.demo,  svg-test.demo {
 	display: block;
 	padding: 1em;
 	padding-top: 0;
 	border: 1px solid #aaa;
 	border-radius: 6px;
+}
+
+svg-test.demo {
+	padding: 1em;
+}
+
+svg-test.demo * {
+	vertical-align: middle;
+}
+svg-test.demo .display {
+	display: inline-block; width: 1em
 }
 
 /*body {

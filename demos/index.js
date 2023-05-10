@@ -14,6 +14,7 @@ class DemoNav {
       { title: 'Demo home', action: 'index', active: false },
       { title: 'Data binding', action: 'binding', active: false },
       { title: 'Dynamic tree', action: 'tree', active: false },
+      { title: 'SVG', action: 'svgx', active: false },
       { title: 'GitHub Commits', action: 'git', active: false }
     ];
   }

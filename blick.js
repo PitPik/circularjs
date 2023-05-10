@@ -8,19 +8,25 @@
   else global.Blick = factory(global, global.Blick);
 }(this, function factory(global, Schnauzer, undefined) { 'use strict';
 
+var parser = new DOMParser();
 var saveWrapHtml = (function(search, tags) {
   for (var tag in tags) tags[tag] = document.createElement(tags[tag]);
   return function saveWrapHtml(htmlText, clone, textOnly) {
     var isString = typeof htmlText === 'string';
     var tagName =  isString ? ((htmlText || '').match(search) || [])[1] : undefined;
     var helper = (tags[tagName] || tags['default']);
+    var hasSVG = !textOnly && !tags[tagName] && htmlText.indexOf('<svg ') !== -1;
+    var doc = null;
 
     if (clone) helper = typeof clone === 'boolean' ?  helper.cloneNode() : clone;
-    // textOnly ? helper.textContent = htmlText || '' :
-    //   helper.insertAdjacentHTML('afterbegin', htmlText || ''); // helper.innerHTML
-    textOnly ?
-      (htmlText ? helper.textContent = htmlText : helper.appendChild(document.createTextNode(''))) :
+    if (textOnly) {
+      (htmlText ? helper.textContent = htmlText : helper.appendChild(document.createTextNode('')))
+    } else if (hasSVG) {
+      doc = parser.parseFromString('<div cr-helper>' + (htmlText || '') + '</div>', 'text/html');
+      helper = document.adoptNode(doc.documentElement.querySelector('[cr-helper]'));
+    } else {
       helper.insertAdjacentHTML('afterbegin', htmlText || ''); // helper.innerHTML
+    }
     return helper;
   };
 }(/<\s*(\w*)[\s\S]*?>/, {
