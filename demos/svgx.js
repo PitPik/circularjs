@@ -7,23 +7,26 @@ Component({
 class Svg {
   constructor() {
     this.max = 30;
-    this.r = 10;
+    this.r = 0;
     this.x = 0;
     this.red = 0;
-
-    this.changeValues(this.r);
   }
 
-  changeValues(value) {
+  onInit() {
+    this.reset();
+  }
+
+  this$(prop, item, value) {
+    if (prop !== 'r') return;
     this.x = value * 2;
     this.red = value * 8;
   }
 
   changeRadius(e, elm) {
-    this.changeValues(this.r = elm.value);
+    this.r = elm.value
   }
 
-  reset(e, elm) {
-    this.changeValues(this.r = 10);
+  reset() {
+    this.r = 10;
   }
 }));
