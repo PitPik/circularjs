@@ -8,25 +8,19 @@
   else global.Blick = factory(global, global.Blick);
 }(this, function factory(global, Schnauzer, undefined) { 'use strict';
 
-var parser = new DOMParser();
+var doc = document.implementation.createHTMLDocument();
 var saveWrapHtml = (function(search, tags) {
-  for (var tag in tags) tags[tag] = document.createElement(tags[tag]);
+  for (var tag in tags) tags[tag] = doc.createElement(tags[tag]);
   return function saveWrapHtml(htmlText, clone, textOnly) {
     var isString = typeof htmlText === 'string';
     var tagName =  isString ? ((htmlText || '').match(search) || [])[1] : undefined;
     var helper = (tags[tagName] || tags['default']);
-    var hasSVG = !textOnly && !tags[tagName] && htmlText.indexOf('<svg ') !== -1;
-    var doc = null;
 
     if (clone) helper = typeof clone === 'boolean' ?  helper.cloneNode() : clone;
-    if (textOnly) {
-      (htmlText ? helper.textContent = htmlText : helper.appendChild(document.createTextNode('')))
-    } else if (hasSVG) {
-      doc = parser.parseFromString('<div cr-helper>' + (htmlText || '') + '</div>', 'text/html');
-      helper = document.adoptNode(doc.documentElement.querySelector('[cr-helper]'));
-    } else {
+    textOnly ?
+      (htmlText ? helper.textContent = htmlText : helper.appendChild(doc.createTextNode(''))):
       helper.insertAdjacentHTML('afterbegin', htmlText || ''); // helper.innerHTML
-    }
+
     return helper;
   };
 }(/<\s*(\w*)[\s\S]*?>/, {
@@ -41,7 +35,7 @@ var saveWrapHtml = (function(search, tags) {
   'default': 'div',
 }));
 
-var garbage = document.createDocumentFragment(); // to destroy inner components etc.
+var garbage = doc.createDocumentFragment(); // to destroy inner components etc.
 // var modelId = 0;
 // TODO: use usedHelpers for @last, @first, etc.
 // TODO: add (in template) expected variable to view model (set in options)
@@ -76,7 +70,7 @@ return (function(Schnauzer, cloneObject) { /* class Blick extends Schnauzer */
     });
     this.version = { blick: '1.0.4', schnauzer: this.version };
     this.collector = { destroyers: {}, updaters: {}, movers: {}, helpers: {}, element: {} };
-    this.returnFragment = document.createDocumentFragment();
+    this.returnFragment = doc.createDocumentFragment();
     this.dataDump = [];
     this._firstTimeLoop = null;
     this._tempNode = null; // TODO
@@ -113,7 +107,7 @@ return (function(Schnauzer, cloneObject) { /* class Blick extends Schnauzer */
   };
   var renderHTML = function(_this, data, extra, elms) {
     var fragment = _this.returnFragment.childNodes.length ?
-      document.createDocumentFragment() : _this.returnFragment;
+      doc.createDocumentFragment() : _this.returnFragment;
     _this.controls.active = false; // TODO: check...
     elms = resolveReferences(
       _this, _this.dataDump, saveWrapHtml(_this.render(data, extra), true)
@@ -178,7 +172,7 @@ function setValue(element, name, value) {
 // --- main delegators and helpers
 
 function createTextNode(parent, first) {
-  var textNode = document.createTextNode('');
+  var textNode = doc.createTextNode('');
   return first ? parent.insertBefore(textNode, parent.childNodes[0]) :
     parent.appendChild(textNode);
 }
@@ -210,7 +204,7 @@ function fixTable(found, rows, cells, dataDump, nodeT, nodeR, parent) {
 }
 
 function findNodes(data, html, out, dataDump, loopHelperName) {
-  var items = document.evaluate(data.xpath, html, null, data.type, null);
+  var items = doc.evaluate(data.xpath, html, null, data.type, null);
   var node, attr, item;
   var found = [];
   var index = 0;
@@ -709,7 +703,7 @@ function inlineFn(_this, nodes, dump, dataDump, update) {
 }
 
 function replaceInline(firstNode, lastNode, isEscaped, update, helperFn) {
-  var fragment = !isEscaped && !update ? document.createDocumentFragment() : null;
+  var fragment = !isEscaped && !update ? doc.createDocumentFragment() : null;
   var dataNode = firstNode.nextSibling;
 
   return function updateInline(data, helpers) { // inlines never have arr? helpers
@@ -770,7 +764,7 @@ function replaceBlock(_this, firstNode, lastNode, bodyFn, track, out, dataDump, 
   var trackDF = [];
   var options = _this.options;
 
-  trackDF[fnIdx] = document.createDocumentFragment();
+  trackDF[fnIdx] = doc.createDocumentFragment();
   wasEverRendered[fnIdx] = out.length > 0;
   track.checkFn = function(currentFnIdx) { // ugly, but it does its job best
     if (!wasEverRendered[currentFnIdx]) _this.controls.active = false;
@@ -792,7 +786,7 @@ function replaceBlock(_this, firstNode, lastNode, bodyFn, track, out, dataDump, 
     }
     fnIdx = track.fnIdx;
     if (wasNotRendered) { // this is for if/else only, not for loops
-      trackDF[fnIdx] = trackDF[fnIdx] || document.createDocumentFragment();
+      trackDF[fnIdx] = trackDF[fnIdx] || doc.createDocumentFragment();
       html = resolveReferences(_this, dataDump, saveWrapHtml(body), update,
         stopRender === options.loopHelperName);
       if (isScroll) setScroll(true, data[0], fnIdx, html);
