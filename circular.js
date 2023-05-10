@@ -256,7 +256,7 @@ function destroyComponent(id, parentInst) {
 // ------------- components and instances
 
 function renderComponent(inst, extra) {
-  var fragment = document.adoptNode(inst.template.blick.renderHTML(inst.instance, extra));
+  var fragment = inst.template.blick.renderHTML(inst.instance, extra);
   var firstKey = keys(inst.models)[0];
   var vArray = inst.models[firstKey].model;
 
