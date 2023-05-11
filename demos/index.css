@@ -100,7 +100,8 @@ svg-test.demo * {
 	vertical-align: middle;
 }
 svg-test.demo .display {
-	display: inline-block; width: 1em
+	display: inline-block;
+	width: 2.5em;
 }
 
 /*body {

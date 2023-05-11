@@ -6,7 +6,7 @@ Component({
 },
 class Svg {
   constructor() {
-    this.max = 30;
+    this.max = 120;
     this.r = 0;
     this.x = 0;
     this.red = 0;
@@ -17,16 +17,17 @@ class Svg {
   }
 
   this$(prop, item, value) {
-    if (prop !== 'r') return;
-    this.x = value * 2;
-    this.red = value * 8;
+    if (prop !== 'x') return;
+
+    this.r = Math.floor(value / 8);
+    this.red = Math.floor(value * 2 * 1.0625);
   }
 
-  changeRadius(e, elm) {
-    this.r = elm.value
+  changeValue(e, elm) {
+    this.x = elm.value;
   }
 
   reset() {
-    this.r = 10;
+    this.x = 40;
   }
 }));
