@@ -288,20 +288,21 @@ function getRenderArgsActives(args, data, actives) {
 }
 // TODO: scanHTML on !wasEverRendered, but (maybe only) on regular stuff
 // Maybe we can use this.active instead?
-function getIfElseActives(_this, tags, getData, tagData, actives) {
+function getIfElseActives(_this, root, tags, getData, tagData, actives) {
   for (var n = 1, l = tags.length, data; n < l; n++) {
     if (!tags[n].vars.length) continue;
     data = getData(tags[n]);
-    for (var m = data.length; m--; ) getActives(_this, actives, data[m], data, tagData);
+    for (var m = data.length; m--; ) getActives(_this, root, actives, data[m], data, tagData);
   }
 }
 
-function getActives(_this, actives, cData, data, tagData) {
+function getActives(_this, root, actives, cData, data, tagData) {
   var variable = cData.variable;
   var hasValue = cData.value !== undefined;
   var key = cData.key || variable.value;
   var isDynamic = 0;
   var partial = tagData.partial && tagData.partial.value;
+  var rootVal = root.helpers['@parent'] || root.helpers.this; // with or de.ep
 
   if (variable.value === 'cr-scroll' && data[0].variable.active) data[0].scrollers = {};
   if (cData.renderArgs && !partial) getRenderArgsActives(cData.renderArgs, cData, actives); // TODO: check partial
@@ -316,11 +317,18 @@ function getActives(_this, actives, cData, data, tagData) {
   }
   if (variable.path[0] === '@root') cData.isFromRoot = true;
 
-  if (cData.loop && !cData.parent.parent) Object.defineProperty(cData.parent, '__cr-id', {
-    value: cData.loop['@root']['__cr-id'] });
-  if (!cData.parent['cr-id'] && !cData.parent.this) Object.defineProperty(cData.parent, 'cr-id', {
-    value: cData.loop.this['cr-id'] || cData.loop['@parent']['cr-id'],
-  });
+  if (!cData.loop) {
+    if (!cData.parent['__cr-id'])
+      Object.defineProperty(cData.parent, '__cr-id', { value: rootVal['__cr-id'] });
+    if (!cData.parent['cr-id'])
+      Object.defineProperty(cData.parent, 'cr-id', { value: rootVal['cr-id'] });
+  } else {
+    if (!cData.parent.parent) Object.defineProperty(cData.parent, '__cr-id', {
+      value: cData.loop['@root']['__cr-id'] });
+    if (!cData.parent['cr-id'] && !cData.parent.this) Object.defineProperty(cData.parent, 'cr-id', {
+      value: cData.loop.this['cr-id'] || cData.loop['@parent']['cr-id'],
+    });
+  }
   isDynamic = _this.options.isDynamic(cData, key, _this.options.forceUpdate);
   if (isDynamic === null) {
     return announce(_this, 3, 'No subscriber defined for:', '"' + key + '"', 'in:', cData.parent);
@@ -330,7 +338,7 @@ function getActives(_this, actives, cData, data, tagData) {
   if (hasValue) actives.push(cData); // TODO: !hasValue ... do something about this
 }
 
-function renderHook(_this, out, data, bodyFn, tagData, track, getData) {
+function renderHook(_this, out, root, data, bodyFn, tagData, track, getData) {
   var tags = _this.options.limiters;
   var tmp = _this.dataDump.length + tags[2];
   var isHelperOrPartial = tagData.tag !== 'B' &&  // TODO: check!!!!!!!
@@ -339,9 +347,9 @@ function renderHook(_this, out, data, bodyFn, tagData, track, getData) {
 
   // TODO: check partial; TODO: maybe delete stuff as helpers etc (check first)...
   for (var n = 0, l = data.length; n < l; n++)
-    if (data[n].parent) getActives(_this, actives, data[n], data, tagData); // static values possible
+    if (data[n].parent) getActives(_this, root, actives, data[n], data, tagData); // static values possible
     else if (data[n].renderArgs) getRenderArgsActives(data[n].renderArgs, data[n], actives);
-  if (getData) getIfElseActives(_this, tagData.children, getData, tagData, actives);
+  if (getData) getIfElseActives(_this, root, tagData.children, getData, tagData, actives);
 
   if (actives.length === 0 || tagData.partial) return out; // TODO: check partial ... earlier; before for()
 

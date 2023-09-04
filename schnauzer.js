@@ -398,13 +398,14 @@ function render(_this, model, data, tagData, out, renderFn, track) {
   if (_this.options.renderHook && tagData.tag === 'B') model =
     { extra: model.extra, scopes: model.scopes, alias: model.alias, blocks: model.blocks };
   return !_this.options.renderHook || !data.length || _this.controls.active ? out :
-    _this.options.renderHook(_this, out, data, function recallBodyFn(newModel, helpers, stop) {
-      if (helpers) model.scopes[0].helpers = helpers; // model.scopes[newModel.variable.depth]?
-      if (newModel[0].parent) model.scopes[0].scope = newModel[0].parent; // dus wel
-      if (stop) _this.controls.stop = stop;
-      return [renderFn(_this, tagData, newModel, model, track || { fnIdx: 0 }),
-        _this.controls.stop = false, _this.controls.active = true][0];
-    }, tagData, tagData.tag === 'B' ? track || { fnIdx: 0 } : undefined,
+    _this.options.renderHook(_this, out, model.scopes[0], data,
+      function recallBodyFn(newModel, helpers, stop) {
+        if (helpers) model.scopes[0].helpers = helpers; // model.scopes[newModel.variable.depth]?
+        if (newModel[0].parent) model.scopes[0].scope = newModel[0].parent; // dus wel
+        if (stop) _this.controls.stop = stop;
+        return [renderFn(_this, tagData, newModel, model, track || { fnIdx: 0 }),
+          _this.controls.stop = false, _this.controls.active = true][0];
+      }, tagData, tagData.tag === 'B' ? track || { fnIdx: 0 } : undefined,
     tagData.children && tagData.children[1] && tagData.children[1].tag === 'E' ?
       function(tag) { return getData(_this, model, tag, []) } : null);
 }
