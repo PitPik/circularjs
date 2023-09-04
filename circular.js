@@ -361,20 +361,21 @@ function setupInput(value, scope, doSubscribe, parent, inst, name) {
 function applyModel(name, component, inst) {
   var inst = inst.instance;
   var names = name.split(/[./]/);
-  var data = findData(names, inst);
+  var models = findData(names, inst);
+  var data = models.data;
   var childNodes = isArray(data) ? component.childNames[name] : null;
   var vArray = getVArrayModel(name, component, inst, data, childNodes);
 
   if (name === 'this' || !isArray(data))
     return { model: vArray, standalone: true, id: inst['cr-id'] };
 
-  inst[name] = vArray;
+  models.parent[names[names.length - 1]] = vArray; // inst[name] = vArray;
   return { model: vArray, id: vArray['cr-id'] };
 }
 
 function findData(names, data) {
-  for (var n = 0, l = names.length; n < l; n++) data = data[names[n]];
-  return data;
+  for (var n = 0, l = names.length; n < l; n++) { parent = data; data = data[names[n]]; }
+  return { parent: parent, data: data };
 }
 
 function getVArrayModel(name, component, inst, instData, childNodes) {
