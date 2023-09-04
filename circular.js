@@ -360,17 +360,24 @@ function setupInput(value, scope, doSubscribe, parent, inst, name) {
 
 function applyModel(name, component, inst) {
   var inst = inst.instance;
-  var childNodes = isArray(inst[name]) ? component.childNames[name] : null;
-  var vArray = getVArrayModel(name, component, inst, childNodes);
+  var names = name.split(/[./]/);
+  var data = findData(names, inst);
+  var childNodes = isArray(data) ? component.childNames[name] : null;
+  var vArray = getVArrayModel(name, component, inst, data, childNodes);
 
-  if (name === 'this' || !isArray(inst[name]))
+  if (name === 'this' || !isArray(data))
     return { model: vArray, standalone: true, id: inst['cr-id'] };
 
   inst[name] = vArray;
   return { model: vArray, id: vArray['cr-id'] };
 }
 
-function getVArrayModel(name, component, inst, childNodes) {
+function findData(names, data) {
+  for (var n = 0, l = names.length; n < l; n++) data = data[names[n]];
+  return data;
+}
+
+function getVArrayModel(name, component, inst, instData, childNodes) {
   var name$PR = name + '$PR';
   var name$Update = name + '$Update';
   var data = {
@@ -381,7 +388,7 @@ function getVArrayModel(name, component, inst, childNodes) {
     childNodes: childNodes,
   };
 
-  return VArray.adopt(name === 'this' ? inst : inst[name] || [], {
+  return VArray.adopt(name === 'this' ? inst : instData || [], {
     idProperty: 'cr-id', // TODO: define by circular properties
     children: childNodes,
     listeners: component.subscribe$[name],
