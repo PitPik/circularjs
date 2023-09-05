@@ -1,4 +1,4 @@
-/**! @license schnauzer v2.0.8; Copyright (C) 2017-2023 by Peter Dematté */
+/**! @license schnauzer v2.0.9; Copyright (C) 2017-2023 by Peter Dematté */
 (function(global, factory) {
   if (typeof exports === 'object' && typeof module === 'object') module.exports = factory();
   else if (typeof define === 'function' && define.amd)
@@ -21,7 +21,7 @@ var concatArrays = function(array, host) { return host.push.apply(host, array), 
 var trims = { start: /^\s*/, all: /^\s*|\s*$/g, end: /\s*$/ };
 
 var Schnauzer = function(templateOrOptions, options) {
-  this.version = '2.0.8';
+  this.version = '2.0.9';
   this.partials = {};
   this.helpers = {};
   this.regexps = {};
