@@ -34,6 +34,7 @@ class Tree {
   toggle(e, elm, item, model) {
     e.stopPropagation();
     if (item.name === '+') {
+      // model.splice(item.index, 0, ...); or
       model.move({ name: 'new stuff' }, item.index);
     } else {
       item.open = !item.open;
@@ -43,10 +44,11 @@ class Tree {
   addChildren(e, elm, item, model) {
     e.stopPropagation();
     if (item.name !== '+' && !item.children.length) {
-      model.move({ name: item.name, open: true, children: [
-        { name: 'new stuff' }
+      // model.splice(item.index, 1, ...); or
+      model.replace({ name: item.name, open: true, children: [
+        { name: 'new stuff' },
+        { name: '+' }
       ]}, item.index);
-      model.remove(item);
     }
   }
 

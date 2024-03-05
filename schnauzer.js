@@ -1,4 +1,4 @@
-/**! @license schnauzer v2.0.9; Copyright (C) 2017-2023 by Peter Dematté */
+/**! @license schnauzer v2.0.10; Copyright (C) 2017-2023 by Peter Dematté */
 (function(global, factory) {
   if (typeof exports === 'object' && typeof module === 'object') module.exports = factory();
   else if (typeof define === 'function' && define.amd)
@@ -18,10 +18,10 @@ var cloneObject = function(newObj, obj) {
   return newObj;
 };
 var concatArrays = function(array, host) { return host.push.apply(host, array), host };
-var trims = { start: /^\s*/, all: /^\s*|\s*$/g, end: /\s*$/ };
+var trims = { start: /^\s*/, end: /\s*$/ };
 
 var Schnauzer = function(templateOrOptions, options) {
-  this.version = '2.0.9';
+  this.version = '2.0.10';
   this.partials = {};
   this.helpers = {};
   this.regexps = {};
@@ -436,11 +436,8 @@ function renderBlock(_this, tagData, data, model, recursive) {
 // ---- parse (pre-render) helpers
 
 function trim(text, start, end) {
-  var doStart = start.indexOf('~') !== -1;
-  var doEnd = end.indexOf('~') !== -1;
-  var regExp = !doStart && !doEnd ? '' : !doStart ? trims.end : !doEnd ? trims.start : trims.all;
-
-  return regExp ? text.replace(regExp, '') : text;
+  if (start.indexOf('~') !== -1) text = text.replace(trims.start, '');
+  return end.indexOf('~') !== -1 ? text.replace(trims.end, '') : text;
 }
 
 function convertValue(text, skip) {

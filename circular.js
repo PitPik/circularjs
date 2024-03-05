@@ -1,4 +1,4 @@
-/**! @license CircularJS ● v2.0.4; Copyright (C) 2017-2023 by Peter Dematté */
+/**! @license CircularJS ● v2.0.5; Copyright (C) 2017-2023 by Peter Dematté */
 define(['toolbox', 'blick', 'VArray', 'api', 'controller'],
 function(Toolbox, Blick, VArray, mixinAPI, Controller) { 'use strict';
 
@@ -15,7 +15,7 @@ var extend = Toolbox.cloneObject;
 
 var Circular = function Circular(name, options) {
   this.controls = { initPartials: false };
-  this.version = '2.0.4';
+  this.version = '2.0.5';
   this.id = 0;
   this.name = '';
   this.options = {
@@ -70,7 +70,7 @@ Object.defineProperties(Circular.prototype, mixinAPI({
       newParent ? newParent.appendChild(elm) : // TODO: maybe offer insertBefore...
         start.parentNode.insertBefore(elm, elm._tracker);
       Blick.setScroll(false, elm.__scrollers, 0);
-      trigerOnLoad(elm, inst);
+      triggerOnLoad(elm, inst);
       return elm;
     }
   }},
@@ -214,19 +214,19 @@ function initComponent(element, component, defData, plugData, parent, onLoad) {
   // inst.instance.onBeforeInit && inst.instance.onBeforeInit(element, crInst);
   if (template) renderComponent(inst, defData.extra);
   inst.instance.onInit && inst.instance.onInit(element, crInst);
-  if (onLoad) trigerOnLoad(element, inst);
+  if (onLoad) triggerOnLoad(element, inst);
 
   return inst;
 }
 
-function trigerOnLoad(elm, inst) {
+function triggerOnLoad(elm, inst) {
   if (!inst.instance.onLoad || !inst.instance.onLoad(elm, inst.crInst)) return;
   for (var n = inst.children.length, id = '', ids = [], child; n--; ) {
     id = inst.children[n];
     ids = id.split(':');
     child = instances[ids[0]][ids[1]];
 
-    trigerOnLoad(child.element, child);
+    triggerOnLoad(child.element, child);
   }
 }
 
@@ -378,6 +378,11 @@ function findData(names, data) {
   return { parent: parent, data: data };
 }
 
+function VArrayError(error, level) {
+  var error = 'VArray Error: ' + error
+  if (!level) throw(error); else console.error(error);
+}
+
 function getVArrayModel(name, component, inst, instData, childNodes) {
   var name$PR = name + '$PR';
   var name$Update = name + '$Update';
@@ -394,10 +399,7 @@ function getVArrayModel(name, component, inst, instData, childNodes) {
     children: childNodes,
     listeners: component.subscribe$[name],
     instId: inst['__cr-id'],
-    error: function(error, level) {
-      if (!level) throw('VArray Error: ' + error);
-      else console.error('VArray Error: ' + error);
-    },
+    error: VArrayError,
     promoter: {
       interseptor: inst[name$PR] && inst[name$PR].bind(inst),
       onUpdate: inst[name$Update] && inst[name$Update].bind(inst),
@@ -430,7 +432,7 @@ function vMoveCallback(action, item, parent, previousParent, previousNode, index
   var newParent = previousParent !== parent ? previousParent : parent;
   var count = parent.length;
   var name$Move = data.name + '$Move';
-  var ids = action === 'move' && parent._onChange._options.instId.split(':');
+  // var ids = action === 'move' && parent._onChange._options.instId.split(':');
 
   if (action === 'move') {
     if (previousParent !== parent && count === 1)

@@ -329,7 +329,7 @@ constructor(element, input, circular) {
 }
 ```
 
-If the variables on the parent are dynamic defined in `subscribe$()` option and change, the changes will be transferred to the child and can also be subscribed to. If you know Angular then think of the `@Input` decorator but not used for each variable but for all before `input(this)`.
+If the variables on the parent are dynamic defined in `subscribe$()` option and change, the changes will be transferred to the child and can also be subscribed to. If you know Angular then think of the `@Input` decorator but not used for each variable but for all before `input(this)`. `input(this, false)` would suppress the subscription.
 
 To communicate from the child to the parent you can use `circular.triggerEvent()` and install an event listener on the parent. This will be explained in the **Circular instance methods** section of this documentation.
 

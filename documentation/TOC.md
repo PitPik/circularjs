@@ -80,7 +80,7 @@
 
 ### Inside [CIRCULAR.md](CIRCULAR.md)
 
-- [createComponent](CIRCULAR.md#createcomponentselector-attrs-component-node-html)
+- [createComponent](CIRCULAR.md#createcomponentselector-attrs-parent-node-html)
 - [hideComponent](CIRCULAR.md#hidecomponentelm)
 - [getChildComponents](CIRCULAR.md#getchildcomponentsinst)
 - [getParentComponent](CIRCULAR.md#getparentcomponentinst)

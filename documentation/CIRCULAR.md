@@ -8,7 +8,7 @@ require(['circular'], ({ Component, circular }) => {});
 
 The instance offers quite some useful methods to manage your apps.
 
-- [createComponent(selector, attrs, component, node, html)](#createcomponentselector-attrs-component-node-html) dynamically create components on the fly
+- [createComponent(selector, attrs, component, node, html)](#createcomponentselector-attrs-parent-node-html) dynamically create components on the fly
 - [hideComponent(elm)](#hidecomponentelm) removes the component from the DOM and returns a recover function
 - [getChildComponents(inst)](#getchildcomponentsinst) returns all children currently rendered within the component
 - [getParentComponent(inst)](#getparentcomponentinst) returns the parent of itself
@@ -26,13 +26,13 @@ The instance offers quite some useful methods to manage your apps.
 - [toggleRoute(data, isOn)](#toggleroutedata-ison) toggles routes
 
 
-### `createComponent(selector, attrs, parent, node?, c?)`
+### `createComponent(selector, attrs, parent, node?, html?)`
 
 This method can create a component on the fly and appends it to your view. It is then treated as if it was part of your template. It creates a HTMLElement defined by `selector` and adds attributes to it defined by `attrs` (also good for the `cr-lazy` attribute in case your component hasn't already imported this component).
 
 The argument `parent` will always be `this` to define its parent and `node` is optional if the new created component should be appended at a different HTMLElement than the parent itself.
 
-`parent` defines the innerHTML of the tag created with `selector` that will then define the `@content` partial that can be used inside the newly created component. This is one of the key features for dynamic component creation.
+`html` defines the innerHTML of the tag created with `selector` that will then define the `@content` partial that can be used inside the newly created component. This is one of the key features for dynamic component creation.
 
 
 ### `hideComponent(elm)`
