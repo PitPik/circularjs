@@ -31,6 +31,6 @@ define('app-search', ['circular', 'data-provider'],
 
   select() {
     this.searchInput.value = '';
-    this.searchList = [];
+    setTimeout(() => this.searchList = []); // Let <a> take it's time.
   }
 }));
