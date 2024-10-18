@@ -1,5 +1,5 @@
 // Full spec-compliant TodoMVC with localStorage persistence
-// and hash-based routing in ~75 effective lines of JavaScript.
+// and hash-based routing in ~77 effective lines of JavaScript.
 require(['circular'], ({ App, Toolbox: { storageHelper: storage, lazy } }) => {
 
 const ENTER_KEY = 13;
@@ -20,6 +20,7 @@ class TodoApp {
     this.left = 0;
     this.none = false;
     this.list = storage.fetch(STORAGE_KEY) || [];
+    this.callUpdateUi = this.updateUI.bind(this);
   }
 
   onInit(elm, crInst) {
@@ -31,7 +32,7 @@ class TodoApp {
   }
 
   list$(prop, item) {
-    prop === 'text' ? item.disabled = true : lazy(this.updateUI.bind(this), this.list);
+    prop === 'text' ? item.disabled = true : lazy(this.callUpdateUi, this.list);
     if (prop !== 'disabled') storage.saveLazy(this.list, STORAGE_KEY);
   }
 
